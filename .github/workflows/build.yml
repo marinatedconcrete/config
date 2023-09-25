@@ -1,0 +1,36 @@
+---
+name: Build USB Sidecar
+
+on: # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-container:
+    runs-on: "ubuntu-latest"
+    permissions:
+      contents: "read"
+      packages: "write"
+
+    steps:
+      - uses: earthly/actions-setup@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version: "0.7.1"
+      - uses: "actions/checkout@v3"
+
+      - name: "Login to GitHub Container Hub"
+        if: github.event_name != 'pull_request'
+        run: docker login --username "${{ secrets.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" --registry ghcr.io
+
+      - name: "Build USB Container Image"
+        run: earthy +usb-image
+        env:
+          EARTHLY_CI: true
+          EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
+          # Only one platform per https://docs.earthly.dev/docs/earthly-command#build-options
+          EARTHLY_PLATFORMS: linux/amd64

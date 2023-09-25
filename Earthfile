@@ -25,3 +25,15 @@ prettier-lint:
   
 lint:
     BUILD +prettier-lint
+
+usb-image:
+    FROM alpine
+
+    RUN mkdir -p /usr/lib/extension-release.d/
+    RUN echo ID=_any > /usr/lib/extension-release.d/extension-release.kubo
+    SAVE ARTIFACT /usr/lib/extension-release.d
+    SAVE ARTIFACT /usr/bin/lsusb
+    SAVE ARTIFACT /usr/bin/less
+
+images:
+    BUILD +usb-image
