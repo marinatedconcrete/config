@@ -7,10 +7,17 @@ on:
   pull_request:
 
 jobs:
-  lint:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Run validation checks
         run: |
           ./earthly.sh +validate
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run lint checks
+        run: |
+          ./earthly.sh +lint

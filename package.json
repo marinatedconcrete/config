@@ -1,0 +1,15 @@
+{
+  "devDependencies": {
+    "prettier": "3.0.3"
+  },
+  "packageManager": "yarn@3.6.3",
+  "scripts": {
+    "format": "prettier --log-level warn --no-error-on-unmatched-pattern --write '**/*.yml' '**/*.json' '**/*.md'",
+    "check-format": "prettier --no-error-on-unmatched-pattern --check '**/*.yml' '**/*.json' '**/*.md'"
+  },
+  "dependenciesMeta": {
+    "prettier@3.0.3": {
+      "unplugged": true
+    }
+  }
+}
