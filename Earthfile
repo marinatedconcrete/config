@@ -1,4 +1,4 @@
-VERSION 0.6
+VERSION 0.7
 FROM alpine
 
 renovate-validate:
@@ -27,6 +27,7 @@ lint:
     BUILD +prettier-lint
 
 usb-image:
+    ARG tag='latest'
     FROM alpine
 
     RUN mkdir -p /usr/lib/extension-release.d/
@@ -34,6 +35,7 @@ usb-image:
     SAVE ARTIFACT /usr/lib/extension-release.d
     SAVE ARTIFACT /usr/bin/lsusb
     SAVE ARTIFACT /usr/bin/less
+    SAVE IMAGE usb-image:$tag
 
 images:
     BUILD +usb-image
