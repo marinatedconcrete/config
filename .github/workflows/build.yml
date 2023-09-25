@@ -28,7 +28,7 @@ jobs:
         run: docker login --username "${{ secrets.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" --registry ghcr.io
 
       - name: "Build USB Container Image"
-        run: earthy +usb-image
+        run: earthly +usb-image
         env:
           EARTHLY_CI: true
           EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
