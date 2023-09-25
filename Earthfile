@@ -35,7 +35,7 @@ usb-image:
     SAVE ARTIFACT /usr/lib/extension-release.d
     SAVE ARTIFACT /usr/bin/lsusb
     SAVE ARTIFACT /usr/bin/less
-    SAVE IMAGE usb-image:$tag
+    SAVE IMAGE marinatedconcrete/usb-image:$tag
 
 images:
     BUILD +usb-image
