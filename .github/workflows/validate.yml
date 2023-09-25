@@ -10,14 +10,26 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
+      - uses: earthly/actions-setup@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version: "0.7.1"
       - uses: actions/checkout@v4
       - name: Run validation checks
         run: |
-          ./earthly.sh +validate
+          earthly +validate
+        env:
+          EARTHLY_CI: true
   lint:
     runs-on: ubuntu-latest
     steps:
+      - uses: earthly/actions-setup@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version: "0.7.1"
       - uses: actions/checkout@v4
       - name: Run lint checks
         run: |
-          ./earthly.sh +lint
+          earthly +lint
+        env:
+          EARTHLY_CI: true
