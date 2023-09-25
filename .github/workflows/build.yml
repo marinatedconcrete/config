@@ -25,7 +25,7 @@ jobs:
 
       - name: "Login to GitHub Container Hub"
         if: github.event_name != 'pull_request'
-        run: docker login --username "${{ secrets.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" --registry ghcr.io
+        run: docker login --username "${{ secrets.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" ghcr.io
 
       - name: "Build USB Container Image"
         run: earthly +usb-image
