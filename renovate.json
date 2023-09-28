@@ -6,11 +6,10 @@
   "commitBody": "{{{releaseNotes}}}",
   "rollbackPrs": true,
   "packageRules": [],
-  "regexManagers": [
+  "customManagers": [
     {
-      "fileMatch": [
-        "^Earthfile$"
-      ],
+      "customType": "regex",
+      "fileMatch": ["^Earthfile$"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)(\\s+versioning=(?<versioning>.*?))?\\s+ARG\\s+.+_VERSION=(?<currentValue>.*?)\\s"
       ],
