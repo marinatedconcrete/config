@@ -10,7 +10,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: earthly/actions-setup@v1
+      - uses: earthly/actions-setup@v1.0.8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           version: "0.7.1"
@@ -23,7 +23,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: earthly/actions-setup@v1
+      - uses: earthly/actions-setup@v1.0.8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           version: "0.7.1"
