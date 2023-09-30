@@ -1,0 +1,5 @@
+VERSION 0.7
+FROM alpine
+
+all:
+    BUILD ./usb-image/+image
