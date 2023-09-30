@@ -1,0 +1,50 @@
+VERSION 0.7
+FROM alpine
+
+# renovate: datasource=github-releases depName=k3s-io/k3s versioning=docker
+ARG --global K3S_VERSION=v1.27.3-k3s1
+# renovate: datasource=docker depName=kairos/core-ubuntu-22-lts
+ARG --global KAIROS_VERSION=v2.4.0
+
+image:
+    BUILD +image-generic \
+        --PLATFORM=linux/amd64 \
+        --REPOSITORY=quay.io/kairos/kairos-ubuntu-22-lts
+    BUILD +image-generic \
+        --PLATFORM=linux/arm64 \
+        --REPOSITORY=quay.io/kairos/kairos-ubuntu-22-lts-arm-rpi
+
+push:
+    BUILD +push-generic \
+        --PLATFORM=linux/amd64 \
+        --REPOSITORY=quay.io/kairos/kairos-ubuntu-22-lts \
+        --TAG=$KAIROS_VERSION
+    BUILD +push-generic \
+        --PLATFORM=linux/arm64 \
+        --REPOSITORY=quay.io/kairos/kairos-ubuntu-22-lts-arm-rpi \
+        --TAG=$KAIROS_VERSION
+
+image-generic:
+    ARG PLATFORM
+    ARG REPOSITORY
+    FROM --platform=$PLATFORM $REPOSITORY:$KAIROS_VERSION-k3s$K3S_VERSION
+    # This is not needed after Kairos version 2.4 because it was fixed:
+    # https://github.com/kairos-io/kairos/pull/1855
+    RUN mkdir -p /var/cache/apt/archives/partial
+
+    # Get Package Manager Updates
+    RUN apt-get update
+
+    # Install Additional Packages
+    RUN apt-get install -y --no-install-recommends \
+        vim
+
+    # Cleanup
+    RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+push-generic:
+    ARG PLATFORM
+    ARG REPOSITORY
+    ARG TAG
+    FROM +image-generic --PLATFORM=$PLATFORM --REPOSITORY=$REPOSITORY
+    SAVE IMAGE --push ghcr.io/marinatedconcrete/kairos-ubuntu-22-lts:$TAG
