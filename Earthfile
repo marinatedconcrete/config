@@ -26,16 +26,5 @@ prettier-lint:
 lint:
     BUILD +prettier-lint
 
-usb-image:
-    ARG tag='latest'
-    FROM alpine
-
-    RUN mkdir -p /usr/lib/extension-release.d/
-    RUN echo ID=_any > /usr/lib/extension-release.d/extension-release.kubo
-    SAVE ARTIFACT /usr/lib/extension-release.d
-    SAVE ARTIFACT /usr/bin/lsusb
-    SAVE ARTIFACT /usr/bin/less
-    SAVE IMAGE --push ghcr.io/marinatedconcrete/usb-image:$tag
-
 images:
-    BUILD +usb-image
+    BUILD ./images+all

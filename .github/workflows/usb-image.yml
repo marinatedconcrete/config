@@ -5,6 +5,8 @@ on: # yamllint disable-line rule:truthy
   push:
     branches:
       - main
+    paths:
+      - images/usb-image/**
   pull_request:
     branches:
       - main
@@ -28,7 +30,7 @@ jobs:
         run: docker login --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" ghcr.io
 
       - name: "Build USB Container Image"
-        run: earthly +usb-image
+        run: earthly ./images/usb-image/+image
         env:
           EARTHLY_CI: true
           EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
