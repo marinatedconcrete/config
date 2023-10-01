@@ -1,0 +1,49 @@
+---
+name: Build Kairos Ubuntu 22 LTS
+
+on: # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+    paths:
+      - images/kairos-ubuntu-22-lts/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - images/kairos-ubuntu-22-lts/**
+
+jobs:
+  build-container:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: earthly/actions-setup@v1.0.8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # renovate: datasource=docker depName=earthly/earthly
+          version: "0.7.19"
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v2
+
+      - name: Login to GitHub Container Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Image
+        env:
+          EARTHLY_CI: true
+        run: earthly ./images/kairos-ubuntu-22-lts/+image
+
+      - name: Push Image
+        env:
+          EARTHLY_CI: true
+        if: github.event_name != 'pull_request'
+        run: earthly ./images/kairos-ubuntu-22-lts/+push
