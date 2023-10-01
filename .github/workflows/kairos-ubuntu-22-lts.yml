@@ -24,7 +24,8 @@ jobs:
       - uses: earthly/actions-setup@v1.0.8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          version: "0.7.1"
+          # renovate: datasource=docker depName=earthly/earthly
+          version: "0.7.19"
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v2
 
