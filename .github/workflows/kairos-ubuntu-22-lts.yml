@@ -6,11 +6,13 @@ on: # yamllint disable-line rule:truthy
     branches:
       - main
     paths:
+      - .github/workflows/kairos-ubuntu-22-lts.yml
       - images/kairos-ubuntu-22-lts/**
   pull_request:
     branches:
       - main
     paths:
+      - .github/workflows/kairos-ubuntu-22-lts.yml
       - images/kairos-ubuntu-22-lts/**
 
 jobs:
@@ -45,5 +47,5 @@ jobs:
       - name: Push Image
         env:
           EARTHLY_CI: true
-        if: github.event_name != 'pull_request'
+          EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
         run: earthly ./images/kairos-ubuntu-22-lts/+push
