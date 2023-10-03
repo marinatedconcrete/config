@@ -1,0 +1,21 @@
+- name: Install zsh
+  ansible.builtin.apt:
+    name: zsh
+    state: present
+  when: ansible_facts['os_family'] == 'Debian'
+- name: Set up zsh config
+  template:
+    src: zshrc
+    dest: "~{{ item }}/.zshrc"
+    mode: u+rw-x,o-rwx,g-rwx
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  loop: "{{ users }}"
+- name: Set up zsh environment
+  template:
+    src: zshenv
+    dest: "~{{ item }}/.zshenv"
+    mode: u+rw-x,o-rwx,g-rwx
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  loop: "{{ users }}"
