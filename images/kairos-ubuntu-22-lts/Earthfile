@@ -37,9 +37,9 @@ image-generic:
 
     # Install Additional Packages
     RUN apt-get install -y --no-install-recommends \
+        usbutils \
         vim \
-        zsh \
-        usbutils
+        zsh
 
     # Cleanup
     RUN apt-get clean && rm -rf /var/lib/apt/lists/*
