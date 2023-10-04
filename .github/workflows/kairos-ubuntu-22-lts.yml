@@ -27,7 +27,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           # renovate: datasource=docker depName=earthly/earthly
-          version: "0.7.19"
+          version: "v0.7.20"
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
 
