@@ -22,9 +22,18 @@ prettier-lint:
     RUN yarn
     COPY --dir .prettierignore .prettierrc.yml .github .
     RUN yarn check-format
-  
+
+shellcheck-lint:
+    # renovate: datasource=docker depName=koalaman/shellcheck-alpine versioning=docker
+    ARG SHELLCHECK_VERSION
+    FROM koalaman/shellcheck-alpine:$SHELLCHECK_VERSION
+    WORKDIR /mnt
+    COPY . .
+    RUN find . -name "*.sh" -print | xargs -r -n1 shellcheck
+
 lint:
     BUILD +prettier-lint
+    BUILD +shellcheck-lint
 
 images:
     BUILD ./images+all
