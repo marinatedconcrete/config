@@ -12,7 +12,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 components:
-  - https://raw.githubusercontent.com/marinatedconcrete/config/main/kustomization/components/operator-lifecycle-manager
+  - https://github.com/marinatedconcrete/config/kustomization/components/operator-lifecycle-manager
 patches:
   # A number of operators do not work in the baseline pod-security profile, alas.
   - target:
