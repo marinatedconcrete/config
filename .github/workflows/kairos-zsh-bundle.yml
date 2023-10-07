@@ -1,5 +1,5 @@
 ---
-name: Build USB Sidecar
+name: Build Kairos ZSH Bundle
 
 on: # yamllint disable-line rule:truthy
   push:
