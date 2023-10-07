@@ -29,6 +29,7 @@ prettier-lint:
     WORKDIR /config
     COPY --dir .pnp.cjs .yarnrc.yml package.json yarn.lock .yarn .
     RUN yarn
+    COPY . .
     COPY --dir .prettierignore .prettierrc.yml .github .
     RUN yarn check-format
 
