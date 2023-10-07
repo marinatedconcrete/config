@@ -3,4 +3,5 @@ FROM alpine
 
 all:
     BUILD ./kairos-ubuntu-22-lts/+image
+    BUILD ./kairos-zsh-bundle/+image
     BUILD ./usb-image/+image

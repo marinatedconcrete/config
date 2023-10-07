@@ -1,0 +1,42 @@
+---
+name: Build USB Sidecar
+
+on: # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/kairos-zsh-bundle.yml
+      - images/kairos-zsh-bundle/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/kairos-zsh-bundle.yml
+      - images/kairos-zsh-bundle/**
+
+jobs:
+  build-container:
+    runs-on: "ubuntu-latest"
+    permissions:
+      contents: "read"
+      packages: "write"
+
+    steps:
+      - uses: earthly/actions-setup@v1.0.8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version: "0.7.1"
+      - uses: "actions/checkout@v4"
+
+      - name: "Login to GitHub Container Hub"
+        if: github.event_name != 'pull_request'
+        run: docker login --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" ghcr.io
+
+      - name: "Build Kairos ZSH Bundle"
+        run: earthly ./images/kairos-zsh-bundle/+image
+        env:
+          EARTHLY_CI: true
+          EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
+          # Only one platform per https://docs.earthly.dev/docs/earthly-command#build-options
+          EARTHLY_PLATFORMS: linux/amd64
