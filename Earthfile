@@ -1,6 +1,14 @@
 VERSION 0.7
 FROM alpine
 
+kustomize-build:
+    # renovate: datasource=docker depName=registry.k8s.io/kustomize/kustomize versioning=docker
+    ARG KUSTOMIZE_VERSION=v5.1.1
+    FROM registry.k8s.io/kustomize/kustomize:$KUSTOMIZE_VERSION
+    COPY kustomization kustomization
+    RUN ls
+    RUN find kustomization/components/ -mindepth 1 -maxdepth 1 -type d -print | xargs -r -n1 kustomize build > /dev/null
+
 renovate-validate:
     # renovate: datasource=docker depName=renovate/renovate versioning=docker
     ARG RENOVATE_VERSION=37
@@ -10,6 +18,7 @@ renovate-validate:
     RUN renovate-config-validator
 
 validate:
+    BUILD +kustomize-build
     BUILD +renovate-validate
 
 prettier-lint:
