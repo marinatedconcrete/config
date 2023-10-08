@@ -1,0 +1,3 @@
+zsh__config_path: "/home/{{ zsh__user }}"
+zsh__config_owner: "{{ zsh__user }}"
+zsh__config_group: "{{ zsh__user }}"

@@ -1,0 +1,60 @@
+VERSION 0.7
+# renovate: datasource=docker depName=python
+ARG PYTHON_TAG=3.12-alpine
+FROM python:$PYTHON_TAG
+
+WORKDIR /ansible
+
+# Linux image with Python + ansible installed
+ansible:
+  # renovate: datasource=pip depName=ansible
+  ARG ANSIBLE_VERSION=8.4.0
+  RUN pip install ansible==$ANSIBLE_VERSION
+
+# The above, with the locally defined roles installed
+ansible-with-roles:
+  FROM +ansible
+  # When we add dependencies on ansible-galaxy, add it here for best caching
+  COPY roles .
+
+# Generates an ansible playbook that executes selected roles with selected vars
+playbook:
+  # Filename of the playbook to generate
+  # Can replace with LET once that's stabilized in Earthly
+  ARG playbook=playbook.yml
+  # Which hosts to run on - for image builds we just want localhost
+  ARG hosts=localhost
+  # Which roles to enable
+  ARG roles
+  # Each var/value pair should be of the form "var: value" like in YAML
+  # Separate multiple vars with a vertical bar (|) since that's not YAML syntax we want injected anyways.
+  ARG vars
+  RUN echo "- hosts:" > $playbook
+  FOR host IN $hosts
+    RUN echo "  - $host" >> $playbook
+  END
+  RUN echo "  roles:" >> $playbook
+  FOR role IN $roles
+    RUN echo "  - $role" >> $playbook
+  END
+  RUN echo "  vars:" >> $playbook
+  FOR --sep '|' var IN $vars
+    RUN echo "    $var" >> $playbook
+  END
+  SAVE ARTIFACT $playbook
+  # For debugging
+  RUN cat $playbook
+
+# Combines the above
+zsh:
+  # Pull in the ansible setup
+  FROM +ansible-with-roles
+  # Create the output directory
+  RUN mkdir /configs
+  # Generate the playbook that will write to /configs
+  # Use the root users since the Kairos user isn't defined in the build environment
+  COPY (+playbook/playbook.yml --roles=zsh --vars="zsh__config_path: /configs|zsh__config_owner: root|zsh__config_group: root") .
+  # Run the playbook
+  RUN ansible-playbook playbook.yml
+  # Export the configs for others to use
+  SAVE ARTIFACT /configs

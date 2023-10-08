@@ -1,19 +1,19 @@
 ---
-name: Build USB Sidecar
+name: Build Kairos ZSH Bundle
 
 on: # yamllint disable-line rule:truthy
   push:
     branches:
       - main
     paths:
-      - .github/workflows/usb-image.yml
-      - images/usb-image/**
+      - .github/workflows/kairos-zsh-bundle.yml
+      - images/kairos-zsh-bundle/**
   pull_request:
     branches:
       - main
     paths:
-      - .github/workflows/usb-image.yml
-      - images/usb-image/**
+      - .github/workflows/kairos-zsh-bundle.yml
+      - images/kairos-zsh-bundle/**
 
 jobs:
   build-container:
@@ -34,8 +34,8 @@ jobs:
         if: github.event_name != 'pull_request'
         run: docker login --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" ghcr.io
 
-      - name: "Build USB Container Image"
-        run: earthly ./images/usb-image/+image
+      - name: "Build Kairos ZSH Bundle"
+        run: earthly ./images/kairos-zsh-bundle/+image
         env:
           EARTHLY_CI: true
           EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
