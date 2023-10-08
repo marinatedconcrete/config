@@ -12,7 +12,7 @@ ansible:
 
 ansible-with-roles:
   FROM +ansible
-  COPY . .
+  COPY roles .
 
 ansible-playbook:
   ARG playbook=playbook.yml
