@@ -5,5 +5,6 @@ image:
   ARG TAG
 
   COPY ./run.sh /
+  # Use Ansible to generate the zsh configs
   COPY ../../ansible+zsh/configs /assets
   SAVE IMAGE --push ghcr.io/marinatedconcrete/kairos-zsh-bundle:$TAG
