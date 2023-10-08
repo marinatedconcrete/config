@@ -35,7 +35,7 @@ jobs:
         run: docker login --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" ghcr.io
 
       - name: "Build Kairos ZSH Bundle"
-        run: earthly ./images/kairos-zsh-bundle/+image
+        run: earthly ./images/kairos-zsh-bundle/+image --TAG=latest
         env:
           EARTHLY_CI: true
           EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
