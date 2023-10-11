@@ -2,7 +2,8 @@ VERSION 0.7
 FROM alpine 
 
 image:
-  ARG TAG
+  ARG EARTHLY_GIT_BRANCH
+  ARG TAG=$EARTHLY_GIT_BRANCH
 
   COPY ./run.sh /
   # Use Ansible to generate the zsh configs
