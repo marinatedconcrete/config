@@ -33,7 +33,6 @@ jobs:
       - uses: "actions/checkout@v4"
 
       - name: "Login to GitHub Container Hub"
-        if: github.event_name != 'pull_request'
         run: docker login --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" ghcr.io
 
       - name: "Build Kairos ZSH Bundle"
