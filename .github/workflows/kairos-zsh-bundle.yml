@@ -38,7 +38,7 @@ jobs:
       - name: "Build Kairos ZSH Bundle"
         run: earthly ./images/kairos-zsh-bundle/+image --TAG=$TAG
         env:
-          TAG: ${{ github.event_name != 'pull_request' && 'latest' || format("pr-{0}", github.head_ref) }}
+          TAG: ${{ github.event_name != 'pull_request' && 'latest' || format('pr-{0}', github.head_ref) }}
           EARTHLY_CI: true
           EARTHLY_PUSH: true
           # Only one platform per https://docs.earthly.dev/docs/earthly-command#build-options
