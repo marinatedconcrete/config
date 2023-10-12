@@ -37,8 +37,9 @@ jobs:
         run: docker login --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" ghcr.io
 
       - name: "Build Kairos ZSH Bundle"
-        run: earthly --push --ci ./images/kairos-zsh-bundle/+image --TAG="${{ github.GITHUB_REF_NAME || 'latest' }}"
+        run: earthly ./images/kairos-zsh-bundle/+image --TAG="${{ github.ref_name || 'latest' }}"
         env:
           EARTHLY_CI: true
+          EARTHLY_PUSH: true
           # Only one platform per https://docs.earthly.dev/docs/earthly-command#build-options
           EARTHLY_PLATFORMS: linux/amd64
