@@ -31,15 +31,22 @@ jobs:
           # renovate: datasource=docker depName=earthly/earthly
           version: "v0.7.20"
       - uses: "actions/checkout@v4"
-
+      - name: Put back the git branch into git (Earthly uses it for tagging)
+        run: |
+          branch=""
+          if [ -n "$GITHUB_HEAD_REF" ]; then
+            branch="$GITHUB_HEAD_REF"
+          else
+            branch="${GITHUB_REF##*/}"
+          fi
+          git checkout -b "$branch" || true
       - name: "Login to GitHub Container Hub"
-        if: github.event_name != 'pull_request'
         run: docker login --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" ghcr.io
 
       - name: "Build Kairos ZSH Bundle"
         run: earthly ./images/kairos-zsh-bundle/+image --TAG=latest
         env:
           EARTHLY_CI: true
-          EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
+          EARTHLY_PUSH: true
           # Only one platform per https://docs.earthly.dev/docs/earthly-command#build-options
           EARTHLY_PLATFORMS: linux/amd64
