@@ -33,13 +33,17 @@ jobs:
       - uses: "actions/checkout@v4"
 
       - name: "Login to GitHub Container Hub"
-        if: github.event_name != 'pull_request'
         run: docker login --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" ghcr.io
 
+      - id: tags
+        run: echo "TAG=$BRANCH" | tr / _ >> "$GITHUB_ENV"
+        env:
+          BRANCH: ${{ github.event_name != 'pull_request' && 'latest' || format('pr-{0}', github.head_ref) }}
+
       - name: "Build Kairos ZSH Bundle"
-        run: earthly ./images/kairos-zsh-bundle/+image --TAG=latest
+        run: earthly ./images/kairos-zsh-bundle/+image --TAG=$TAG
         env:
           EARTHLY_CI: true
-          EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
+          EARTHLY_PUSH: true
           # Only one platform per https://docs.earthly.dev/docs/earthly-command#build-options
           EARTHLY_PLATFORMS: linux/amd64
