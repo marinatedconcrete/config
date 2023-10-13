@@ -36,7 +36,7 @@ jobs:
         run: docker login --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" ghcr.io
 
       - id: tags
-        run: echo "name=$BRANCH" | tr / - >> "$TAG_ENV"
+        run: echo "name=$BRANCH" | tr / __ >> "$GITHUB_ENV"
         env:
           BRANCH: ${{ github.event_name != 'pull_request' && 'latest' || format('pr-{0}', github.head_ref) }}
 
