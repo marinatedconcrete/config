@@ -6,16 +6,14 @@
 - name: Set up zsh config
   ansible.builtin.template:
     src: zshrc
-    dest: "~{{ item }}/.zshrc"
+    dest: "{{ zsh__config_path }}/.zshrc"
     mode: u+rw-x,o-rwx,g-rwx
-    owner: "{{ item }}"
-    group: "{{ item }}"
-  loop: "{{ zsh__users }}"
+    owner: "{{ zsh__config_owner }}"
+    group: "{{ zsh__config_group }}"
 - name: Set up zsh environment
   ansible.builtin.template:
     src: zshenv
-    dest: "~{{ item }}/.zshenv"
+    dest: "{{ zsh__config_path }}/.zshenv"
     mode: u+rw-x,o-rwx,g-rwx
-    owner: "{{ item }}"
-    group: "{{ item }}"
-  loop: "{{ zsh__users }}"
+    owner: "{{ zsh__config_owner }}"
+    group: "{{ zsh__config_group }}"
