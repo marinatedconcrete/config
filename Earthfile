@@ -23,7 +23,7 @@ validate:
 
 prettier-lint:
     # renovate: datasource=docker depName=node versioning=docker
-    ARG NODE_VERSION=20
+    ARG NODE_VERSION=21
     FROM node:$NODE_VERSION
     RUN corepack enable
     WORKDIR /config
