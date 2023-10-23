@@ -5,7 +5,14 @@
   "configMigration": true,
   "commitBody": "{{{releaseNotes}}}",
   "rollbackPrs": true,
-  "packageRules": [],
+  "packageRules": [
+    {
+      "description": "Automerge all yarn & prettier changes",
+      "matchPackageNames": ["prettier", "yarn"],
+      "automerge": true,
+      "automergeSchedule": ["every day"]
+    }
+  ],
   "customManagers": [
     {
       "customType": "regex",
