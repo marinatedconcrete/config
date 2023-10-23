@@ -31,7 +31,13 @@ prettier-lint:
     RUN yarn
     COPY . .
     COPY --dir .prettierignore .prettierrc.yml .github .
-    RUN yarn check-format
+    ARG write=false
+    IF [ "$write" = "true" ]
+      RUN yarn format
+      SAVE ARTIFACT /config/* AS LOCAL .
+    ELSE
+      RUN yarn check-format || echo "Lint failed. Please re-run earthly with --write=true to save the corrections"
+    END
 
 shellcheck-lint:
     # renovate: datasource=docker depName=koalaman/shellcheck-alpine versioning=docker
