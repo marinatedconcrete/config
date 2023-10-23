@@ -17,6 +17,10 @@ on: # yamllint disable-line rule:truthy
 
 jobs:
   build-container:
+    env:
+      EARTHLY_TOKEN: ${{ secrets.EARTHLY_TOKEN }}
+      EARTHLY_ORG: marinatedconcrete
+      EARTHLY_SATELLITE: config-repo
     runs-on: "ubuntu-latest"
     permissions:
       contents: "read"

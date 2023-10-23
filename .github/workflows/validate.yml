@@ -8,6 +8,10 @@ on:
 
 jobs:
   validate:
+    env:
+      EARTHLY_TOKEN: ${{ secrets.EARTHLY_TOKEN }}
+      EARTHLY_ORG: marinatedconcrete
+      EARTHLY_SATELLITE: config-repo
     runs-on: ubuntu-latest
     steps:
       - uses: earthly/actions-setup@v1.0.8
@@ -21,6 +25,10 @@ jobs:
         env:
           EARTHLY_CI: true
   lint:
+    env:
+      EARTHLY_TOKEN: ${{ secrets.EARTHLY_TOKEN }}
+      EARTHLY_ORG: marinatedconcrete
+      EARTHLY_SATELLITE: config-repo
     runs-on: ubuntu-latest
     steps:
       - uses: earthly/actions-setup@v1.0.8
