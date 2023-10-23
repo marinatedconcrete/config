@@ -7,6 +7,7 @@ DEST="/home/kairos"
 echo $PATH
 pwd
 whoami
+find .
 
 # Copy the zsh configs to the kairos user homedir with the appropriate permissions.
 # User writable is helpful for local experimentation/debugging
