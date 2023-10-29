@@ -12,5 +12,5 @@
     }
   },
   "installsAfter": ["ghcr.io/devcontainers/features/common-utils"],
-  "updateContentCommand": "./updateContent.sh"
+  "updateContentCommand": "/config/ansible/updateContent.sh"
 }
