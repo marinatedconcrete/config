@@ -1,7 +1,7 @@
 {
   "name": "Run an ansible playbook",
   "id": "ansible",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Runs an ansible playbook and installs pre-requests for plays/roles from the marinatedconcrete repo",
   "options": {
     "playbook": {
