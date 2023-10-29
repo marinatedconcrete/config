@@ -32,5 +32,5 @@ PLAYBOOK=${PLAYBOOK:-undefined}
 if [ -f "$PLAYBOOK" ]; then
     ansible-playbook "$PLAYBOOK"
 else
-    echo "Could not find playbook - cowardly doing nothing
+    echo "Could not find playbook - cowardly doing nothing"
 fi
