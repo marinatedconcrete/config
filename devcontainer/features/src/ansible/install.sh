@@ -26,11 +26,3 @@ if ! command -v sshpass; then
     sudo apt update
     sudo apt install -y --no-install-recommends sshpass
 fi
-
-# Actually run the playbook
-PLAYBOOK=${PLAYBOOK:-undefined}
-if [ -f "$PLAYBOOK" ]; then
-    ansible-playbook "$PLAYBOOK"
-else
-    echo "Could not find playbook - cowardly doing nothing"
-fi
