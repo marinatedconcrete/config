@@ -1,0 +1,15 @@
+{
+  "name": "Run an ansible playbook",
+  "id": "ansible",
+  "version": "1.0.0",
+  "description": "Runs an ansible playbook and installs pre-requests for plays/roles from the marinatedconcrete repo",
+  "options": {
+    "playbook": {
+      "type": "string",
+      "proposals": ["site.yml"],
+      "default": "site.yml",
+      "description": "Select a play to run on container start"
+    }
+  },
+  "installsAfter": ["ghcr.io/devcontainers/features/common-utils"]
+}
