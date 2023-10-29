@@ -2,7 +2,8 @@
   "basic": {
     "image": "buildpack-deps:22.04-curl",
     "features": {
-      "ghcr.io/devcontainers/features/common-utils:2": {}
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "ansible": {}
     }
   }
 }
