@@ -26,3 +26,9 @@ if ! command -v sshpass; then
     sudo apt update
     sudo apt install -y --no-install-recommends sshpass
 fi
+
+# This must line up with the path in the json manifest
+DEST=/usr/marinatedconcrete/ansible
+mkdir -p "$DEST"
+chmod -R 0755 "$DEST"
+cp -a ./updateContent.sh "$DEST/updateContent.sh"
