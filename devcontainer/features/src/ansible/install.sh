@@ -29,4 +29,8 @@ fi
 
 # Actually run the playbook
 PLAYBOOK=${PLAYBOOK:-undefined}
-ansible-playbook "$PLAYBOOK"
+if [ -f "$PLAYBOOK" ]; then
+    ansible-playbook "$PLAYBOOK"
+else
+    echo "Could not find playbook - cowardly doing nothing
+fi
