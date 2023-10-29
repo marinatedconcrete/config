@@ -1,16 +1,8 @@
 {
-  "name": "Run an ansible playbook",
+  "name": "Installs pre-requests for running ansible plays authored using this repo",
   "id": "ansible",
-  "version": "1.1.0",
-  "description": "Runs an ansible playbook and installs pre-requests for plays/roles from the marinatedconcrete repo",
-  "options": {
-    "playbook": {
-      "type": "string",
-      "proposals": ["site.yml"],
-      "default": "site.yml",
-      "description": "Select a play to run on container start"
-    }
-  },
-  "installsAfter": ["ghcr.io/devcontainers/features/common-utils"],
-  "updateContentCommand": "/usr/marinatedconcrete/ansible/updateContent.sh"
+  "version": "1.2.0",
+  "description": "This automates the setup on Ubuntu images of everything needed to run Ansible",
+  "options": {},
+  "installsAfter": ["ghcr.io/devcontainers/features/common-utils"]
 }
