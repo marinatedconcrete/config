@@ -1,0 +1,3 @@
+# pip requirements
+ansible==8.5.0
+kubernetes==28.1.0

@@ -27,7 +27,7 @@ jobs:
         uses: devcontainers/action@v1.4.0
         with:
           publish-features: "true"
-          base-path-to-features: "./devcontainer/features"
+          base-path-to-features: "./devcontainer/features/src"
           generate-docs: "false"
 
         env:
