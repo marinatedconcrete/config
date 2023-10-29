@@ -24,7 +24,7 @@ jobs:
         features:
           - ansible
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: "Install latest devcontainer CLI"
         run: npm install -g @devcontainers/cli
