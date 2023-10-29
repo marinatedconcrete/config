@@ -27,10 +27,8 @@ if ! command -v sshpass; then
     sudo apt install -y --no-install-recommends sshpass
 fi
 
-# Actually run the playbook
-PLAYBOOK=${PLAYBOOK:-undefined}
-if [ -f "$PLAYBOOK" ]; then
-    ansible-playbook "$PLAYBOOK"
-else
-    echo "Could not find playbook - cowardly doing nothing"
-fi
+# This must line up with the path in the json manifest
+DEST=/usr/marinatedconcrete/ansible
+mkdir -p "$DEST"
+chmod -R 0755 "$DEST"
+cp -a ./updateContent.sh "$DEST/updateContent.sh"
