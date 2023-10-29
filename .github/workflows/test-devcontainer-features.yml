@@ -24,7 +24,7 @@ jobs:
         features:
           - ansible
         baseImage:
-          - ubuntu:22.04
+          - buildpack-deps:22.04-curl
     steps:
       - uses: actions/checkout@v3
 
