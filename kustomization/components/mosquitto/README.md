@@ -13,7 +13,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 components:
-  - ../../../components/mosquitto
+  - https://github.com/marinatedconcrete/config/kustomization/components/mosquitto
 ```
 
 See below for additionally required patches and secrets.
