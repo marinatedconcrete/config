@@ -1,11 +1,11 @@
 #!/bin/sh
 set -e
 
+packages="gnupg2"
 if [ -f requirements.txt ]; then
     # Install pip to install ansible & kubernetes modules
     if ! command -v pip; then
-        sudo apt update
-        sudo apt install -y --no-install-recommends python3-pip
+        packages="$packages python3-pip"
     else
         echo "Pip already installed"
     fi
@@ -23,6 +23,8 @@ fi
 
 # sshpass for initial node provisioning
 if ! command -v sshpass; then
-    sudo apt update
-    sudo apt install -y --no-install-recommends sshpass
+    packages="$packages sshpass"
 fi
+
+sudo apt update
+sudo apt install -y --no-install-recommends "$packages"
