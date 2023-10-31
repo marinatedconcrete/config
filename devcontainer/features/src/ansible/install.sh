@@ -1,5 +1,7 @@
 #!/bin/sh
 set -e
+# Disable Globbing
+set -f
 
 #
 # Gather & Install Required Packages
@@ -20,8 +22,9 @@ if ! command -v sshpass; then
     packages="$packages sshpass"
 fi
 
-sudo apt update
-sudo apt install -y --no-install-recommends "$packages"
+sudo apt-get update
+# shellcheck disable=SC2086
+sudo apt-get install -y --no-install-recommends $packages
 
 #
 # Non-Package Requirements
