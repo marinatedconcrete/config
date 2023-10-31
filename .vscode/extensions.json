@@ -1,6 +1,6 @@
 {
-    "recommendations": [
-        "earthly.earthfile-syntax-highlighting",
-        "github.vscode-github-actions"
-    ]
+  "recommendations": [
+    "earthly.earthfile-syntax-highlighting",
+    "github.vscode-github-actions"
+  ]
 }
