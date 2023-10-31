@@ -25,8 +25,10 @@
     }
   },
   "remoteUser": "vscode",
+  "mounts": [
+    "source=${localEnv:HOME}/.earthly,target=/home/vscode/.earthly,type=bind,consistency=cached"
+  ],
   "containerEnv": {
-    "EARTHLY_ORG": "marinatedconcrete",
     "EARTHLY_SATELLITE": "config-repo"
   }
 }
