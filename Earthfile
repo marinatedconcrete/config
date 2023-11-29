@@ -40,15 +40,9 @@ minikube:
 #
 
 kustomization-tests-image:
-    # renovate: datasource=docker depName=python versioning=docker
-    ARG PYTHON_VERSION=3.12.0-bullseye
-    FROM python:$PYTHON_VERSION
+    FROM ./ansible/+ansible
 
-    # renovate: datasource=python depName=ansible-core
-    ARG ANSIBLE_VERSION=2.16.0
-    RUN python3 -m pip install ansible-core==$ANSIBLE_VERSION
-
-    # renovate: datasource=python depName=kubernetes
+    # renovate: datasource=pypi depName=kubernetes
     ARG PYKUBERNETES_VERSION=28.1.0
     RUN python3 -m pip install kubernetes==$PYKUBERNETES_VERSION
 
