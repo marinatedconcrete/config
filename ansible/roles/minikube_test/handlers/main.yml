@@ -1,0 +1,17 @@
+---
+# handlers file for minikube_test
+- name: Stop minikube
+  ansible.builtin.command:
+    argv:
+      - minikube
+      - stop
+      - "--profile={{ test_name }}"
+  listen: stop minikube
+  notify: delete minikube
+- name: Delete minikube
+  ansible.builtin.command:
+    argv:
+      - minikube
+      - delete
+      - "--profile={{ test_name }}"
+  listen: delete minikube

@@ -1,0 +1,4 @@
+---
+# vars file for minikube_test
+
+test_dir:

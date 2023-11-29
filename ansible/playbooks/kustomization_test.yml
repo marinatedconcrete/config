@@ -1,0 +1,6 @@
+---
+- force_handlers: yes
+  gather_facts: no
+  hosts: localhost
+  roles:
+    - role: minikube_test

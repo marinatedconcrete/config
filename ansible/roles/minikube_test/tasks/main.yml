@@ -1,0 +1,17 @@
+---
+# tasks file for minikube_test
+- name: Start minikube
+  ansible.builtin.command:
+    argv:
+      - minikube
+      - start
+      - --interactive=false
+      - "--profile={{ test_name }}"
+      - "--kubernetes-version={{ kubernetes_version }}"
+      - --force
+  notify: stop minikube
+- name: Apply kustomization
+  kubernetes.core.k8s:
+    apply: yes
+    context: "{{ test_name }}"
+    definition: "{{ lookup('kubernetes.core.kustomize', dir=test_dir) }}"

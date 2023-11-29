@@ -1,0 +1,14 @@
+---
+# defaults file for minikube_test
+
+# renovate: datasource=github-releases depName=kubernetes/kubernetes
+kubernetes_version: v1.28.3
+
+# The number of nodes needed for the test.
+minikube_nodes: 1
+
+# The directory to pass to kustomize for the test.
+kustomization_dir: "{{ test_dir }}"
+
+# The name of the test.
+test_name: "{{ kustomization_dir.split('/')[-1] }}"
