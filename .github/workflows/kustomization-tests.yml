@@ -1,0 +1,44 @@
+---
+name: Run Kustomization Tests
+
+on: # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/kustomization-tests.yml
+      - ansible/playbooks/kustomization_test.yml
+      - ansible/roles/minikube_test/**
+      - kustomization/tests/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/kustomization-tests.yml
+      - ansible/playbooks/kustomization_test.yml
+      - ansible/roles/minikube_test/**
+      - kustomization/tests/**
+
+jobs:
+  build-container:
+    env:
+      EARTHLY_TOKEN: ${{ secrets.EARTHLY_TOKEN }}
+      EARTHLY_ORG: marinatedconcrete
+      EARTHLY_SATELLITE: config-repo
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: earthly/actions-setup@v1.0.8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # renovate: datasource=docker depName=earthly/earthly
+          version: "v0.7.21"
+      - uses: actions/checkout@v4.1.1
+
+      - name: Build Image
+        env:
+          EARTHLY_CI: true
+        run: earthly --allow-privileged +kustomization-tests

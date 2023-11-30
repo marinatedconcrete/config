@@ -1,0 +1,5 @@
+---
+# vars file for minikube_test
+
+# The kustomization directory to apply for the test.
+test_dir:

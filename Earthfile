@@ -1,13 +1,79 @@
 VERSION 0.7
 FROM alpine
 
-kustomize-build:
-    # renovate: datasource=docker depName=registry.k8s.io/kustomize/kustomize versioning=docker
+#
+# Dependency Targets
+#
+
+kubectl:
+    # renovate: datasource=github-releases depName=kubernetes/kubernetes
+    ARG KUBERNETES_VERSION=v1.28.3
+    ARG TARGETARCH
+    ARG TARGETOS
+    WORKDIR ~
+    RUN wget -O kubectl https://dl.k8s.io/release/$KUBERNETES_VERSION/bin/$TARGETOS/$TARGETARCH/kubectl
+    RUN chmod +x kubectl
+    SAVE ARTIFACT kubectl /binary
+
+kustomize:
+    # renovate: datasource=github-releases depName=kustomize/kustomize
     ARG KUSTOMIZE_VERSION=v5.2.1
-    FROM registry.k8s.io/kustomize/kustomize:$KUSTOMIZE_VERSION
+    ARG TARGETARCH
+    ARG TARGETOS
+    WORKDIR ~
+    RUN wget -O kustomize.tar.gz https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/$KUSTOMIZE_VERSION/kustomize_"$KUSTOMIZE_VERSION"_"$TARGETOS"_"$TARGETARCH".tar.gz
+    RUN tar -xf kustomize.tar.gz
+    SAVE ARTIFACT kustomize /binary
+
+minikube:
+    # renovate: datasource=github-releases depName=kubernetes/minikube
+    ARG MINIKUBE_VERSION=v1.32.0
+    ARG TARGETARCH
+    ARG TARGETOS
+    WORKDIR ~
+    RUN wget -O minikube https://github.com/kubernetes/minikube/releases/download/$MINIKUBE_VERSION/minikube-$TARGETOS-$TARGETARCH
+    RUN chmod +x minikube
+    SAVE ARTIFACT minikube /binary
+
+#
+# Working Images
+#
+
+kustomization-tests-image:
+    FROM ./ansible/+ansible
+
+    # renovate: datasource=pypi depName=kubernetes
+    ARG PYKUBERNETES_VERSION=28.1.0
+    RUN python3 -m pip install kubernetes==$PYKUBERNETES_VERSION
+
+    COPY +kubectl/binary /usr/local/bin/kubectl
+    COPY +kustomize/binary /usr/local/bin/kustomize
+    COPY +minikube/binary /usr/local/bin/minikube
+
+    WORKDIR workdir
+
+#
+# Workflows
+#
+
+kustomize-build:
+    COPY +kustomize/binary /usr/local/bin/kustomize
     COPY kustomization kustomization
-    RUN ls
     RUN find kustomization/components/ -mindepth 1 -maxdepth 1 -type d -print | xargs -r -n1 kustomize build > /dev/null
+
+kustomization-tests:
+    FROM +kustomization-tests-image
+    # Install marinatedconcrete.config collection
+    COPY ansible ansible
+    RUN ansible-galaxy collection install --no-cache ansible
+
+    # Copy Kustomizations and Run Tests
+    COPY kustomization kustomization
+    WITH DOCKER
+        RUN find kustomization/tests -mindepth 1 -maxdepth 1 -type d -print | \
+            awk '{print "test_dir="$1}' | \
+            xargs -r -n1 ansible-playbook marinatedconcrete.config.kustomization_test -e
+    END
 
 renovate-validate:
     # renovate: datasource=docker depName=renovate/renovate versioning=docker

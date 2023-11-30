@@ -1,0 +1,8 @@
+---
+galaxy_info:
+  author: sdwilsh
+  description: Role to run tests of kustomizations against minikube.
+  license: BSD-3-Clause
+  min_ansible_version: 2.1
+  galaxy_tags: []
+dependencies: []
