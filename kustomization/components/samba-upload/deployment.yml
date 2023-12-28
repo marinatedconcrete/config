@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: samba
+spec:
+  revisionHistoryLimit: 4
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: samba
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: samba
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - paperless
+      volumes:
+        - name: paperless-scans
+          persistentVolumeClaim:
+            claimName: paperless-scans
+      containers:
+        - name: samba
+          image: ghcr.io/servercontainers/samba:smbd-only-latest
+          ports:
+            - containerPort: 445
+            - containerPort: 139
+          env:
+            - name: ACCOUNT_hp
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secrets
+                  key: hp_samba_password
+            - name: SAMBA_VOLUME_CONFIG_scans
+              value: "[Scans]; path=/shares/scans; valid users = hp; guest ok = no; read only = no; browseable = no"
+          resources:
+            requests:
+              cpu: 25m
+              memory: 100Mi
+            limits:
+              cpu: 100m
+              memory: 1Gi
+          volumeMounts:
+            - mountPath: "/shares/scans"
+              name: paperless-scans
