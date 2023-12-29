@@ -5,4 +5,4 @@ metadata:
   labels:
     pod-security.kubernetes.io/enforce: privileged
     pod-security.kubernetes.io/enforce-version: latest
-  name: kube-vip
+  name: kube-vip-test
