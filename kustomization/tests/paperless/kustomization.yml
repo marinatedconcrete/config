@@ -11,4 +11,3 @@ namespace: paperless-test
 resources:
   - namespace.yml
   - secret.yml
-

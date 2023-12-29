@@ -33,11 +33,12 @@ metadata:
 stringData:
   # comma separate multiple dates
   # These dates may be sensitive or non-public (ex: birthdays) and thus best represented as a secret.
-  ignored_dates: '2023-12-28,1980-04-23'
+  ignored_dates: "2023-12-28,1980-04-23"
   paperless_admin_password: super-secure-unhashed-password
 ```
 
 ## Optional Components
+
 See the [samba-upload component](../samba-upload/README.md).
 
 ## Optional Patches

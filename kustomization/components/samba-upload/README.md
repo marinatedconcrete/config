@@ -17,4 +17,3 @@ patches:
       name: samba
   # ...rest of your paperless patches
 ```
-
