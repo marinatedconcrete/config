@@ -102,7 +102,7 @@ prettier-lint:
       RUN yarn format
       SAVE ARTIFACT /config/* AS LOCAL .
     ELSE
-      RUN yarn check-format || echo "Lint failed. Please re-run earthly with --write=true to save the corrections"
+      RUN yarn check-format || (echo "Lint failed. Please re-run earthly with --write=true to save the corrections" && exit 1)
     END
 
 shellcheck-lint:
