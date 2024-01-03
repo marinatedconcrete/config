@@ -41,12 +41,12 @@ spec:
             - name: SAMBA_VOLUME_CONFIG_scans
               value: "[Scans]; path=/shares/scans; valid users = hp; guest ok = no; read only = no; browseable = no"
           resources:
-            requests:
-              cpu: 25m
-              memory: 100Mi
             limits:
               cpu: 100m
               memory: 1Gi
+            requests:
+              cpu: 25m
+              memory: 100Mi
           volumeMounts:
             - mountPath: "/shares/scans"
               name: paperless-scans
