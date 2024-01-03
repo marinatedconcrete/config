@@ -1,0 +1,2 @@
+universal-silabs-flasher==0.0.15
+
