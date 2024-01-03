@@ -4,8 +4,6 @@ metadata:
   name: samba
 spec:
   revisionHistoryLimit: 4
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: samba
