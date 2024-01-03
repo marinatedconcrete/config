@@ -33,13 +33,13 @@ spec:
             - containerPort: 445
             - containerPort: 139
           env:
-            - name: ACCOUNT_hp
+            - name: ACCOUNT_printer
               valueFrom:
                 secretKeyRef:
                   name: paperless-secrets
-                  key: hp_samba_password
+                  key: printer_samba_password
             - name: SAMBA_VOLUME_CONFIG_scans
-              value: "[Scans]; path=/shares/scans; valid users = hp; guest ok = no; read only = no; browseable = no"
+              value: "[Scans]; path=/shares/scans; valid users = printer; guest ok = no; read only = no; browseable = no"
           resources:
             limits:
               cpu: 100m
