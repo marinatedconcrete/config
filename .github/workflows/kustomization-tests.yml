@@ -7,6 +7,8 @@ on: # yamllint disable-line rule:truthy
       - main
     paths:
       - .github/workflows/kustomization-tests.yml
+      - ansible/Earthfile
+      - ansible/galaxy.yml
       - ansible/playbooks/kustomization_test.yml
       - ansible/roles/minikube_test/**
       - kustomization/tests/**
@@ -15,6 +17,8 @@ on: # yamllint disable-line rule:truthy
       - main
     paths:
       - .github/workflows/kustomization-tests.yml
+      - ansible/Earthfile
+      - ansible/galaxy.yml
       - ansible/playbooks/kustomization_test.yml
       - ansible/roles/minikube_test/**
       - kustomization/tests/**
