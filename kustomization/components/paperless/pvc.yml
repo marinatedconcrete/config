@@ -1,0 +1,51 @@
+# Where incoming raw scans should go
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-scans
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: longhorn-encrypted
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Where paperless keeps its database
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-encrypted
+  resources:
+    requests:
+      storage: 4Gi
+---
+# Where paperless keeps processed documents
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-encrypted
+  resources:
+    requests:
+      storage: 1Gi
+---
+# This seems related to the [document exporter](https://docs.paperless-ngx.com/administration/#utilities-exporter) feature
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paperless-export
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn-encrypted
+  resources:
+    requests:
+      storage: 100Mi

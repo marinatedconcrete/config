@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: paperless
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: paperless
+  serviceName: paperless
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: paperless
+    spec:
+      volumes:
+        - name: paperless-data
+          persistentVolumeClaim:
+            claimName: paperless-data
+        - name: paperless-media
+          persistentVolumeClaim:
+            claimName: paperless-media
+        - name: paperless-scans
+          persistentVolumeClaim:
+            claimName: paperless-scans
+        - name: paperless-export
+          persistentVolumeClaim:
+            claimName: paperless-export
+      initContainers:
+        # Paperless needs the trash dir to exist on startup
+        - name: prep-trash-dir
+          image: ghcr.io/paperless-ngx/paperless-ngx
+          command:
+            - /bin/sh
+            - -c
+            - mkdir -p $PAPERLESS_TRASH_DIR
+          env:
+            - name: PAPERLESS_TRASH_DIR
+              value: "/usr/src/paperless/media/trash"
+          volumeMounts:
+            - mountPath: "/usr/src/paperless/media"
+              name: paperless-media
+      containers:
+        - name: paperless
+          image: ghcr.io/paperless-ngx/paperless-ngx
+          ports:
+            - containerPort: 8000
+          env:
+            - name: PAPERLESS_PORT
+              value: "8000"
+            - name: PAPERLESS_REDIS
+              value: "redis://redis-svc:6379"
+            - name: PAPERLESS_TIME_ZONE
+              value: America/Los_Angeles
+            - name: PAPERLESS_AUTO_LOGIN_USERNAME
+              value: admin
+            - name: PAPERLESS_ADMIN_USER
+              value: admin
+            - name: PAPERLESS_DATE_ORDER
+              value: MDY
+            - name: PAPERLESS_FILENAME_FORMAT
+              value: "{correspondent}/{created_year}/{created_year}-{created_month}-{created_day} {title}"
+            - name: PAPERLESS_TRASH_DIR
+              value: "/usr/src/paperless/media/trash"
+            - name: PAPERLESS_IGNORE_DATES
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secrets
+                  key: ignored_dates
+            - name: PAPERLESS_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secrets
+                  key: paperless_admin_password
+            - name: PAPERLESS_TASK_WORKERS
+              value: "2"
+            - name: PAPERLESS_THREADS_PER_WORKER
+              value: "1"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 200Mi
+            limits:
+              cpu: 3000m
+              memory: 2Gi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+              scheme: HTTP
+          volumeMounts:
+            - mountPath: "/usr/src/paperless/data"
+              name: paperless-data
+            - mountPath: "/usr/src/paperless/media"
+              name: paperless-media
+            - mountPath: "/usr/src/paperless/export"
+              name: paperless-export
+            - mountPath: "/usr/src/paperless/consume"
+              name: paperless-scans
