@@ -2,35 +2,58 @@ VERSION 0.7
 FROM alpine
 
 # renovate: datasource=github-releases depName=k3s-io/k3s versioning=docker
-ARG --global K3S_VERSION=v1.27.3-k3s1
+ARG --global K3S_VERSION=v1.27.9+k3s1
 # renovate: datasource=docker depName=quay.io/kairos/core-ubuntu-22-lts
-ARG --global KAIROS_VERSION=v2.4.1
+ARG --global KAIROS_VERSION=v2.5.0
 
 image:
+    BUILD +image-amd64
+    # Not sure why this isn't working
+    # ./i/kairos-ubuntu-22-lts+image-generic | WARN images/kairos-ubuntu-22-lts/Earthfile line 55:4: The command 'RUN apt-get update' failed: failed to read expected number of bytes: unexpected EOF
+    # Error: unlazy force execution: failed to compute cache key: failed to read expected number of bytes: unexpected EOF
+    #BUILD +image-arm64
+
+image-amd64:
     BUILD +image-generic \
-        --PLATFORM=linux/amd64 \
-        --REPOSITORY=quay.io/kairos/kairos-ubuntu-22-lts
+        --PLATFORM=amd64 \
+        --DEVICE=generic \
+        --UBUNTU_VERSION=22.04
+
+image-arm64:
     BUILD +image-generic \
-        --PLATFORM=linux/arm64 \
-        --REPOSITORY=quay.io/kairos/kairos-ubuntu-22-lts-arm-rpi
+        --PLATFORM=arm64 \
+        --DEVICE=rpi4 \
+        --UBUNTU_VERSION=22.04
 
 push:
+    BUILD +push-amd64
+    # Disabled due to build not working
+    #BUILD +push-arm64
+
+push-amd64:
     BUILD +push-generic \
-        --PLATFORM=linux/amd64 \
-        --REPOSITORY=quay.io/kairos/kairos-ubuntu-22-lts \
+        --PLATFORM=amd64 \
+        --DEVICE=generic \
+        --UBUNTU_VERSION=22.04 \
         --TAG=$KAIROS_VERSION
+
+push-arm64:
     BUILD +push-generic \
-        --PLATFORM=linux/arm64 \
-        --REPOSITORY=quay.io/kairos/kairos-ubuntu-22-lts-arm-rpi \
+        --PLATFORM=arm64 \
+        --DEVICE=rpi4 \
+        --UBUNTU_VERSION=22.04 \
         --TAG=$KAIROS_VERSION
 
 image-generic:
     ARG PLATFORM
-    ARG REPOSITORY
-    FROM --platform=$PLATFORM $REPOSITORY:$KAIROS_VERSION-k3s$K3S_VERSION
-    # This is not needed after Kairos version 2.4 because it was fixed:
-    # https://github.com/kairos-io/kairos/pull/1855
-    RUN mkdir -p /var/cache/apt/archives/partial
+    ARG DEVICE
+    ARG UBUNTU_VERSION
+    ARG REPOSITORY=quay.io/kairos/ubuntu
+    ARG FLAVOR=standard
+    # Final image looks something like this:
+    # quay.io/kairos/ubuntu:22.04-standard-amd64-generic-v2.5.0-k3sv1.27.9-k3s1
+    ARG k3s_tag=$(echo "$K3S_VERSION" | tr '+' '-')
+    FROM --platform=linux/$PLATFORM $REPOSITORY:$UBUNTU_VERSION-$FLAVOR-$PLATFORM-$DEVICE-$KAIROS_VERSION-k3s$k3s_tag
 
     # Get Package Manager Updates
     RUN apt-get update
@@ -46,7 +69,8 @@ image-generic:
 
 push-generic:
     ARG PLATFORM
-    ARG REPOSITORY
+    ARG DEVICE
+    ARG UBUNTU_VERSION
     ARG TAG
-    FROM +image-generic --PLATFORM=$PLATFORM --REPOSITORY=$REPOSITORY
+    FROM +image-generic --PLATFORM=$PLATFORM --DEVICE=$DEVICE --UBUNTU_VERSION=$UBUNTU_VERSION
     SAVE IMAGE --push ghcr.io/marinatedconcrete/kairos-ubuntu-22-lts:$TAG
