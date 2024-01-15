@@ -2,7 +2,7 @@ VERSION 0.7
 FROM alpine
 
 # renovate: datasource=github-releases depName=k3s-io/k3s versioning=docker
-ARG --global K3S_VERSION=v1.27.3-k3s1
+ARG --global K3S_VERSION=v1.27.3+k3s1
 # renovate: datasource=docker depName=quay.io/kairos/core-ubuntu-22-lts
 ARG --global KAIROS_VERSION=v2.4.1
 
