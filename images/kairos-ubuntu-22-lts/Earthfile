@@ -28,15 +28,17 @@ push:
 
 push-amd64:
     BUILD +push-generic \
-        --PLATFORM=linux/amd64 \
-        --TAG=$KAIROS_VERSION \
-        --UBUNTU_VERSION=22.04
+        --PLATFORM=amd64 \
+        --DEVICE=generic \
+        --UBUNTU_VERSION=22.04 \
+        --TAG=$KAIROS_VERSION
 
 push-arm64:
     BUILD +push-generic \
-        --PLATFORM=linux/arm64 \
-        --TAG=$KAIROS_VERSION \
-        --UBUNTU_VERSION=22.04
+        --PLATFORM=arm64 \
+        --DEVICE=rpi4 \
+        --UBUNTU_VERSION=22.04 \
+        --TAG=$KAIROS_VERSION
 
 image-generic:
     ARG PLATFORM
