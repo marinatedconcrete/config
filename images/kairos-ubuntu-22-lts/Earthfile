@@ -7,18 +7,30 @@ ARG --global K3S_VERSION=v1.27.3-k3s1
 ARG --global KAIROS_VERSION=v2.4.1
 
 image:
+    BUILD +image-amd64
+    BUILD +image-arm64
+
+image-amd64:
     BUILD +image-generic \
         --PLATFORM=linux/amd64 \
         --REPOSITORY=quay.io/kairos/kairos-ubuntu-22-lts
+
+image-arm64:
     BUILD +image-generic \
         --PLATFORM=linux/arm64 \
         --REPOSITORY=quay.io/kairos/kairos-ubuntu-22-lts-arm-rpi
 
 push:
+    BUILD +push-amd64
+    BUILD +push-arm64
+
+push-amd64:
     BUILD +push-generic \
         --PLATFORM=linux/amd64 \
         --REPOSITORY=quay.io/kairos/kairos-ubuntu-22-lts \
         --TAG=$KAIROS_VERSION
+
+push-arm64:
     BUILD +push-generic \
         --PLATFORM=linux/arm64 \
         --REPOSITORY=quay.io/kairos/kairos-ubuntu-22-lts-arm-rpi \
