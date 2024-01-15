@@ -29,12 +29,14 @@ push:
 push-amd64:
     BUILD +push-generic \
         --PLATFORM=linux/amd64 \
-        --TAG=$KAIROS_VERSION
+        --TAG=$KAIROS_VERSION \
+        --UBUNTU_VERSION=22.04
 
 push-arm64:
     BUILD +push-generic \
         --PLATFORM=linux/arm64 \
-        --TAG=$KAIROS_VERSION
+        --TAG=$KAIROS_VERSION \
+        --UBUNTU_VERSION=22.04
 
 image-generic:
     ARG PLATFORM
@@ -62,6 +64,7 @@ image-generic:
 push-generic:
     ARG PLATFORM
     ARG DEVICE
+    ARG UBUNTU_VERSION
     ARG TAG
-    FROM +image-generic --PLATFORM=$PLATFORM --DEVICE=$DEVICE --UBUNTU_VERSION=22.04
+    FROM +image-generic --PLATFORM=$PLATFORM --DEVICE=$DEVICE --UBUNTU_VERSION=$UBUNTU_VERSION
     SAVE IMAGE --push ghcr.io/marinatedconcrete/kairos-ubuntu-22-lts:$TAG
