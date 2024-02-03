@@ -61,7 +61,7 @@ image-generic:
     # Install Additional Packages
     RUN apt-get install -y --no-install-recommends \
         usbutils \
-        va_info \
+        vainfo \
         vim \
         zsh
 
