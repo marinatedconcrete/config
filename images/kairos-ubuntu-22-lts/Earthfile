@@ -73,4 +73,5 @@ push-generic:
     ARG UBUNTU_VERSION
     ARG TAG
     FROM +image-generic --PLATFORM=$PLATFORM --DEVICE=$DEVICE --UBUNTU_VERSION=$UBUNTU_VERSION
+    RUN echo "MARINATEDCONCRETE_IMAGE=ghcr.io/marinatedconcrete/kairos-ubuntu-22-lts:$TAG" >> /etc/os-release
     SAVE IMAGE --push ghcr.io/marinatedconcrete/kairos-ubuntu-22-lts:$TAG
