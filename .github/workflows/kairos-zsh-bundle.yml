@@ -29,7 +29,7 @@ jobs:
       packages: "write"
 
     steps:
-      - uses: earthly/actions-setup@v1.0.9
+      - uses: earthly/actions-setup@v1.0.10
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           # renovate: datasource=docker depName=earthly/earthly
