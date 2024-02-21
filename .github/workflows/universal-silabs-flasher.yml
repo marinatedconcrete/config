@@ -31,7 +31,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           # renovate: datasource=docker depName=earthly/earthly
-          version: "v0.7.22"
+          version: "v0.8.4"
       - uses: "actions/checkout@v4.1.1"
 
       - name: "Login to GitHub Container Hub"
