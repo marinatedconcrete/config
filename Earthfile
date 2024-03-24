@@ -107,7 +107,7 @@ prettier-lint:
 
 shellcheck-lint:
     # renovate: datasource=docker depName=koalaman/shellcheck-alpine versioning=docker
-    ARG SHELLCHECK_VERSION=v0.9.0
+    ARG SHELLCHECK_VERSION=v0.10.0
     FROM koalaman/shellcheck-alpine:$SHELLCHECK_VERSION
     WORKDIR /mnt
     COPY . .
