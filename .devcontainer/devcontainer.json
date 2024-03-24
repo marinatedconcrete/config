@@ -21,7 +21,10 @@
   },
   "customizations": {
     "vscode": {
-      "extensions": ["earthly.earthfile-syntax-highlighting"]
+      "extensions": [
+        "earthly.earthfile-syntax-highlighting",
+        "esbenp.prettier-vscode"
+      ]
     }
   },
   "remoteUser": "vscode",
