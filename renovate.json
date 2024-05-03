@@ -11,6 +11,13 @@
       "matchPackageNames": ["prettier", "yarn"],
       "automerge": true,
       "automergeSchedule": ["every day"]
+    },
+    {
+      "description": "Auto-merge all patch updates - they have been safe so far",
+      "matchUpdateTypes": ["patch"],
+      "minimumReleaseAge": "3 days",
+      "automerge": true,
+      "automergeType": "branch"
     }
   ],
   "customManagers": [
