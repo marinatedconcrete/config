@@ -1,6 +1,6 @@
 {
   "name": "Ubuntu",
-  "image": "buildpack-deps:22.04-curl",
+  "image": "buildpack-deps:24.04-curl",
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,
