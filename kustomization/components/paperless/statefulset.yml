@@ -12,6 +12,7 @@ spec:
       labels:
         app.kubernetes.io/name: paperless
     spec:
+      priorityClassName: critical-application
       volumes:
         - name: paperless-data
           persistentVolumeClaim:
