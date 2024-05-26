@@ -35,9 +35,29 @@ minikube:
     RUN chmod +x minikube
     SAVE ARTIFACT minikube /binary
 
+python-requirements:
+    # renovate: datasource=docker depName=python
+    ARG PYTHON_VERSION=3.12
+    FROM python:$PYTHON_VERSION
+    WORKDIR /usr/src/app
+    COPY requirements.txt .
+    RUN pip install --no-cache-dir -r requirements.txt
+
 #
 # Working Images
 #
+
+ansible-lint:
+    FROM ./ansible/+ansible
+
+    # renovate: datasource=pypi depName=ansible-lint
+    ARG ANSIBLE_LINT_VERSION=24.5.0
+    RUN python3 -m pip install ansible-lint==$ANSIBLE_LINT_VERSION
+
+    COPY --dir ansible ansible
+    WORKDIR ansible
+    RUN ansible-galaxy collection install --no-cache .
+    RUN ansible-lint
 
 kustomization-tests-image:
     FROM ./ansible/+ansible
