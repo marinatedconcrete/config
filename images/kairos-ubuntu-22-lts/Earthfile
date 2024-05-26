@@ -26,23 +26,26 @@ image-arm64:
         --UBUNTU_VERSION=22.04
 
 push:
-    BUILD +push-amd64
+    ARG TAG
+    BUILD +push-amd64 --TAG=$TAG
     # Disabled due to build not working
     #BUILD +push-arm64
 
 push-amd64:
+    ARG TAG
     BUILD +push-generic \
         --PLATFORM=amd64 \
         --DEVICE=generic \
         --UBUNTU_VERSION=22.04 \
-        --TAG=$KAIROS_VERSION
+        --TAG=$TAG
 
 push-arm64:
+    ARG TAG
     BUILD +push-generic \
         --PLATFORM=arm64 \
         --DEVICE=rpi4 \
         --UBUNTU_VERSION=22.04 \
-        --TAG=$KAIROS_VERSION
+        --TAG=$TAG
 
 image-generic:
     ARG PLATFORM
