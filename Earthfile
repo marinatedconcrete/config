@@ -134,6 +134,7 @@ shellcheck-lint:
     RUN find . -name "*.sh" -print | xargs -r -n1 shellcheck
 
 lint:
+    BUILD +ansible-lint
     BUILD +prettier-lint
     BUILD +shellcheck-lint
 
