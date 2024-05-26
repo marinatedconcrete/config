@@ -43,7 +43,7 @@ jobs:
       - id: tags
         run: echo "TAG=$BRANCH" | tr / _ >> "$GITHUB_ENV"
         env:
-          BRANCH: ${{ github.event_name != 'pull_request' && 'latest' || format('pr-{0}', github.head_ref) }}
+          BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && 'latest' || format('pr-{0}', github.head_ref) }}
 
       - name: "Build Universal Silabs Flasher"
         run: earthly ./images/universal-silabs-flasher/+image --TAG=$TAG

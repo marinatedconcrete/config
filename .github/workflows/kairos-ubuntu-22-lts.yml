@@ -51,8 +51,13 @@ jobs:
           EARTHLY_CI: true
         run: earthly ./images/kairos-ubuntu-22-lts/+image
 
+      - id: tags
+        run: echo "TAG=$BRANCH" | tr / _ >> "$GITHUB_ENV"
+        env:
+          BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && 'latest' || format('pr-{0}', github.head_ref) }}
+
       - name: Push Image
         env:
           EARTHLY_CI: true
           EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
-        run: earthly ./images/kairos-ubuntu-22-lts/+push
+        run: earthly ./images/kairos-ubuntu-22-lts/+push --TAG=$TAG
