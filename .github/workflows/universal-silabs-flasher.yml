@@ -41,7 +41,7 @@ jobs:
         run: docker login --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" ghcr.io
 
       - id: tags
-        run: echo "TAG=$BRANCH" | sed -e 's/^v//' -e 's/\//_/' >> "$GITHUB_ENV"
+        run: echo "TAG=$BRANCH" | sed -e 's/=v/=/' -e 's/\//_/' >> "$GITHUB_ENV"
         env:
           BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && 'latest' || format('pr-{0}', github.head_ref) }}
 
