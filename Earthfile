@@ -27,7 +27,7 @@ kustomize:
 
 minikube:
     # renovate: datasource=github-releases depName=kubernetes/minikube
-    ARG MINIKUBE_VERSION=v1.32.0
+    ARG MINIKUBE_VERSION=v1.33.1
     ARG TARGETARCH
     ARG TARGETOS
     WORKDIR ~
