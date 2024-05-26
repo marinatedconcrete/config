@@ -12,6 +12,9 @@ on:
     paths:
       - .github/workflows/validate-devcontainer-feature.yml
       - devcontainer/features/**
+  release:
+    types:
+      - created
 
 jobs:
   deploy:
