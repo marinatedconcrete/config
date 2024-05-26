@@ -35,14 +35,6 @@ minikube:
     RUN chmod +x minikube
     SAVE ARTIFACT minikube /binary
 
-python-requirements:
-    # renovate: datasource=docker depName=python
-    ARG PYTHON_VERSION=3.12
-    FROM python:$PYTHON_VERSION
-    WORKDIR /usr/src/app
-    COPY requirements.txt .
-    RUN pip install --no-cache-dir -r requirements.txt
-
 #
 # Working Images
 #
