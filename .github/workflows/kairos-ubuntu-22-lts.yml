@@ -52,7 +52,7 @@ jobs:
         run: earthly ./images/kairos-ubuntu-22-lts/+image
 
       - id: tags
-        run: echo "TAG=$BRANCH" | tr / _ >> "$GITHUB_ENV"
+        run: echo "TAG=$BRANCH" | sed -e 's/^v//' -e 's/\//_/' >> "$GITHUB_ENV"
         env:
           BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && 'latest' || format('pr-{0}', github.head_ref) }}
 
