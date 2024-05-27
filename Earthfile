@@ -39,6 +39,18 @@ minikube:
 # Working Images
 #
 
+ansible-lint:
+    FROM ./ansible/+ansible
+
+    # renovate: datasource=pypi depName=ansible-lint
+    ARG ANSIBLE_LINT_VERSION=24.5.0
+    RUN python3 -m pip install ansible-lint==$ANSIBLE_LINT_VERSION
+
+    COPY --dir ansible ansible
+    WORKDIR ansible
+    RUN ansible-galaxy collection install --no-cache .
+    RUN ansible-lint
+
 kustomization-tests-image:
     FROM ./ansible/+ansible
 
@@ -114,6 +126,7 @@ shellcheck-lint:
     RUN find . -name "*.sh" -print | xargs -r -n1 shellcheck
 
 lint:
+    BUILD +ansible-lint
     BUILD +prettier-lint
     BUILD +shellcheck-lint
 
