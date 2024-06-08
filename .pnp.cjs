@@ -27,16 +27,16 @@ const RAW_RUNTIME_STATE =
       [null, {\
         "packageLocation": "./",\
         "packageDependencies": [\
-          ["prettier", "npm:3.3.0"]\
+          ["prettier", "npm:3.3.1"]\
         ],\
         "linkType": "SOFT"\
       }]\
     ]],\
     ["prettier", [\
-      ["npm:3.3.0", {\
-        "packageLocation": "./.yarn/unplugged/prettier-npm-3.3.0-2a7d3c0efa/node_modules/prettier/",\
+      ["npm:3.3.1", {\
+        "packageLocation": "./.yarn/unplugged/prettier-npm-3.3.1-91c1be8598/node_modules/prettier/",\
         "packageDependencies": [\
-          ["prettier", "npm:3.3.0"]\
+          ["prettier", "npm:3.3.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -46,7 +46,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["root-workspace-0b6124", "workspace:."],\
-          ["prettier", "npm:3.3.0"]\
+          ["prettier", "npm:3.3.1"]\
         ],\
         "linkType": "SOFT"\
       }]\
