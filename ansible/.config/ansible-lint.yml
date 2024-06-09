@@ -1,4 +1,8 @@
 ---
 # .ansible-lint
 
-profile: safety
+profile: shared
+
+skip_list:
+  - galaxy[no-changelog]
+  - galaxy[version-incorrect]
