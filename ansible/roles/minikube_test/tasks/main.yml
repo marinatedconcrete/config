@@ -6,12 +6,12 @@
       - minikube
       - start
       - --interactive=false
-      - "--profile={{ test_name }}"
-      - "--kubernetes-version={{ kubernetes_version }}"
+      - "--profile={{ minikube_test__test_name }}"
+      - "--kubernetes-version={{ minikube_test__kubernetes_version }}"
       - --force
   notify: stop minikube
 - name: Apply kustomization
   kubernetes.core.k8s:
-    apply: yes
-    context: "{{ test_name }}"
-    definition: "{{ lookup('kubernetes.core.kustomize', dir=test_dir) }}"
+    apply: true
+    context: "{{ minikube_test__test_name }}"
+    definition: "{{ lookup('kubernetes.core.kustomize', dir=minikube_test__test_dir) }}"

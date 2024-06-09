@@ -83,7 +83,7 @@ kustomization-tests:
     COPY kustomization kustomization
     WITH DOCKER
         RUN find kustomization/tests -mindepth 1 -maxdepth 1 -type d -print | \
-            awk '{print "test_dir="$1}' | \
+            awk '{print "minikube_test__test_dir="$1}' | \
             xargs -r -n1 ansible-playbook marinatedconcrete.config.kustomization_test -e
     END
 
