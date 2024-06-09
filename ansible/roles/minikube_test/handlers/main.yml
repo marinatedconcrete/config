@@ -5,7 +5,7 @@
     argv:
       - minikube
       - stop
-      - "--profile={{ test_name }}"
+      - "--profile={{ minikube_test__test_name }}"
   listen: stop minikube
   notify: delete minikube
 - name: Delete minikube
@@ -13,5 +13,5 @@
     argv:
       - minikube
       - delete
-      - "--profile={{ test_name }}"
+      - "--profile={{ minikube_test__test_name }}"
   listen: delete minikube

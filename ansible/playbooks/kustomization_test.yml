@@ -1,6 +1,7 @@
 ---
-- force_handlers: yes
-  gather_facts: no
+- name: Run kustomization tests
+  force_handlers: true
+  gather_facts: false
   hosts: localhost
   roles:
     - role: minikube_test

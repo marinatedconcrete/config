@@ -1,5 +1,6 @@
 namespace: marinatedconcrete
 name: config
+description: A collection of various useful things for us.
 
 # The version of the collection. Must be compatible with semantic versioning
 version: 0.1.0
