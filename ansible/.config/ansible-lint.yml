@@ -1,7 +1,7 @@
 ---
 # .ansible-lint
 
-profile: shared
+profile: production
 
 skip_list:
   - galaxy[no-changelog]
