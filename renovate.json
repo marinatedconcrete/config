@@ -42,6 +42,13 @@
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s+version:\\s+\"(?<currentValue>.*?)\""
       ]
+    },
+    {
+      "customType": "regex",
+      "datasourceTemplate": "pypi",
+      "depNameTemplate": "ansible-core",
+      "fileMatch": ["^ansible/meta/runtime\\.yml$"],
+      "matchStrings": ["requires_ansible:\\s*\">=(?<currentValue>.*?)\""]
     }
   ]
 }

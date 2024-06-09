@@ -6,6 +6,7 @@
       - minikube
       - stop
       - "--profile={{ minikube_test__test_name }}"
+  changed_when: true
   listen: stop minikube
   notify: delete minikube
 - name: Delete minikube
@@ -14,4 +15,5 @@
       - minikube
       - delete
       - "--profile={{ minikube_test__test_name }}"
+  changed_when: true
   listen: delete minikube

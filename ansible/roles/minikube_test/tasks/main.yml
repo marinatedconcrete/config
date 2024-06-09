@@ -9,6 +9,7 @@
       - "--profile={{ minikube_test__test_name }}"
       - "--kubernetes-version={{ minikube_test__kubernetes_version }}"
       - --force
+  changed_when: true
   notify: stop minikube
 - name: Apply kustomization
   kubernetes.core.k8s:
