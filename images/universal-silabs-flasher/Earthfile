@@ -1,6 +1,6 @@
 VERSION 0.7
 # renovate: datasource=docker depName=python versioning=docker
-ARG PYTHON_VERSION=3.12.3-bullseye
+ARG PYTHON_VERSION=3.12.4-bullseye
 FROM python:$PYTHON_VERSION
 
 image:
