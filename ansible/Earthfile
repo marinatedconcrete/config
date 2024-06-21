@@ -8,7 +8,7 @@ WORKDIR /ansible
 # Linux image with Python + ansible installed
 ansible:
   # renovate: datasource=pypi depName=ansible
-  ARG ANSIBLE_VERSION=9.6.1
+  ARG ANSIBLE_VERSION=10.1.0
   RUN pip install ansible==$ANSIBLE_VERSION
 
 # The above, with the locally defined roles installed
