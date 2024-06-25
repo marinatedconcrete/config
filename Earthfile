@@ -43,7 +43,7 @@ ansible-lint:
     FROM ./ansible/+ansible
 
     # renovate: datasource=pypi depName=ansible-lint
-    ARG ANSIBLE_LINT_VERSION=24.6.0
+    ARG ANSIBLE_LINT_VERSION=24.6.1
     RUN python3 -m pip install ansible-lint==$ANSIBLE_LINT_VERSION
 
     COPY --dir ansible ansible
