@@ -1,0 +1,25 @@
+---
+apiVersion: batch/v1
+kind: Job 
+metadata:
+  name: data-mover
+spec:
+  template:
+    spec:
+      containers:
+        - image: ubuntu
+          name: data-mover
+          args:
+            - "apt-get update && apt-get install -y rsync && rsync -av source/ destination"
+          command:
+            - /bin/bash
+            - -c
+          volumeMounts:
+            - mountPath: /source
+              name: source
+            - mountPath: /destination
+              name: destination
+      restartPolicy: Never
+      volumes:
+        - name: source
+        - name: destination
