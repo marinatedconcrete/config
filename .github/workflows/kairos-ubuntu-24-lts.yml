@@ -1,0 +1,58 @@
+---
+name: Build Kairos Ubuntu 24 LTS
+
+on: # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/kairos-ubuntu-24-lts.yml
+      - images/kairos-ubuntu-24-lts/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/kairos-ubuntu-24-lts.yml
+      - images/kairos-ubuntu-24-lts/**
+  release:
+    types:
+      - created
+
+jobs:
+  build-container:
+    env:
+      EARTHLY_TOKEN: ${{ secrets.EARTHLY_TOKEN }}
+      EARTHLY_ORG: marinatedconcrete
+      EARTHLY_SATELLITE: config-repo
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: earthly/actions-setup@v1.0.13
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # renovate: datasource=docker depName=earthly/earthly
+          version: "v0.8.15"
+      - uses: actions/checkout@v4.1.7
+      - uses: docker/setup-qemu-action@v3
+
+      - name: Login to GitHub Container Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: tags
+        run: echo "TAG=$BRANCH" | sed -e 's/=v/=/' -e 's/\//_/' >> "$GITHUB_ENV"
+        env:
+          BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && 'latest' || format('pr-{0}', github.head_ref) }}
+
+      - name: Build & Push Image
+        env:
+          EARTHLY_CI: true
+          EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
+        run: earthly ./images/kairos-ubuntu-22-lts/+base-image --TAG=$TAG

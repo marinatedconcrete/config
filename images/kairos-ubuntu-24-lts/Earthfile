@@ -1,0 +1,14 @@
+VERSION 0.8
+FROM alpine
+
+# Builds our base image that can be used standalone as well as for the Kairos Factory:
+# https://kairos.io/docs/reference/kairos-factory/
+base-image:
+    ARG TAG=dev
+    ARG TARGETPLATFORM
+    FROM DOCKERFILE \
+      -f Dockerfile \
+      --platform $TARGETPLATFORM \
+      .
+    SAVE IMAGE --push ghcr.io/marinatedconcrete/ubuntu-24-lts:$TAG
+
