@@ -55,4 +55,4 @@ jobs:
         env:
           EARTHLY_CI: true
           EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
-        run: earthly ./images/kairos-ubuntu-22-lts/+base-image --TAG=$TAG
+        run: earthly ./images/kairos-ubuntu-24-lts/+base-image --TAG=$TAG
