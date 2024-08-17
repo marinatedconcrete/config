@@ -19,7 +19,7 @@ kairos-image:
     # renovate: datasource=github-releases depName=kairos-io/kairos
     ARG KAIROS_VERSION=v3.1.1
 
-    BUILD github.com/$KAIROS_ORG/kairos:$KAIROS_VERSION+base-image \
+    FROM github.com/$KAIROS_ORG/kairos:$KAIROS_VERSION+base-image \
         --BASE_IMAGE=ghcr.io/marinatedconcrete/ubuntu-24-lts:$TAG \
         --BOOTLOADER=grub \
         --FAMILY=ubuntu \
@@ -27,3 +27,4 @@ kairos-image:
         --FLAVOR_RELEASE=24.04 \
         --MODEL=generic \
         --VARIANT=standard
+    SAVE IMAGE --push ghcr.io/marinatedconcrete/kairos-ubuntu-24-lts:$TAG
