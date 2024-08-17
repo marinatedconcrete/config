@@ -12,3 +12,18 @@ base-image:
       .
     SAVE IMAGE --push ghcr.io/marinatedconcrete/ubuntu-24-lts:$TAG
 
+kairos-image:
+    ARG --required TAG
+
+    ARG KAIROS_ORG=kairos-io
+    # renovate: datasource=github-releases depName=kairos-io/kairos
+    ARG KAIROS_VERSION=v3.1.1
+
+    BUILD github.com/$KAIROS_ORG/kairos:$KAIROS_VERSION+base-image \
+        --BASE_IMAGE=ghcr.io/marinatedconcrete/ubuntu-24-lts:$TAG \
+        --BOOTLOADER=grub \
+        --FAMILY=ubuntu \
+        --FLAVOR=ubuntu \
+        --FLAVOR_RELEASE=24.04 \
+        --MODEL=generic \
+        --VARIANT=standard

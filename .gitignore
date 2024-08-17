@@ -9,3 +9,6 @@
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Kairos Factory dumps stuff under /build locally
+/build

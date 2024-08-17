@@ -51,8 +51,15 @@ jobs:
         env:
           BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && 'latest' || format('pr-{0}', github.head_ref) }}
 
-      - name: Build & Push Image
+      - name: Build & Push Base Image
         env:
           EARTHLY_CI: true
           EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
         run: earthly ./images/kairos-ubuntu-24-lts/+base-image --TAG=$TAG
+
+      - name: Build & Push Kairos Image
+        env:
+          EARTHLY_CI: true
+          EARTHLY_PUSH: ${{ github.event_name != 'pull_request' }}
+        # In the short-term, we need to use the sdwilsh fork until that fix is released upstream.
+        run: earthly ./images/kairos-ubuntu-24-lts/+base-image --KAIROS_ORG=sdwilsh --KAIROS_VERSION=fix-earthly-remote-invocation --TAG=$TAG
