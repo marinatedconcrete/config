@@ -1,8 +1,0 @@
-{
-  "name": "Installs pre-requests for running ansible plays authored using this repo",
-  "id": "ansible",
-  "version": "1.2.0",
-  "description": "This automates the setup on Ubuntu images of everything needed to run Ansible",
-  "options": {},
-  "installsAfter": ["ghcr.io/devcontainers/features/common-utils"]
-}
