@@ -1,6 +1,6 @@
 VERSION 0.7
 # renovate: datasource=docker depName=python versioning=docker
-ARG PYTHON_VERSION=3.12.5-bookworm
+ARG PYTHON_VERSION=3.12.6-bookworm
 FROM python:$PYTHON_VERSION
 
 WORKDIR /ansible
