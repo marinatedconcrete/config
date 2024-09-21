@@ -55,7 +55,7 @@ kustomization-tests-image:
     FROM ./ansible/+ansible
 
     # renovate: datasource=pypi depName=kubernetes
-    ARG PYKUBERNETES_VERSION=29.0.0
+    ARG PYKUBERNETES_VERSION=31.0.0
     RUN python3 -m pip install kubernetes==$PYKUBERNETES_VERSION
 
     COPY +kubectl/binary /usr/local/bin/kubectl
