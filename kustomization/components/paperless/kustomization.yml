@@ -8,4 +8,4 @@ resources:
 
 images:
   - name: ghcr.io/paperless-ngx/paperless-ngx
-    newTag: 2.4.3
+    newTag: 2.12.1
