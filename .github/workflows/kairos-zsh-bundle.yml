@@ -34,7 +34,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           # renovate: datasource=docker depName=earthly/earthly
           version: "v0.8.15"
-      - uses: "actions/checkout@v4.1.7"
+      - uses: "actions/checkout@v4.2.2"
 
       - name: "Login to GitHub Container Hub"
         run: docker login --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" ghcr.io
