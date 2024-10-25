@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: factorio-svc
+  name: factorio-admin-svc
 spec:
   selector:
     app.kubernetes.io/name: factorio
@@ -10,6 +10,15 @@ spec:
     - name: web
       protocol: TCP
       port: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: factorio-game-svc
+spec:
+  selector:
+    app.kubernetes.io/name: factorio
+  ports:
     - name: game
       protocol: UDP
       port: 34197
