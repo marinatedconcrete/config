@@ -105,7 +105,7 @@ prettier-lint:
     FROM node:$NODE_VERSION
     RUN corepack enable
     WORKDIR /config
-    COPY --dir .pnp.cjs .yarnrc.yml package.json yarn.lock .yarn .
+    COPY --dir .yarnrc.yml package.json yarn.lock .yarn .
     RUN yarn
     COPY . .
     COPY --dir .prettierignore .prettierrc.yml .github .
