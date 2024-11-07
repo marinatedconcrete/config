@@ -8,4 +8,4 @@ resources:
 
 images:
   - name: redis
-    newTag: 7.4.0
+    newTag: 7.4.1
