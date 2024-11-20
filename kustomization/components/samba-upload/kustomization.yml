@@ -7,4 +7,4 @@ resources:
 
 images:
   - name: ghcr.io/servercontainers/samba:smbd-only-latest
-    digest: sha256:50d28991ed82de9e629534293ca38e9aaacf6757bc79b4fe14f5ace0041ac78e
+    digest: sha256:74f9a43a47c7791498db4ade68647b4a6af5199ca825dbf792fd206ccd8b73ed
