@@ -3,14 +3,14 @@ check-format:
     #!/usr/bin/env bash
     set -euo pipefail
     just --unstable --fmt --check -f justfile
-    yarn prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md **/*.js .devcontainer/devcontainer.json .github/**/*.yml
+    yarn prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md
 
 [group('format')]
 format:
     #!/usr/bin/env bash
     set -euo pipefail
     just --unstable --fmt -f justfile
-    yarn prettier --no-error-on-unmatched-pattern --log-level warn --write **/*.yml **/*.json **/*.md **/*.js .devcontainer/devcontainer.json .github/**/*.yml
+    yarn prettier --no-error-on-unmatched-pattern --log-level warn --write **/*.yml **/*.json **/*.md
 
 [group('lint')]
 ansible-lint:
@@ -55,3 +55,9 @@ kustomization-tests:
 
 [group('test')]
 test: kustomization-tests
+
+regen-yarn-sdks:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    yarn
+    yarn dlx @yarnpkg/sdks

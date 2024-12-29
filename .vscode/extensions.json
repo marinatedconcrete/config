@@ -2,6 +2,7 @@
   "recommendations": [
     "earthly.earthfile-syntax-highlighting",
     "github.vscode-github-actions",
-    "esbenp.prettier-vscode"
+    "esbenp.prettier-vscode",
+    "arcanis.vscode-zipfs"
   ]
 }
