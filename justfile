@@ -22,7 +22,7 @@ ansible-lint:
 kustomize-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    find kustomization/components -mindepth 1 -maxdepth 1 -type d -print | grep -v components | xargs -r -n1 kustomize build > /dev/null
+    find kustomization/components -mindepth 1 -maxdepth 1 -type d -print | xargs -r -n1 kustomize build > /dev/null
 
 [group('lint')]
 hado-lint:
