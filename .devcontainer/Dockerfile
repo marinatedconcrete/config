@@ -9,3 +9,5 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
+COPY ansible/requirements.txt requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
