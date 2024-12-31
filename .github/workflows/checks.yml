@@ -24,7 +24,7 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: filter
           refFilterForPush: refs/heads/main
-  format:
+  check-format:
     needs: build
     runs-on: ubuntu-latest
     steps:

@@ -9,6 +9,7 @@
     "vscode": {
       "extensions": [
         "esbenp.prettier-vscode",
+        // Enable VSCode to find the prettier package to use when formatting
         "arcanis.vscode-zipfs",
         "github.vscode-github-actions",
         "ms-kubernetes-tools.vscode-kubernetes-tools",
@@ -26,18 +27,23 @@
     }
   },
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
       // renovate: datasource=github-releases depName=kubernetes/kubernetes
       "version": "1.32.0"
     },
-    "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "os-provided"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      // renovate: datasource=github-releases depName=cli/cli
+      "version": "2.64.0"
+    },
     "ghcr.io/dhoeric/features/hadolint:1": {
       // renovate: datasource=github-releases depName=hadolint/hadolint
       "version": "2.12.0"
     },
     "ghcr.io/devcontainers/features/node:1": {
+      // TODO: figure out how to version node
       "installYarnUsingApt": "false"
     },
     "ghcr.io/devcontainers-extra/features/argo-cd:1": {
