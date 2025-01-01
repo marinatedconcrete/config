@@ -3,6 +3,6 @@
 set -e
 
 # Install prettier
-yarn
+yarn --immutable
 
 ansible-galaxy collection install --no-cache ansible

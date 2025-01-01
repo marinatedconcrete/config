@@ -27,6 +27,7 @@
     }
   },
   "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
       // renovate: datasource=github-releases depName=kubernetes/kubernetes
       "version": "1.32.0"
