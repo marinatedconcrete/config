@@ -1,3 +1,9 @@
+# Lists all targets
+[private]
+default:
+    @just --list
+
+# Check if files were auto-formated properly
 [group('format')]
 check-format:
     #!/usr/bin/env bash
@@ -5,6 +11,7 @@ check-format:
     just --unstable --fmt --check -f justfile
     yarn prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md
 
+# Auto-format files
 [group('format')]
 format:
     #!/usr/bin/env bash
@@ -48,6 +55,7 @@ renovate-lint:
     set -euo pipefail
     renovate-config-validator
 
+# Lint shell scripts with shell check
 [group('lint')]
 shellcheck-lint:
     #!/usr/bin/env bash
@@ -58,9 +66,11 @@ shellcheck-lint:
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
 
+# Runs all linters
 [group('lint')]
 lint: ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
 
+# Run all the tests for the kustomize files
 [group('test')]
 kustomization-tests:
     #!/usr/bin/env bash
@@ -69,9 +79,11 @@ kustomization-tests:
         awk '{print "minikube_test__test_dir="$1}' | \
         xargs -r -n1 ansible-playbook marinatedconcrete.config.kustomization_test -e
 
+# Run all tests
 [group('test')]
 test: kustomization-tests
 
+# Regenerate Yarn integrations with other tools, like VSCode
 regen-yarn-sdks:
     #!/usr/bin/env bash
     set -euo pipefail
