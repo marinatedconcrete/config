@@ -38,10 +38,12 @@
     },
     {
       "customType": "regex",
-      "fileMatch": ["^.*\\.yml$"],
+      "fileMatch": ["^.*\\.yml$", ".devcontainer/devcontainer.json"],
       "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s+version:\\s+\"(?<currentValue>.*?)\""
-      ]
+        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s+version:\\s+\"(?<currentValue>.*?)\"",
+        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s+\"(v|\\w+V)ersion\":\\s+\"(?<currentValue>.*?)\""
+      ],
+      "registryUrlTemplate": "https://packages.microsoft.com/repos/microsoft-debian-bookworm-prod"
     },
     {
       "customType": "regex",
