@@ -51,8 +51,14 @@
       "version": "2.12.0"
     },
     "ghcr.io/devcontainers/features/node:1": {
-      // TODO: figure out how to version node
-      "installYarnUsingApt": "false"
+      "installYarnUsingApt": "false",
+      // Save on space since we don't need this
+      "nodeGypDependencies": "false",
+      // renovate: datasource=github-releases depName=nvm-sh/nvm
+      "nvmVersion": "0.40.1",
+      "pnpmVersion": "none",
+      // renovate: datasource=node-version depName=node
+      "version": "v22.12.0"
     },
     "ghcr.io/devcontainers-extra/features/argo-cd:1": {
       // renovate: datasource=github-releases depName=argoproj/argo-cd
