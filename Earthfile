@@ -7,7 +7,7 @@ FROM alpine
 
 kubectl:
     # renovate: datasource=github-releases depName=kubernetes/kubernetes
-    ARG KUBERNETES_VERSION=v1.28.3
+    ARG KUBERNETES_VERSION=v1.32.1
     ARG TARGETARCH
     ARG TARGETOS
     WORKDIR ~
