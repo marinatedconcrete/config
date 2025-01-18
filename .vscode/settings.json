@@ -8,5 +8,9 @@
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "prettier.prettierPath": "./node_modules/.cache/prettier"
+  "prettier.prettierPath": ".yarn/sdks/prettier/index.cjs",
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  }
 }

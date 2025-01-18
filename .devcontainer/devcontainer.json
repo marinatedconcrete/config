@@ -1,0 +1,86 @@
+{
+  "name": "config",
+  "build": {
+    "cacheFrom": "ghcr.io/marinatedconcrete/config-devcontainer:latest",
+    "context": "..",
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        // Enable VSCode to find the prettier package to use when formatting
+        "arcanis.vscode-zipfs",
+        "github.vscode-github-actions",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "nefrob.vscode-just-syntax",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        "prettier.useEditorConfig": false,
+        "search.exclude": {
+          "**/.yarn": true,
+          "**/.pnp.*": true
+        },
+        "prettier.prettierPath": ".yarn/sdks/prettier/index.js"
+      }
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      // renovate: datasource=deb depName=moby-cli
+      "version": "27.4.1",
+      // renovate: datasource=deb depName=moby-buildx
+      "mobyBuildxVersion": "0.19.3",
+      // We don't need this
+      "dockerDashComposeVersion": "none"
+    },
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      // renovate: datasource=github-releases depName=kubernetes/kubernetes
+      "version": "1.32.0"
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "os-provided"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      // renovate: datasource=github-releases depName=cli/cli
+      "version": "2.64.0"
+    },
+    "ghcr.io/dhoeric/features/hadolint:1": {
+      // renovate: datasource=github-releases depName=hadolint/hadolint
+      "version": "2.12.0"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "installYarnUsingApt": "false",
+      // Save on space since we don't need this
+      "nodeGypDependencies": "false",
+      // renovate: datasource=github-releases depName=nvm-sh/nvm
+      "nvmVersion": "0.40.1",
+      "pnpmVersion": "none",
+      // renovate: datasource=node-version depName=node
+      "version": "v22.12.0"
+    },
+    "ghcr.io/devcontainers-extra/features/argo-cd:1": {
+      // renovate: datasource=github-releases depName=argoproj/argo-cd
+      "version": "2.13.2"
+    },
+    "ghcr.io/devcontainers-extra/features/renovate-cli:2": {
+      // renovate: datasource=github-releases depName=renovate/renovate
+      "version": "39.82.0"
+    },
+    "ghcr.io/guiyomh/features/just:0": {
+      // renovate: datasource=github-releases depName=casey/just
+      "version": "1.38.0"
+    },
+    "ghcr.io/marcozac/devcontainer-features/shellcheck:1": {
+      // renovate: datasource=github-releases depName=koalaman/shellcheck
+      "version": "v0.10.0"
+    },
+    "ghcr.io/rio/features/kustomize:1": {
+      // renovate: datasource=docker depName=registry.k8s.io/kustomize/kustomize
+      "version": "v5.4.3"
+    }
+  },
+  "postCreateCommand": ".devcontainer/post-create-command.sh",
+  "remoteUser": "vscode"
+}
