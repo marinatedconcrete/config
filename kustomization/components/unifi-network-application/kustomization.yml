@@ -11,7 +11,7 @@ images:
   - name: busybox
     newTag: 1.37.0
   - name: lscr.io/linuxserver/unifi-network-application
-    newTag: 9.0.108
+    newTag: 9.0.114
   - name: mongo
     newTag: 7.0.16
 resources:
