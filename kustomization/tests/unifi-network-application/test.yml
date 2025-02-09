@@ -1,0 +1,8 @@
+---
+- name: Unifi Network Appliance Tests
+  gather_facts: false
+  hosts: localhost
+  roles:
+    - role: marinatedconcrete.config.minikube_test
+      vars:
+        minikube_test__test_dir: kustomization/tests/unifi-network-application
