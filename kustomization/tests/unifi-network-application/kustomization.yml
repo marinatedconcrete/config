@@ -16,5 +16,32 @@ patches:
         name: this-is-ignored-but-is-required
     target:
       kind: ServersTransport
+  # Change storage class so we use minikube's local path provisioner.
+  - patch: |-
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: unifi-network-application-statefulset
+      spec:
+        volumeClaimTemplates:
+          - metadata:
+              name: mongodb-data
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 1Gi
+              storageClassName: local-path
+          - metadata:
+              name: unifi-config
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 1Gi
+              storageClassName: local-path
 resources:
   - namespace.yml
+  - secret.yml

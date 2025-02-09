@@ -75,9 +75,11 @@ lint: ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
 kustomization-tests:
     #!/usr/bin/env bash
     set -euo pipefail
-    find kustomization/tests -mindepth 1 -maxdepth 1 -type d -print | \
-        awk '{print "minikube_test__test_dir="$1}' | \
-        xargs -r -n1 ansible-playbook marinatedconcrete.config.kustomization_test -e
+    find kustomization/tests/*/test.yml -print | while read -r file; do
+        echo -n "Running tests in ${file}..."
+        ansible-playbook ${file}
+        echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
+    done
 
 # Run all tests
 [group('test')]
