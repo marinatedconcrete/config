@@ -43,9 +43,13 @@ jobs:
           cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
           env: |
             CI=1
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
-          runCmd: just kustomization-test priorityclass
+          runCmd: |
+            just kustomization-test priorityclass
+            kustomize build kustomization/components/priorityclass/ -o /tmp/priorityclass.yml
+            gh release upload ${{ needs.release-please.outputs.kustomize-priorityclass--tag_name }} /tmp/priorityclass.yml
 
   release-kustomize-unifi-network-application:
     if: ${{needs.release-please.outputs.kustomize-unifi-network-application--release_created}}
@@ -60,6 +64,10 @@ jobs:
           cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
           env: |
             CI=1
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
-          runCmd: just kustomization-test unifi-network-application
+          runCmd: |
+            just kustomization-test unifi-network-application
+            kustomize build kustomization/components/unifi-network-application/ -o /tmp/unifi-network-application.yml
+            gh release upload ${{ needs.release-please.outputs.kustomize-unifi-network-application--tag_name }} /tmp/unifi-network-application.yml
