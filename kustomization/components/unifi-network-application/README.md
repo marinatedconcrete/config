@@ -7,13 +7,15 @@ This also requires our PriorityClass component.
 
 # Example Usage
 
+Note: please replace `{version}` with the desired version you wish to use.  [Here is a full list of GitHub releases for this component.](https://github.com/marinatedconcrete/config/releases?q=%22kustomize-unifi-network-application%22).
+
 ```yaml
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 components:
-  - https://github.com/marinatedconcrete/config/kustomization/components/unifi-network-application
+  - https://github.com/marinatedconcrete/config/releases/download/kustomize-unifi-network-application@{version}/unifi-network-application.yml
 ```
 
 See below for additionally required patches and secrets.
