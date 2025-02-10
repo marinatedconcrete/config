@@ -1,9 +1,0 @@
-# User to install configs for. This can drive the other variables or be ignored in favor of directly setting them all
-zsh__user: ""
-
-# Config path to install the zsh configs to
-zsh__config_path: "/home/{{ zsh__user }}"
-
-# Ownership information for the configs on the path
-zsh__config_owner: "{{ zsh__user }}"
-zsh__config_group: "{{ zsh__user }}"
