@@ -1,4 +1,4 @@
 {
-    "kustomize-priorityclass": "1.0.0",
-    "kustomize-unifi-network-application": "1.0.0"
+  "kustomize-priorityclass": "1.0.0",
+  "kustomize-unifi-network-application": "1.0.0"
 }

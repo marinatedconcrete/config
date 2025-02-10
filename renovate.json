@@ -1,9 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    ":semanticCommitScope(package)"
-  ],
+  "extends": ["config:recommended", ":semanticCommitScope(package)"],
   "timezone": "America/Los_Angeles",
   "configMigration": true,
   "commitBody": "{{{releaseNotes}}}",

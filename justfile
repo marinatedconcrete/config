@@ -73,7 +73,7 @@ lint: ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
 # Run a single test
 [group('test')]
 kustomization-test component:
-    ansible-playbook kustomization/tests/{{component}}/test.yml
+    ansible-playbook kustomization/tests/{{ component }}/test.yml
 
 # Run all the tests for the kustomize files
 [group('test')]
