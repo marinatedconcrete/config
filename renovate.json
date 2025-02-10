@@ -21,6 +21,15 @@
       "minimumReleaseAge": "3 days",
       "automerge": true,
       "automergeType": "branch"
+    },
+    {
+      "description": "Auto-merge all Unifi updates",
+      "automerge": true,
+      "automergeType": "branch",
+      "groupName": "unifi",
+      "matchFileNames": ["kustomization/components/unifi-network-application"],
+      "matchUpdateTypes": ["major", "minor", "patch", "digest"],
+      "minimumReleaseAge": "3 days"
     }
   ],
   "customManagers": [
