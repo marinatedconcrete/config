@@ -1,0 +1,17 @@
+{
+  "include-component-in-tag": true,
+  "include-v-in-tag": true,
+  "tag-separator": "@",
+  "separate-pull-requests": true,
+  "packages": {
+    "kustomize-priorityclass": {
+      "path": "kustomization/components/priorityclass",
+      "release-type": "simple"
+    },
+    "kustomize-unifi-network-application": {
+      "path": "kustomization/components/unifi-network-application",
+      "release-type": "simple"
+    }
+  },
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}
