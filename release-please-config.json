@@ -4,6 +4,17 @@
   "tag-separator": "@",
   "separate-pull-requests": true,
   "packages": {
+    "ansible": {
+      "extra-files": [
+        {
+          "jsonpath": "$.version",
+          "path": "galaxy.yml",
+          "type": "yaml"
+        }
+      ],
+      "package-name": "ansible-collection",
+      "release-type": "simple"
+    },
     "kustomization/components/priorityclass": {
       "package-name": "kustomize-priorityclass",
       "release-type": "simple"

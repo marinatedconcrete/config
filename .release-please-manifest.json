@@ -1,4 +1,5 @@
 {
+  "ansible": "0.1.0",
   "kustomization/components/priorityclass": "1.0.0",
   "kustomization/components/unifi-network-application": "1.0.0"
 }
