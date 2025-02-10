@@ -4,12 +4,12 @@
   "tag-separator": "@",
   "separate-pull-requests": true,
   "packages": {
-    "kustomize-priorityclass": {
-      "path": "kustomization/components/priorityclass",
+    "kustomization/components/priorityclass": {
+      "package-name": "kustomize-priorityclass",
       "release-type": "simple"
     },
-    "kustomize-unifi-network-application": {
-      "path": "kustomization/components/unifi-network-application",
+    "kustomization/components/unifi-network-application": {
+      "package-name": "kustomize-unifi-network-application",
       "release-type": "simple"
     }
   },
