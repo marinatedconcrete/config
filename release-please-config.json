@@ -1,8 +1,6 @@
 {
   "include-component-in-tag": true,
   "include-v-in-tag": true,
-  "tag-separator": "@",
-  "separate-pull-requests": true,
   "packages": {
     "ansible": {
       "extra-files": [
@@ -24,5 +22,7 @@
       "release-type": "simple"
     }
   },
+  "separate-pull-requests": true,
+  "tag-separator": "@",
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
 }
