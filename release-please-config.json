@@ -1,4 +1,31 @@
 {
+  "changelog-sections": [
+    {
+      "hidden": false,
+      "type": "feat",
+      "section": "Features"
+    },
+    {
+      "hidden": false,
+      "type": "fix",
+      "section": "Bug Fixes"
+    },
+    {
+      "hidden": false,
+      "type": "docs",
+      "section": "Documentation Updates"
+    },
+    {
+      "hidden": false,
+      "type": "build",
+      "section": "Other Changes"
+    },
+    {
+      "hidden": false,
+      "type": "chore",
+      "section": "Other Changes"
+    }
+  ],
   "include-component-in-tag": true,
   "include-v-in-tag": true,
   "packages": {
