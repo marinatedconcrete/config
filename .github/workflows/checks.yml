@@ -19,7 +19,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build devcontainer image
-        uses: devcontainers/ci@v0.3
+        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 #0.3.1900000417
         with:
           cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
           env: |
@@ -34,7 +34,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Check formatting
-        uses: devcontainers/ci@v0.3
+        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 #0.3.1900000417
         with:
           cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
           env: |
@@ -42,6 +42,29 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
           runCmd: just check-format
+  kustomization-test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Validate configs
+        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 #0.3.1900000417
+        with:
+          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
+          env: |
+            CI=1
+          imageName: ghcr.io/marinatedconcrete/config-devcontainer
+          push: never
+          runCmd: just kustomization-test ${{ matrix.kustomization-test }}
+    strategy:
+      matrix:
+        kustomization-test:
+          - kube-vip
+          - mosquitto
+          - paperless
+          - priorityclass
+          - unifi-network-application
   lint:
     needs: build
     runs-on: ubuntu-latest
@@ -49,7 +72,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Validate configs
-        uses: devcontainers/ci@v0.3
+        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 #0.3.1900000417
         with:
           cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
           env: |
@@ -57,18 +80,3 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
           runCmd: just lint
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Validate configs
-        uses: devcontainers/ci@v0.3
-        with:
-          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
-          env: |
-            CI=1
-          imageName: ghcr.io/marinatedconcrete/config-devcontainer
-          push: never
-          runCmd: just test
