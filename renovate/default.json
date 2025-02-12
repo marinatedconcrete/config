@@ -18,9 +18,7 @@
       "customType": "regex",
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "marinatedconcrete/config",
-      "fileMatch": [
-        "^renovate.json5?$"
-      ],
+      "fileMatch": ["^renovate.json5?$"],
       "matchStrings": [
         "\"github>marinatedconcrete/config//renovate/.*#(?<currentValue>.+?)\""
       ]
