@@ -49,8 +49,10 @@
       "release-type": "simple"
     },
     "renovate": {
+      "include-v-in-tag": false,
       "package-name": "renovate-config",
-      "release-type": "simple"
+      "release-type": "simple",
+      "tag-separator": "-"
     }
   },
   "separate-pull-requests": true,
