@@ -53,7 +53,10 @@ kustomize-lint:
 renovate-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    renovate-config-validator
+    renovate-config-validator renovate.json
+    find renovate -name "*.json" -print | while read -r file; do 
+        renovate-config-validator ${file}
+    done
 
 # Lint shell scripts with shell check
 [group('lint')]
