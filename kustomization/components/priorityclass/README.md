@@ -26,3 +26,4 @@ kind: Kustomization
 
 resources:
   - https://github.com/marinatedconcrete/config/releases/download/kustomize-priorityclass@v{version}/priorityclass.yml
+```

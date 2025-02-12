@@ -31,7 +31,7 @@ kind: Kustomization
 
 resources:
   - https://github.com/marinatedconcrete/config/releases/download/kustomize-unifi-network-application@v{version}/unifi-network-application.yml
-
+```
 
 ## Required Patches
 
