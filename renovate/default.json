@@ -13,6 +13,17 @@
         "- https://github\\.com/marinatedconcrete/config/releases/download/(?<currentValue>.*?)/",
         "- https://github\\.com/marinatedconcrete/config/?\\?ref=(?<currentValue>.+?)$"
       ]
+    },
+    {
+      "customType": "regex",
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "marinatedconcrete/config",
+      "fileMatch": [
+        "^renovate.json5?$"
+      ],
+      "matchStrings": [
+        "\"github>marinatedconcrete/config//renovate/.*#(?<currentValue>.+?)\""
+      ]
     }
   ],
   "extends": ["config:best-practices"],
@@ -20,7 +31,7 @@
     {
       "description": "marinatedconcrete/config versioning",
       "matchPackageNames": ["marinatedconcrete/config"],
-      "versioning": "regex:^(?<compatibility>.*)@v?(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)?$"
+      "versioning": "regex:^(?<compatibility>.+)[@\\-]v?(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+?)$"
     }
   ],
   "timezone": "America/Los_Angeles"
