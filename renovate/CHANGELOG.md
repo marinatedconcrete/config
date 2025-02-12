@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/marinatedconcrete/config/compare/renovate-config@v1.0.0...renovate-config-1.0.1) (2025-02-12)
+
+
+### Bug Fixes
+
+* use a tag that is hopefully more friendly for renovate ([436ec50](https://github.com/marinatedconcrete/config/commit/436ec50e2170e995dd7a6a141780f5ff2706fa72))
+
 ## 1.0.0 (2025-02-12)
 
 
