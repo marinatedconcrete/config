@@ -2,5 +2,6 @@
   "ansible": "0.1.0",
   "kustomization/components/priorityclass": "1.0.1",
   "kustomization/components/unifi-network-application": "1.0.0",
-  "renovate-config": "0.1.0"
+  "renovate-config": "0.1.0",
+  "renovate": "1.0.0"
 }
