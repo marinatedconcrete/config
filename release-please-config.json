@@ -47,6 +47,10 @@
     "kustomization/components/unifi-network-application": {
       "package-name": "kustomize-unifi-network-application",
       "release-type": "simple"
+    },
+    "renovate": {
+      "package-name": "renovate-config",
+      "release-type": "simple"
     }
   },
   "separate-pull-requests": true,
