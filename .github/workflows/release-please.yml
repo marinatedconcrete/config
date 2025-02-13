@@ -16,8 +16,8 @@ jobs:
     outputs:
       kustomize-priorityclass--release_created: ${{ steps.releases.outputs.kustomize-priorityclass--release_created }}
       kustomize-priorityclass--tag_name: ${{ steps.releases.outputs.kustomize-priorityclass--tag_name }}
-      kustomize-unifi-network-application--release_created: ${{ steps.releases.outputs.kustomize-priorityclass--release_created }}
-      kustomize-unifi-network-application--tag_name: ${{ steps.releases.outputs.kustomize-priorityclass--tag_name }}
+      kustomize-unifi-network-application--release_created: ${{ steps.releases.outputs.kustomize-unifi-network-application--release_created }}
+      kustomize-unifi-network-application--tag_name: ${{ steps.releases.outputs.kustomize-unifi-network-application--tag_name }}
     steps:
       - uses: googleapis/release-please-action@7987652d64b4581673a76e33ad5e98e3dd56832f # v4.1.3
         id: release-please
@@ -27,7 +27,7 @@ jobs:
           manifest-file: .release-please-manifest.json
       - name: Checkout Repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Print release outputs for debugging
+      - name: Gather Release Outputs
         env:
           OUTPUTS: ${{ toJson(steps.release-please.outputs) }}
         id: releases
