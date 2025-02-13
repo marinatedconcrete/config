@@ -60,6 +60,7 @@ jobs:
     strategy:
       matrix:
         kustomization-test:
+          - factorio
           - kube-vip
           - mosquitto
           - paperless
