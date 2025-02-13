@@ -14,7 +14,7 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     outputs:
-      kustomize-priorityclass--release_created: ${{ steps.release.outputs[kustomization/components/priorityclass--release_created"] }}
+      kustomize-priorityclass--release_created: ${{ steps.release.outputs["kustomization/components/priorityclass--release_created"] }}
       kustomize-priorityclass--tag_name: ${{ steps.release.outputs["kustomization/components/priorityclass--tag_name"] }}
       kustomize-unifi-network-application--release_created: ${{ steps.release.outputs["kustomization/components/unifi-network-application--release_created"] }}
       kustomize-unifi-network-application--tag_name: ${{ steps.release.outputs["kustomization/components/unifi-network-application--tag_name"] }}
