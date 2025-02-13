@@ -25,6 +25,8 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+      - name: Checkout Repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Print release outputs for debugging
         env:
           OUTPUTS: ${{ toJson(steps.release-please.outputs) }}
