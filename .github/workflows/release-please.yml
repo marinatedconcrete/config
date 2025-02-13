@@ -14,22 +14,23 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     outputs:
-      kustomize-priorityclass--release_created: ${{ steps.release.outputs["kustomization/components/priorityclass--release_created"] }}
-      kustomize-priorityclass--tag_name: ${{ steps.release.outputs["kustomization/components/priorityclass--tag_name"] }}
-      kustomize-unifi-network-application--release_created: ${{ steps.release.outputs["kustomization/components/unifi-network-application--release_created"] }}
-      kustomize-unifi-network-application--tag_name: ${{ steps.release.outputs["kustomization/components/unifi-network-application--tag_name"] }}
+      kustomize-priorityclass--release_created: ${{ steps.releases.outputs.kustomize-priorityclass--release_created }}
+      kustomize-priorityclass--tag_name: ${{ steps.releases.outputs.kustomize-priorityclass--tag_name }}
+      kustomize-unifi-network-application--release_created: ${{ steps.releases.outputs.kustomize-priorityclass--release_created }}
+      kustomize-unifi-network-application--tag_name: ${{ steps.releases.outputs.kustomize-priorityclass--tag_name }}
     steps:
       - uses: googleapis/release-please-action@7987652d64b4581673a76e33ad5e98e3dd56832f # v4.1.3
-        id: release
+        id: release-please
         with:
           token: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
       - name: Print release outputs for debugging
-        continue-on-error: true
-        run: |
-          echo "Release outputs:"
-          echo "${{ toJson(steps.release.outputs) }}"
+        env:
+          OUTPUTS: ${{ toJson(steps.release-please.outputs) }}
+        id: releases
+        run: sh .github/workflows/release-please-output-helper.sh
+
 
   #
   # Package Release Jobs
