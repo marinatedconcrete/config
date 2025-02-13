@@ -40,6 +40,10 @@
       "package-name": "ansible-collection",
       "release-type": "simple"
     },
+    "kustomization/components/factorio": {
+      "package-name": "kustomize-factorio",
+      "release-type": "simple"
+    },
     "kustomization/components/priorityclass": {
       "package-name": "kustomize-priorityclass",
       "release-type": "simple"
