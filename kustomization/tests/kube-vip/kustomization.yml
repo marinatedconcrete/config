@@ -5,5 +5,19 @@ kind: Kustomization
 components:
   - ../../components/kube-vip
 namespace: kube-vip-test
+patches:
+  - patch: |-
+      apiVersion: apps/v1
+      kind: DaemonSet
+      metadata:
+        name: kube-vip-ds
+      spec:
+        template:
+          spec:
+            containers:
+              - env:
+                  - name: vip_address
+                    value: 192.168.42.42
+                name: kube-vip
 resources:
   - namespace.yml
