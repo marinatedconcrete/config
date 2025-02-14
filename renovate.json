@@ -20,6 +20,24 @@
       "automergeType": "branch"
     },
     {
+      "description": "Auto-merge all Factorio updates",
+      "automerge": true,
+      "automergeType": "branch",
+      "groupName": "factorio",
+      "matchFileNames": ["kustomization/components/factorio/kustomization.yml"],
+      "matchUpdateTypes": ["major", "minor", "patch", "digest"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Auto-merge all Kube-vip updates",
+      "automerge": true,
+      "automergeType": "branch",
+      "groupName": "kube-vip",
+      "matchFileNames": ["kustomization/components/kube-vip/kustomization.yml"],
+      "matchUpdateTypes": ["major", "minor", "patch", "digest"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
       "description": "Auto-merge all Unifi updates",
       "automerge": true,
       "automergeType": "branch",
