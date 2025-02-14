@@ -19,5 +19,5 @@
         wait_timeout: 300 # Five minutes
       changed_when: false
   vars:
-    kubernetes_core_k8s__context: kube-vip-test
+    kubernetes_core_k8s__context: kube-vip
     test_namespace: "{{ (lookup('file', 'kustomization.yml') | from_yaml).namespace }}"
