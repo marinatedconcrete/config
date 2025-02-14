@@ -24,7 +24,7 @@
       "automerge": true,
       "automergeType": "branch",
       "groupName": "unifi",
-      "matchFileNames": ["kustomization/components/unifi-network-application"],
+      "matchFileNames": ["kustomization/components/unifi-network-application/kustomization.yml"],
       "matchUpdateTypes": ["major", "minor", "patch", "digest"],
       "minimumReleaseAge": "3 days"
     }
