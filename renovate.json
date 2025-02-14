@@ -25,7 +25,7 @@
       "automergeType": "branch",
       "groupName": "factorio",
       "matchFileNames": ["kustomization/components/factorio/kustomization.yml"],
-      "matchUpdateTypes": ["major", "minor", "patch", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
       "minimumReleaseAge": "3 days"
     },
     {
@@ -34,7 +34,7 @@
       "automergeType": "branch",
       "groupName": "kube-vip",
       "matchFileNames": ["kustomization/components/kube-vip/kustomization.yml"],
-      "matchUpdateTypes": ["major", "minor", "patch", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
       "minimumReleaseAge": "3 days"
     },
     {
@@ -43,7 +43,7 @@
       "automergeType": "branch",
       "groupName": "unifi",
       "matchFileNames": ["kustomization/components/unifi-network-application/kustomization.yml"],
-      "matchUpdateTypes": ["major", "minor", "patch", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
       "minimumReleaseAge": "3 days"
     }
   ],
