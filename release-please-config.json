@@ -46,7 +46,6 @@
     },
     "kustomization/components/kube-vip": {
       "package-name": "kustomize-kube-vip",
-      "release-as": "1.0.0",
       "release-type": "simple"
     },
     "kustomization/components/priorityclass": {
