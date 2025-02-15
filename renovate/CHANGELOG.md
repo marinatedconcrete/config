@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/marinatedconcrete/config/compare/renovate-config-1.1.0...renovate-config-1.1.1) (2025-02-15)
+
+
+### Bug Fixes
+
+* be more flexible on where to find `kustomization.yml` files ([2abbd3d](https://github.com/marinatedconcrete/config/commit/2abbd3d744dd71e9de433c61b59a441813c834c4))
+* run `just format` ([5a0e7d1](https://github.com/marinatedconcrete/config/commit/5a0e7d1372928716cb04c60bd4201122a7027ab0))
+
 ## [1.1.0](https://github.com/marinatedconcrete/config/compare/renovate-config-1.0.1...renovate-config-1.1.0) (2025-02-12)
 
 

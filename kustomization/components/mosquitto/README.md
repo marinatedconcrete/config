@@ -7,20 +7,35 @@ which runs with a `uid` and `gid` of `1883`. This component can run under a `res
 
 # Example Usage
 
+Note: please replace `{version}` with the desired version you wish to use.  [Here is a full list of GitHub releases for this component.](https://github.com/marinatedconcrete/config/releases?q=%22kustomize-mosquitto%22).
+
+See below for additionally required patches and secrets.
+
+## Component
+
 ```yaml
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 components:
-  - https://github.com/marinatedconcrete/config/kustomization/components/mosquitto
+  - https://github.com/marinatedconcrete/config/kustomization/components/mosquitto?ref=kustomize-mosquitto@v{version}
 ```
 
-See below for additionally required patches and secrets.
+## Resource
 
-## Required Secrets
+```yaml
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
-### `mosquitto-password-conf-secret`
+resources:
+  - https://github.com/marinatedconcrete/config/releases/download/kustomize-mosquitto@v{version}/mosquitto.yml
+```
+
+# Required Secrets
+
+## `mosquitto-password-conf-secret`
 
 This contains the logins that you want to be included in the `password.conf` file in the container.
 Each key will be treated as the username, and the contents the password to hash and add to
@@ -35,15 +50,15 @@ stringData:
   someuser: super-secure-unhashed-password
 ```
 
-## Optional Patches
+# Optional Patches
 
-### Add Configuration Options
+## Add Configuration Options
 
 If you want to change the [configuration](https://mosquitto.org/man/mosquitto-conf-5.html) of
 `mosquitto`, you can patch in your own config files. You can place as many `.conf` files as you
 would like in the `ConfigMap`.
 
-#### `kustomization.yml`
+### `kustomization.yml`
 
 ```yaml
 configMapGenerator:
@@ -57,13 +72,13 @@ patches:
       name: mosquitto-deployment
 ```
 
-#### `configmap/logging.conf`
+### `configmap/logging.conf`
 
 ```
 log_type all
 ```
 
-#### `patches/add_custom_config.yml`
+### `patches/add_custom_config.yml`
 
 This patch is taking advantage of the `$patch: delete` functionality of Kustomize to remove the
 `emptyDir` configuration and instead mount the `ConfigMap` that was just defined.
