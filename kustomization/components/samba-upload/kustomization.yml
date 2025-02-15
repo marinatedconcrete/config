@@ -3,7 +3,7 @@ kind: Component
 
 images:
   - name: ghcr.io/servercontainers/samba:smbd-only-latest
-    digest: sha256:50d28991ed82de9e629534293ca38e9aaacf6757bc79b4fe14f5ace0041ac78e
+    digest: sha256:58b59656f36b025da79ee7a71ee4aeffe8a472b23aaf86bf0e27394460180d82
 resources:
   - deployment.yml
   - service.yml
