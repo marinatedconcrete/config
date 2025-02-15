@@ -48,6 +48,11 @@
       "package-name": "kustomize-kube-vip",
       "release-type": "simple"
     },
+    "kustomization/components/mosquitto": {
+      "package-name": "kustomize-mosquitto",
+      "release-as": "1.0.0",
+      "release-type": "simple"
+    },
     "kustomization/components/priorityclass": {
       "package-name": "kustomize-priorityclass",
       "release-type": "simple"
