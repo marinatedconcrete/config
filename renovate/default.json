@@ -5,9 +5,7 @@
       "customType": "regex",
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "marinatedconcrete/config",
-      "fileMatch": [
-        "^(.+/)+kustomization\\.yml$"
-      ],
+      "fileMatch": ["^(.+/)+kustomization\\.yml$"],
       "matchStrings": [
         "- https://github\\.com/marinatedconcrete/config/releases/download/(?<currentValue>.*?)/",
         "- https://github\\.com/marinatedconcrete/config/?\\?ref=(?<currentValue>.+?)$"
