@@ -9,6 +9,22 @@ how to do that.
 [Here is a full list of GitHub releases](https://github.com/marinatedconcrete/config/releases?q=%22renovate-config%22)
 that you can use as a version tag.
 
+## `renovate/devcontainer`
+
+This contains a set of [custom managers](https://docs.renovatebot.com/modules/manager/regex/) to allow renovate to
+update versions in a devcontainer feature. You can see an example in
+[this repository's own config](https://github.com/marinatedconcrete/config/blob/main/.devcontainer/devcontainer.json).
+
+To use this, simply add it to your `extends`:
+
+```json
+{
+  "extends": [
+    "github>marinatedconcrete/config//renovate/devcontainer#renovate-config-2.0.0"
+  ]
+}
+```
+
 ## `renovate/marinatedconcrete`
 
 This contains a set of [custom managers](https://docs.renovatebot.com/modules/manager/regex/) and

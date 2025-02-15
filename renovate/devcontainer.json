@@ -1,0 +1,12 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^.devcontainer/devcontainer.json$"],
+      "matchStrings": [
+        "//\\s*renovate: datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\s+\".*[Vv]ersion\":\\s*\"(?<currentValue>.+?)\""
+      ]
+    }
+  ]
+}
