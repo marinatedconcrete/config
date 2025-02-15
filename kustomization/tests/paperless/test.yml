@@ -5,4 +5,33 @@
   roles:
     - role: marinatedconcrete.config.minikube_test
       vars:
+        minikube_test__enable_local_path_storage: true
         minikube_test__test_dir: kustomization/tests/paperless
+  tasks:
+    - name: Wait for Paperless StatefulSet
+      kubernetes.core.k8s:
+        api_version: apps/v1
+        context: "{{ kubernetes_core_k8s__context }}"
+        kind: StatefulSet
+        name: paperless
+        namespace: "{{ test_namespace }}"
+        state: present
+        wait: true
+        wait_timeout: 300 # Five minutes
+      changed_when: false
+    - name: Get Paperless endpoints information
+      kubernetes.core.k8s_info:
+        api_version: v1
+        context: "{{ kubernetes_core_k8s__context }}"
+        kind: Endpoints
+        name: paperless-svc
+        namespace: "{{ test_namespace }}"
+      register: endpoints
+    - name: Ensure the Paperless endpoint is in a good state
+      ansible.builtin.assert:
+        that:
+          - endpoints.resources | length | bool # Found
+          - (endpoints.resources | first).subsets | length | bool
+  vars:
+    kubernetes_core_k8s__context: paperless
+    test_namespace: "{{ (lookup('file', 'kustomization.yml') | from_yaml).namespace }}"
