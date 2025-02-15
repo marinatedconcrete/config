@@ -1,7 +1,7 @@
 {
   "ansible": "0.1.0",
   "kustomization/components/factorio": "0.1.1",
-  "kustomization/components/kube-vip": "1.0.0",
+  "kustomization/components/kube-vip": "1.0.1",
   "kustomization/components/mosquitto": "0.1.0",
   "kustomization/components/priorityclass": "1.0.2",
   "kustomization/components/unifi-network-application": "1.1.0",
