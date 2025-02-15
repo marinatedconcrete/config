@@ -1,6 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":semanticCommitScope(package)"],
+  "extends": [
+    "config:recommended",
+    ":semanticCommitScope(package)",
+    "github>marinatedconcrete/config//renovate/marinatedconcrete#renovate-config-2.0.0",
+    "github>marinatedconcrete/config//renovate/devcontainer#renovate-config-2.0.0"
+  ],
   "timezone": "America/Los_Angeles",
   "configMigration": true,
   "commitBody": "{{{releaseNotes}}}",
@@ -74,12 +79,10 @@
     },
     {
       "customType": "regex",
-      "fileMatch": ["^.*\\.yml$", ".devcontainer/devcontainer.json"],
+      "fileMatch": ["^.*\\.yml$"],
       "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s+version:\\s+\"(?<currentValue>.*?)\"",
-        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s+\"(v|\\w+V)ersion\":\\s+\"(?<currentValue>.*?)\""
-      ],
-      "registryUrlTemplate": "https://packages.microsoft.com/repos/microsoft-debian-bookworm-prod"
+        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s+version:\\s+\"(?<currentValue>.*?)\""
+      ]
     },
     {
       "customType": "regex",
