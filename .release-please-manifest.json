@@ -5,5 +5,5 @@
   "kustomization/components/mosquitto": "1.0.0",
   "kustomization/components/priorityclass": "1.0.2",
   "kustomization/components/unifi-network-application": "1.1.0",
-  "renovate": "1.1.0"
+  "renovate": "1.1.1"
 }
