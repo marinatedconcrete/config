@@ -6,8 +6,7 @@
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "marinatedconcrete/config",
       "fileMatch": [
-        "^kustomization/.+/.+/kustomization\\.yml$",
-        "^kustomization/.+/.+/.+/kustomization\\.yml$"
+        "^(.+/)+kustomization\\.yml$"
       ],
       "matchStrings": [
         "- https://github\\.com/marinatedconcrete/config/releases/download/(?<currentValue>.*?)/",
