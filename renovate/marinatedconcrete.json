@@ -21,13 +21,11 @@
       ]
     }
   ],
-  "extends": ["config:best-practices"],
   "packageRules": [
     {
       "description": "marinatedconcrete/config versioning",
       "matchPackageNames": ["marinatedconcrete/config"],
       "versioning": "regex:^(?<compatibility>.+)[@\\-]v?(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+?)$"
     }
-  ],
-  "timezone": "America/Los_Angeles"
+  ]
 }
