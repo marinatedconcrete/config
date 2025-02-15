@@ -38,6 +38,15 @@
       "minimumReleaseAge": "3 days"
     },
     {
+      "description": "Auto-merge all mosquitto updates",
+      "automerge": true,
+      "automergeType": "branch",
+      "groupName": "mosquitto",
+      "matchFileNames": ["kustomization/components/mosquitto/kustomization.yml"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
       "description": "Auto-merge all Unifi updates",
       "automerge": true,
       "automergeType": "branch",
