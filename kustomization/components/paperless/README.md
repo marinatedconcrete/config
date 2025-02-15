@@ -4,24 +4,35 @@ This will deploy an instance of [paperless-ngx](https://docs.paperless-ngx.com/)
 
 # Example Usage
 
+Note: please replace `{version}` with the desired version you wish to use.  [Here is a full list of GitHub releases for this component.](https://github.com/marinatedconcrete/config/releases?q=%22kustomize-paperless%22).
+
+See below for additionally required patches and secrets.
+
+## Component
+
 ```yaml
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: paperless
 
 components:
-  # Core paperless service
-  - https://github.com/marinatedconcrete/config/kustomization/components/paperless
-  # Paperless depends on redis
-  - https://github.com/marinatedconcrete/config/kustomization/components/redis
+  - https://github.com/marinatedconcrete/config/kustomization/components/paperless?ref=kustomize-paperless@v{version}
 ```
 
-See below for additionally required patches and secrets.
+## Resource
 
-## Required Secrets
+```yaml
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
-### `paperless-secrets`
+resources:
+  - https://github.com/marinatedconcrete/config/releases/download/kustomize-paperless@v{version}/paperless.yml
+```
+
+# Required Secrets
+
+## `paperless-secrets`
 
 This contains the administrator password used by the container, and any dates that you may want to ignore. The admin password is not user facing, because the container is set up to automatically login as the admin, assuming that some external mechanism (ex: Authelia) provides an authentication solution.
 
@@ -37,13 +48,13 @@ stringData:
   paperless_admin_password: super-secure-unhashed-password
 ```
 
-## Optional Components
+# Optional Components
 
 See the [samba-upload component](../samba-upload/README.md).
 
-## Optional Patches
+# Optional Patches
 
-### Set the paperless hostname
+## Set the paperless hostname
 
 You may want to configure the [PAPERLESS_URL](https://docs.paperless-ngx.com/configuration/#PAPERLESS_URL) setting to ensure proper security, especially if this service is exposed on the internet.
 
