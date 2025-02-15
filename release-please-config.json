@@ -54,7 +54,6 @@
     },
     "kustomization/components/paperless": {
       "package-name": "kustomize-paperless",
-      "release-as": "1.0.0",
       "release-type": "simple"
     },
     "kustomization/components/priorityclass": {
