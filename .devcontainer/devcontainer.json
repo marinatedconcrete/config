@@ -28,9 +28,9 @@
   },
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      // renovate: deb=moby-cli repository=https://packages.microsoft.com/debian?binaryArch=all,components=main,release=bullseye
+      // renovate: deb=moby-cli repository=https://packages.microsoft.com/debian?binaryArch=all&components=main&release=bullseye
       "version": "27.5.0-debian12u1",
-      // renovate: deb=moby-buildx repository=https://packages.microsoft.com/debian?binaryArch=all,components=main,release=bullseye
+      // renovate: deb=moby-buildx repository=https://packages.microsoft.com/debian?binaryArch=all&components=main&release=bullseye
       "mobyBuildxVersion": "0.19.3-debian12u1",
       // We don't need this
       "dockerDashComposeVersion": "none"
