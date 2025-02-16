@@ -29,9 +29,9 @@
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       // renovate: deb=moby-cli repository=https://packages.microsoft.com/repos/microsoft-debian-bookworm-prod
-      "version": "27.4.1",
+      "version": "27.5.0-debian12u1",
       // renovate: deb=moby-buildx repository=https://packages.microsoft.com/repos/microsoft-debian-bookworm-prod
-      "mobyBuildxVersion": "0.19.3",
+      "mobyBuildxVersion": "0.19.3-debian12u1",
       // We don't need this
       "dockerDashComposeVersion": "none"
     },
