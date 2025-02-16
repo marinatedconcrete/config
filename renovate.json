@@ -3,8 +3,8 @@
   "extends": [
     "config:recommended",
     ":semanticCommitScope(package)",
-    "github>marinatedconcrete/config//renovate/marinatedconcrete#renovate-config-2.0.0",
-    "github>marinatedconcrete/config//renovate/devcontainer#renovate-config-2.0.0"
+    "github>marinatedconcrete/config//renovate/marinatedconcrete#renovate-config-1.1.1",
+    "github>marinatedconcrete/config//renovate/devcontainer#renovate-config-1.1.1"
   ],
   "timezone": "America/Los_Angeles",
   "configMigration": true,
