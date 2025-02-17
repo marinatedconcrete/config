@@ -1,13 +1,15 @@
 # Mosquitto Component
 
+[![Current Version](https://img.shields.io/badge/dynamic/json?style=for-the-badge&label=version&query=%24.kustomization%2Fcomponents%2Fmosquitto&url=https%3A%2F%2Fraw.githubusercontent.com%2Fmarinatedconcrete%2Fconfig%2Frefs%2Fheads%2Fmain%2F.release-please-manifest.json)](https://github.com/marinatedconcrete/config/releases?q=%22kustomize-mosquitto%22)
+[![Pod Security Standard: Restricted](https://img.shields.io/badge/pod_security_standard-restricted-green?style=for-the-badge&logo=kubernetes&logoColor=%23326CE5)](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+
 This will deploy the [Mosquitto](https://mosquitto.org/). This runs as as the `mosquitto` user
 from the [`mosquitto` Docker image](https://github.com/eclipse/mosquitto/tree/master/docker/2.0),
-which runs with a `uid` and `gid` of `1883`. This component can run under a `restricted`
-[pod security standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/).
+which runs with a `uid` and `gid` of `1883`.
 
 # Example Usage
 
-Note: please replace `{version}` with the desired version you wish to use.  [Here is a full list of GitHub releases for this component.](https://github.com/marinatedconcrete/config/releases?q=%22kustomize-mosquitto%22).
+Note: please replace `{version}` with the desired version you wish to use.
 
 See below for additionally required patches and secrets.
 
