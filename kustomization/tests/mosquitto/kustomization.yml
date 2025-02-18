@@ -4,6 +4,7 @@ kind: Kustomization
 
 components:
   - ../../components/mosquitto
+  - ../../components/priorityclass
 namespace: mosquitto-test
 resources:
   - namespace.yml

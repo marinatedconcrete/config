@@ -4,6 +4,7 @@ kind: Kustomization
 
 components:
   - ../../components/kube-vip
+  - ../../components/priorityclass
 namespace: kube-vip-test
 patches:
   - patch: |-
