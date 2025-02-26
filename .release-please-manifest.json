@@ -4,7 +4,7 @@
   "kustomization/components/kube-vip": "1.0.1",
   "kustomization/components/mosquitto": "1.0.0",
   "kustomization/components/paperless": "1.0.0",
-  "kustomization/components/priorityclass": "1.0.2",
+  "kustomization/components/priorityclass": "1.0.3",
   "kustomization/components/unifi-network-application": "1.1.1",
   "renovate": "2.0.0"
 }
