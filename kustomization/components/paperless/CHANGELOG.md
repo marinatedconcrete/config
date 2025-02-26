@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.0.0...kustomize-paperless@v1.0.1) (2025-02-26)
+
+
+### Documentation Updates
+
+* Add and Standardize Badging ([#278](https://github.com/marinatedconcrete/config/issues/278)) ([9f21755](https://github.com/marinatedconcrete/config/commit/9f21755bdeaa287887215ca76586aa070d17656e))
+
 ## 1.0.0 (2025-02-15)
 
 
