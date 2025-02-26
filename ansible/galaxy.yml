@@ -1,8 +1,7 @@
----
 namespace: marinatedconcrete
 name: config
 description: A collection of various useful things for us.
-version: 0.1.0
+version: 1.0.0
 readme: README.md
 authors:
   - robarnold
@@ -12,7 +11,7 @@ license:
 tags:
   - infrastructure
 dependencies:
-  kubernetes.core: ">=2.0.0"
+  kubernetes.core: '>=2.0.0'
 repository: https://github.com/marinatedconcrete/config
 documentation: lol
 homepage: https://github.com/marinatedconcrete/config
