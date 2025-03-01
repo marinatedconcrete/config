@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/marinatedconcrete/config/compare/kustomize-factorio@v0.1.1...kustomize-factorio@v0.1.2) (2025-03-01)
+
+
+### Documentation Updates
+
+* Add and Standardize Badging ([#278](https://github.com/marinatedconcrete/config/issues/278)) ([9f21755](https://github.com/marinatedconcrete/config/commit/9f21755bdeaa287887215ca76586aa070d17656e))
+
 ## [0.1.1](https://github.com/marinatedconcrete/config/compare/kustomize-factorio-v0.1.0...kustomize-factorio@v0.1.1) (2025-02-13)
 
 
