@@ -1,6 +1,6 @@
 {
   "ansible": "0.1.0",
-  "kustomization/components/factorio": "0.1.1",
+  "kustomization/components/factorio": "0.1.2",
   "kustomization/components/kube-vip": "1.0.1",
   "kustomization/components/mosquitto": "1.0.0",
   "kustomization/components/paperless": "1.0.0",
