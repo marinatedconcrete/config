@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.1.2](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.1...kustomize-unifi-network-application@v1.1.2) (2025-03-03)
+
+
+### Documentation Updates
+
+* Add and Standardize Badging ([#278](https://github.com/marinatedconcrete/config/issues/278)) ([9f21755](https://github.com/marinatedconcrete/config/commit/9f21755bdeaa287887215ca76586aa070d17656e))
+
+
+### Other Changes
+
+* **package:** update busybox:1.37.0 docker digest to 498a000 ([0b55ce9](https://github.com/marinatedconcrete/config/commit/0b55ce976682d79d8d8910b26197ebb2217bef9e))
+* **package:** update lscr.io/linuxserver/unifi-network-application:9.0.114 docker digest to 0b126fc ([177a7b5](https://github.com/marinatedconcrete/config/commit/177a7b5a2db608e15c1f974150df43e6b4363f08))
+* **package:** update mongo docker tag to v7.0.17 ([#289](https://github.com/marinatedconcrete/config/issues/289)) ([159c928](https://github.com/marinatedconcrete/config/commit/159c92887139ba4d7bdbf337c236115cb6af14fd))
+
 ## [1.1.1](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.0...kustomize-unifi-network-application@v1.1.1) (2025-02-15)
 
 
