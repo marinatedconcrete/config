@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.3](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.2...kustomize-unifi-network-application@v1.1.3) (2025-03-21)
+
+
+### Other Changes
+
+* **package:** update busybox:1.37.0 docker digest to 37f7b37 ([7f7f02a](https://github.com/marinatedconcrete/config/commit/7f7f02ab63151cc63fca06d885c5dc19ee818409))
+* **package:** update lscr.io/linuxserver/unifi-network-application:9.0.114 docker digest to 79adf36 ([a67c77c](https://github.com/marinatedconcrete/config/commit/a67c77c2c00849c4fb9644a5b0cae5222c053764))
+* **package:** update lscr.io/linuxserver/unifi-network-application:9.0.114 docker digest to b03a7bb ([814e420](https://github.com/marinatedconcrete/config/commit/814e42017e9a2c7aa4f51b5e235125c295bfb493))
+* **package:** update mongo:7.0.17 docker digest to ac9e83c ([740b726](https://github.com/marinatedconcrete/config/commit/740b726f1bc6fd18606cea40a3970ccdef30ae29))
+
 ## [1.1.2](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.1...kustomize-unifi-network-application@v1.1.2) (2025-03-03)
 
 
