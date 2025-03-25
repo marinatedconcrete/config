@@ -12,8 +12,8 @@
   "rollbackPrs": true,
   "packageRules": [
     {
-      "description": "Automerge all yarn & prettier changes",
-      "matchPackageNames": ["prettier", "yarn"],
+      "description": "Automerge all yarn, prettier, and gh-cli changes",
+      "matchPackageNames": ["prettier", "yarn", "cli/cli"],
       "automerge": true,
       "automergeSchedule": ["every day"]
     },
@@ -47,7 +47,9 @@
       "automerge": true,
       "automergeType": "branch",
       "groupName": "mosquitto",
-      "matchFileNames": ["kustomization/components/mosquitto/kustomization.yml"],
+      "matchFileNames": [
+        "kustomization/components/mosquitto/kustomization.yml"
+      ],
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "minimumReleaseAge": "3 days"
     },
@@ -56,9 +58,18 @@
       "automerge": true,
       "automergeType": "branch",
       "groupName": "unifi",
-      "matchFileNames": ["kustomization/components/unifi-network-application/kustomization.yml"],
+      "matchFileNames": [
+        "kustomization/components/unifi-network-application/kustomization.yml"
+      ],
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Auto-merge renovate updates monthly",
+      "automerge": true,
+      "automergeType": "branch",
+      "matchDepNames": ["renovatebot/renovate"],
+      "schedule": ["on the first day of the month"]
     }
   ],
   "customManagers": [
