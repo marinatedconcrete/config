@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.0.0...ansible-collection@v1.0.1) (2025-04-04)
+
+
+### Other Changes
+
+* **package:** update dependency ansible to v11.4.0 ([#305](https://github.com/marinatedconcrete/config/issues/305)) ([0824b6b](https://github.com/marinatedconcrete/config/commit/0824b6b088ade4ef99cb8e22c3c671d99bf2af17))
+* **package:** update dependency ansible-core to v2.18.4 ([6f6ed35](https://github.com/marinatedconcrete/config/commit/6f6ed355ff585387cfc1086df013c47e89b64f11))
+* **package:** update dependency ansible-lint to v25.2.0 ([#308](https://github.com/marinatedconcrete/config/issues/308)) ([dbdef00](https://github.com/marinatedconcrete/config/commit/dbdef00aaf09647be2a2d2e4a58674d613228e64))
+
 ## [1.0.0](https://github.com/marinatedconcrete/config/compare/ansible-collection@v0.1.0...ansible-collection@v1.0.0) (2025-03-03)
 
 
