@@ -2,7 +2,7 @@
   "devDependencies": {
     "prettier": "3.5.3"
   },
-  "packageManager": "yarn@4.8.1",
+  "packageManager": "yarn@4.9.0",
   "scripts": {
     "format": "prettier --log-level warn --no-error-on-unmatched-pattern --write '**/*.yml' '**/*.json' '**/*.md'",
     "check-format": "prettier --no-error-on-unmatched-pattern --check '**/*.yml' '**/*.json' '**/*.md'"
