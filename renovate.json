@@ -13,7 +13,7 @@
   "packageRules": [
     {
       "description": "Automerge all yarn, prettier, and gh-cli changes",
-      "matchPackageNames": ["prettier", "yarnpkg/berry", "cli/cli"],
+      "matchPackageNames": ["prettier", "@yarnpkg/cli", "cli/cli"],
       "automerge": true,
       "automergeSchedule": ["every day"]
     },
