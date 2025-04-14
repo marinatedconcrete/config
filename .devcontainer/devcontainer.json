@@ -8,6 +8,7 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "earthly.earthfile-syntax-highlighting",
         "esbenp.prettier-vscode",
         // Enable VSCode to find the prettier package to use when formatting
         "arcanis.vscode-zipfs",
