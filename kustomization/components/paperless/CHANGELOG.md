@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.0.0...kustomize-paperless@v1.0.1) (2025-04-15)
+
+
+### Documentation Updates
+
+* Add and Standardize Badging ([#278](https://github.com/marinatedconcrete/config/issues/278)) ([9f21755](https://github.com/marinatedconcrete/config/commit/9f21755bdeaa287887215ca76586aa070d17656e))
+
+
+### Other Changes
+
+* **package:** update ghcr.io/paperless-ngx/paperless-ngx docker tag to v2.15.1 ([#310](https://github.com/marinatedconcrete/config/issues/310)) ([0d7fbad](https://github.com/marinatedconcrete/config/commit/0d7fbad9b812e31fee7a2c1e7aa2fce1b0d8e41c))
+* **package:** update ghcr.io/paperless-ngx/paperless-ngx docker tag to v2.15.2 ([0d8d50a](https://github.com/marinatedconcrete/config/commit/0d8d50a62662d33d3973dcc325ec5ff3e11b00b4))
+
 ## 1.0.0 (2025-02-15)
 
 
