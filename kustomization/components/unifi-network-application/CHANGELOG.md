@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.4](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.3...kustomize-unifi-network-application@v1.1.4) (2025-04-15)
+
+
+### Other Changes
+
+* **package:** update lscr.io/linuxserver/unifi-network-application:9.0.114 docker digest to 5018f4c ([dbaec13](https://github.com/marinatedconcrete/config/commit/dbaec13a8b629b1fb0d3d4749f04a74f34eb68c4))
+* **package:** update lscr.io/linuxserver/unifi-network-application:9.0.114 docker digest to d673e01 ([0805204](https://github.com/marinatedconcrete/config/commit/08052048955d3149dcc674db58a50fb596ba2cf8))
+* **package:** update mongo docker tag to v7.0.18 ([4920f41](https://github.com/marinatedconcrete/config/commit/4920f4126b8cb2da148f2a5ab663d5f17f070d80))
+* **package:** update mongo:7.0.18 docker digest to 549107a ([8e5eb84](https://github.com/marinatedconcrete/config/commit/8e5eb84b572726a19b2a399dc713ab4c1f677e29))
+* **package:** update mongo:7.0.18 docker digest to 549107a ([3ec8b3f](https://github.com/marinatedconcrete/config/commit/3ec8b3fedfbd48c9537a6d46ae11c0a75981c78e))
+* **package:** update mongo:7.0.18 docker digest to 8c30f14 ([04de92b](https://github.com/marinatedconcrete/config/commit/04de92b95f5827312b9da82f79535b4317368496))
+
 ## [1.1.3](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.2...kustomize-unifi-network-application@v1.1.3) (2025-03-21)
 
 
