@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v1.0.1...kustomize-kube-vip@v2.0.0) (2025-04-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* require `priorityclass` component, and add appropriate `priorityClass` ([#285](https://github.com/marinatedconcrete/config/issues/285))
+
+### Features
+
+* require `priorityclass` component, and add appropriate `priorityClass` ([#285](https://github.com/marinatedconcrete/config/issues/285)) ([a148a93](https://github.com/marinatedconcrete/config/commit/a148a93e5638ad7b0822a1c23f58154e8642f5f5))
+
+
+### Documentation Updates
+
+* Add and Standardize Badging ([#278](https://github.com/marinatedconcrete/config/issues/278)) ([9f21755](https://github.com/marinatedconcrete/config/commit/9f21755bdeaa287887215ca76586aa070d17656e))
+
+
+### Other Changes
+
+* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v0.8.10 ([06a7858](https://github.com/marinatedconcrete/config/commit/06a7858dca7bf6075ef091562b0206b2cf23c38b))
+
 ## [1.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v1.0.0...kustomize-kube-vip@v1.0.1) (2025-02-15)
 
 
