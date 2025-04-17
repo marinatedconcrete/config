@@ -92,7 +92,8 @@
       "customType": "regex",
       "fileMatch": ["^.*\\.yml$"],
       "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s+version:\\s+\"(?<currentValue>.*?)\""
+        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s+version:\\s+\"(?<currentValue>.*?)\"",
+        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\n[a-zA-Z_]+version:\\s+\"?(?<currentValue>.*?)\"?\\n"
       ]
     },
     {
