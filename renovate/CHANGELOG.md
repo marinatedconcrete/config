@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.0.1...renovate-config-2.1.0) (2025-04-18)
+
+
+### Features
+
+* Create a recommended renovate settings to share ([#326](https://github.com/marinatedconcrete/config/issues/326)) ([e946095](https://github.com/marinatedconcrete/config/commit/e946095f53caab8fbb4c4148dfd35cc9d0fd809d))
+
 ## [2.0.1](https://github.com/marinatedconcrete/config/compare/renovate-config-2.0.0...renovate-config-2.0.1) (2025-04-18)
 
 
