@@ -40,3 +40,17 @@ To use this, simply add it to your `extends`:
   ]
 }
 ```
+
+## `renovate/recommended`
+
+This contains settings that we think should be a good default to start with for your own config.
+
+To use this, simply add it to your `extends`:
+
+```json
+{
+  "extends": [
+    "github>marinatedconcrete/config//renovate/recommended#renovate-config-2.0.0"
+  ]
+}
+```
