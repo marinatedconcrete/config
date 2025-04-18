@@ -2,5 +2,3 @@
 failure-threshold: info
 ignored:
   - DL3008
-  - DL3009 # Fix kairos dockerfile
-  - DL3059 # Fix kairos dockerfile
