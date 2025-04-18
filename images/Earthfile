@@ -1,5 +1,0 @@
-VERSION 0.7
-FROM alpine
-
-all:
-    BUILD ./kairos-ubuntu-24-lts/+image
