@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/marinatedconcrete/config/compare/renovate-config-2.0.0...renovate-config-2.0.1) (2025-04-18)
+
+
+### Bug Fixes
+
+* remove renovate deb matching ([#317](https://github.com/marinatedconcrete/config/issues/317)) ([15c5ba7](https://github.com/marinatedconcrete/config/commit/15c5ba76c34fd257d1f1ea404e0060bea3f43d6b))
+
 ## [2.0.0](https://github.com/marinatedconcrete/config/compare/renovate-config-1.1.1...renovate-config-2.0.0) (2025-02-15)
 
 
