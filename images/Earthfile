@@ -3,4 +3,3 @@ FROM alpine
 
 all:
     BUILD ./kairos-ubuntu-24-lts/+image
-    BUILD ./universal-silabs-flasher/+image
