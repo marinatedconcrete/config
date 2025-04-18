@@ -7,14 +7,6 @@
       "matchStrings": [
         "//\\s*renovate: datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\s+\".*[Vv]ersion\":\\s*\"(?<currentValue>.+?)\""
       ]
-    },
-    {
-      "customType": "regex",
-      "datasourceTemplate": "deb",
-      "fileMatch": ["^.devcontainer/devcontainer.json$"],
-      "matchStrings": [
-        "//\\s*renovate: deb=(?<depName>.+?)\\s+repository=(?<repositoryUrl>.+?)\\s+\".*[Vv]ersion\":\\s*\"(?<currentValue>.+?)\""
-      ]
     }
   ]
 }
