@@ -87,6 +87,13 @@
       "depNameTemplate": "ansible-core",
       "fileMatch": ["^ansible/meta/runtime\\.yml$"],
       "matchStrings": ["requires_ansible:\\s*\">=(?<currentValue>.*?)\""]
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^justfile$"],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\n\\s+?[A-Z_]+_VERSION=(?<currentValue>.+?)$"
+      ]
     }
   ]
 }

@@ -11,6 +11,65 @@ check-format:
     just --unstable --fmt --check -f justfile
     yarn prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md
 
+# Generates the daemonset manifest for kube-vip.
+[group('codegen')]
+codegen-kube-vip-daemonset:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    # renovate: datasource=docker depName=ghcr.io/kube-vip/kube-vip
+    KUBE_VIP_VERSION=v0.8.10
+    DEST=kustomization/components/kube-vip/daemonset.yml
+    SCRATCH=/tmp/daemonset.yml
+
+    # First, generate the manifest with their tooling.
+    docker run --network host --rm ghcr.io/kube-vip/kube-vip:${KUBE_VIP_VERSION} \
+        manifest daemonset \
+            --address=8.8.8.8 \
+            --arp \
+            --controlplane \
+            --inCluster \
+            --leaderElection \
+            --namespace=kube-vip \
+            --services \
+            --servicesElection \
+            --taint \
+        > ${SCRATCH}
+
+    # Update namespace to kube-vip (optional patch is documented).
+    yq -iy '.metadata.namespace = "kube-vip"' ${SCRATCH}
+
+    # Remove creationTimestamp fields as we do not care about them.
+    yq -iy 'del(.metadata.creationTimestamp)' ${SCRATCH}
+    yq -iy 'del(.spec.template.metadata.creationTimestamp)' ${SCRATCH}
+
+    # Remove empty objects that get added by their generator.
+    yq -iy 'del(.spec.template.spec.containers[0].resources)' ${SCRATCH}
+    yq -iy 'del(.spec.updateStrategy)' ${SCRATCH}
+
+    # Remove the tag from the image, as it is managed by the `kustomization.yml` file.
+    yq -iy '.spec.template.spec.containers[0].image = "ghcr.io/kube-vip/kube-vip"' ${SCRATCH}
+
+    # Remove VIP address, as this is a required patch.
+    yq -iy 'del(.spec.template.spec.containers[0].env[] | select(.name == "address"))' ${SCRATCH}
+
+    # Remove prometheus_server.
+    yq -iy 'del(.spec.template.spec.containers[0].env[] | select(.name == "prometheus_server"))' ${SCRATCH}
+
+    # Add our priorityClassName to the manifest.
+    yq -iy '.spec.template.spec.priorityClassName = "critical-application-infra"' ${SCRATCH}
+
+    # Sort the container's env by the name of the environment variables to set.
+    yq -iy '.spec.template.spec.containers[0].env |= sort_by(.name)' ${SCRATCH}
+
+    # Write out the final output.
+    echo '# @codegen-command: just codegen-kube-vip-daemonset' > ${DEST}
+    echo '# @generated' >> ${DEST}
+    echo '---' >> ${DEST}
+    yq -y -S '' ${SCRATCH} \
+        | sed -e "s/'/\"/g" \
+        >> ${DEST}
+
 # Auto-format files
 [group('format')]
 format:
