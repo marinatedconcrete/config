@@ -1,8 +1,14 @@
+# @codegen-command: just codegen-kube-vip-daemonset
+# @generated
 ---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
+  labels:
+    app.kubernetes.io/name: kube-vip-ds
+    app.kubernetes.io/version: v0.8.10
   name: kube-vip-ds
+  namespace: kube-vip
 spec:
   selector:
     matchLabels:
@@ -11,11 +17,15 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: kube-vip-ds
+        app.kubernetes.io/version: v0.8.10
     spec:
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/master
+                    operator: Exists
               - matchExpressions:
                   - key: node-role.kubernetes.io/control-plane
                     operator: Exists
@@ -27,34 +37,44 @@ spec:
               value: "true"
             - name: cp_namespace
               value: kube-vip
+            - name: dns_mode
+              value: first
             - name: port
               value: "6443"
             - name: svc_election
               value: "true"
             - name: svc_enable
               value: "true"
+            - name: svc_leasename
+              value: plndr-svcs-lock
             - name: vip_arp
               value: "true"
-            - name: vip_ddns
-              value: "false"
             - name: vip_cidr
               value: "32"
             - name: vip_leaderelection
               value: "true"
             - name: vip_leaseduration
               value: "5"
+            - name: vip_leasename
+              value: plndr-cp-lock
+            - name: vip_nodename
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
             - name: vip_renewdeadline
               value: "3"
             - name: vip_retryperiod
               value: "1"
           image: ghcr.io/kube-vip/kube-vip
+          imagePullPolicy: IfNotPresent
           name: kube-vip
           securityContext:
             capabilities:
               add:
                 - NET_ADMIN
                 - NET_RAW
-                - SYS_TIME
+              drop:
+                - ALL
       hostNetwork: true
       priorityClassName: critical-application-infra
       serviceAccountName: kube-vip

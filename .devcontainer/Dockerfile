@@ -6,6 +6,7 @@ RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
         libssh-dev \
+        yq \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
