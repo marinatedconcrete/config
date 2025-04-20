@@ -16,6 +16,9 @@
         "nefrob.vscode-just-syntax",
         "redhat.vscode-yaml"
       ],
+      "files.readonlyInclude": {
+        "kustomization/components/kube-vip/daemonset.yml": true
+      },
       "settings": {
         "prettier.useEditorConfig": false,
         "search.exclude": {
