@@ -40,6 +40,12 @@
       "package-name": "ansible-collection",
       "release-type": "simple"
     },
+    "images/kairos-ubuntu": {
+      "initial-version": "0.1.0",
+      "package-name": "kairos-ubuntu",
+      "prerelease": true,
+      "release-type": "simple"
+    },
     "kustomization/components/factorio": {
       "package-name": "kustomize-factorio",
       "release-type": "simple"
