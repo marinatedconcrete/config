@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu@v0.1.1...kairos-ubuntu@v0.1.2) (2025-04-20)
+
+
+### Documentation Updates
+
+* Add more details to the kairos-ubuntu README ([473f06b](https://github.com/marinatedconcrete/config/commit/473f06bfd9ba013b01c4697fea2c924f17f554f5))
+
 ## [0.1.1](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu@v0.1.0...kairos-ubuntu@v0.1.1) (2025-04-20)
 
 
