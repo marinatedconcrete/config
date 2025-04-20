@@ -1,0 +1,57 @@
+---
+name: Build Kairos-Ubuntu
+
+on: # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/image-kairos-ubuntu.yml
+      - images/kairos-ubuntu/**
+    tags:
+      - v*-kairos-ubuntu
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/image-kairos-ubuntu.yml
+      - images/kairos-ubuntu/**
+  release:
+    types:
+      - created
+
+jobs:
+  build-container:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Note: this must start with a number for the build to work correctly!
+      - name: Compute Version Tag
+        env:
+          BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}', github.actor_id, github.job) || format('{0}-pr', github.event.number) }}
+        id: version_tag
+        run: echo "tag=$BRANCH" | sed -e 's/kairos-ubuntu@//' >> "$GITHUB_OUTPUT"
+      - name: Generate Metadata
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+        id: metadata
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/kairos-ubuntu
+      - name: Build Image
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        with:
+          build-args: |
+            VERSION=${{ steps.version_tag.outputs.tag }}
+          context: images/kairos-ubuntu
+          labels: ${{ steps.metadata.outputs.labels }}
+          tags: ${{ steps.version_tag.outputs.tag }}
