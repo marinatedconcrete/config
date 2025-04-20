@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v2.0.0...kustomize-kube-vip@v2.0.1) (2025-04-20)
+
+
+### Bug Fixes
+
+* update RBAC for kube-vip ([#321](https://github.com/marinatedconcrete/config/issues/321)) ([f5d2645](https://github.com/marinatedconcrete/config/commit/f5d2645328d2c1b2c5091ee38b1a790070d53943))
+
+
+### Documentation Updates
+
+* fix kube-vip priorityclass ([01de083](https://github.com/marinatedconcrete/config/commit/01de083f5fd404f823abd7079e33363c1de85e19))
+
 ## [2.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v1.0.1...kustomize-kube-vip@v2.0.0) (2025-04-15)
 
 
