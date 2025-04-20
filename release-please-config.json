@@ -41,7 +41,6 @@
       "release-type": "simple"
     },
     "images/kairos-ubuntu": {
-      "initial-version": "0.1.0",
       "package-name": "kairos-ubuntu",
       "prerelease": true,
       "release-type": "simple"
