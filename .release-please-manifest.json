@@ -6,5 +6,6 @@
   "kustomization/components/paperless": "1.0.1",
   "kustomization/components/priorityclass": "1.0.3",
   "kustomization/components/unifi-network-application": "1.1.6",
-  "renovate": "2.1.0"
+  "renovate": "2.1.0",
+  "images/kairos-ubuntu": "0.1.0"
 }
