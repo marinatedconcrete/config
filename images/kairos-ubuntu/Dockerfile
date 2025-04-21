@@ -3,6 +3,8 @@
 FROM quay.io/kairos/kairos-init:v0.4.4 AS kairos-init
 
 FROM ubuntu:24.04 AS base-kairos
+LABEL org.opencontainers.image.title="A custom Ubuntu-based Kairos image."
+LABEL org.opencontainers.image.title="kairos-ubuntu"
 ARG VARIANT=standard
 ARG MODEL=generic
 ARG TRUSTED_BOOT=false

@@ -41,9 +41,11 @@
       "release-type": "simple"
     },
     "images/kairos-ubuntu": {
+      "include-v-in-tag": false,
       "package-name": "kairos-ubuntu",
       "prerelease": true,
-      "release-type": "simple"
+      "release-type": "simple",
+      "tag-separator": "-"
     },
     "kustomization/components/factorio": {
       "package-name": "kustomize-factorio",

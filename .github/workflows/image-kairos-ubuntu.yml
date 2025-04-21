@@ -41,7 +41,7 @@ jobs:
         env:
           BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('{0}-pr', github.event.number) }}
         id: version_tag
-        run: echo "tag=$BRANCH" | sed -e 's/kairos-ubuntu@v//' >> "$GITHUB_OUTPUT"
+        run: echo "tag=$BRANCH" | sed -e 's/kairos-ubuntu-//' >> "$GITHUB_OUTPUT"
       - name: Generate Metadata
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
         id: metadata
@@ -55,4 +55,4 @@ jobs:
           context: images/kairos-ubuntu
           labels: ${{ steps.metadata.outputs.labels }}
           push: ${{ github.ref_type == 'tag' }}
-          tags: ${{ steps.version_tag.outputs.tag }}
+          tags: ghcr.io/${{ github.repository_owner }}/kairos-ubuntu:${{ steps.version_tag.outputs.tag }}
