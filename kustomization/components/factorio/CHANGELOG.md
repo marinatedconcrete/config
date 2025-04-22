@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/marinatedconcrete/config/compare/kustomize-factorio@v0.1.2...kustomize-factorio@v0.1.3) (2025-04-22)
+
+
+### Bug Fixes
+
+* handle syntax change for volume claim templates ([#338](https://github.com/marinatedconcrete/config/issues/338)) ([e5c9899](https://github.com/marinatedconcrete/config/commit/e5c9899e2ea20911fea8387091dc7fb38ef72e9c))
+
 ## [0.1.2](https://github.com/marinatedconcrete/config/compare/kustomize-factorio@v0.1.1...kustomize-factorio@v0.1.2) (2025-03-01)
 
 
