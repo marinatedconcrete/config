@@ -156,7 +156,9 @@ spec:
             name: una-mongodb-scripts-configmap
           name: mongodb-scripts
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: mongodb-data
       spec:
         accessModes:
@@ -165,7 +167,9 @@ spec:
           requests:
             storage: 1Gi
         storageClassName: longhorn-encrypted
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: unifi-config
       spec:
         accessModes:
