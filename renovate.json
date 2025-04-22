@@ -85,7 +85,7 @@
       "customType": "regex",
       "fileMatch": ["^.*Dockerfile$"],
       "matchStrings": [
-        "^#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\nARG\\s+[A-Z_]+_VERSION=(?<currentValue>.+?)$"
+        "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\nARG\\s+[A-Z_]+_VERSION=(?<currentValue>.+?)\\n"
       ]
     },
     {
@@ -107,7 +107,7 @@
       "customType": "regex",
       "fileMatch": ["^justfile$"],
       "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\n\\s+?[A-Z_]+_VERSION=(?<currentValue>.+?)$"
+        "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\n\\s+?[A-Z_]+_VERSION=(?<currentValue>.+?)\\n"
       ]
     }
   ]
