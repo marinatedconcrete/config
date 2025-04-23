@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.7](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.6...kustomize-unifi-network-application@v1.1.7) (2025-04-23)
+
+
+### Bug Fixes
+
+* handle syntax change for volume claim templates ([#338](https://github.com/marinatedconcrete/config/issues/338)) ([e5c9899](https://github.com/marinatedconcrete/config/commit/e5c9899e2ea20911fea8387091dc7fb38ef72e9c))
+
+
+### Other Changes
+
+* **package:** update lscr.io/linuxserver/unifi-network-application:9.0.114 docker digest to 08c141d ([712c11d](https://github.com/marinatedconcrete/config/commit/712c11d8d7c509b8ef6022c94edeafdc7abf34a7))
+
 ## [1.1.6](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.5...kustomize-unifi-network-application@v1.1.6) (2025-04-20)
 
 
