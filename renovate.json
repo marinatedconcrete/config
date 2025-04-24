@@ -12,8 +12,8 @@
   "rollbackPrs": true,
   "packageRules": [
     {
-      "description": "Automerge all yarn, prettier, and gh-cli changes",
-      "matchPackageNames": ["prettier", "@yarnpkg/cli", "cli/cli"],
+      "description": "Automerge all js infra, and gh-cli changes",
+      "matchPackageNames": ["prettier", "@yarnpkg/cli", "cli/cli", "nodejs/node"],
       "automerge": true,
       "automergeSchedule": ["every day"]
     },
