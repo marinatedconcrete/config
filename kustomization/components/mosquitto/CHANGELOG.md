@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-mosquitto@v2.0.0...kustomize-mosquitto@v2.0.1) (2025-04-24)
+
+
+### Documentation Updates
+
+* fix mosquitto priorityclass ([472c8e6](https://github.com/marinatedconcrete/config/commit/472c8e6be3c1ca2cf9fc965ef87a60feee29cd57))
+
 ## [2.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-mosquitto@v1.0.0...kustomize-mosquitto@v2.0.0) (2025-03-21)
 
 
