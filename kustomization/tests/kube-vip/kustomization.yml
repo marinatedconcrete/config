@@ -12,7 +12,6 @@ patches:
       kind: DaemonSet
       metadata:
         name: kube-vip-ds
-        namespace: kube-vip
       spec:
         template:
           spec:

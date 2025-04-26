@@ -1,4 +1,4 @@
-# @codegen-command: just codegen-kube-vip-daemonset
+# @codegen-command: just codegen-kube-vip
 # @generated
 ---
 apiVersion: apps/v1
@@ -6,9 +6,8 @@ kind: DaemonSet
 metadata:
   labels:
     app.kubernetes.io/name: kube-vip-ds
-    app.kubernetes.io/version: v0.9.0
+    app.kubernetes.io/version: v0.9.1
   name: kube-vip-ds
-  namespace: kube-vip
 spec:
   selector:
     matchLabels:
@@ -17,7 +16,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: kube-vip-ds
-        app.kubernetes.io/version: v0.9.0
+        app.kubernetes.io/version: v0.9.1
     spec:
       affinity:
         nodeAffinity:
