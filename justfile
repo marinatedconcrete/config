@@ -56,6 +56,10 @@ codegen-kube-vip-daemonset:
     # Remove prometheus_server.
     yq -iy 'del(.spec.template.spec.containers[0].env[] | select(.name == "prometheus_server"))' ${SCRATCH}
 
+    # Set cp_namespace via a reference.
+    yq -iy 'del(.spec.template.spec.containers[0].env[] | select(.name == "cp_namespace") | .value)' ${SCRATCH}
+    yq -iy '(.spec.template.spec.containers[0].env[] | select(.name == "cp_namespace") | .valueFrom.fieldRef.fieldPath) = "metadata.namespace"' ${SCRATCH}
+
     # Add our priorityClassName to the manifest.
     yq -iy '.spec.template.spec.priorityClassName = "critical-application-infra"' ${SCRATCH}
 
