@@ -38,8 +38,9 @@
       "automerge": true,
       "automergeType": "branch",
       "groupName": "kube-vip",
-      "matchFileNames": ["kustomization/components/kube-vip/kustomization.yml"],
+      "matchFileNames": ["justfile", "kustomization/components/kube-vip/kustomization.yml"],
       "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchPackageNames": ["ghcr.io/kube-vip/kube-vip"],
       "minimumReleaseAge": "3 days"
     },
     {
