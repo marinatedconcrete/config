@@ -1,0 +1,22 @@
+# renovate
+FROM debian:stable-slim
+
+# Install sshd and remove the auto-generated keys
+RUN apt-get update && \
+    apt-get install -y openssh-server curl && \
+    rm /etc/ssh/ssh_host_*
+
+# Set up the dev user
+RUN useradd -ms /bin/bash dev && \
+    mkdir -p /home/dev/.ssh && \
+    chown -R dev:dev /home/dev/.ssh
+
+COPY root /
+
+EXPOSE 2222
+CMD ["/init.sh"]
+
+# Where we keep config like the ssh host keys
+VOLUME /config
+# The data we want ssh access to. Sessions will start in this directory.
+VOLUME /data
