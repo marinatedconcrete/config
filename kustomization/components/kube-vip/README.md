@@ -67,37 +67,3 @@ spec:
               value: 233.252.0.42
           name: kube-vip
 ```
-
-## Optional
-
-### Namespace
-
-If you do not deploy this to the `kube-vip` namespace, you will need to tell kube-vip what namespace it is deployed to.
-
-#### `kustomization.yml`
-
-```yaml
-patches:
-  - path: patches/set_kube-vip_namespace.yml
-    target:
-      kind: DaemonSet
-      name: kube-vip-ds
-```
-
-#### `patches/set_kube-vip_namespace.yml`
-
-```yaml
----
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: this-is-ignored-but-is-required
-spec:
-  template:
-    spec:
-      containers:
-        - env:
-            - name: cp_namespace
-              value: totally-new-namespace
-          name: kube-vip
-```
