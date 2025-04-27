@@ -16,9 +16,6 @@ on: # yamllint disable-line rule:truthy
     paths:
       - .github/workflows/image-vscode-ssh-server.yml
       - images/vscode-ssh-server/**
-  release:
-    types:
-      - created
 
 jobs:
   build-container:
