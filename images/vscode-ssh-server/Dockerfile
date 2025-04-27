@@ -3,7 +3,9 @@ FROM debian:stable-slim
 
 # Install sshd and remove the auto-generated keys
 RUN apt-get update && \
-    apt-get install -y openssh-server curl && \
+    apt-get install -y --no-install-recommends openssh-server curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
     rm /etc/ssh/ssh_host_*
 
 # Set up the dev user
