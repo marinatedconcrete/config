@@ -1,7 +1,7 @@
 {
   "name": "config",
   "build": {
-    "cacheFrom": "ghcr.io/marinatedconcrete/config-devcontainer:latest",
+    "cacheFrom": "ghcr.io/marinatedconcrete/config-devcontainer",
     "context": "..",
     "dockerfile": "Dockerfile"
   },
@@ -81,5 +81,6 @@
     }
   },
   "postCreateCommand": ".devcontainer/post-create-command.sh",
+  "containerUser": "vscode",
   "remoteUser": "vscode"
 }
