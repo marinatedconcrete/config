@@ -36,7 +36,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      # Note: this must start with a number for the build to work correctly!
       - name: Compute Version Tag
         env:
           BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('{0}-pr', github.event.number) }}
