@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 set -ex
 
 # Ensure per-machine keys
@@ -12,7 +12,7 @@ fi
 AUTHORIZED_KEYS_PATH=/home/dev/.ssh/authorized_keys
 if [ ! -f $AUTHORIZED_KEYS_PATH ]; then
     # Ex: https://github.com/robarnold.keys
-    curl -L $AUTHORIZED_KEYS_URL -o $AUTHORIZED_KEYS_PATH
+    curl --location --fail "$AUTHORIZED_KEYS_URL" -o $AUTHORIZED_KEYS_PATH
     chmod 600 $AUTHORIZED_KEYS_PATH
 else
     echo "Authorized keys already present. Skipping download."

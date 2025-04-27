@@ -14,6 +14,7 @@ RUN useradd -ms /bin/bash dev && \
 COPY root /
 
 EXPOSE 2222
+USER dev
 CMD ["/init.sh"]
 
 # Where we keep config like the ssh host keys
