@@ -39,7 +39,7 @@ spec:
       - name: ssh-server
         env:
         - name: AUTHORIZED_KEYS_URL
-          # Pick swap in your github username
+          # Swap in your github username
           value: "https://github.com/marinatedconcrete.keys"
         image: ghcr.io/marinatedconcrete/config/vscode-ssh-server
         ports:
