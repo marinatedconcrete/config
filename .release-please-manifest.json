@@ -7,5 +7,6 @@
   "kustomization/components/paperless": "1.0.2",
   "kustomization/components/priorityclass": "1.0.3",
   "kustomization/components/unifi-network-application": "1.1.7",
-  "renovate": "2.1.0"
+  "renovate": "2.1.0",
+  "images/vscode-ssh-server": "0.1.0"
 }
