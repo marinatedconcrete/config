@@ -16,9 +16,6 @@ on: # yamllint disable-line rule:truthy
     paths:
       - .github/workflows/image-kairos-ubuntu.yml
       - images/kairos-ubuntu/**
-  release:
-    types:
-      - created
 
 jobs:
   build-container:
