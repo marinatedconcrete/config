@@ -13,7 +13,7 @@
   "packageRules": [
     {
       "description": "Automerge all js infra, and gh-cli changes",
-      "matchPackageNames": ["prettier", "@yarnpkg/cli", "cli/cli", "nodejs/node"],
+      "matchPackageNames": ["prettier", "@yarnpkg/cli", "cli/cli", "node"],
       "automerge": true,
       "automergeSchedule": ["every day"]
     },
