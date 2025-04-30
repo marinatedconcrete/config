@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.0.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.0.0...ansible-collection@v1.0.1) (2025-04-30)
+
+
+### Bug Fixes
+
+* Make sure ansible test runner picks up k8s updates ([#316](https://github.com/marinatedconcrete/config/issues/316)) ([87327cf](https://github.com/marinatedconcrete/config/commit/87327cfc32b75674d1abd4c925232084c4c43cc1))
+
+
+### Other Changes
+
+* **package:** update dependency ansible to v11.4.0 ([#305](https://github.com/marinatedconcrete/config/issues/305)) ([0824b6b](https://github.com/marinatedconcrete/config/commit/0824b6b088ade4ef99cb8e22c3c671d99bf2af17))
+* **package:** update dependency ansible-core to v2.18.4 ([6f6ed35](https://github.com/marinatedconcrete/config/commit/6f6ed355ff585387cfc1086df013c47e89b64f11))
+* **package:** update dependency ansible-core to v2.18.5 ([29d5a38](https://github.com/marinatedconcrete/config/commit/29d5a3854e74366305feda8316b17c7deefc9165))
+* **package:** update dependency ansible-lint to v25.2.0 ([#308](https://github.com/marinatedconcrete/config/issues/308)) ([dbdef00](https://github.com/marinatedconcrete/config/commit/dbdef00aaf09647be2a2d2e4a58674d613228e64))
+* **package:** update dependency ansible-lint to v25.2.1 ([a06a7f7](https://github.com/marinatedconcrete/config/commit/a06a7f702480dadacc04ca596f697ec913300559))
+* **package:** update dependency ansible-lint to v25.4.0 ([#359](https://github.com/marinatedconcrete/config/issues/359)) ([9c9ff51](https://github.com/marinatedconcrete/config/commit/9c9ff51abab5f2bf06c8d54d0e9da99fe666c0aa))
+* **package:** update dependency kubernetes/kubernetes to v1.33.0 ([#349](https://github.com/marinatedconcrete/config/issues/349)) ([b114364](https://github.com/marinatedconcrete/config/commit/b1143645c052fb7280af35152836e8bfd81d2d49))
+
 ## [1.0.0](https://github.com/marinatedconcrete/config/compare/ansible-collection@v0.1.0...ansible-collection@v1.0.0) (2025-03-03)
 
 
