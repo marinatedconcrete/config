@@ -49,7 +49,6 @@
     },
     "images/vscode-ssh-server": {
       "include-v-in-tag": false,
-      "initial-version": "0.1.0",
       "package-name": "vscode-ssh-server",
       "prerelease": true,
       "release-type": "simple",
