@@ -13,6 +13,7 @@ ARG KUBERNETES_DISTRO=k3s
 ARG KUBERNETES_VERSION=v1.31.4+k3s1
 # renovate: datasource=github-releases depName=kairos-io/kairos-framework
 ARG FRAMEWORK_VERSION=v2.20.0
+ARG REGISTRY
 ARG VERSION
 
 COPY --from=kairos-init /kairos-init /kairos-init
@@ -25,6 +26,7 @@ RUN /kairos-init \
     -l debug \
     -m "${MODEL}" \
     -s install \
+    -r "${REGISTRY}" \
     -t "${TRUSTED_BOOT}" \
     -v "${VARIANT}" \
     --k8sversion "${KUBERNETES_VERSION}" \
@@ -41,6 +43,7 @@ RUN /kairos-init \
     -l debug \
     -m "${MODEL}" \
     -s init \
+    -r "${REGISTRY}" \
     -t "${TRUSTED_BOOT}" \
     -v "${VARIANT}" \
     --k8sversion "${KUBERNETES_VERSION}" \
@@ -54,6 +57,7 @@ RUN /kairos-init \
     -k "${KUBERNETES_DISTRO}" \
     -l debug \
     -m "${MODEL}" \
+    -r "${REGISTRY}" \
     -t "${TRUSTED_BOOT}" \
     -v "${VARIANT}" \
     --k8sversion "${KUBERNETES_VERSION}" \
