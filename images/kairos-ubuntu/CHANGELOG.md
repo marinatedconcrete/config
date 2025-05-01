@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.4](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.1.3...kairos-ubuntu-0.1.4) (2025-05-01)
+
+
+### Bug Fixes
+
+* Specify the registory of our Kairos image ([#370](https://github.com/marinatedconcrete/config/issues/370)) ([dfdf173](https://github.com/marinatedconcrete/config/commit/dfdf1731f61a2d8f39705aac88d163be50b9704a))
+
+
+### Other Changes
+
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.4.5 ([d8ec9d3](https://github.com/marinatedconcrete/config/commit/d8ec9d3768db4c36de3a434874cc9bb9e687a46b))
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.4.6 ([7737d7c](https://github.com/marinatedconcrete/config/commit/7737d7cfb90ad933b2f39bbfc89e5186c9592a02))
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.4.7 ([3bb0f72](https://github.com/marinatedconcrete/config/commit/3bb0f72b0f9f5cb70fa95dcdde47a49d078e5ab4))
+
 ## [0.1.3](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu@v0.1.2...kairos-ubuntu-0.1.3) (2025-04-21)
 
 
