@@ -1,5 +1,5 @@
 # Marinated Concrete's VSCode-compatible ssh server
-This runs a little ssh server that's compatible with VSCode's remote SSH feature. Unfortunately, [the LinuxServer one](https://docs.linuxserver.io/images/docker-openssh-server/) cannot be used because it is based on Alpine so it lacks glibc, a [known limitation](https://code.visualstudio.com/docs/remote/ssh#_remote-ssh-limitations).
+This runs a little ssh server that's compatible with VSCode's remote SSH feature. Unfortunately, the [LinuxServer one](https://docs.linuxserver.io/images/docker-openssh-server/) cannot be used because it is based on Alpine so it lacks glibc, a [known limitation](https://code.visualstudio.com/docs/remote/ssh#_remote-ssh-limitations).
 
 It's also less flexible/more opinionated. The intention is to run it as a sidecar to an existing application you have, such as esphome, HomeAssistant, or zwave-js.
 
