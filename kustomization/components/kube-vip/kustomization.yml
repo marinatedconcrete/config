@@ -7,4 +7,5 @@ images:
     newTag: v0.9.1@sha256:37036d0f81745c4a5948abd069006264b699b3a98d26aadb24e63f86b7a3fdef
 resources:
   - rbac.yml
-  - daemonset.yml
+  - daemonset/services.yml
+  - daemonset/vip.yml
