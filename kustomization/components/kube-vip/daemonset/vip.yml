@@ -42,12 +42,6 @@ spec:
               value: first
             - name: port
               value: "6443"
-            - name: svc_election
-              value: "true"
-            - name: svc_enable
-              value: "true"
-            - name: svc_leasename
-              value: plndr-svcs-lock
             - name: vip_arp
               value: "true"
             - name: vip_leaderelection

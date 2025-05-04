@@ -19,10 +19,10 @@ codegen-kube-vip:
 
     # renovate: datasource=docker depName=ghcr.io/kube-vip/kube-vip
     KUBE_VIP_VERSION=v0.9.1
-    DEST=kustomization/components/kube-vip/daemonset.yml
-    SCRATCH=$(mktemp --tmpdir daemonset-XXX.yml)
 
-    # DaemonSet manifest generation.
+    # VIP DaemonSet manifest generation.
+    DEST=kustomization/components/kube-vip/daemonset/vip.yml
+    SCRATCH=$(mktemp --tmpdir daemonset-XXX.yml)
     docker run --network host --rm ghcr.io/kube-vip/kube-vip:${KUBE_VIP_VERSION} \
         manifest daemonset \
             --address=8.8.8.8 \
@@ -30,8 +30,6 @@ codegen-kube-vip:
             --controlplane \
             --inCluster \
             --leaderElection \
-            --services \
-            --servicesElection \
             --taint \
         > ${SCRATCH}
 
@@ -59,8 +57,62 @@ codegen-kube-vip:
     yq -iy 'del(.spec.template.spec.containers[0].env[] | select(.name == "cp_namespace") | .value)' ${SCRATCH}
     yq -iy '(.spec.template.spec.containers[0].env[] | select(.name == "cp_namespace") | .valueFrom.fieldRef.fieldPath) = "metadata.namespace"' ${SCRATCH}
 
-    # Add our priorityClassName to the manifest.
-    yq -iy '.spec.template.spec.priorityClassName = "critical-application-infra"' ${SCRATCH}
+    # Add appropriate priorityClassName to the manifest.
+    yq -iy '.spec.template.spec.priorityClassName = "system-cluster-critical"' ${SCRATCH}
+
+    # Sort the container's env by the name of the environment variables to set.
+    yq -iy '.spec.template.spec.containers[0].env |= sort_by(.name)' ${SCRATCH}
+
+    # Write out the final output.
+    echo '# @codegen-command: just codegen-kube-vip' > ${DEST}
+    echo '# @generated' >> ${DEST}
+    echo '---' >> ${DEST}
+    yq -y -S '' ${SCRATCH} \
+        | sed -e "s/'/\"/g" \
+        >> ${DEST}
+
+
+    # Services DaemonSet manifest generation.
+    DEST=kustomization/components/kube-vip/daemonset/services.yml
+    SCRATCH=$(mktemp --tmpdir daemonset-XXX.yml)
+    docker run --network host --rm ghcr.io/kube-vip/kube-vip:${KUBE_VIP_VERSION} \
+        manifest daemonset \
+            --arp \
+            --inCluster \
+            --services \
+            --servicesElection \
+        > ${SCRATCH}
+
+    # Set a unique name that is different from the control plane daemonset.
+    yq -iy '.metadata.name = "kube-vip-svc-ds"' ${SCRATCH}
+    yq -iy '.spec.selector.matchLabels."app.kubernetes.io/name" = "kube-vip-svc-ds"' ${SCRATCH}
+    yq -iy '.spec.template.metadata.labels."app.kubernetes.io/name" = "kube-vip-svc-ds"' ${SCRATCH}
+
+    # Drop namespace and let user configure this.
+    yq -iy 'del(.metadata.namespace)' ${SCRATCH}
+
+    # Remove creationTimestamp fields as we do not care about them.
+    yq -iy 'del(.metadata.creationTimestamp)' ${SCRATCH}
+    yq -iy 'del(.spec.template.metadata.creationTimestamp)' ${SCRATCH}
+
+    # Remove empty objects that get added by their generator.
+    yq -iy 'del(.spec.template.spec.containers[0].resources)' ${SCRATCH}
+    yq -iy 'del(.spec.updateStrategy)' ${SCRATCH}
+
+    # Remove the tag from the image, as it is managed by the `kustomization.yml` file.
+    yq -iy '.spec.template.spec.containers[0].image = "ghcr.io/kube-vip/kube-vip"' ${SCRATCH}
+
+    # Remove unused environment settings.
+    yq -iy 'del(.spec.template.spec.containers[0].env[] | select(.name == "dns_mode"))' ${SCRATCH}
+    yq -iy 'del(.spec.template.spec.containers[0].env[] | select(.name == "port"))' ${SCRATCH}
+    yq -iy 'del(.spec.template.spec.containers[0].env[] | select(.name == "prometheus_server"))' ${SCRATCH}
+    yq -iy 'del(.spec.template.spec.containers[0].env[] | select(.name == "vip_address"))' ${SCRATCH}
+
+    # Set cp_namespace via a reference.
+    yq -iy '.spec.template.spec.containers[0].env += [{"name": "cp_namespace", "valueFrom": { "fieldRef": { "fieldPath": "metadata.namespace"}}}]' ${SCRATCH}
+
+    # Add appropriate priorityClassName to the manifest.
+    yq -iy '.spec.template.spec.priorityClassName = "system-cluster-critical"' ${SCRATCH}
 
     # Sort the container's env by the name of the environment variables to set.
     yq -iy '.spec.template.spec.containers[0].env |= sort_by(.name)' ${SCRATCH}
