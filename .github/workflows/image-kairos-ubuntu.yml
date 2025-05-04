@@ -9,7 +9,7 @@ on: # yamllint disable-line rule:truthy
       - .github/workflows/image-kairos-ubuntu.yml
       - images/kairos-ubuntu/**
     tags:
-      - kairos-ubuntu@v*
+      - kairos-ubuntu-*
   pull_request:
     branches:
       - main
