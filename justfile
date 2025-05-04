@@ -11,18 +11,18 @@ check-format:
     just --unstable --fmt --check -f justfile
     yarn prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md
 
-# Generates the daemonset manifest for kube-vip.
+# Generates the manifests for kube-vip.
 [group('codegen')]
-codegen-kube-vip-daemonset:
+codegen-kube-vip:
     #!/usr/bin/env bash
     set -euo pipefail
 
     # renovate: datasource=docker depName=ghcr.io/kube-vip/kube-vip
     KUBE_VIP_VERSION=v0.9.1
     DEST=kustomization/components/kube-vip/daemonset.yml
-    SCRATCH=/tmp/daemonset.yml
+    SCRATCH=$(mktemp --tmpdir daemonset-XXX.yml)
 
-    # First, generate the manifest with their tooling.
+    # DaemonSet manifest generation.
     docker run --network host --rm ghcr.io/kube-vip/kube-vip:${KUBE_VIP_VERSION} \
         manifest daemonset \
             --address=8.8.8.8 \
@@ -30,14 +30,13 @@ codegen-kube-vip-daemonset:
             --controlplane \
             --inCluster \
             --leaderElection \
-            --namespace=kube-vip \
             --services \
             --servicesElection \
             --taint \
         > ${SCRATCH}
 
-    # Update namespace to kube-vip (optional patch is documented).
-    yq -iy '.metadata.namespace = "kube-vip"' ${SCRATCH}
+    # Drop namespace and let user configure this.
+    yq -iy 'del(.metadata.namespace)' ${SCRATCH}
 
     # Remove creationTimestamp fields as we do not care about them.
     yq -iy 'del(.metadata.creationTimestamp)' ${SCRATCH}
@@ -67,7 +66,33 @@ codegen-kube-vip-daemonset:
     yq -iy '.spec.template.spec.containers[0].env |= sort_by(.name)' ${SCRATCH}
 
     # Write out the final output.
-    echo '# @codegen-command: just codegen-kube-vip-daemonset' > ${DEST}
+    echo '# @codegen-command: just codegen-kube-vip' > ${DEST}
+    echo '# @generated' >> ${DEST}
+    echo '---' >> ${DEST}
+    yq -y -S '' ${SCRATCH} \
+        | sed -e "s/'/\"/g" \
+        >> ${DEST}
+
+
+    # RBAC manifest generation.
+    DEST=kustomization/components/kube-vip/rbac.yml
+    SCRATCH=$(mktemp --tmpdir rbac-XXX.yml)
+
+    docker run --network host --rm ghcr.io/kube-vip/kube-vip:${KUBE_VIP_VERSION} \
+        manifest rbac \
+            --namespace=kube-vip \
+        > ${SCRATCH}
+
+    # Drop namespace and let user configure this.
+    yq -iy 'del(.metadata.namespace)' ${SCRATCH}
+    yq -iy 'del(select(.kind == "ClusterRoleBinding") | .subjects[] | select(.name == "kube-vip") | .namespace)' ${SCRATCH}
+
+    # Sort rules.
+    yq -iy '.rules[]?.resources |= sort_by(.)' ${SCRATCH}
+    yq -iy '.rules[]?.verbs |= sort_by(.)' ${SCRATCH}
+
+    # Write out the final output.
+    echo '# @codegen-command: just codegen-kube-vip' > ${DEST}
     echo '# @generated' >> ${DEST}
     echo '---' >> ${DEST}
     yq -y -S '' ${SCRATCH} \

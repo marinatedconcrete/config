@@ -1,3 +1,5 @@
+# @codegen-command: just codegen-kube-vip
+# @generated
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -7,8 +9,6 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  annotations:
-    rbac.authorization.kubernetes.io/autoupdate: "true"
   name: system:kube-vip-role
 rules:
   - apiGroups:
@@ -23,9 +23,9 @@ rules:
       - endpoints
       - services
     verbs:
+      - endpoints
       - get
       - list
-      - update
       - watch
   - apiGroups:
       - ""
@@ -63,8 +63,8 @@ rules:
     verbs:
       - list
 ---
-kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
 metadata:
   name: system:kube-vip-binding
 roleRef:
