@@ -9,7 +9,7 @@ on: # yamllint disable-line rule:truthy
       - .github/workflows/image-vscode-ssh-server.yml
       - images/vscode-ssh-server/**
     tags:
-      - vscode-ssh-server@v*
+      - vscode-ssh-server-*
   pull_request:
     branches:
       - main
