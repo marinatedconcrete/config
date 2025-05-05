@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.1.4...kairos-ubuntu-0.1.5) (2025-05-05)
+
+
+### Bug Fixes
+
+* pin ubuntu image for kairos-ubuntu ([7b3c4e8](https://github.com/marinatedconcrete/config/commit/7b3c4e861e27b5bb6bb96e40ab392b0c08925128))
+
 ## [0.1.4](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.1.3...kairos-ubuntu-0.1.4) (2025-05-01)
 
 
