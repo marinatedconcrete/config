@@ -12,7 +12,7 @@ ARG KUBERNETES_DISTRO=k3s
 # renovate: datasource=custom.k3s depName=k3s
 ARG KUBERNETES_VERSION=v1.31.4+k3s1
 # renovate: datasource=github-releases depName=kairos-io/kairos-framework
-ARG FRAMEWORK_VERSION=v2.20.0
+ARG FRAMEWORK_VERSION=v2.22.0
 ARG REGISTRY
 ARG VERSION
 
