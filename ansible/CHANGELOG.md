@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.0.1...ansible-collection@v1.0.2) (2025-05-07)
+
+
+### Other Changes
+
+* **package:** update dependency ansible to v11.5.0 ([#345](https://github.com/marinatedconcrete/config/issues/345)) ([3c4189b](https://github.com/marinatedconcrete/config/commit/3c4189b6e08ee6944123aa60be883be79287c6e5))
+
 ## [1.0.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.0.0...ansible-collection@v1.0.1) (2025-04-30)
 
 
