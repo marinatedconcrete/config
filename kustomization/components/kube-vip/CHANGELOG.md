@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v3.0.0...kustomize-kube-vip@v3.0.1) (2025-05-12)
+
+
+### Bug Fixes
+
+* update RBAC from incorrect `endpoints` ([e31b9b9](https://github.com/marinatedconcrete/config/commit/e31b9b9705dcfc58df5ece80a6b3ebdad4be9f6b))
+
 ## [3.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v2.0.1...kustomize-kube-vip@v3.0.0) (2025-05-04)
 
 
