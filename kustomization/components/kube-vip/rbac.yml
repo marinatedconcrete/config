@@ -23,9 +23,9 @@ rules:
       - endpoints
       - services
     verbs:
-      - endpoints
       - get
       - list
+      - update 
       - watch
   - apiGroups:
       - ""
