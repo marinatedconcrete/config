@@ -8,4 +8,4 @@ resources:
 
 images:
   - name: redis
-    newTag: 7.4.3@sha256:1233cac5802e1197e451b9e31d9065334abbd67532d3fcd80de5ef42a1a03c48
+    newTag: 8.0.1@sha256:1b7c17f650602d97a10724d796f45f0b5250d47ee5ba02f28de89f8a1531f3ce
