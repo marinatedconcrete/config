@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.1.5...kairos-ubuntu-0.1.6) (2025-05-16)
+
+
+### Other Changes
+
+* **package:** update dependency kairos-io/kairos-framework to v2.22.0 ([#344](https://github.com/marinatedconcrete/config/issues/344)) ([34bf298](https://github.com/marinatedconcrete/config/commit/34bf298e85ed1775aefb6b5fa7535d9867854977))
+
 ## [0.1.5](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.1.4...kairos-ubuntu-0.1.5) (2025-05-05)
 
 
