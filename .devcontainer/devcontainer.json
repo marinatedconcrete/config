@@ -59,7 +59,7 @@
       "nvmVersion": "0.40.3",
       "pnpmVersion": "none",
       // renovate: datasource=node-version depName=node
-      "version": "22.15.0"
+      "version": "22.15.1"
     },
     "ghcr.io/devcontainers-extra/features/argo-cd:1": {
       // renovate: datasource=github-releases depName=argoproj/argo-cd
