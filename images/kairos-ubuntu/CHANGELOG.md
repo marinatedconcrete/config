@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.1.6...kairos-ubuntu-0.2.0) (2025-05-17)
+
+
+### Features
+
+* Upgrade to k3s 1.32.1+k3s1 ([#388](https://github.com/marinatedconcrete/config/issues/388)) ([76030b5](https://github.com/marinatedconcrete/config/commit/76030b50ad2bab66fac560b875e2ff370013c48b))
+
 ## [0.1.6](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.1.5...kairos-ubuntu-0.1.6) (2025-05-16)
 
 
