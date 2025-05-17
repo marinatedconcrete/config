@@ -38,7 +38,10 @@
       "automerge": true,
       "automergeType": "branch",
       "groupName": "kube-vip",
-      "matchFileNames": ["justfile", "kustomization/components/kube-vip/kustomization.yml"],
+      "matchFileNames": [
+        "justfile",
+        "kustomization/components/kube-vip/kustomization.yml"
+      ],
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "matchPackageNames": ["ghcr.io/kube-vip/kube-vip"],
       "minimumReleaseAge": "3 days"
@@ -85,14 +88,14 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^.*Dockerfile$"],
+      "managerFilePatterns": ["/^.*Dockerfile$/"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\nARG\\s+[A-Z_]+_VERSION=(?<currentValue>.+?)\\n"
       ]
     },
     {
       "customType": "regex",
-      "fileMatch": ["^.*\\.yml$"],
+      "managerFilePatterns": ["/^.*\\.yml$/"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s+version:\\s+\"(?<currentValue>.*?)\"",
         "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\n[a-zA-Z_]+version:\\s+\"?(?<currentValue>.*?)\"?\\n"
@@ -102,12 +105,12 @@
       "customType": "regex",
       "datasourceTemplate": "pypi",
       "depNameTemplate": "ansible-core",
-      "fileMatch": ["^ansible/meta/runtime\\.yml$"],
+      "managerFilePatterns": ["/^ansible/meta/runtime\\.yml$/"],
       "matchStrings": ["requires_ansible:\\s*\">=(?<currentValue>.*?)\""]
     },
     {
       "customType": "regex",
-      "fileMatch": ["^justfile$"],
+      "managerFilePatterns": ["/^justfile$/"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\n\\s+?[A-Z_]+_VERSION=(?<currentValue>.+?)\\n"
       ]
