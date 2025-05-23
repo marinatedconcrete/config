@@ -2,7 +2,7 @@
 
 FROM quay.io/kairos/kairos-init:v0.4.8@sha256:0b8c5c0a633edcc76fd3f76ffaf927c7c170f114520d52afb59b22728e1ce5d1 AS kairos-init
 
-FROM ubuntu:24.04@sha256:1e622c5f073b4f6bfad6632f2616c7f59ef256e96fe78bf6a595d1dc4376ac02 AS base-kairos
+FROM ubuntu:24.04@sha256:6015f66923d7afbc53558d7ccffd325d43b4e249f41a6e93eef074c9505d2233 AS base-kairos
 LABEL org.opencontainers.image.title="A custom Ubuntu-based Kairos image."
 LABEL org.opencontainers.image.title="kairos-ubuntu"
 ARG VARIANT=standard
