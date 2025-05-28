@@ -5,7 +5,7 @@
       "customType": "regex",
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "marinatedconcrete/config",
-      "fileMatch": ["^(.+/)+kustomization\\.yml$"],
+      "managerFilePatterns": ["/^(.+/)+kustomization\\.yml$/"],
       "matchStrings": [
         "- https://github\\.com/marinatedconcrete/config/releases/download/(?<currentValue>.*?)/",
         "- https://github\\.com/marinatedconcrete/config/?\\?ref=(?<currentValue>.+?)$"
@@ -15,7 +15,7 @@
       "customType": "regex",
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "marinatedconcrete/config",
-      "fileMatch": ["^renovate.json5?$"],
+      "managerFilePatterns": ["/^renovate.json5?$/"],
       "matchStrings": [
         "\"github>marinatedconcrete/config//renovate/.*#(?<currentValue>.+?)\""
       ]
