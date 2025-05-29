@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/marinatedconcrete/config/compare/renovate-config-2.1.0...renovate-config-2.1.1) (2025-05-28)
+
+
+### Other Changes
+
+* **config:** Migrate renovate configs to the new syntax ([#399](https://github.com/marinatedconcrete/config/issues/399)) ([163e2d6](https://github.com/marinatedconcrete/config/commit/163e2d68a1eeb1ac1b6f945ae373bf7cdfe4da80))
+
 ## [2.1.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.0.1...renovate-config-2.1.0) (2025-04-18)
 
 
