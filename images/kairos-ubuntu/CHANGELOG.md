@@ -26,7 +26,7 @@
 
 ### Bug Fixes
 
-* Specify the registory of our Kairos image ([#370](https://github.com/marinatedconcrete/config/issues/370)) ([dfdf173](https://github.com/marinatedconcrete/config/commit/dfdf1731f61a2d8f39705aac88d163be50b9704a))
+* Specify the registry of our Kairos image ([#370](https://github.com/marinatedconcrete/config/issues/370)) ([dfdf173](https://github.com/marinatedconcrete/config/commit/dfdf1731f61a2d8f39705aac88d163be50b9704a))
 
 
 ### Other Changes
