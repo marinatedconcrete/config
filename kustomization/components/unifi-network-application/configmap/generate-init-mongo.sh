@@ -13,6 +13,14 @@ echo "db.getSiblingDB(\"unifi\")
       {role: \"dbOwner\", db: \"unifi\"}
     ]
   });
+db.getSiblingDB(\"unifi_audit\")
+  .createUser({
+    user: \"unifi\",
+    pwd: \"${MONGO_PASS}\",
+    roles: [
+      {role: \"dbOwner\", db: \"unifi_audit\"}
+    ]
+  });
 db.getSiblingDB(\"unifi_stat\")
   .createUser({
     user: \"unifi\",
