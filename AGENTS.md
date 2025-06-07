@@ -16,4 +16,5 @@
 - Follow [Conventional Commits](https://www.conventionalcommits.org/) style. Commits from `sdwilsh` use types such as `feat`, `fix`, `docs`, `chore`, and `tests`, optionally with `!` for breaking changes (e.g., `feat!: rename ...`).
 - Keep the summary short and use the body to provide context if needed. Issue or PR references can be placed in parentheses after the summary, as seen in commits like `Add Mosquitto Kustomize Component (#74)`.
 - Signed commits are recommended as noted in commit `Support GPG Signing of Commits (#76)`.
+- Pull request titles should also follow the [Conventional Commits](https://www.conventionalcommits.org/) style so that PRs and commits use consistent semantic naming.
 
