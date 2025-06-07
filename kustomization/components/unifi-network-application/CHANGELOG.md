@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.1.11](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.10...kustomize-unifi-network-application@v1.1.11) (2025-06-07)
+
+
+### Bug Fixes
+
+* Fix new installs of Unifi ([#407](https://github.com/marinatedconcrete/config/issues/407)) ([d062194](https://github.com/marinatedconcrete/config/commit/d0621946055f7400a14c5f98ec755ef903ae318b))
+
+
+### Other Changes
+
+* **main:** release kustomize-unifi-network-application 1.1.10 ([#390](https://github.com/marinatedconcrete/config/issues/390)) ([4364908](https://github.com/marinatedconcrete/config/commit/43649085dcf503a00e20bf8ea83c249794cc04a2))
+* **package:** update busybox:1.37.0 docker digest to 3308bdf ([ccddcf0](https://github.com/marinatedconcrete/config/commit/ccddcf048a8c8d601011f87628c0ac25784d5d01))
+* **package:** update busybox:1.37.0 docker digest to f64ff79 ([21df67d](https://github.com/marinatedconcrete/config/commit/21df67de4a505f3819a0d1c9cb7d9f20c1680966))
+* **package:** update lscr.io/linuxserver/unifi-network-application:9.1.120 docker digest to 685dc8e ([#406](https://github.com/marinatedconcrete/config/issues/406)) ([cb408af](https://github.com/marinatedconcrete/config/commit/cb408af615cea4c68c508b32b600c5ccadba93ae))
+* **package:** update lscr.io/linuxserver/unifi-network-application:9.1.120 docker digest to dd5ef5b ([f30757c](https://github.com/marinatedconcrete/config/commit/f30757c741a5c3f87b2c4e89bf590df1e166b2be))
+* **package:** update mongo docker tag to v7.0.21 ([fdc83a2](https://github.com/marinatedconcrete/config/commit/fdc83a255af75b7c0c89596a35e6700a56208223))
+* **package:** update mongo docker tag to v8 ([#290](https://github.com/marinatedconcrete/config/issues/290)) ([e76f960](https://github.com/marinatedconcrete/config/commit/e76f96096b8a0c4fe46300d65db4a15b6ae6f102))
+* **package:** update unifi ([39e8188](https://github.com/marinatedconcrete/config/commit/39e818881fee402b71f89ebf946ce32d6bc88371))
+
 ## [1.1.10](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.9...kustomize-unifi-network-application@v1.1.10) (2025-06-06)
 
 
