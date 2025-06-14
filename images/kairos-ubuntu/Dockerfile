@@ -10,7 +10,7 @@ ARG MODEL=generic
 ARG TRUSTED_BOOT=false
 ARG KUBERNETES_DISTRO=k3s
 # renovate: datasource=github-releases depName=k3s-io/k3s
-ARG KUBERNETES_VERSION=v1.32.4+k3s1
+ARG KUBERNETES_VERSION=v1.33.1+k3s1
 # renovate: datasource=github-releases depName=kairos-io/kairos-framework
 ARG FRAMEWORK_VERSION=v2.22.0
 ARG REGISTRY
