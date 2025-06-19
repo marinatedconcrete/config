@@ -4,7 +4,7 @@
 [![Pod Security Standard: Baseline](https://img.shields.io/badge/pod_security_standard-baseline-yellow?style=for-the-badge&logo=kubernetes&logoColor=%23326CE5)](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
 [![Priority Class](https://img.shields.io/badge/dynamic/yaml?style=for-the-badge&label=priorityclass&url=https%3A%2F%2Fgithub.com%2Fmarinatedconcrete%2Fconfig%2Fraw%2Frefs%2Fheads%2Fmain%2Fkustomization%2Fcomponents%2Fpaperless%2Fstatefulset.yml&query=%24.spec.template.spec.priorityClassName)](https://github.com/marinatedconcrete/config/tree/main/kustomization/components/priorityclass)
 
-This will deploy an instance of [paperless-ngx](https://docs.paperless-ngx.com/). This component requires a redis instance (provided via component of the same name) and optionally can use the related samba component.
+This will deploy an instance of [paperless-ngx](https://docs.paperless-ngx.com/). This component requires a Redis instance (provided via the component of the same name) and includes a Samba container for uploading scanned documents over the network.
 
 # Example Usage
 
@@ -52,9 +52,22 @@ stringData:
   paperless_admin_password: super-secure-unhashed-password
 ```
 
-# Optional Components
 
-See the [samba-upload component](../samba-upload/README.md).
+# Samba Uploads
+
+Network-enabled scanners can upload scanned documents directly to CIFS/SMB network
+shares. This container exposes the `paperless-scans` PVC so
+scanned documents can be consumed automatically. Files are removed from this PVC
+once processed.
+
+```yaml
+patches:
+  # Configure the external IP for the samba service
+  - path: patches/configure-samba-address.yml
+    target:
+      kind: Service
+      name: samba
+```
 
 # Optional Patches
 
