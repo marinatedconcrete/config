@@ -4,7 +4,11 @@ kind: Component
 images:
   - name: ghcr.io/paperless-ngx/paperless-ngx
     newTag: 2.15.3@sha256:39b337e73c978238f0b529baf42f1b59b65d17eed35cd61bc1ccbbf779b5d58b
+  - name: ghcr.io/servercontainers/samba:smbd-only-latest
+    digest: sha256:58b59656f36b025da79ee7a71ee4aeffe8a472b23aaf86bf0e27394460180d82
 resources:
   - pvc.yml
   - statefulset.yml
   - service.yml
+  - samba-deployment.yml
+  - samba-service.yml
