@@ -1,6 +1,6 @@
 # See https://kairos.io/docs/reference/kairos-factory/ for more details.
 
-FROM quay.io/kairos/kairos-init:v0.4.9@sha256:66aa70c19d598b96a58b74e3eaa42bc61ce3ba8f20fc93fda586745786508060 AS kairos-init
+FROM quay.io/kairos/kairos-init:v0.5.4@sha256:ae1c4d470c802c103d43bb06347f0884cb50a4f44504cb87963c064a265dd438 AS kairos-init
 
 FROM ubuntu:24.04@sha256:440dcf6a5640b2ae5c77724e68787a906afb8ddee98bf86db94eea8528c2c076 AS base-kairos
 LABEL org.opencontainers.image.title="A custom Ubuntu-based Kairos image."
