@@ -29,7 +29,7 @@ jobs:
       - uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
         id: app-token
         with:
-          app-id: ${{ vars.FORMWORK_REMOVER APP_ID }}
+          app-id: ${{ vars.FORMWORK_REMOVER_APP_ID }}
           private-key: ${{ secrets.FORMWORK_REMOVER_PRIVATE_KEY }}
       - uses: googleapis/release-please-action@a02a34c4d625f9be7cb89156071d8567266a2445 # v4.2.0
         id: release-please
