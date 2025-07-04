@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.1](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.2.0...kairos-ubuntu-0.2.1) (2025-07-04)
+
+
+### Other Changes
+
+* **package:** update dependency k3s-io/k3s to v1.32.4+k3s1 ([ec68674](https://github.com/marinatedconcrete/config/commit/ec6867440eea59e4075c44bf921c96738cd58d49))
+* **package:** update dependency k3s-io/k3s to v1.33.1+k3s1 ([5716650](https://github.com/marinatedconcrete/config/commit/5716650f6b38fce0159b7566902ed344719fe121))
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.4.8 ([d3beab0](https://github.com/marinatedconcrete/config/commit/d3beab04d434ccee1f4c872468d6f52daa796bb3))
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.4.9 ([#408](https://github.com/marinatedconcrete/config/issues/408)) ([eaea219](https://github.com/marinatedconcrete/config/commit/eaea2198795cf216121a7789d58fed250fdcb2b6))
+* **package:** update ubuntu:24.04 docker digest to 440dcf6 ([#405](https://github.com/marinatedconcrete/config/issues/405)) ([df7e0e5](https://github.com/marinatedconcrete/config/commit/df7e0e56a3fde2a1715c82e3d7bf6c8f1f197038))
+* **package:** update ubuntu:24.04 docker digest to 6015f66 ([#378](https://github.com/marinatedconcrete/config/issues/378)) ([3e1c0eb](https://github.com/marinatedconcrete/config/commit/3e1c0eb9cc4e6440146017a74399ce0f041be3fe))
+
 ## [0.2.0](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.1.6...kairos-ubuntu-0.2.0) (2025-05-17)
 
 
