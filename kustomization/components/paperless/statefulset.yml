@@ -59,7 +59,7 @@ spec:
             - name: PAPERLESS_DATE_ORDER
               value: MDY
             - name: PAPERLESS_FILENAME_FORMAT
-              value: "{correspondent}/{created_year}/{created_year}-{created_month}-{created_day} {title}"
+              value: "{{ correspondent }}/{{ created_year }}/{{ created_year }}-{{ created_month }}-{{ created_day }} {{ title }}"
             - name: PAPERLESS_TRASH_DIR
               value: "/usr/src/paperless/media/trash"
             - name: PAPERLESS_IGNORE_DATES

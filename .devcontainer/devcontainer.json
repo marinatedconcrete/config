@@ -38,14 +38,14 @@
     },
     "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
       // renovate: datasource=github-releases depName=kubernetes/kubernetes
-      "version": "1.33.1"
+      "version": "1.33.2"
     },
     "ghcr.io/devcontainers/features/git:1": {
       "version": "os-provided"
     },
     "ghcr.io/devcontainers/features/github-cli:1": {
       // renovate: datasource=github-releases depName=cli/cli
-      "version": "2.74.1"
+      "version": "2.74.2"
     },
     "ghcr.io/dhoeric/features/hadolint:1": {
       // renovate: datasource=github-releases depName=hadolint/hadolint
@@ -59,19 +59,19 @@
       "nvmVersion": "0.40.3",
       "pnpmVersion": "none",
       // renovate: datasource=node-version depName=node
-      "version": "22.16.0"
+      "version": "22.17.0"
     },
     "ghcr.io/devcontainers-extra/features/renovate-cli:2": {
       // renovate: datasource=github-releases depName=renovatebot/renovate
-      "version": "40.37.1"
+      "version": "41.17.2"
     },
     "ghcr.io/guiyomh/features/just:0": {
       // renovate: datasource=github-releases depName=casey/just
-      "version": "1.40.0"
+      "version": "1.41.0"
     },
     "ghcr.io/rio/features/kustomize:1": {
       // renovate: datasource=docker depName=registry.k8s.io/kustomize/kustomize
-      "version": "v5.6.0"
+      "version": "v5.7.0"
     }
   },
   "postCreateCommand": ".devcontainer/post-create-command.sh",
