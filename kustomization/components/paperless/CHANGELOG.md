@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.0.3...kustomize-paperless@v1.1.0) (2025-07-05)
+
+
+### Features
+
+* **paperless:** integrate samba upload resources ([#419](https://github.com/marinatedconcrete/config/issues/419)) ([553691f](https://github.com/marinatedconcrete/config/commit/553691fc8629d4a90024e75445e40138805a7b02))
+
+
+### Bug Fixes
+
+* Update filename format ([#431](https://github.com/marinatedconcrete/config/issues/431)) ([2db2439](https://github.com/marinatedconcrete/config/commit/2db2439e9bf2fb38f1eb53baf1ba225d22b6033f))
+
 ## [1.0.3](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.0.2...kustomize-paperless@v1.0.3) (2025-07-04)
 
 
