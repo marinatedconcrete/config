@@ -14,3 +14,4 @@ ansible/.ansible
 
 # Kairos Factory dumps stuff under /build locally
 /build
+kustomize

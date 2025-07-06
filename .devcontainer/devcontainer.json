@@ -70,7 +70,7 @@
       "version": "1.41.0"
     },
     "ghcr.io/rio/features/kustomize:1": {
-      // renovate: datasource=github-releases depName=kubernetes-sigs/kustomize
+      // renovate: datasource=github-releases depName=kubernetes-sigs/kustomize extractVersion=^kustomize\/v(?<version>.*)$
       "version": "v5.6.0"
     }
   },
