@@ -60,6 +60,8 @@ shares. This container exposes the `paperless-scans` PVC so
 scanned documents can be consumed automatically. Files are removed from this PVC
 once processed.
 
+### `kustomization.yml`
+
 ```yaml
 patches:
   # Configure the external IP for the samba service
@@ -67,6 +69,33 @@ patches:
     target:
       kind: Service
       name: samba
+  # Alternatively, configure a kube-vip annotation
+  - path: patches/configure-samba-annotation.yml
+    target:
+      kind: Service
+      name: samba
+```
+
+#### `patches/configure-samba-address.yml`
+
+```yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: this-is-ignored-but-is-required
+spec:
+  loadBalancerIP: 192.0.2.2
+```
+
+#### `patches/configure-samba-annotation.yml`
+
+```yaml
+---
+- op: add
+  path: /metadata/annotations
+  value:
+    kube-vip.io/loadbalancerIPs: 192.0.2.2
 ```
 
 # Optional Patches
@@ -81,4 +110,22 @@ patches:
     target:
       kind: StatefulSet
       name: paperless
+```
+
+#### `patches/configure-hostname.yml`
+
+```yaml
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: this-is-ignored-but-is-required
+spec:
+  template:
+    spec:
+      containers:
+        - name: paperless
+          env:
+            - name: PAPERLESS_URL
+              value: https://paperless.example.com
 ```
