@@ -5,7 +5,7 @@
       "customType": "regex",
       "managerFilePatterns": ["/^.devcontainer/devcontainer.json$/"],
       "matchStrings": [
-        "//\\s*renovate: datasource=(?<datasource>.+?)\\s+depName=(?<depName>\\S+?)(?:\\s+extractVersion=(?<extractVersion>\\S+))?\\s+\\\".*[Vv]ersion\\\":\\s*\\\"(?<currentValue>.+?)\\\""
+        "//\\s*renovate: datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)(?:\\s+extractVersion=(?<extractVersion>\\S+))?\\s+\\\".*[Vv]ersion\\\":\\s*\\\"(?<currentValue>.+?)\\\""
       ],
       "extractVersionTemplate": "{{extractVersion}}"
     }
