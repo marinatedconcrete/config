@@ -12,6 +12,11 @@
   "rollbackPrs": true,
   "packageRules": [
     {
+      "description": "Extract Kustomize's unusual release versions",
+      "matchPackageNames": ["kubernetes-sigs/kustomize"],
+      "extractVersion": "^kustomize/v(?<version>.*)$"
+    },
+    {
       "description": "Automerge all js infra, and gh-cli changes",
       "matchPackageNames": ["prettier", "@yarnpkg/cli", "cli/cli", "node"],
       "automerge": true,
