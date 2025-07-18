@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.2](https://github.com/marinatedconcrete/config/compare/kustomize-mosquitto@v2.0.1...kustomize-mosquitto@v2.0.2) (2025-07-17)
+
+
+### Other Changes
+
+* **package:** update eclipse-mosquitto docker tag to v2.0.22 ([74b9138](https://github.com/marinatedconcrete/config/commit/74b91386c9be8e948036318936226adb66b773e3))
+* **package:** update eclipse-mosquitto:2.0.22 docker digest to d219d3a ([237c786](https://github.com/marinatedconcrete/config/commit/237c78674e8d43da0d172a074805a4b18753a62c))
+
 ## [2.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-mosquitto@v2.0.0...kustomize-mosquitto@v2.0.1) (2025-04-24)
 
 
