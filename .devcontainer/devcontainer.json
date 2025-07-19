@@ -38,7 +38,7 @@
     },
     "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
       // renovate: datasource=github-releases depName=kubernetes/kubernetes
-      "version": "1.33.2"
+      "version": "1.33.3"
     },
     "ghcr.io/devcontainers/features/git:1": {
       "version": "os-provided"
