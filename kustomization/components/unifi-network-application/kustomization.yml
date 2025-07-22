@@ -11,7 +11,7 @@ images:
   - name: busybox
     newTag: 1.37.0@sha256:f85340bf132ae937d2c2a763b8335c9bab35d6e8293f70f606b9c6178d84f42b
   - name: lscr.io/linuxserver/unifi-network-application
-    newTag: 9.2.87@sha256:75b952fe876559592be4c1de1a733397cb57208ec26ba617fe9bf89849d61ea0
+    newTag: 9.2.87@sha256:0a757b41978541ff9274a311b71437b9c65009f1887d53608011dd3f9a60f02a
   - name: mongo
     newTag: 8.0.11@sha256:dca8d11fe4673f4409e27361e9c5717bd35103c9c15b5b50fc6b2913b2407fed
 resources:
