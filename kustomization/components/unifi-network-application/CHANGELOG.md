@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.14](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.13...kustomize-unifi-network-application@v1.1.14) (2025-07-26)
+
+
+### Other Changes
+
+* **package:** update lscr.io/linuxserver/unifi-network-application:9.2.87 docker digest to 0a757b4 ([37fe51d](https://github.com/marinatedconcrete/config/commit/37fe51d1b505c1917f3eb7ee4d53e1a5da36b603))
+
 ## [1.1.13](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.12...kustomize-unifi-network-application@v1.1.13) (2025-07-18)
 
 
