@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.2.3...kairos-ubuntu-0.2.4) (2025-07-26)
+
+
+### Other Changes
+
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.5.7 ([d08cc9a](https://github.com/marinatedconcrete/config/commit/d08cc9a059b5f349a300a4249d7f9ff371e500cf))
+
 ## [0.2.3](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.2.2...kairos-ubuntu-0.2.3) (2025-07-18)
 
 
