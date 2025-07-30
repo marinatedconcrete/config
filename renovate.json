@@ -74,6 +74,16 @@
       "minimumReleaseAge": "3 days"
     },
     {
+      "description": "Auto-merge samba digest updates monthly",
+      "automerge": true,
+      "automergeType": "branch",
+      "groupName": "samba",
+      "matchFileNames": ["kustomization/components/paperless/kustomization.yml"],
+      "matchPackageNames": ["ghcr.io/servercontainers/samba"],
+      "matchUpdateTypes": ["digest"],
+      "schedule": ["on the first day of the month"]
+    },
+    {
       "description": "Auto-merge renovate updates monthly",
       "automerge": true,
       "automergeType": "branch",
