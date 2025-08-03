@@ -45,7 +45,7 @@
     },
     "ghcr.io/devcontainers/features/github-cli:1": {
       // renovate: datasource=github-releases depName=cli/cli
-      "version": "2.76.1"
+      "version": "2.76.2"
     },
     "ghcr.io/dhoeric/features/hadolint:1": {
       // renovate: datasource=github-releases depName=hadolint/hadolint
