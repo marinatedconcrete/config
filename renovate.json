@@ -84,6 +84,16 @@
       "schedule": ["on the first day of the month"]
     },
     {
+      "description": "Auto-merge ubuntu digest updates monthly",
+      "automerge": true,
+      "automergeType": "branch",
+      "groupName": "ubuntu",
+      "matchFileNames": ["images/kairos-ubuntu/Dockerfile"],
+      "matchPackageNames": ["ubuntu"],
+      "matchUpdateTypes": ["digest"],
+      "schedule": ["on the first day of the month"]
+    },
+    {
       "description": "Auto-merge renovate updates monthly",
       "automerge": true,
       "automergeType": "branch",
