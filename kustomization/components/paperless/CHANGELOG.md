@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.1.0...kustomize-paperless@v1.1.1) (2025-08-08)
+
+
+### Documentation Updates
+
+* show kube-vip patch for paperless ([#435](https://github.com/marinatedconcrete/config/issues/435)) ([fdd4fbf](https://github.com/marinatedconcrete/config/commit/fdd4fbf113b6bfa423a32e291659bdab77f9e38e))
+
 ## [1.1.0](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.0.3...kustomize-paperless@v1.1.0) (2025-07-05)
 
 
