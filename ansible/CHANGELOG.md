@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.4](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.0.3...ansible-collection@v1.0.4) (2025-08-14)
+
+
+### Other Changes
+
+* **package:** update dependency ansible to v11.7.0 ([#417](https://github.com/marinatedconcrete/config/issues/417)) ([6875eea](https://github.com/marinatedconcrete/config/commit/6875eeacca13e0870e8a4d3ef15920779bc9b419))
+* **package:** update dependency ansible to v11.8.0 ([#442](https://github.com/marinatedconcrete/config/issues/442)) ([6c928dd](https://github.com/marinatedconcrete/config/commit/6c928dd35c7437bb0c66ccae25db8f431808cf9c))
+* **package:** update dependency ansible-core to v2.18.7 ([bc23426](https://github.com/marinatedconcrete/config/commit/bc234268cb7f31616a9fde9c0cf6281b9f8ee474))
+* **package:** update dependency ansible-lint to v25.6.1 ([#418](https://github.com/marinatedconcrete/config/issues/418)) ([1dd1dca](https://github.com/marinatedconcrete/config/commit/1dd1dca8737434c72f1c85fcf0791f19a79af033))
+* **package:** update dependency ansible-lint to v25.7.0 ([#452](https://github.com/marinatedconcrete/config/issues/452)) ([1ddb9ea](https://github.com/marinatedconcrete/config/commit/1ddb9eac31928a1c300ff1e832e2dcce34ef6b78))
+* **package:** update dependency kubernetes to v33 ([#413](https://github.com/marinatedconcrete/config/issues/413)) ([7ef52e6](https://github.com/marinatedconcrete/config/commit/7ef52e6385fbd030ee0ac34f3297f56c3b18fdce))
+* **package:** update dependency kubernetes/kubernetes to v1.33.3 ([7f77604](https://github.com/marinatedconcrete/config/commit/7f776045dc93098ee1473379caec4b3a4e08058f))
+
 ## [1.0.3](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.0.2...ansible-collection@v1.0.3) (2025-07-02)
 
 
