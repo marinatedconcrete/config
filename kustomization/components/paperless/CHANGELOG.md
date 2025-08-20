@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.1](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.1.0...kustomize-paperless@v1.1.1) (2025-08-20)
+
+
+### Documentation Updates
+
+* show kube-vip patch for paperless ([#435](https://github.com/marinatedconcrete/config/issues/435)) ([fdd4fbf](https://github.com/marinatedconcrete/config/commit/fdd4fbf113b6bfa423a32e291659bdab77f9e38e))
+
+
+### Other Changes
+
+* **package:** update ghcr.io/paperless-ngx/paperless-ngx docker tag to v2.18.0 ([#471](https://github.com/marinatedconcrete/config/issues/471)) ([2a9d216](https://github.com/marinatedconcrete/config/commit/2a9d216cefe2eb530c9952c7817f04f5d28af00f))
+
 ## [1.1.0](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.0.3...kustomize-paperless@v1.1.0) (2025-07-05)
 
 
