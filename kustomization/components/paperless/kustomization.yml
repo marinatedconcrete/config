@@ -3,7 +3,7 @@ kind: Component
 
 images:
   - name: ghcr.io/paperless-ngx/paperless-ngx
-    newTag: 2.18.1@sha256:2dbee2d7fea624af8f12877936f6d728f351d2b8f4ddb34bdc06d933f0f47200
+    newTag: 2.18.2@sha256:fbe142ff2e02713740329ebb5981c6bb6fe54f8b4de18e98637c2ff586ea1935
   - name: ghcr.io/servercontainers/samba:smbd-only-latest
     digest: sha256:58b59656f36b025da79ee7a71ee4aeffe8a472b23aaf86bf0e27394460180d82
 resources:
