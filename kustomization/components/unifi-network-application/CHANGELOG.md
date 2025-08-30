@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.15](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.14...kustomize-unifi-network-application@v1.1.15) (2025-08-30)
+
+
+### Other Changes
+
+* **package:** update busybox:1.37.0 docker digest to ab33eac ([#470](https://github.com/marinatedconcrete/config/issues/470)) ([9aea864](https://github.com/marinatedconcrete/config/commit/9aea8640b1475c04febd7e4094f7710bdcde23a1))
+* **package:** update mongo docker tag to v8.0.13 ([e542a15](https://github.com/marinatedconcrete/config/commit/e542a15b64309f4b732a02a2945d7dd55d7ed7ba))
+
 ## [1.1.14](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.13...kustomize-unifi-network-application@v1.1.14) (2025-08-16)
 
 
