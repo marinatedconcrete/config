@@ -26,6 +26,59 @@
       "description": "marinatedconcrete/config versioning",
       "matchPackageNames": ["marinatedconcrete/config"],
       "versioning": "regex:^(?<compatibility>.+)[@\\-]v?(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+?)$"
+    },
+    {
+      "groupName": "marinatedconcrete Ansible Collection",
+      "matchCurrentValue": "ansible-collection@**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
+      "groupName": "marinatedconcrete Kairos Ubuntu Image",
+      "groupSlug": "marinatedconcrete-kairos-ubuntu",
+      "matchCurrentValue": "kairos-ubuntu-**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
+      "groupName": "marinatedconcrete vscode SSH Server Image",
+      "groupSlug": "marinatedconcrete-vscode-ssh-server",
+      "matchCurrentValue": "vscode-ssh-server-**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
+      "groupName": "marinatedconcrete Factorio Kustomize Component",
+      "groupSlug": "marinatedconcrete-kustomize-factorio",
+      "matchCurrentValue": "kustomize-factorio@**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
+      "groupName": "marinatedconcrete kube-vip Kustomize Component",
+      "groupSlug": "marinatedconcrete-kustomize-kube-vip",
+      "matchCurrentValue": "kustomize-kube-vip@**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
+      "groupName": "marinatedconcrete Mosquitto Kustomize Component",
+      "groupSlug": "marinatedconcrete-kustomize-mosquitto",
+      "matchCurrentValue": "kustomize-mosquitto@**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
+      "groupName": "marinatedconcrete Paperless Kustomize Component",
+      "groupSlug": "marinatedconcrete-kustomize-paperless",
+      "matchCurrentValue": "kustomize-paperless@**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
+      "groupName": "marinatedconcrete Priority Classes Kustomize Component",
+      "groupSlug": "marinatedconcrete-kustomize-priorityclass",
+      "matchCurrentValue": "kustomize-priorityclass@**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
+      "groupName": "marinatedconcrete Unifi Network Application Kustomize Component",
+      "groupSlug": "marinatedconcrete-kustomize-unifi-network-application",
+      "matchCurrentValue": "kustomize-unifi-network-application@**",
+      "matchPackageNames": ["marinatedconcrete/config"]
     }
   ]
 }
