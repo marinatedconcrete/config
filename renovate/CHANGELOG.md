@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.1.1...renovate-config-2.2.0) (2025-08-31)
+
+
+### Features
+
+* Ensure each thing we release is not grouped by renovate ([#481](https://github.com/marinatedconcrete/config/issues/481)) ([94d23b4](https://github.com/marinatedconcrete/config/commit/94d23b42473be3f4ed30449a98ab54199d8ae585))
+
 ## [2.1.1](https://github.com/marinatedconcrete/config/compare/renovate-config-2.1.0...renovate-config-2.1.1) (2025-05-28)
 
 
