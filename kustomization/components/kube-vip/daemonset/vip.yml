@@ -6,7 +6,7 @@ kind: DaemonSet
 metadata:
   labels:
     app.kubernetes.io/name: kube-vip-ds
-    app.kubernetes.io/version: v0.9.1
+    app.kubernetes.io/version: v1.0.0
   name: kube-vip-ds
 spec:
   selector:
@@ -16,7 +16,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: kube-vip-ds
-        app.kubernetes.io/version: v0.9.1
+        app.kubernetes.io/version: v1.0.0
     spec:
       affinity:
         nodeAffinity:
@@ -71,7 +71,7 @@ spec:
               drop:
                 - ALL
       hostNetwork: true
-      priorityClassName: critical-application-infra
+      priorityClassName: system-cluster-critical
       serviceAccountName: kube-vip
       tolerations:
         - effect: NoSchedule

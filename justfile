@@ -112,7 +112,7 @@ codegen-kube-vip:
     yq -iy '.spec.template.spec.containers[0].env += [{"name": "cp_namespace", "valueFrom": { "fieldRef": { "fieldPath": "metadata.namespace"}}}]' ${SCRATCH}
 
     # Add appropriate priorityClassName to the manifest.
-    yq -iy '.spec.template.spec.priorityClassName = "system-cluster-critical"' ${SCRATCH}
+    yq -iy '.spec.template.spec.priorityClassName = "critical-application-infra"' ${SCRATCH}
 
     # Sort the container's env by the name of the environment variables to set.
     yq -iy '.spec.template.spec.containers[0].env |= sort_by(.name)' ${SCRATCH}
