@@ -5,7 +5,7 @@ images:
   - name: ghcr.io/paperless-ngx/paperless-ngx
     newTag: 2.18.2@sha256:fbe142ff2e02713740329ebb5981c6bb6fe54f8b4de18e98637c2ff586ea1935
   - name: ghcr.io/servercontainers/samba:smbd-only-latest
-    digest: sha256:58b59656f36b025da79ee7a71ee4aeffe8a472b23aaf86bf0e27394460180d82
+    digest: sha256:3853c448d8a391be21ce9509607607572a9b79ad47973e36bd4b62ad824b15d1
 resources:
   - pvc.yml
   - statefulset.yml
