@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.16](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.15...kustomize-unifi-network-application@v1.1.16) (2025-09-03)
+
+
+### Other Changes
+
+* **package:** update mongo:8.0.13 docker digest to f4a9789 ([b0a2d01](https://github.com/marinatedconcrete/config/commit/b0a2d0170713e417b33c21e32b31c2d775b5d1e0))
+
 ## [1.1.15](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.14...kustomize-unifi-network-application@v1.1.15) (2025-08-30)
 
 
