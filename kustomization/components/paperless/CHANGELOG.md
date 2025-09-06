@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.3](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.1.2...kustomize-paperless@v1.1.3) (2025-09-03)
+## [1.1.3](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.1.2...kustomize-paperless@v1.1.3) (2025-09-06)
 
 
 ### Other Changes
