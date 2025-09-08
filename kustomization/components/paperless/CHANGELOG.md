@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.4](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.1.3...kustomize-paperless@v1.1.4) (2025-09-08)
+
+
+### Other Changes
+
+* **main:** release kustomize-paperless 1.1.3 ([#489](https://github.com/marinatedconcrete/config/issues/489)) ([52f3633](https://github.com/marinatedconcrete/config/commit/52f3633235e7adaba1bd5b081d27033f663a0600))
+* **package:** update ghcr.io/paperless-ngx/paperless-ngx docker tag to v2.18.4 ([96b9031](https://github.com/marinatedconcrete/config/commit/96b9031d4de0f660829f4f18c08ea56483a94c91))
+
 ## [1.1.3](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.1.2...kustomize-paperless@v1.1.3) (2025-09-06)
 
 
