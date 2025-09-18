@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.0...kustomize-kube-vip@v4.0.1) (2025-09-18)
+
+
+### Bug Fixes
+
+* regenerate kube-vip manifests ([c025b7a](https://github.com/marinatedconcrete/config/commit/c025b7aa3c35e879b03327372d146b678db21bc0))
+
 ## [4.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v3.0.2...kustomize-kube-vip@v4.0.0) (2025-08-30)
 
 
