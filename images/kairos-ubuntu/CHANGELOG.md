@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.6](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.2.5...kairos-ubuntu-0.2.6) (2025-09-27)
+
+
+### Other Changes
+
+* **package:** update dependency k3s-io/k3s to v1.33.4+k3s1 ([7a64095](https://github.com/marinatedconcrete/config/commit/7a6409599ee43faeb47f9b229fb37cf8018d7175))
+* **package:** update ubuntu:24.04 docker digest to 7c06e91 ([33df1e4](https://github.com/marinatedconcrete/config/commit/33df1e4439923e11d311eb37c14ecb0f749829cd))
+* **package:** update ubuntu:24.04 docker digest to f3b7f1b ([515fcbc](https://github.com/marinatedconcrete/config/commit/515fcbccde9c61f592d986ee828012ebd78c9d9e))
+
 ## [0.2.5](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.2.4...kairos-ubuntu-0.2.5) (2025-08-30)
 
 
