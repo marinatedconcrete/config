@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.0.4...ansible-collection@v1.1.0) (2025-10-05)
+
+
+### Features
+
+* include a new role to allow encrypted trim ([#515](https://github.com/marinatedconcrete/config/issues/515)) ([011eae3](https://github.com/marinatedconcrete/config/commit/011eae30e5706326ad1bd9e4b8d106408fd42540))
+
 ## [1.0.4](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.0.3...ansible-collection@v1.0.4) (2025-10-05)
 
 
