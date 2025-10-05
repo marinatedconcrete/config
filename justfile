@@ -164,7 +164,11 @@ format:
 ansible-lint:
     #!/usr/bin/env bash
     set -euo pipefail
+
+    # We need a valid .kube/context file for ansible-lint to be happy.
+    minikube start --interactive=false --profile=ansible-lint
     cd ansible && ansible-lint
+    minikube stop --profile=ansible-lint
 
 # Lint Dockerfiles with hado
 [group('lint')]

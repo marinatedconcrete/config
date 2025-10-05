@@ -1,0 +1,8 @@
+---
+galaxy_info:
+  author: Shawn Wilsher <me@shawnwilsher.com>
+  description: This role walks every Longhorn `Volume`, and enables the `discards` flag on it.
+
+  license: BSD-3-Clause
+
+  min_ansible_version: "2.18"

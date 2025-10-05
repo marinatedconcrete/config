@@ -1,0 +1,38 @@
+---
+# Tasks file for longhorn_allow_encrypted_trim.
+- name: Determine all StorageClasses
+  ansible.builtin.set_fact:
+    longhorn_allow_encrypted_trim_storage_classes_yaml: |-
+      ---
+      {%
+        for storage_class in query(
+          'kubernetes.core.k8s',
+          api_version='storage.k8s.io/v1',
+          kind='StorageClass',
+        )
+        | rejectattr('parameters.encrypted', 'undefined')
+        | selectattr('parameters.encrypted')
+      %}{{
+      storage_class.metadata.name + ':
+        namespace: ' + storage_class.parameters['csi.storage.k8s.io/node-publish-secret-namespace'] + '
+        secret: ' + storage_class.parameters['csi.storage.k8s.io/node-publish-secret-name'] + '
+      '
+      }}{%- endfor %}
+- name: Update each volume
+  ansible.builtin.include_tasks: process_volume.yml
+  loop: >-
+    {{
+      query(
+        'kubernetes.core.k8s',
+        api_version='longhorn.io/v1beta2',
+        kind='Volume',
+        namespace='longhorn-system',
+      )
+      | selectattr('status.state', '==', 'attached')
+      | selectattr('spec.encrypted', '==', true)
+    }}
+  loop_control:
+    label: >-
+      {{ volume.metadata.name }}
+      ({{ volume.status.kubernetesStatus.namespace }}/{{ volume.status.kubernetesStatus.pvcName }})
+    loop_var: volume
