@@ -1,5 +1,5 @@
 {
-  "ansible": "1.0.3",
+  "ansible": "1.0.4",
   "images/kairos-ubuntu": "0.3.0",
   "images/vscode-ssh-server": "0.1.1",
   "kustomization/components/factorio": "0.1.3",
