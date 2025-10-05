@@ -37,6 +37,9 @@
           "type": "yaml"
         }
       ],
+      "exclude-paths": [
+        "ansible/requirements.txt"
+      ],
       "package-name": "ansible-collection",
       "release-type": "simple"
     },
