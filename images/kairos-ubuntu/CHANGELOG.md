@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.3.0](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.2.5...kairos-ubuntu-0.3.0) (2025-10-05)
+
+
+### Features
+
+* include python3-pexpect in our kairos image ([#511](https://github.com/marinatedconcrete/config/issues/511)) ([bc4bf3c](https://github.com/marinatedconcrete/config/commit/bc4bf3c41ecd1a511d46b7e24783fbf4a229b93a))
+
+
+### Bug Fixes
+
+* rollback to 0.5.x branch of kairos-init ([b09eaa4](https://github.com/marinatedconcrete/config/commit/b09eaa419a0db869c0d2e1c0c625b89a276b29ec))
+
+
+### Other Changes
+
+* **package:** update dependency k3s-io/k3s to v1.33.4+k3s1 ([7a64095](https://github.com/marinatedconcrete/config/commit/7a6409599ee43faeb47f9b229fb37cf8018d7175))
+* **package:** update ubuntu:24.04 docker digest to 7c06e91 ([33df1e4](https://github.com/marinatedconcrete/config/commit/33df1e4439923e11d311eb37c14ecb0f749829cd))
+* **package:** update ubuntu:24.04 docker digest to f3b7f1b ([515fcbc](https://github.com/marinatedconcrete/config/commit/515fcbccde9c61f592d986ee828012ebd78c9d9e))
+* **package:** update ubuntu:24.04 docker digest to fdb6c9c ([f67b3c7](https://github.com/marinatedconcrete/config/commit/f67b3c7852674b0947c4ccbf799961d5bc6008ed))
+
 ## [0.2.5](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.2.4...kairos-ubuntu-0.2.5) (2025-08-30)
 
 
