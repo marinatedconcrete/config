@@ -102,10 +102,13 @@
     },
     {
       "description": "Auto-merge k3s updates every two weeks, skipping .0 releases",
-      "allowedVersions": "/v[1-9]+\\.[0-9]+\\.[1-9]+\\+k3s[0-9]+/",
+      "allowedVersions": "/v?[1-9]+\\.[0-9]+\\.[1-9]+(?:\\+k3s[0-9]+)?/",
       "automerge": true,
       "automergeType": "branch",
-      "matchDepNames": ["k3s-io/k3s"],
+      "matchDepNames": [
+        "k3s-io/k3s",
+        "kubernetes/kubernetes"
+      ],
       "minimumReleaseAge": "1 week",
       "schedule": ["* * 14,28 * *"]
     }

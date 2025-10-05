@@ -6,7 +6,7 @@
 minikube_test__enable_local_path_storage: false
 
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
-minikube_test__kubernetes_version: v1.34.1
+minikube_test__kubernetes_version: v1.33
 
 # The number of nodes needed for the test.
 minikube_test__minikube_nodes: 1
