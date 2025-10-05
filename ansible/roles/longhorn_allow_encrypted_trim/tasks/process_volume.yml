@@ -1,0 +1,41 @@
+---
+# Tasks file for longhorn_allow_encrypted_trim to process each volume.
+- name: Get pv storageClass
+  ansible.builtin.set_fact:
+    longhorn_allow_encrypted_trim_storage_class: >-
+      {{
+        (
+          query(
+            'kubernetes.core.k8s',
+            kind='PersistentVolume',
+            resource_name=volume.status.kubernetesStatus.pvName,
+          )
+          | first
+        ).spec.storageClassName
+      }}
+- name: Persist allowing discards
+  ansible.builtin.expect:
+    command: "cryptsetup --allow-discards --persistent refresh {{ device }}"
+    responses:
+      "^Enter passphrase for ": "{{ encryption_key }}"
+  become: true
+  delegate_to: >-
+      {{
+        hostvars | list | select('match', '^' + volume.status.ownerID) | first
+      }}
+  no_log: true # This contains a secret!
+  vars:
+    device: "/dev/mapper/{{ volume.metadata.name }}"
+    encryption_key: >-
+      {{
+        (
+          query(
+            'kubernetes.core.k8s',
+            kind='Secret',
+            namespace=(longhorn_allow_encrypted_trim_storage_classes_yaml | from_yaml)[longhorn_allow_encrypted_trim_storage_class].namespace,
+            resource_name=(longhorn_allow_encrypted_trim_storage_classes_yaml | from_yaml)[longhorn_allow_encrypted_trim_storage_class].secret,
+          )
+          | first
+        ).data.CRYPTO_KEY_VALUE
+        | b64decode
+      }}
