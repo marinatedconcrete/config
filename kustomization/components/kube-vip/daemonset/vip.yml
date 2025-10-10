@@ -6,7 +6,7 @@ kind: DaemonSet
 metadata:
   labels:
     app.kubernetes.io/name: kube-vip-ds
-    app.kubernetes.io/version: v1.0.0
+    app.kubernetes.io/version: v1.0.1
   name: kube-vip-ds
 spec:
   selector:
@@ -16,7 +16,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: kube-vip-ds
-        app.kubernetes.io/version: v1.0.0
+        app.kubernetes.io/version: v1.0.1
     spec:
       affinity:
         nodeAffinity:
