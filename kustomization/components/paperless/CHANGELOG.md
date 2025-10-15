@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.5](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.1.4...kustomize-paperless@v1.1.5) (2025-10-15)
+
+
+### Other Changes
+
+* **package:** update ghcr.io/servercontainers/samba:smbd-only-latest docker digest to 4c78ce2 ([fcb96e4](https://github.com/marinatedconcrete/config/commit/fcb96e46c307392a9f276a6e00065dad99bed66e))
+
 ## [1.1.4](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.1.3...kustomize-paperless@v1.1.4) (2025-09-08)
 
 
