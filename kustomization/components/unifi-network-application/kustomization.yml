@@ -13,7 +13,7 @@ images:
   - name: lscr.io/linuxserver/unifi-network-application
     newTag: 9.5.21@sha256:78abb3540cba315c9fcb0f91370f5eb3070a61349df63b20a9ea42c4a95af4bf
   - name: mongo
-    newTag: 8.0.15@sha256:d0d76261e7a19aee701e890a9e835ba369a12b8733e7d39cd89a923ed97f247c
+    newTag: 8.0.15@sha256:bc0c381d51fb4a316a8f420bf35b6c29ca45167cdea4ec1df4e6e64c9b90022a
 resources:
   - statefulset.yml
   - serverstransport.yml
