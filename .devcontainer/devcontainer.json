@@ -34,7 +34,9 @@
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       // We don't need this
-      "dockerDashComposeVersion": "none"
+      "dockerDashComposeVersion": "none",
+      // Doesn't work on Debian Trixie
+      "moby": false
     },
     "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
       // renovate: datasource=github-releases depName=kubernetes/kubernetes
