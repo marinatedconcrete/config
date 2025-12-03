@@ -28,4 +28,5 @@ db.getSiblingDB(\"unifi_stat\")
     roles: [
       {role: \"dbOwner\", db: \"unifi_stat\"}
     ]
-  });" > /docker-entrypoint-initdb.d/init-mongo.js
+  });
+db.adminCommand({setFeatureCompatibilityVersion: '8.0', confirm: true})" > /docker-entrypoint-initdb.d/init-mongo.js
