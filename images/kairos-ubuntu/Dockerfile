@@ -1,6 +1,6 @@
 # See https://kairos.io/docs/reference/kairos-factory/ for more details.
 
-FROM quay.io/kairos/kairos-init:v0.5.20@sha256:d90e8dd3d43f8c90b4cc9f76b1eb7282823737867dfdf5dda88a66c7683bccfc AS kairos-init
+FROM quay.io/kairos/kairos-init:v0.7.0@sha256:e95460bd961efcc9c7cda2e24bfb61d203ed86feba72f15321266d5178c3725d AS kairos-init
 
 # Allow build scripts to be referenced without being copied into the final image.
 FROM scratch AS ctx
