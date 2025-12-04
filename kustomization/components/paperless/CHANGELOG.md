@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.7](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.1.6...kustomize-paperless@v1.1.7) (2025-12-04)
+
+
+### Other Changes
+
+* **package:** update ghcr.io/paperless-ngx/paperless-ngx docker tag to v2.20.0 ([#546](https://github.com/marinatedconcrete/config/issues/546)) ([5e8baca](https://github.com/marinatedconcrete/config/commit/5e8baca9dc705808474331b5a73a9b0c005b1ed3))
+* **package:** update ghcr.io/servercontainers/samba:smbd-only-latest docker digest to 763db87 ([ef29db9](https://github.com/marinatedconcrete/config/commit/ef29db90347f177323cd09787368ee01774c60e6))
+
 ## [1.1.6](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.1.5...kustomize-paperless@v1.1.6) (2025-11-16)
 
 
