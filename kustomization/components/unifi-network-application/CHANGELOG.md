@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.22](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.21...kustomize-unifi-network-application@v1.1.22) (2025-12-04)
+
+
+### Bug Fixes
+
+* Revert mongodb to 8.0.x ([#554](https://github.com/marinatedconcrete/config/issues/554)) ([c36089d](https://github.com/marinatedconcrete/config/commit/c36089d4c23cb987efa6e5c84e86797b432610c8))
+
+
+### Other Changes
+
+* **main:** release ansible-collection 1.1.1 ([#521](https://github.com/marinatedconcrete/config/issues/521)) ([625f2db](https://github.com/marinatedconcrete/config/commit/625f2db10d0378acb2b2caaa9dfdef9a3afb923a))
+* **package:** update unifi ([#556](https://github.com/marinatedconcrete/config/issues/556)) ([6420963](https://github.com/marinatedconcrete/config/commit/64209636373d2a4944cb7b542f724ee9155aa55d))
+
 ## [1.1.21](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.20...kustomize-unifi-network-application@v1.1.21) (2025-11-26)
 
 
