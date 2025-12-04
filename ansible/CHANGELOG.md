@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.1.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.1.0...ansible-collection@v1.1.1) (2025-12-03)
+
+
+### Other Changes
+
+* **package:** update dependency ansible to v12.1.0 ([#517](https://github.com/marinatedconcrete/config/issues/517)) ([ece5d12](https://github.com/marinatedconcrete/config/commit/ece5d12e56318055f860d09adaa717939a045cbe))
+* **package:** update dependency ansible to v12.2.0 ([#535](https://github.com/marinatedconcrete/config/issues/535)) ([827e5b6](https://github.com/marinatedconcrete/config/commit/827e5b613797b2f7ae8ec64de2ccd855cb71ac3d))
+* **package:** update dependency ansible to v13 ([#543](https://github.com/marinatedconcrete/config/issues/543)) ([50f3261](https://github.com/marinatedconcrete/config/commit/50f3261159dd775927301d0f3dea7a12676bdc05))
+* **package:** update dependency ansible-core to v2.19.3 ([9cbc815](https://github.com/marinatedconcrete/config/commit/9cbc8152deae0205ead58c53861e8745ef291514))
+* **package:** update dependency ansible-lint to v25.11.0 ([#538](https://github.com/marinatedconcrete/config/issues/538)) ([c350dae](https://github.com/marinatedconcrete/config/commit/c350dae67856180e2c04f85a1b517617d3bf0a2a))
+* **package:** update dependency ansible-lint to v25.11.1 ([231bf4c](https://github.com/marinatedconcrete/config/commit/231bf4c3779a34aae160ac373f701c6705083bbd))
+* **package:** update dependency ansible-lint to v25.12.0 ([#553](https://github.com/marinatedconcrete/config/issues/553)) ([4b4fd73](https://github.com/marinatedconcrete/config/commit/4b4fd73775bf19113797ace839bcbdba74a89d3f))
+* **package:** update dependency ansible-lint to v25.9.2 ([014fbcc](https://github.com/marinatedconcrete/config/commit/014fbcc560a84881aa89bbfb46b448bbd61e0b83))
+* **package:** update dependency kubernetes/kubernetes to v1.34.1 ([#522](https://github.com/marinatedconcrete/config/issues/522)) ([286108b](https://github.com/marinatedconcrete/config/commit/286108b38ddfa8171fb3b818a6d946eb567cfc58))
+* **package:** update dependency kubernetes/kubernetes to v1.34.2 ([b8019ba](https://github.com/marinatedconcrete/config/commit/b8019ba65e125db1ca638fd402774f12c9be2179))
+
 ## [1.1.0](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.0.4...ansible-collection@v1.1.0) (2025-10-05)
 
 
