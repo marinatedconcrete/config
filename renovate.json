@@ -74,6 +74,14 @@
       "minimumReleaseAge": "3 days"
     },
     {
+      "description": "Keep Unifi MongoDB on the 8.0.x line",
+      "allowedVersions": "<8.1.0",
+      "matchPackageNames": ["mongo"],
+      "matchFileNames": [
+        "kustomization/components/unifi-network-application/kustomization.yml"
+      ]
+    },
+    {
       "description": "Auto-merge samba digest updates monthly",
       "automerge": true,
       "automergeType": "branch",
