@@ -34,10 +34,11 @@ jobs:
           private-key: ${{ secrets.FORMWORK_REMOVER_PRIVATE_KEY }}
       - name: Checkout Repo
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 500
       - name: Verify existing release tags
         run: |
           set -euo pipefail
-          git fetch origin main --force
           git fetch --tags --force
           while IFS=$'\t' read -r path tag; do
             git rev-parse "$tag" >/dev/null 2>&1 || { echo "Missing tag $tag (for $path)"; exit 1; }
