@@ -98,8 +98,7 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
           runCmd: |
-            just kustomization-test factorio
-            kustomize build kustomization/components/factorio/ -o /tmp/factorio.yml
+            just release-please-build kustomize-factorio /tmp/factorio.yml
             gh release upload ${{ needs.release-please.outputs.kustomize-factorio--tag_name }} /tmp/factorio.yml
 
   release-kustomize-kube-vip:
@@ -119,8 +118,7 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
           runCmd: |
-            just kustomization-test kube-vip
-            kustomize build kustomization/components/kube-vip/ -o /tmp/kube-vip.yml
+            just release-please-build kustomize-kube-vip /tmp/kube-vip.yml
             gh release upload ${{ needs.release-please.outputs.kustomize-kube-vip--tag_name }} /tmp/kube-vip.yml
 
   release-kustomize-mosquitto:
@@ -140,8 +138,7 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
           runCmd: |
-            just kustomization-test mosquitto
-            kustomize build kustomization/components/mosquitto/ -o /tmp/mosquitto.yml
+            just release-please-build kustomize-mosquitto /tmp/mosquitto.yml
             gh release upload ${{ needs.release-please.outputs.kustomize-mosquitto--tag_name }} /tmp/mosquitto.yml
 
   release-kustomize-paperless:
@@ -161,8 +158,7 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
           runCmd: |
-            just kustomization-test paperless
-            kustomize build kustomization/components/paperless/ -o /tmp/paperless.yml
+            just release-please-build kustomize-paperless /tmp/paperless.yml
             gh release upload ${{ needs.release-please.outputs.kustomize-paperless--tag_name }} /tmp/paperless.yml
 
   release-kustomize-priorityclass:
@@ -182,8 +178,7 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
           runCmd: |
-            just kustomization-test priorityclass
-            kustomize build kustomization/components/priorityclass/ -o /tmp/priorityclass.yml
+            just release-please-build kustomize-priorityclass /tmp/priorityclass.yml
             gh release upload ${{ needs.release-please.outputs.kustomize-priorityclass--tag_name }} /tmp/priorityclass.yml
 
   release-kustomize-unifi-network-application:
@@ -203,6 +198,5 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
           runCmd: |
-            just kustomization-test unifi-network-application
-            kustomize build kustomization/components/unifi-network-application/ -o /tmp/unifi-network-application.yml
+            just release-please-build kustomize-unifi-network-application /tmp/unifi-network-application.yml
             gh release upload ${{ needs.release-please.outputs.kustomize-unifi-network-application--tag_name }} /tmp/unifi-network-application.yml
