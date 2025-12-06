@@ -237,6 +237,35 @@ kustomization-tests:
 [group('test')]
 test: kustomization-tests
 
+[group('release')]
+release-please-build project dest="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    project="{{ project }}"
+    if [[ "${project}" != kustomize-* ]]; then
+        echo "Unsupported release-please project: ${project}" >&2
+        exit 1
+    fi
+
+    component="${project#kustomize-}"
+    component_path="kustomization/components/${component}"
+
+    if [[ ! -d "${component_path}" ]]; then
+        echo "Component path not found: ${component_path}" >&2
+        exit 1
+    fi
+
+    dest_path="{{ dest }}"
+    if [[ -z "${dest_path}" ]]; then
+        dest_path="/tmp/${component}.yml"
+    fi
+
+    # Run component tests before building the release artifact.
+    just kustomization-test "${component}"
+    kustomize build "${component_path}/" -o "${dest_path}"
+    echo "${dest_path}"
+
 # Regenerate Yarn integrations with other tools, like VSCode
 regen-yarn-sdks:
     #!/usr/bin/env bash
