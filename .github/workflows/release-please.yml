@@ -32,14 +32,21 @@ jobs:
         with:
           app-id: ${{ vars.FORMWORK_REMOVER_APP_ID }}
           private-key: ${{ secrets.FORMWORK_REMOVER_PRIVATE_KEY }}
+      - name: Checkout Repo
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - name: Verify existing release tags
+        run: |
+          git fetch --tags --force
+          jq -r 'to_entries[] | "\(.key)@v\(.value)"' .release-please-manifest.json | while read -r tag; do
+            git rev-parse "$tag" >/dev/null 2>&1 || { echo "Missing tag $tag"; exit 1; }
+            git merge-base --is-ancestor "$tag" origin/main || { echo "Tag $tag is not an ancestor of origin/main"; exit 1; }
+          done
       - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
         id: release-please
         with:
           token: ${{ steps.app-token.outputs.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-      - name: Checkout Repo
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Gather Release Outputs
         env:
           OUTPUTS: ${{ toJson(steps.release-please.outputs) }}
