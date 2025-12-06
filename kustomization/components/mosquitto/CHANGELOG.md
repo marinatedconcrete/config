@@ -1,5 +1,36 @@
 # Changelog
 
+## [3.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-mosquitto@v2.0.4...kustomize-mosquitto@v3.0.0) (2025-12-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* require `priorityclass` component, and add appropriate `priorityClass` ([#285](https://github.com/marinatedconcrete/config/issues/285))
+
+### Features
+
+* require `priorityclass` component, and add appropriate `priorityClass` ([#285](https://github.com/marinatedconcrete/config/issues/285)) ([a148a93](https://github.com/marinatedconcrete/config/commit/a148a93e5638ad7b0822a1c23f58154e8642f5f5))
+
+
+### Documentation Updates
+
+* Add and Standardize Badging ([#278](https://github.com/marinatedconcrete/config/issues/278)) ([9f21755](https://github.com/marinatedconcrete/config/commit/9f21755bdeaa287887215ca76586aa070d17656e))
+* fix mosquitto priorityclass ([472c8e6](https://github.com/marinatedconcrete/config/commit/472c8e6be3c1ca2cf9fc965ef87a60feee29cd57))
+
+
+### Other Changes
+
+* **main:** release kustomize-mosquitto 2.0.0 ([#279](https://github.com/marinatedconcrete/config/issues/279)) ([031cf30](https://github.com/marinatedconcrete/config/commit/031cf308b522628e43cade7824056a6659e7d527))
+* **main:** release kustomize-mosquitto 2.0.1 ([#332](https://github.com/marinatedconcrete/config/issues/332)) ([1225be0](https://github.com/marinatedconcrete/config/commit/1225be0b08900bc3b3168594d905f9863a348314))
+* **main:** release kustomize-mosquitto 2.0.2 ([#440](https://github.com/marinatedconcrete/config/issues/440)) ([bc29688](https://github.com/marinatedconcrete/config/commit/bc29688c54d62294bd62f65ddb40a1331214c4b4))
+* **main:** release kustomize-mosquitto 2.0.3 ([#520](https://github.com/marinatedconcrete/config/issues/520)) ([884e0b1](https://github.com/marinatedconcrete/config/commit/884e0b172ea27f1ee8f2766d5649f2bf1bff12db))
+* **main:** release kustomize-mosquitto 2.0.4 ([#539](https://github.com/marinatedconcrete/config/issues/539)) ([7425f0b](https://github.com/marinatedconcrete/config/commit/7425f0be336ed1879929fd1da2db45361c3f6a3c))
+* **package:** update eclipse-mosquitto docker tag to v2.0.21 ([0b91c16](https://github.com/marinatedconcrete/config/commit/0b91c1658c43c011081bb91e70d11cfa924bb50e))
+* **package:** update eclipse-mosquitto docker tag to v2.0.22 ([74b9138](https://github.com/marinatedconcrete/config/commit/74b91386c9be8e948036318936226adb66b773e3))
+* **package:** update eclipse-mosquitto:2.0.22 docker digest to 077fe4f ([6bca391](https://github.com/marinatedconcrete/config/commit/6bca3917a83936fcb1c67daac5e344b558e29c80))
+* **package:** update eclipse-mosquitto:2.0.22 docker digest to d219d3a ([237c786](https://github.com/marinatedconcrete/config/commit/237c78674e8d43da0d172a074805a4b18753a62c))
+* **package:** update eclipse-mosquitto:2.0.22 docker digest to fd9982f ([5b12936](https://github.com/marinatedconcrete/config/commit/5b12936c6affb75de48dd92e221c37745adf7357))
+
 ## [2.0.4](https://github.com/marinatedconcrete/config/compare/kustomize-mosquitto@v2.0.3...kustomize-mosquitto@v2.0.4) (2025-12-03)
 
 
