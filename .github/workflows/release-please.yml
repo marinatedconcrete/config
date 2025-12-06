@@ -14,18 +14,7 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     outputs:
-      kustomize-factorio--release_created: ${{ steps.releases.outputs.kustomize-factorio--release_created }}
-      kustomize-factorio--tag_name: ${{ steps.releases.outputs.kustomize-factorio--tag_name }}
-      kustomize-kube-vip--release_created: ${{ steps.releases.outputs.kustomize-kube-vip--release_created }}
-      kustomize-kube-vip--tag_name: ${{ steps.releases.outputs.kustomize-kube-vip--tag_name }}
-      kustomize-mosquitto--release_created: ${{ steps.releases.outputs.kustomize-mosquitto--release_created }}
-      kustomize-mosquitto--tag_name: ${{ steps.releases.outputs.kustomize-mosquitto--tag_name }}
-      kustomize-paperless--release_created: ${{ steps.releases.outputs.kustomize-paperless--release_created }}
-      kustomize-paperless--tag_name: ${{ steps.releases.outputs.kustomize-paperless--tag_name }}
-      kustomize-priorityclass--release_created: ${{ steps.releases.outputs.kustomize-priorityclass--release_created }}
-      kustomize-priorityclass--tag_name: ${{ steps.releases.outputs.kustomize-priorityclass--tag_name }}
-      kustomize-unifi-network-application--release_created: ${{ steps.releases.outputs.kustomize-unifi-network-application--release_created }}
-      kustomize-unifi-network-application--tag_name: ${{ steps.releases.outputs.kustomize-unifi-network-application--tag_name }}
+      components_json: ${{ steps.releases.outputs.components_json }}
     steps:
       - uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2.2.0
         id: app-token
@@ -76,19 +65,18 @@ jobs:
         id: releases
         run: sh .github/workflows/release-please-output-helper.sh
 
-  #
-  # Package Release Jobs
-  #
-
-  release-kustomize-factorio:
-    if: ${{needs.release-please.outputs.kustomize-factorio--release_created}}
+  build-release:
     runs-on: ubuntu-latest
     needs: release-please
+    if: ${{ needs.release-please.outputs.components_json != '[]' }}
+    strategy:
+      matrix:
+        component: ${{ fromJson(needs.release-please.outputs.components_json) }}
 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      - name: Test Component
+      - name: Test and Build Component
         uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3.1900000417
         with:
           cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
@@ -98,105 +86,5 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
           runCmd: |
-            just release-please-build kustomize-factorio /tmp/factorio.yml
-            gh release upload ${{ needs.release-please.outputs.kustomize-factorio--tag_name }} /tmp/factorio.yml
-
-  release-kustomize-kube-vip:
-    if: ${{needs.release-please.outputs.kustomize-kube-vip--release_created}}
-    runs-on: ubuntu-latest
-    needs: release-please
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      - name: Test Component
-        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3.1900000417
-        with:
-          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
-          env: |
-            CI=1
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          imageName: ghcr.io/marinatedconcrete/config-devcontainer
-          push: never
-          runCmd: |
-            just release-please-build kustomize-kube-vip /tmp/kube-vip.yml
-            gh release upload ${{ needs.release-please.outputs.kustomize-kube-vip--tag_name }} /tmp/kube-vip.yml
-
-  release-kustomize-mosquitto:
-    if: ${{needs.release-please.outputs.kustomize-mosquitto--release_created}}
-    runs-on: ubuntu-latest
-    needs: release-please
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      - name: Test Component
-        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3.1900000417
-        with:
-          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
-          env: |
-            CI=1
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          imageName: ghcr.io/marinatedconcrete/config-devcontainer
-          push: never
-          runCmd: |
-            just release-please-build kustomize-mosquitto /tmp/mosquitto.yml
-            gh release upload ${{ needs.release-please.outputs.kustomize-mosquitto--tag_name }} /tmp/mosquitto.yml
-
-  release-kustomize-paperless:
-    if: ${{needs.release-please.outputs.kustomize-paperless--release_created}}
-    runs-on: ubuntu-latest
-    needs: release-please
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      - name: Test Component
-        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3.1900000417
-        with:
-          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
-          env: |
-            CI=1
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          imageName: ghcr.io/marinatedconcrete/config-devcontainer
-          push: never
-          runCmd: |
-            just release-please-build kustomize-paperless /tmp/paperless.yml
-            gh release upload ${{ needs.release-please.outputs.kustomize-paperless--tag_name }} /tmp/paperless.yml
-
-  release-kustomize-priorityclass:
-    if: ${{needs.release-please.outputs.kustomize-priorityclass--release_created}}
-    runs-on: ubuntu-latest
-    needs: release-please
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      - name: Test Component
-        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3.1900000417
-        with:
-          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
-          env: |
-            CI=1
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          imageName: ghcr.io/marinatedconcrete/config-devcontainer
-          push: never
-          runCmd: |
-            just release-please-build kustomize-priorityclass /tmp/priorityclass.yml
-            gh release upload ${{ needs.release-please.outputs.kustomize-priorityclass--tag_name }} /tmp/priorityclass.yml
-
-  release-kustomize-unifi-network-application:
-    if: ${{needs.release-please.outputs.kustomize-unifi-network-application--release_created}}
-    runs-on: ubuntu-latest
-    needs: release-please
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      - name: Test Component
-        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3.1900000417
-        with:
-          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
-          env: |
-            CI=1
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          imageName: ghcr.io/marinatedconcrete/config-devcontainer
-          push: never
-          runCmd: |
-            just release-please-build kustomize-unifi-network-application /tmp/unifi-network-application.yml
-            gh release upload ${{ needs.release-please.outputs.kustomize-unifi-network-application--tag_name }} /tmp/unifi-network-application.yml
+            just release-please-build ${{ matrix.component.project }} /tmp/${{ matrix.component.project }}.yml
+            gh release upload ${{ matrix.component.tag }} /tmp/${{ matrix.component.project }}.yml
