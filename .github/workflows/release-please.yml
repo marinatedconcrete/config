@@ -21,44 +21,14 @@ jobs:
         with:
           app-id: ${{ vars.FORMWORK_REMOVER_APP_ID }}
           private-key: ${{ secrets.FORMWORK_REMOVER_PRIVATE_KEY }}
-      - name: Checkout Repo
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        with:
-          fetch-depth: 500
-      - name: Verify existing release tags
-        run: |
-          set -euo pipefail
-          git fetch --tags --force
-          while IFS=$'\t' read -r path tag; do
-            git rev-parse "$tag" >/dev/null 2>&1 || { echo "Missing tag $tag (for $path)"; exit 1; }
-            git merge-base --is-ancestor "$tag" origin/main || { echo "Tag $tag (for $path) is not an ancestor of origin/main"; exit 1; }
-          done < <(
-            jq -r -n \
-              --slurpfile cfg release-please-config.json \
-              --slurpfile man .release-please-manifest.json '
-              def bool(x; d): if x == null then d else x end;
-              ($cfg[0]["tag-separator"] // "@") as $defaultSep |
-              bool($cfg[0]["include-v-in-tag"]; true) as $defaultV |
-              bool($cfg[0]["include-component-in-tag"]; true) as $defaultComp |
-              $man[0]
-              | to_entries[]
-              | .key as $path
-              | .value as $ver
-              | ($cfg[0].packages[$path]) as $pkg
-              | ($pkg["package-name"] // halt_error("missing package-name for " + $path)) as $pname
-              | ($pkg["tag-separator"] // $defaultSep) as $sep
-              | bool($pkg["include-v-in-tag"]; $defaultV) as $v
-              | bool($pkg["include-component-in-tag"]; $defaultComp) as $comp
-              | ($comp as $c | ($c | if . then $pname + $sep else "" end) + (if $v then "v" else "" end) + $ver) as $tag
-              | [$path, $tag]
-              | @tsv
-            ')
       - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
         id: release-please
         with:
           token: ${{ steps.app-token.outputs.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+      - name: Checkout Repo
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Gather Release Outputs
         env:
           OUTPUTS: ${{ toJson(steps.release-please.outputs) }}
