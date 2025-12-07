@@ -1,6 +1,6 @@
 {
   "ansible": "1.1.1",
-  "images/kairos-ubuntu": "0.3.0",
+  "images/kairos-ubuntu": "0.3.1",
   "images/vscode-ssh-server": "0.1.1",
   "kustomization/components/factorio": "0.1.3",
   "kustomization/components/kube-vip": "4.0.1",
