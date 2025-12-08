@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/marinatedconcrete/config/compare/vscode-ssh-server-0.1.1...vscode-ssh-server-0.1.2) (2025-12-08)
+
+
+### Other Changes
+
+* **package:** pin debian docker tag to 7cb087f ([#577](https://github.com/marinatedconcrete/config/issues/577)) ([66d92a0](https://github.com/marinatedconcrete/config/commit/66d92a034dbc36cb7501ab675c437646c22a72fb))
+
 ## [0.1.1](https://github.com/marinatedconcrete/config/compare/vscode-ssh-server-0.1.0...vscode-ssh-server-0.1.1) (2025-05-04)
 
 
