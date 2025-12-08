@@ -148,7 +148,7 @@
       "customType": "regex",
       "managerFilePatterns": ["/^justfile$/"],
       "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\n\\s+?[A-Z_]+_VERSION=(?<currentValue>.+?)\\n"
+        "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\n\\s+?[A-Z_]+_VERSION=(?<currentValue>[^@\\n]+)\\n\\s+?[A-Z_]+_DIGEST=(?<currentDigest>sha256:[a-f0-9]{64})\\n"
       ]
     }
   ]
