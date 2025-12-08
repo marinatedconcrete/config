@@ -19,11 +19,13 @@ codegen-kube-vip:
 
     # renovate: datasource=docker depName=ghcr.io/kube-vip/kube-vip
     KUBE_VIP_VERSION=v1.0.1
+    KUBE_VIP_DIGEST=sha256:554d1e07ee24a046bbc7fba67f438c01b480b072c6f0b99215321fc0eb440178
+    KUBE_VIP_IMAGE=ghcr.io/kube-vip/kube-vip@${KUBE_VIP_DIGEST}
 
     # VIP DaemonSet manifest generation.
     DEST=kustomization/components/kube-vip/daemonset/vip.yml
     SCRATCH=$(mktemp --tmpdir daemonset-XXX.yml)
-    docker run --network host --rm ghcr.io/kube-vip/kube-vip:${KUBE_VIP_VERSION} \
+    docker run --network host --rm ${KUBE_VIP_IMAGE} \
         manifest daemonset \
             --address=8.8.8.8 \
             --arp \
@@ -75,7 +77,7 @@ codegen-kube-vip:
     # Services DaemonSet manifest generation.
     DEST=kustomization/components/kube-vip/daemonset/services.yml
     SCRATCH=$(mktemp --tmpdir daemonset-XXX.yml)
-    docker run --network host --rm ghcr.io/kube-vip/kube-vip:${KUBE_VIP_VERSION} \
+    docker run --network host --rm ${KUBE_VIP_IMAGE} \
         manifest daemonset \
             --arp \
             --inCluster \
@@ -130,7 +132,7 @@ codegen-kube-vip:
     DEST=kustomization/components/kube-vip/rbac.yml
     SCRATCH=$(mktemp --tmpdir rbac-XXX.yml)
 
-    docker run --network host --rm ghcr.io/kube-vip/kube-vip:${KUBE_VIP_VERSION} \
+    docker run --network host --rm ${KUBE_VIP_IMAGE} \
         manifest rbac \
             --namespace=kube-vip \
         > ${SCRATCH}
