@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.1.1...ansible-collection@v1.1.2) (2025-12-13)
+
+
+### Other Changes
+
+* **package:** update dependency ansible to v13.1.0 ([#582](https://github.com/marinatedconcrete/config/issues/582)) ([e25cc59](https://github.com/marinatedconcrete/config/commit/e25cc593ca366c361604ec4e8e203b25556b8e2a))
+* **package:** update dependency ansible-lint to v25.12.1 ([0f15b5c](https://github.com/marinatedconcrete/config/commit/0f15b5c76079fd9b7c2447483ae8699d84930190))
+
 ## [1.1.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.1.0...ansible-collection@v1.1.1) (2025-12-03)
 
 
