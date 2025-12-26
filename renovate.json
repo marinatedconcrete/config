@@ -102,6 +102,16 @@
       "schedule": ["on the first day of the month"]
     },
     {
+      "description": "Auto-merge vscode-ssh-server digest updates",
+      "automerge": true,
+      "automergeType": "branch",
+      "groupName": "vscode-ssh-server",
+      "matchFileNames": ["images/vscode-ssh-server/Dockerfile"],
+      "matchPackageNames": ["debian"],
+      "matchUpdateTypes": ["digest"],
+      "schedule": ["on the first day of the month"]
+    },
+    {
       "description": "Auto-merge renovate updates monthly",
       "automerge": true,
       "automergeType": "branch",
