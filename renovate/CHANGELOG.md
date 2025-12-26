@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.2.0...renovate-config-2.3.0) (2025-12-26)
+
+
+### Features
+
+* let renovate properly manage the Microsoft devcontainer image ([#590](https://github.com/marinatedconcrete/config/issues/590)) ([fa9867f](https://github.com/marinatedconcrete/config/commit/fa9867f2d6505037238ecc055a8112e06a0ac8d7))
+
 ## [2.2.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.1.1...renovate-config-2.2.0) (2025-08-31)
 
 
