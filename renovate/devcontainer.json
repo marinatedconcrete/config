@@ -8,5 +8,16 @@
         "//\\s*renovate: datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\s+\".*[Vv]ersion\":\\s*\"(?<currentValue>.+?)\""
       ]
     }
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["dockerfile"],
+      "matchFileNames": [
+        ".devcontainer/Dockerfile",
+        ".devcontainer/Containerfile"
+      ],
+      "matchDepNames": ["mcr.microsoft.com/devcontainers/python"],
+      "versioning": "regex:^(?<major>\\d+)-(?<minor>\\d+)\\.(?<patch>\\d+)$"
+    }
   ]
 }
