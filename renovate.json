@@ -2,9 +2,9 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     ":semanticCommitScope(package)",
-    "github>marinatedconcrete/config//renovate/marinatedconcrete#renovate-config-2.2.0",
-    "github>marinatedconcrete/config//renovate/devcontainer#renovate-config-2.2.0",
-    "github>marinatedconcrete/config//renovate/recommended#renovate-config-2.2.0"
+    "github>marinatedconcrete/config//renovate/marinatedconcrete#renovate-config-2.3.0",
+    "github>marinatedconcrete/config//renovate/devcontainer#renovate-config-2.3.0",
+    "github>marinatedconcrete/config//renovate/recommended#renovate-config-2.3.0"
   ],
   "timezone": "America/Los_Angeles",
   "configMigration": true,
