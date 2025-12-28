@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.3.1...kairos-ubuntu-0.4.0) (2025-12-28)
+
+
+### Other Changes
+
+* **package:** update dependency k3s-io/k3s to v1.34.3+k3s1 ([8091d3f](https://github.com/marinatedconcrete/config/commit/8091d3f40e91801b3e2b7f46eb5b5e55c334e16b))
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.6.9 ([#519](https://github.com/marinatedconcrete/config/issues/519)) ([eb213ec](https://github.com/marinatedconcrete/config/commit/eb213ecda97a975fcd87d70e2b6201e6148f9b11))
+
 ## [0.3.1](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.3.0...kairos-ubuntu-0.3.1) (2025-12-07)
 
 
