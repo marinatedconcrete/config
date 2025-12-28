@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.2](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.3.1...kairos-ubuntu-0.3.2) (2025-12-28)
+## [0.4.0](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-0.3.1...kairos-ubuntu-0.4.0) (2025-12-28)
 
 
 ### Other Changes
