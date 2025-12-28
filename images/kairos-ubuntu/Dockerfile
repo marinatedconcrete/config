@@ -21,12 +21,12 @@ COPY --from=kairos-init /kairos-init /kairos-init
 # Install Kairos into the image.
 # hadolint ignore=DL3059
 RUN /kairos-init \
-    -k "${KUBERNETES_DISTRO}" \
     -l debug \
     -m "${MODEL}" \
     -s install \
     -t "${TRUSTED_BOOT}" \
-    --k8sversion "${KUBERNETES_VERSION}" \
+    --provider "${KUBERNETES_DISTRO}" \
+    --provider-k3s-version "${KUBERNETES_VERSION}" \
     --version "${VERSION}"
 
 # Our customizations!
@@ -40,12 +40,12 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
 # Initialize the image.
 # hadolint ignore=DL3059
 RUN /kairos-init \
-    -k "${KUBERNETES_DISTRO}" \
     -l debug \
     -m "${MODEL}" \
     -s init \
     -t "${TRUSTED_BOOT}" \
-    --k8sversion "${KUBERNETES_VERSION}" \
+    --provider "${KUBERNETES_DISTRO}" \
+    --provider-k3s-version "${KUBERNETES_VERSION}" \
     --version "${VERSION}"
 
 # Validate the image.
