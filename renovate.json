@@ -96,7 +96,7 @@
       "automerge": true,
       "automergeType": "branch",
       "groupName": "ubuntu",
-      "matchFileNames": ["images/kairos-ubuntu/Dockerfile"],
+      "matchFileNames": ["images/kairos-ubuntu/Containerfile"],
       "matchPackageNames": ["ubuntu"],
       "matchUpdateTypes": ["digest"],
       "schedule": ["on the first day of the month"]
@@ -134,7 +134,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["/^.*Dockerfile$/"],
+      "managerFilePatterns": ["/^.*(Container|Docker)file$/"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\nARG\\s+[A-Z_]+_VERSION=(?<currentValue>.+?)\\n"
       ]

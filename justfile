@@ -172,12 +172,12 @@ ansible-lint:
     cd ansible && ansible-lint
     minikube stop --profile=ansible-lint
 
-# Lint Dockerfiles with hado
+# Lint Container and Docker files with hado
 [group('lint')]
 hado-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    find . -name "Dockerfile*" -print | while read -r file; do 
+    find . -name "*erfile*" -print | while read -r file; do 
         echo -n "Running \`hadolint\` on ${file}..."
         hadolint ${file}
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"

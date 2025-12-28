@@ -50,6 +50,7 @@ jobs:
           build-args: |
             VERSION=${{ steps.version_tag.outputs.tag }}
           context: images/kairos-ubuntu
+          file: images/kairos-ubuntu/Containerfile
           labels: ${{ steps.metadata.outputs.labels }}
           push: ${{ github.ref_type == 'tag' }}
           tags: ghcr.io/${{ github.repository_owner }}/kairos-ubuntu:${{ steps.version_tag.outputs.tag }}
