@@ -1,5 +1,5 @@
 # renovate
-FROM debian:stable-slim@sha256:7cb087f19bcc175b96fbe4c2aef42ed00733a659581a80f6ebccfd8fe3185a3d
+FROM debian:stable-slim@sha256:449673e1239be6fdc89616f926abb87f360c280c3bb7ca3591694564359695fa
 
 # Install sshd and remove the auto-generated keys
 RUN apt-get update && \
