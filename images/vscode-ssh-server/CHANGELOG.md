@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.3](https://github.com/marinatedconcrete/config/compare/vscode-ssh-server-0.1.2...vscode-ssh-server-0.1.3) (2026-01-03)
+
+
+### Other Changes
+
+* **main:** release renovate-config 2.3.0 ([#595](https://github.com/marinatedconcrete/config/issues/595)) ([72e5ae7](https://github.com/marinatedconcrete/config/commit/72e5ae726a0a26d2a0c85933a9793d599da54432))
+* **package:** update debian:stable-slim docker digest to 449673e ([a66b748](https://github.com/marinatedconcrete/config/commit/a66b748a03b41c460fda062a82321be3e998d096))
+
 ## [0.1.2](https://github.com/marinatedconcrete/config/compare/vscode-ssh-server-0.1.1...vscode-ssh-server-0.1.2) (2025-12-08)
 
 
