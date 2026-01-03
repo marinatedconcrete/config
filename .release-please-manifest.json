@@ -7,6 +7,6 @@
   "kustomization/components/mosquitto": "2.0.4",
   "kustomization/components/paperless": "1.1.7",
   "kustomization/components/priorityclass": "1.0.3",
-  "kustomization/components/unifi-network-application": "1.1.25",
+  "kustomization/components/unifi-network-application": "1.1.26",
   "renovate": "2.3.0"
 }
