@@ -46,7 +46,6 @@
     "images/kairos-ubuntu": {
       "include-v-in-tag": false,
       "package-name": "kairos-ubuntu",
-      "prerelease": true,
       "release-type": "simple",
       "tag-separator": "-"
     },
