@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.1](https://github.com/marinatedconcrete/config/compare/renovate-config-2.3.0...renovate-config-2.3.1) (2026-01-10)
+
+
+### Other Changes
+
+* **main:** release renovate-config 2.3.0 ([#595](https://github.com/marinatedconcrete/config/issues/595)) ([72e5ae7](https://github.com/marinatedconcrete/config/commit/72e5ae726a0a26d2a0c85933a9793d599da54432))
+
 ## [2.3.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.2.0...renovate-config-2.3.0) (2025-12-26)
 
 
