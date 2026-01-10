@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.3](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.2...kustomize-kube-vip@v4.0.3) (2026-01-10)
+
+
+### Other Changes
+
+* **main:** release renovate-config 2.3.0 ([#595](https://github.com/marinatedconcrete/config/issues/595)) ([72e5ae7](https://github.com/marinatedconcrete/config/commit/72e5ae726a0a26d2a0c85933a9793d599da54432))
+
 ## [4.0.2](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.1...kustomize-kube-vip@v4.0.2) (2025-12-28)
 
 
