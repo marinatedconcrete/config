@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/marinatedconcrete/config/compare/kustomize-priorityclass@v1.0.3...kustomize-priorityclass@v1.0.4) (2026-01-10)
+
+
+### Other Changes
+
+* **main:** release renovate-config 2.3.0 ([#595](https://github.com/marinatedconcrete/config/issues/595)) ([72e5ae7](https://github.com/marinatedconcrete/config/commit/72e5ae726a0a26d2a0c85933a9793d599da54432))
+
 ## [1.0.3](https://github.com/marinatedconcrete/config/compare/kustomize-priorityclass@v1.0.2...kustomize-priorityclass@v1.0.3) (2025-03-02)
 
 
