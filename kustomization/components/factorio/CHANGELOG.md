@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/marinatedconcrete/config/compare/kustomize-factorio@v0.1.3...kustomize-factorio@v0.1.4) (2026-01-10)
+
+
+### Other Changes
+
+* **main:** release renovate-config 2.3.0 ([#595](https://github.com/marinatedconcrete/config/issues/595)) ([72e5ae7](https://github.com/marinatedconcrete/config/commit/72e5ae726a0a26d2a0c85933a9793d599da54432))
+
 ## [0.1.3](https://github.com/marinatedconcrete/config/compare/kustomize-factorio@v0.1.2...kustomize-factorio@v0.1.3) (2025-04-22)
 
 
