@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/python:3-3.14@sha256:9d063a63ebbded28ff97a11f246bb43aa198f3cb7db3589c92bd1bf2e017a0cf
+FROM mcr.microsoft.com/devcontainers/python:3-3.14@sha256:99bf0ccea2570de791b53370bf17d0aa103a4faf396b5fb968462f65267bc6a5
 
 RUN apt-get update \
     && apt-get upgrade -y \
