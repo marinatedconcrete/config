@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.26](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.25...kustomize-unifi-network-application@v1.1.26) (2026-01-29)
+
+
+### Other Changes
+
+* **package:** update unifi ([#623](https://github.com/marinatedconcrete/config/issues/623)) ([e009874](https://github.com/marinatedconcrete/config/commit/e00987440931eb4e642be514faaeef4f749e7ddf))
+
 ## [1.1.25](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.24...kustomize-unifi-network-application@v1.1.25) (2025-12-28)
 
 
