@@ -9,11 +9,11 @@ configMapGenerator:
       - configmap/shutdown-mongo.js
 images:
   - name: busybox
-    newTag: 1.37.0@sha256:b86c79d6d337dcaa4cad3cfc704d5e6ae5ba725f3e0674d96f65af7a8f5e2761
+    newTag: 1.37.0@sha256:b3255e7dfbcd10cb367af0d409747d511aeb66dfac98cf30e97e87e4207dd76f
   - name: lscr.io/linuxserver/unifi-network-application
-    newTag: 10.0.162@sha256:7948b8c2ca4cd9bf9e1839f3e399c320e0a8318cd54dc807c247f48702f4b157
+    newTag: 10.0.162@sha256:1c3667f6f145b49dcbd105b090a3740a6403f2ae02a164ae9231649e073e2f84
   - name: mongo
-    newTag: 8.0.17@sha256:9814652e33f0cf8b9fddea8b46dfc9d8e19b130dcfdd7b510ca58bb0d40c8b71
+    newTag: 8.0.18@sha256:ea2d3389d685f1cbd41cbad8c9d0fb1a7448ede26263cde4e5e61aa9050d7783
 resources:
   - statefulset.yml
   - serverstransport.yml
