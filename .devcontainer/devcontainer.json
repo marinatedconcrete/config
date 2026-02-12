@@ -73,7 +73,7 @@
     },
     "ghcr.io/rio/features/kustomize:1": {
       // renovate: datasource=github-releases depName=kubernetes-sigs/kustomize
-      "version": "5.8.0"
+      "version": "5.8.1"
     }
   },
   "postCreateCommand": ".devcontainer/post-create-command.sh",
