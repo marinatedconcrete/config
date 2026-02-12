@@ -61,7 +61,7 @@
       "nvmVersion": "0.40.4",
       "pnpmVersion": "none",
       // renovate: datasource=node-version depName=node
-      "version": "24.13.0"
+      "version": "24.13.1"
     },
     "ghcr.io/devcontainers-extra/features/renovate-cli:2": {
       // renovate: datasource=github-releases depName=renovatebot/renovate
