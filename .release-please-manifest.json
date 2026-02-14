@@ -4,7 +4,7 @@
   "images/vscode-ssh-server": "0.1.2",
   "kustomization/components/factorio": "0.1.3",
   "kustomization/components/kube-vip": "4.0.2",
-  "kustomization/components/mosquitto": "2.0.4",
+  "kustomization/components/mosquitto": "2.0.5",
   "kustomization/components/paperless": "1.1.7",
   "kustomization/components/priorityclass": "1.0.3",
   "kustomization/components/unifi-network-application": "1.1.26",
