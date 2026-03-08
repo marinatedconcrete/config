@@ -8,6 +8,7 @@
       - --interactive=false
       - "--profile={{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
       - "--kubernetes-version={{ minikube_test__kubernetes_version }}"
+      - --cni=kindnet
       - --force
   changed_when: true
   notify: stop minikube
