@@ -28,6 +28,9 @@ spec:
       containers:
         - name: redis
           image: redis
+          readinessProbe:
+            tcpSocket:
+              port: 6379
           resources:
             requests:
               cpu: 25m
