@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.2.1...ansible-collection@v1.3.0) (2026-03-15)
+
+
+### Features
+
+* add paperless startup probe ([#652](https://github.com/marinatedconcrete/config/issues/652)) ([1498464](https://github.com/marinatedconcrete/config/commit/1498464bbc489eb2f640ca50acc416f6637348c5))
+
+
+### Other Changes
+
+* **package:** update dependency ansible to v13.4.0 ([#644](https://github.com/marinatedconcrete/config/issues/644)) ([33e57e2](https://github.com/marinatedconcrete/config/commit/33e57e2bff6babd0b2c211fd37eda647fc71adca))
+* **package:** update dependency kubernetes to v35 ([#620](https://github.com/marinatedconcrete/config/issues/620)) ([7aa96d4](https://github.com/marinatedconcrete/config/commit/7aa96d4ee205dc7846f0576bcfbdcd44fb1850d2))
+
 ## [1.2.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.2.0...ansible-collection@v1.2.1) (2026-03-08)
 
 
