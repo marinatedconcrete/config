@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.3.0...ansible-collection@v1.3.1) (2026-03-15)
+
+
+### Other Changes
+
+* **package:** update dependency kubernetes/kubernetes to v1.35.2 ([33122db](https://github.com/marinatedconcrete/config/commit/33122db5601e4134b981725032c94b1c2ce841cb))
+
 ## [1.3.0](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.2.1...ansible-collection@v1.3.0) (2026-03-15)
 
 
