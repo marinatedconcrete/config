@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.1.7...kustomize-paperless@v1.2.0) (2026-03-15)
+
+
+### Features
+
+* add paperless startup probe ([#652](https://github.com/marinatedconcrete/config/issues/652)) ([1498464](https://github.com/marinatedconcrete/config/commit/1498464bbc489eb2f640ca50acc416f6637348c5))
+
+
+### Other Changes
+
+* **package:** update ghcr.io/servercontainers/samba:smbd-only-latest docker digest to 3984f93 ([c031914](https://github.com/marinatedconcrete/config/commit/c031914f95b188e8f067a7f817ec71ad17f6f0de))
+* **package:** update ghcr.io/servercontainers/samba:smbd-only-latest docker digest to cf0d36d ([960d598](https://github.com/marinatedconcrete/config/commit/960d598fc7259edf940496f727ba8813a6b4f8b8))
+
 ## [1.1.7](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.1.6...kustomize-paperless@v1.1.7) (2025-12-04)
 
 
