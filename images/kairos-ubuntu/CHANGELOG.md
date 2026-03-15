@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-1.0.2...kairos-ubuntu-1.0.3) (2026-03-15)
+
+
+### Other Changes
+
+* **package:** update dependency k3s-io/k3s to v1.35.2+k3s1 ([d54ecb8](https://github.com/marinatedconcrete/config/commit/d54ecb856b31f980219c31210e94dbe01cb456c6))
+
 ## [1.0.2](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-1.0.1...kairos-ubuntu-1.0.2) (2026-02-24)
 
 
