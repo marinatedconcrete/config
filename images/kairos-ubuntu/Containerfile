@@ -6,7 +6,7 @@ FROM quay.io/kairos/kairos-init:v0.10.0@sha256:ed04343a44af73e1f916f6abdfdccf866
 FROM scratch AS ctx
 COPY build_files /
 
-FROM ubuntu:24.04@sha256:186072bba1b2f436cbb91ef2567abca677337cfc786c86e107d25b7072feef0c AS base-kairos
+FROM ubuntu:26.04@sha256:5e275723f82c67e387ba9e3c24baa0abdcb268917f276a0561c97bef9450d0b4 AS base-kairos
 LABEL org.opencontainers.image.title="A custom Ubuntu-based Kairos image."
 LABEL org.opencontainers.image.title="kairos-ubuntu"
 ARG MODEL=generic
