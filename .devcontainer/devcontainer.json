@@ -53,7 +53,7 @@
       // renovate: datasource=github-releases depName=hadolint/hadolint
       "version": "2.14.0"
     },
-    "ghcr.io/devcontainers/features/node:1": {
+    "ghcr.io/devcontainers/features/node:2": {
       "installYarnUsingApt": "false",
       // Save on space since we don't need this
       "nodeGypDependencies": "false",
