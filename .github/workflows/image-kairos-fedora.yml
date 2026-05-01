@@ -1,0 +1,56 @@
+---
+name: Build Kairos-Fedora
+
+on: # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/image-kairos-fedora.yml
+      - images/kairos-fedora/**
+    tags:
+      - kairos-fedora-*
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/image-kairos-fedora.yml
+      - images/kairos-fedora/**
+
+jobs:
+  build-container:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Note: this must start with a number for the build to work correctly!
+      - name: Compute Version Tag
+        env:
+          BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('{0}-pr', github.event.number) }}
+        id: version_tag
+        run: echo "tag=$BRANCH" | sed -e 's/kairos-fedora-//' >> "$GITHUB_OUTPUT"
+      - name: Generate Metadata
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
+        id: metadata
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/kairos-fedora
+      - name: Build Image
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        with:
+          build-args: |
+            VERSION=${{ steps.version_tag.outputs.tag }}
+          context: images/kairos-fedora
+          file: images/kairos-fedora/Containerfile
+          labels: ${{ steps.metadata.outputs.labels }}
+          push: ${{ github.ref_type == 'tag' }}
+          tags: ghcr.io/${{ github.repository_owner }}/kairos-fedora:${{ steps.version_tag.outputs.tag }}

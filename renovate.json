@@ -102,6 +102,16 @@
       "schedule": ["on the first day of the month"]
     },
     {
+      "description": "Auto-merge fedora digest updates monthly",
+      "automerge": true,
+      "automergeType": "branch",
+      "groupName": "fedora",
+      "matchFileNames": ["images/kairos-fedora/Containerfile"],
+      "matchPackageNames": ["fedora"],
+      "matchUpdateTypes": ["digest"],
+      "schedule": ["on the first day of the month"]
+    },
+    {
       "description": "Auto-merge vscode-ssh-server digest updates",
       "automerge": true,
       "automergeType": "branch",

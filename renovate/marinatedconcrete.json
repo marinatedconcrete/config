@@ -39,6 +39,12 @@
       "matchPackageNames": ["marinatedconcrete/config"]
     },
     {
+      "groupName": "marinatedconcrete Kairos Fedora Image",
+      "groupSlug": "marinatedconcrete-kairos-fedora",
+      "matchCurrentValue": "kairos-fedora-**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
       "groupName": "marinatedconcrete vscode SSH Server Image",
       "groupSlug": "marinatedconcrete-vscode-ssh-server",
       "matchCurrentValue": "vscode-ssh-server-**",

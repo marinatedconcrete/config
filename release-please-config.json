@@ -49,6 +49,12 @@
       "release-type": "simple",
       "tag-separator": "-"
     },
+    "images/kairos-fedora": {
+      "include-v-in-tag": false,
+      "package-name": "kairos-fedora",
+      "release-type": "simple",
+      "tag-separator": "-"
+    },
     "images/vscode-ssh-server": {
       "include-v-in-tag": false,
       "package-name": "vscode-ssh-server",
