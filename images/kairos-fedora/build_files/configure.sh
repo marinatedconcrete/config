@@ -15,3 +15,17 @@ systemctl enable iscsi-init.service iscsid.service iscsid.socket
 
 systemctl mask NetworkManager.service NetworkManager-wait-online.service
 systemctl enable systemd-networkd.service systemd-resolved.service
+
+# https://docs.k3s.io/installation/requirements?os=rhel#inbound-rules-for-k3s-nodes
+# k8s API server and supervisor
+firewall-offline-cmd --add-port=6443/tcp
+# etcd for HA setups
+firewall-offline-cmd --add-port=2379-2380/tcp
+# flannel VXLAN for pod/pod communication across nodes
+firewall-offline-cmd --add-port=8472/udp
+# kubelet metrics and API
+firewall-offline-cmd --add-port=10250/tcp
+# pods
+firewall-offline-cmd --zone=trusted --add-source=10.42.0.0/16
+# services
+firewall-offline-cmd --zone=trusted --add-source=10.43.0.0/16
