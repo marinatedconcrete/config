@@ -4,6 +4,8 @@ set -ouex pipefail
 
 # Additional Packages
 PACKAGES=(
+    # Required by Longhorn for iSCSI volume support.
+    "iscsi-initiator-utils"
     "openssh-server"
     # Used by `ansible.builtin.expect`
     "python3-pexpect"
