@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.4.0...kairos-fedora-0.5.0) (2026-05-08)
+
+
+### Features
+
+* **kairos-fedora:** disable firewalld ([#709](https://github.com/marinatedconcrete/config/issues/709)) ([55798aa](https://github.com/marinatedconcrete/config/commit/55798aab571a4010e3dee3a1c4943b935fd326e3))
+
+
+### Bug Fixes
+
+* **deps:** fedora cannot be pinned ([#708](https://github.com/marinatedconcrete/config/issues/708)) ([7f111d5](https://github.com/marinatedconcrete/config/commit/7f111d587f82b5b81d386e4d322b257170c01f4d))
+
+
+### Other Changes
+
+* **package:** update dependency k3s-io/k3s to v1.35.4+k3s1 ([#691](https://github.com/marinatedconcrete/config/issues/691)) ([dbca4a4](https://github.com/marinatedconcrete/config/commit/dbca4a40b67134dcf2d184fab1a8789313a1b100))
+
 ## [0.4.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.3.0...kairos-fedora-0.4.0) (2026-05-02)
 
 
