@@ -25,7 +25,9 @@ firewall-offline-cmd --add-port=2379-2380/tcp
 firewall-offline-cmd --add-port=8472/udp
 # kubelet metrics and API
 firewall-offline-cmd --add-port=10250/tcp
-# pods
-firewall-offline-cmd --zone=trusted --add-source=10.42.0.0/16
-# services
-firewall-offline-cmd --zone=trusted --add-source=10.43.0.0/16
+
+# While we setup the firewall to allow for core k8s access, we also disable it
+# since one would have to add rules for any load balanced service that is
+# exposed in order for it to be accessible.  If you want to re-enable it, keep
+# this constraint in mind.
+systemctl mask firewalld

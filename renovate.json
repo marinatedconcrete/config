@@ -12,6 +12,17 @@
   "rollbackPrs": true,
   "packageRules": [
     {
+      "enabled": false,
+      "groupName": "no-pin",
+      "matchUpdateTypes": [
+        "pin",
+        "pinDigest"
+      ],
+      "matchPackageNames": [
+        "fedora"
+      ]
+    },
+    {
       "description": "Extract Kustomize's unusual release versions",
       "matchPackageNames": ["kubernetes-sigs/kustomize"],
       "extractVersion": "^kustomize/v(?<version>.*)$"
