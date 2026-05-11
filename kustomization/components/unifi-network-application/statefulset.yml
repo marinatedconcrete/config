@@ -165,7 +165,10 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 1Gi
+            # MongoDB defaults to keeping 500MiB free for index builds and
+            # 250MiB for diagnostic data, so 1Gi triggers low-space warnings
+            # before a small UniFi install has much application data.
+            storage: 2Gi
         storageClassName: longhorn-encrypted
     - apiVersion: v1
       kind: PersistentVolumeClaim
