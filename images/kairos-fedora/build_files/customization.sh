@@ -4,6 +4,16 @@ set -ouex pipefail
 
 # Additional Packages
 PACKAGES=(
+    # Required for AMD GPU initialization.
+    "amd-gpu-firmware"
+    # CPU microcode updates for AMD nodes.
+    "amd-ucode-firmware"
+    # Required for Intel Quick Sync/VAAPI on systems using i915.
+    "intel-gpu-firmware"
+    # CPU microcode updates for Intel nodes.
+    "microcode_ctl"
+    # Firmware for Realtek NICs, commonly used on our nodes
+    "realtek-firmware"
     # Required by Longhorn for iSCSI volume support.
     "iscsi-initiator-utils"
     "openssh-server"
