@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.5.0...kairos-fedora-0.6.0) (2026-05-11)
+
+
+### Features
+
+* add firmware to the fedora builds ([#711](https://github.com/marinatedconcrete/config/issues/711)) ([c91f5c3](https://github.com/marinatedconcrete/config/commit/c91f5c32c2451593c7fe7cc902440c52775eb2ad))
+
 ## [0.5.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.4.0...kairos-fedora-0.5.0) (2026-05-08)
 
 
