@@ -10,10 +10,16 @@ PACKAGES=(
     "amd-ucode-firmware"
     # Required for Intel Quick Sync/VAAPI on systems using i915.
     "intel-gpu-firmware"
+    # Firmware for Intel Wi-Fi adapters used by some nodes.
+    "iwlwifi-mvm-firmware"
     # CPU microcode updates for Intel nodes.
     "microcode_ctl"
-    # Firmware for Realtek NICs, commonly used on our nodes
-    "realtek-firmware"
+    # Firmware for MediaTek Wi-Fi/Bluetooth adapters used by some nodes.
+    "mt7xxx-firmware"
+    # Firmware for Realtek NICs and Intel Bluetooth used by several nodes.
+    "linux-firmware"
+    # Wireless regulatory database referenced by cfg80211.
+    "wireless-regdb"
     # Required by Longhorn for iSCSI volume support.
     "iscsi-initiator-utils"
     "openssh-server"
