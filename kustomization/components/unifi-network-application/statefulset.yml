@@ -16,7 +16,12 @@ spec:
     spec:
       automountServiceAccountToken: false
       containers:
-        - image: mongo
+        - env:
+            # MongoDB 8.0 can segfault on affected Linux kernels without this.
+            # https://www.mongodb.com/docs/v8.2/release-notes/8.0/#mongodb-8.0-incompatible-with-kernel-6.19
+            - name: GLIBC_TUNABLES
+              value: glibc.pthread.rseq=1
+          image: mongo
           lifecycle:
             preStop:
               exec:
