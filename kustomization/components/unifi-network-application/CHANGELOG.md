@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.29](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.28...kustomize-unifi-network-application@v1.1.29) (2026-05-12)
+
+
+### Bug Fixes
+
+* bump initial mongodb pvc size ([#716](https://github.com/marinatedconcrete/config/issues/716)) ([5994889](https://github.com/marinatedconcrete/config/commit/5994889f3d58c5cd87f8827fa6b6afdeca37145e))
+* MongoDB workaround for newer kernels ([#715](https://github.com/marinatedconcrete/config/issues/715)) ([21bb498](https://github.com/marinatedconcrete/config/commit/21bb49834ea85b3a38012ab6a8f80f32b6ca1a36))
+
 ## [1.1.28](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.27...kustomize-unifi-network-application@v1.1.28) (2026-03-19)
 
 
