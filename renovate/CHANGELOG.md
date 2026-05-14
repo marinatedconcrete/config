@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.3.0...renovate-config-2.4.0) (2026-05-14)
+
+
+### Features
+
+* Add a kairos-fedora image ([#694](https://github.com/marinatedconcrete/config/issues/694)) ([8a2fa2c](https://github.com/marinatedconcrete/config/commit/8a2fa2c980cb64ce70567ee14e5e653368975cef))
+
 ## [2.3.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.2.0...renovate-config-2.3.0) (2025-12-26)
 
 
