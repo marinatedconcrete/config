@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.4.0...ansible-collection@v1.4.1) (2026-05-21)
+
+
+### Bug Fixes
+
+* **longhorn_allow_encrypted_trim:** cryptsetup on fedora wants the path after /dev/mapper ([#731](https://github.com/marinatedconcrete/config/issues/731)) ([5cc4e4e](https://github.com/marinatedconcrete/config/commit/5cc4e4ed377dcb9a7ae4ccb20427a91197fa6421))
+
 ## [1.4.0](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.3.4...ansible-collection@v1.4.0) (2026-05-14)
 
 
