@@ -15,7 +15,7 @@
       }}
 - name: Persist allowing discards
   ansible.builtin.expect:
-    command: "cryptsetup --allow-discards --persistent refresh {{ device }}"
+    command: "cryptsetup --allow-discards --persistent refresh {{ device.removeprefix('/dev/mapper/') }}"
     responses:
       "^Enter passphrase for ": "{{ encryption_key }}"
   become: true
