@@ -199,9 +199,9 @@ kustomize-lint:
 renovate-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    renovate-config-validator renovate.json
-    find renovate -name "*.json" -print | while read -r file; do 
-        renovate-config-validator ${file}
+    yarn renovate-config-validator renovate.json
+    find renovate -name "*.json" -print | while read -r file; do
+        yarn renovate-config-validator ${file}
     done
 
 # Lint shell scripts with shell check
@@ -209,7 +209,7 @@ renovate-lint:
 shellcheck-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    find . -name "*.sh" -print | while read -r file; do 
+    find . -path "./.yarn" -prune -o -name "*.sh" -print | while read -r file; do
         echo -n "Running \`shellcheck\` on ${file}..."
         shellcheck ${file}
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"

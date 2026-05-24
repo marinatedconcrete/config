@@ -136,7 +136,7 @@
       "description": "Auto-merge renovate updates monthly",
       "automerge": true,
       "automergeType": "branch",
-      "matchDepNames": ["renovatebot/renovate"],
+      "matchDepNames": ["renovate"],
       "schedule": ["on the first day of the month"]
     },
     {
