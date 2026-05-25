@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.7.1...kairos-fedora-0.8.0) (2026-05-25)
+
+
+### Features
+
+* **package:** Update dependency k3s-io/k3s to v1.36.0+k3s1 ([#733](https://github.com/marinatedconcrete/config/issues/733)) ([e950853](https://github.com/marinatedconcrete/config/commit/e950853fe140187e672af893752af471ed5cde60))
+
+
+### Other Changes
+
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.13.1 ([#728](https://github.com/marinatedconcrete/config/issues/728)) ([51cd01c](https://github.com/marinatedconcrete/config/commit/51cd01c23355721784785c66463e40973b8f37b6))
+
 ## [0.7.1](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.7.0...kairos-fedora-0.7.1) (2026-05-16)
 
 
