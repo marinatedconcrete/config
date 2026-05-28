@@ -13,5 +13,10 @@ RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
     /ctx/build.sh
 
+RUN groupadd --gid ${GROUPID} ${USERNAME} \
+    && useradd --gid ${GROUPID} --uid ${USERID} -p ${USERNAME} -s /bin/bash -m ${USERNAME} \
+    && passwd -d ${USERNAME} \
+    && usermod -a -G wheel ${USERNAME}
+
 WORKDIR /home/${USERNAME}
 USER ${USERNAME}
