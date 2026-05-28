@@ -1,11 +1,11 @@
-ARG USERNAME=vscode
-ARG USERID=1000
-ARG GROUPID=1000
-
 FROM scratch AS ctx
 COPY build_files /
 
 FROM quay.io/fedora/fedora-minimal:44
+
+ARG USERNAME=vscode
+ARG USERID=1000
+ARG GROUPID=1000
 
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/cache \
