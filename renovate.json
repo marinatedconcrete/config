@@ -19,7 +19,8 @@
         "pinDigest"
       ],
       "matchPackageNames": [
-        "fedora"
+        "fedora",
+        "fedora-minimal"
       ]
     },
     {
