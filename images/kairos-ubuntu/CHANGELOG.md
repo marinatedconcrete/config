@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.0](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-1.0.4...kairos-ubuntu-1.1.0) (2026-05-30)
+
+
+### Features
+
+* **package:** Update dependency k3s-io/k3s to v1.36.0+k3s1 ([#733](https://github.com/marinatedconcrete/config/issues/733)) ([e950853](https://github.com/marinatedconcrete/config/commit/e950853fe140187e672af893752af471ed5cde60))
+
+
+### Other Changes
+
+* **package:** update dependency k3s-io/k3s to v1.36.1+k3s1 ([8443f1f](https://github.com/marinatedconcrete/config/commit/8443f1fb581dff9d4031c95d5a4841f48b04a9c9))
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.12.1 ([#706](https://github.com/marinatedconcrete/config/issues/706)) ([96c0262](https://github.com/marinatedconcrete/config/commit/96c0262e2335516ca0849b347d89b8676ca21a76))
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.13.0 ([#722](https://github.com/marinatedconcrete/config/issues/722)) ([63dc996](https://github.com/marinatedconcrete/config/commit/63dc996214765d9aa5a6a312c2d77186c228676d))
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.13.1 ([#728](https://github.com/marinatedconcrete/config/issues/728)) ([51cd01c](https://github.com/marinatedconcrete/config/commit/51cd01c23355721784785c66463e40973b8f37b6))
+
 ## [1.0.4](https://github.com/marinatedconcrete/config/compare/kairos-ubuntu-1.0.3...kairos-ubuntu-1.0.4) (2026-05-08)
 
 
