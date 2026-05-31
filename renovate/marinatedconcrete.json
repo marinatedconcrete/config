@@ -33,12 +33,6 @@
       "matchPackageNames": ["marinatedconcrete/config"]
     },
     {
-      "groupName": "marinatedconcrete Kairos Ubuntu Image",
-      "groupSlug": "marinatedconcrete-kairos-ubuntu",
-      "matchCurrentValue": "kairos-ubuntu-**",
-      "matchPackageNames": ["marinatedconcrete/config"]
-    },
-    {
       "groupName": "marinatedconcrete Kairos Fedora Image",
       "groupSlug": "marinatedconcrete-kairos-fedora",
       "matchCurrentValue": "kairos-fedora-**",

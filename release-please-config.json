@@ -43,12 +43,6 @@
       "package-name": "ansible-collection",
       "release-type": "simple"
     },
-    "images/kairos-ubuntu": {
-      "include-v-in-tag": false,
-      "package-name": "kairos-ubuntu",
-      "release-type": "simple",
-      "tag-separator": "-"
-    },
     "images/kairos-fedora": {
       "include-v-in-tag": false,
       "package-name": "kairos-fedora",
