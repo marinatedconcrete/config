@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.4.1](https://github.com/marinatedconcrete/config/compare/renovate-config-2.4.0...renovate-config-2.4.1) (2026-05-31)
+
+
+### Bug Fixes
+
+* allow renovate to resolve the ansible-galaxy package ([#753](https://github.com/marinatedconcrete/config/issues/753)) ([5a56ffd](https://github.com/marinatedconcrete/config/commit/5a56ffdaf612c826a51b0a9f4cb139af60d49170))
+* **renovate:** map kairos-fedora image changelog ([#751](https://github.com/marinatedconcrete/config/issues/751)) ([1945f47](https://github.com/marinatedconcrete/config/commit/1945f47e8b80b013b21e415bffdeccc0562ef038))
+
+
+### Other Changes
+
+* remove kairos-ubuntu image ([#750](https://github.com/marinatedconcrete/config/issues/750)) ([656e85c](https://github.com/marinatedconcrete/config/commit/656e85ce605da90ddfdfe08a831a287c7bd95d3b))
+
 ## [2.4.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.3.0...renovate-config-2.4.0) (2026-05-14)
 
 
