@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.31](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.30...kustomize-unifi-network-application@v1.1.31) (2026-05-31)
+
+
+### Other Changes
+
+* **package:** update busybox docker tag to v1.38.0 ([933cbea](https://github.com/marinatedconcrete/config/commit/933cbeadbeab965c219e0e4f59f132c3109a2acd))
+
 ## [1.1.30](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.29...kustomize-unifi-network-application@v1.1.30) (2026-05-24)
 
 
