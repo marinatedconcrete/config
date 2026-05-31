@@ -23,6 +23,14 @@
   ],
   "packageRules": [
     {
+      "description": "Normalize marinatedconcrete/config Ansible git collection",
+      "matchManagers": ["ansible-galaxy"],
+      "matchDatasources": ["github-tags"],
+      "matchDepNames": ["github.com/marinatedconcrete/config"],
+      "overrideDepName": "marinatedconcrete/config",
+      "overridePackageName": "marinatedconcrete/config"
+    },
+    {
       "description": "marinatedconcrete/config versioning",
       "matchPackageNames": ["marinatedconcrete/config"],
       "versioning": "regex:^(?<compatibility>.+)[@\\-]v?(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+?)$"
