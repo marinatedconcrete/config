@@ -28,6 +28,13 @@
       "versioning": "regex:^(?<compatibility>.+)[@\\-]v?(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+?)$"
     },
     {
+      "description": "Map kairos-fedora image to its monorepo changelog",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/marinatedconcrete/kairos-fedora"],
+      "sourceDirectory": "images/kairos-fedora",
+      "sourceUrl": "https://github.com/marinatedconcrete/config"
+    },
+    {
       "groupName": "marinatedconcrete Ansible Collection",
       "matchCurrentValue": "ansible-collection@**",
       "matchPackageNames": ["marinatedconcrete/config"]
