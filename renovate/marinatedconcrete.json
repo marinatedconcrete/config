@@ -27,7 +27,6 @@
       "matchManagers": ["ansible-galaxy"],
       "matchDatasources": ["github-tags"],
       "matchDepNames": ["github.com/marinatedconcrete/config"],
-      "overrideDepName": "marinatedconcrete/config",
       "overridePackageName": "marinatedconcrete/config"
     },
     {
