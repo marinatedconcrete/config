@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.2](https://github.com/marinatedconcrete/config/compare/renovate-config-2.4.1...renovate-config-2.4.2) (2026-06-01)
+
+
+### Bug Fixes
+
+* **renovate:** overriding the dep name breaks branch creation ([#754](https://github.com/marinatedconcrete/config/issues/754)) ([9170988](https://github.com/marinatedconcrete/config/commit/9170988a549dc806f03842f6cd8ddce5a55269b4))
+
 ## [2.4.1](https://github.com/marinatedconcrete/config/compare/renovate-config-2.4.0...renovate-config-2.4.1) (2026-05-31)
 
 
