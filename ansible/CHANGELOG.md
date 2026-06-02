@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.2](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.4.1...ansible-collection@v1.4.2) (2026-06-02)
+
+
+### Other Changes
+
+* **package:** update dependency ansible to v13.7.0 ([#726](https://github.com/marinatedconcrete/config/issues/726)) ([b0c04c1](https://github.com/marinatedconcrete/config/commit/b0c04c1da3dddfbd4567e649add7f67f851d468f))
+* **package:** update dependency kubernetes to v36 ([#730](https://github.com/marinatedconcrete/config/issues/730)) ([bd9aa2d](https://github.com/marinatedconcrete/config/commit/bd9aa2d502cb591afdec721bb667a019ed11426c))
+* **package:** update dependency kubernetes to v36.0.1 ([03b0652](https://github.com/marinatedconcrete/config/commit/03b0652baf6b2898f9bee1e6988ca0711dc5ae09))
+* **package:** update dependency kubernetes/kubernetes to v1.36.1 ([be506a4](https://github.com/marinatedconcrete/config/commit/be506a4ca487f95cdc2481cc0ee92d0a79eb27d5))
+
 ## [1.4.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.4.0...ansible-collection@v1.4.1) (2026-05-21)
 
 
