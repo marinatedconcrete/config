@@ -1,7 +1,7 @@
 {
   "devDependencies": {
     "prettier": "3.8.3",
-    "renovate": "43.102.9"
+    "renovate": "43.204.1"
   },
   "packageManager": "yarn@4.15.0",
   "scripts": {
