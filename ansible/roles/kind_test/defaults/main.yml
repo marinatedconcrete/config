@@ -1,0 +1,17 @@
+---
+# defaults file for kind_test
+
+# If the test harness should add a local-path StorageClass alias for Kind's
+# built-in rancher.io/local-path provisioner.
+kind_test__enable_local_path_storage: false
+
+# renovate: datasource=docker depName=kindest/node
+kind_test__node_image: kindest/node:v1.36.1@sha256:3489c7674813ba5d8b1a9977baea8a6e553784dab7b84759d1014dbd78f7ebd5
+
+# The directory to pass to kustomize for the test.
+kind_test__kustomization_dir: "{{ kind_test__test_dir }}"
+
+# The name of the test.
+kind_test__test_name: "{{ kind_test__kustomization_dir.split('/')[-1] }}"
+kind_test__cluster_name: "{{ kind_test__test_name }}"
+kind_test__context: "kind-{{ kind_test__cluster_name }}"

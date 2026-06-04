@@ -7,7 +7,7 @@ components:
   - ../../components/factorio
 namespace: factorio-test
 patches:
-  # Change storage class so we use minikube's local path provisioner.
+  # Change storage class so we use Kind's local path provisioner.
   - patch: |-
       apiVersion: apps/v1
       kind: StatefulSet

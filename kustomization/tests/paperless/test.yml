@@ -3,10 +3,10 @@
   gather_facts: false
   hosts: localhost
   roles:
-    - role: marinatedconcrete.config.minikube_test
+    - role: marinatedconcrete.config.kind_test
       vars:
-        minikube_test__enable_local_path_storage: true
-        minikube_test__test_dir: kustomization/tests/paperless
+        kind_test__enable_local_path_storage: true
+        kind_test__test_dir: kustomization/tests/paperless
   tasks:
     - name: Wait for Paperless StatefulSet
       kubernetes.core.k8s:
@@ -33,5 +33,5 @@
           - endpoints.resources | length | bool # Found
           - (endpoints.resources | first).subsets | length | bool
   vars:
-    kubernetes_core_k8s__context: paperless
+    kubernetes_core_k8s__context: kind-paperless
     test_namespace: "{{ (lookup('file', 'kustomization.yml') | from_yaml).namespace }}"
