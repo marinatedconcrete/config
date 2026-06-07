@@ -1,7 +1,7 @@
 FROM scratch AS ctx
 COPY build_files /
 
-FROM quay.io/fedora/fedora-minimal:44
+FROM quay.io/fedora/fedora-minimal:44@sha256:5fdcb48065dd933b161bb0fe1da834dddabb344d595b228314d3d7b0f50a4536
 
 ARG USERNAME=vscode
 ARG USERID=1000
