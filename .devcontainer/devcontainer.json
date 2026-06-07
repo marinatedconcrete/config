@@ -58,7 +58,7 @@
       // Save on space since we don't need this
       "nodeGypDependencies": "false",
       // renovate: datasource=github-releases depName=nvm-sh/nvm
-      "nvmVersion": "0.40.4",
+      "nvmVersion": "0.40.5",
       "pnpmVersion": "none",
       // renovate: datasource=node-version depName=node
       "version": "24.16.0"
