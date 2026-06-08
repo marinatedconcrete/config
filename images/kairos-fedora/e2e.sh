@@ -166,7 +166,7 @@ start_qemu() {
     cp "$firmware_vars_template" "$firmware_vars"
 
     qemu_args=(
-        -machine q35,accel=kvm
+        -machine "q35,accel=kvm"
         -cpu host
         -m "$E2E_MEMORY"
         -smp "$E2E_CPUS"
@@ -182,14 +182,14 @@ start_qemu() {
     if [[ "$mode" == "install" ]]; then
         qemu_args+=(
             -drive "file=${iso_path},media=cdrom,readonly=on,if=ide"
-            -boot order=d,menu=off
+            -boot "order=d,menu=off"
             -no-reboot
             -netdev "user,id=net0,hostfwd=tcp:127.0.0.1:${E2E_WEBUI_PORT}-:8080"
             -device virtio-net-pci,netdev=net0
         )
     else
         qemu_args+=(
-            -boot order=c,menu=off
+            -boot "order=c,menu=off"
             -netdev "user,id=net0,hostfwd=tcp:127.0.0.1:${E2E_SSH_PORT}-:22"
             -device virtio-net-pci,netdev=net0
         )
@@ -359,7 +359,7 @@ run_guest_checks() {
     ssh_cmd 'sudo -n k3s kubectl get pods -A -o wide'
 
     log "Checking failed systemd units"
-    ssh_cmd 'test -z "$(sudo -n systemctl --failed --no-legend)"'
+    ssh_cmd "test -z \"\$(sudo -n systemctl --failed --no-legend)\""
 }
 
 main() {
