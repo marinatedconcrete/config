@@ -12,16 +12,14 @@
   "rollbackPrs": true,
   "packageRules": [
     {
-      "enabled": false,
-      "groupName": "no-pin",
-      "matchUpdateTypes": [
-        "pin",
-        "pinDigest"
-      ],
+      "description": "Do not pin Fedora image digests because old digests disappear",
+      "matchDatasources": ["docker"],
       "matchPackageNames": [
         "fedora",
-        "fedora-minimal"
-      ]
+        "fedora-minimal",
+        "quay.io/fedora/**"
+      ],
+      "pinDigests": false
     },
     {
       "description": "Extract Kustomize's unusual release versions",
