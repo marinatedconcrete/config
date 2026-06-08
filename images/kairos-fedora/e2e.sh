@@ -185,13 +185,13 @@ start_qemu() {
             -boot "order=d,menu=off"
             -no-reboot
             -netdev "user,id=net0,hostfwd=tcp:127.0.0.1:${E2E_WEBUI_PORT}-:8080"
-            -device virtio-net-pci,netdev=net0
+            -device "virtio-net-pci,netdev=net0"
         )
     else
         qemu_args+=(
             -boot "order=c,menu=off"
             -netdev "user,id=net0,hostfwd=tcp:127.0.0.1:${E2E_SSH_PORT}-:22"
-            -device virtio-net-pci,netdev=net0
+            -device "virtio-net-pci,netdev=net0"
         )
     fi
 
