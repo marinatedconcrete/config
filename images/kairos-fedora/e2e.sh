@@ -239,8 +239,12 @@ wait_for_qemu_exit() {
 }
 
 wait_for_webui() {
-    local deadline=$((SECONDS + $(duration_to_seconds "$E2E_BOOT_TIMEOUT")))
+    local deadline
+    local timeout_seconds
     local url="http://127.0.0.1:${E2E_WEBUI_PORT}/"
+
+    timeout_seconds="$(duration_to_seconds "$E2E_BOOT_TIMEOUT")"
+    deadline=$((SECONDS + timeout_seconds))
 
     log "Waiting for Kairos WebUI at ${url}"
     while ((SECONDS < deadline)); do
@@ -294,7 +298,11 @@ ssh_cmd() {
 }
 
 wait_for_ssh() {
-    local deadline=$((SECONDS + $(duration_to_seconds "$E2E_BOOT_TIMEOUT")))
+    local deadline
+    local timeout_seconds
+
+    timeout_seconds="$(duration_to_seconds "$E2E_BOOT_TIMEOUT")"
+    deadline=$((SECONDS + timeout_seconds))
 
     log "Waiting for SSH on localhost:${E2E_SSH_PORT}"
     while ((SECONDS < deadline)); do
