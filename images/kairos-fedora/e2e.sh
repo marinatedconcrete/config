@@ -281,10 +281,9 @@ submit_install() {
 
     log "Submitting WebUI install to /dev/vda"
     if ! curl --fail --silent --show-error --location \
-        -X POST \
-        -F "cloud-config=<${cloud_config};type=text/plain" \
-        -F "installation-device=/dev/vda" \
-        -F "power-off=on" \
+        --data-urlencode "cloud-config@${cloud_config}" \
+        --data-urlencode "installation-device=/dev/vda" \
+        --data-urlencode "power-off=on" \
         "${base_url}/install" \
         >"${logs_dir}/webui-install-response.html"; then
         log "Install submission connection ended early; continuing to wait for VM poweroff"
