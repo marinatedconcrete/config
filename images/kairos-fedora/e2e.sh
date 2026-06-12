@@ -94,7 +94,7 @@ build_installer_iso() {
     fi
 
     docker_image="$(normalize_image_ref "$image")"
-    mkdir -p "$E2E_WORKDIR"
+    mkdir -p "$logs_dir"
 
     log "Building installer ISO from oci:${docker_image}"
     docker run --rm \
@@ -103,10 +103,12 @@ build_installer_iso() {
         "$AURORABOOT_IMAGE" \
         build-iso \
         --output /tmp/auroraboot \
-        "oci:${docker_image}"
+        "oci:${docker_image}" \
+        >"${logs_dir}/auroraboot-build-iso.log" 2>&1
 
     iso_path="$(find_latest_iso)"
     [[ -n "$iso_path" ]] || die "AuroraBoot did not produce an ISO in ${E2E_WORKDIR}"
+    log "Using installer ISO ${iso_path}"
     printf '%s\n' "$iso_path"
 }
 
@@ -248,6 +250,11 @@ wait_for_webui() {
 
     log "Waiting for Kairos WebUI at ${url}"
     while ((SECONDS < deadline)); do
+        if [[ -n "$qemu_pid" ]] && ! kill -0 "$qemu_pid" >/dev/null 2>&1; then
+            wait "$qemu_pid" || true
+            die "QEMU installer VM exited before WebUI became reachable"
+        fi
+
         if curl --fail --silent --show-error --max-time 5 "$url" >"${logs_dir}/webui-index.html"; then
             grep -q 'install-form' "${logs_dir}/webui-index.html" || die "WebUI responded but install form was not found"
             return
