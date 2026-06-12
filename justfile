@@ -167,10 +167,20 @@ ansible-lint:
     #!/usr/bin/env bash
     set -euo pipefail
 
+    cleanup() {
+        kind delete cluster --name ansible-lint >/dev/null 2>&1 || true
+    }
+    trap cleanup EXIT
+
     # We need a valid .kube/context file for ansible-lint to be happy.
-    minikube start --interactive=false --profile=ansible-lint
+    cleanup
+    # renovate: datasource=docker depName=kindest/node
+    KINDEST_NODE_IMAGE=kindest/node:v1.36.1@sha256:3489c7674813ba5d8b1a9977baea8a6e553784dab7b84759d1014dbd78f7ebd5
+    kind create cluster \
+        --name=ansible-lint \
+        --image="${KINDEST_NODE_IMAGE}" \
+        --wait=5m
     cd ansible && ansible-lint
-    minikube stop --profile=ansible-lint
 
 # Lint Container and Docker files with hado
 [group('lint')]

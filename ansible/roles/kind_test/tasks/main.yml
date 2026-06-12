@@ -1,0 +1,51 @@
+---
+# tasks file for kind_test
+- name: Delete stale kind cluster
+  ansible.builtin.command:
+    argv:
+      - kind
+      - delete
+      - cluster
+      - "--name={{ kind_test__cluster_name }}"
+  changed_when: false
+  failed_when: false
+- name: Start kind
+  ansible.builtin.command:
+    argv:
+      - kind
+      - create
+      - cluster
+      - "--name={{ kind_test__cluster_name }}"
+      - "--image={{ kind_test__node_image }}"
+      - --wait=5m
+  changed_when: true
+  notify: delete kind
+- name: Setup local path storage class
+  when: kind_test__enable_local_path_storage | bool
+  block:
+    - name: Wait for provisioner deployment
+      kubernetes.core.k8s:
+        api_version: apps/v1
+        context: "{{ kubernetes_core_k8s__context | default(kind_test__context) }}"
+        kind: Deployment
+        name: local-path-provisioner
+        namespace: local-path-storage
+        state: present
+        wait: true
+    - name: Add local-path storage class alias
+      kubernetes.core.k8s:
+        apply: true
+        context: "{{ kubernetes_core_k8s__context | default(kind_test__context) }}"
+        definition:
+          apiVersion: storage.k8s.io/v1
+          kind: StorageClass
+          metadata:
+            name: local-path
+          provisioner: rancher.io/local-path
+          reclaimPolicy: Delete
+          volumeBindingMode: WaitForFirstConsumer
+- name: Apply kustomization
+  kubernetes.core.k8s:
+    apply: true
+    context: "{{ kubernetes_core_k8s__context | default(kind_test__context) }}"
+    definition: "{{ lookup('kubernetes.core.kustomize', dir=kind_test__test_dir) }}"

@@ -3,6 +3,6 @@
   gather_facts: false
   hosts: localhost
   roles:
-    - role: marinatedconcrete.config.minikube_test
+    - role: marinatedconcrete.config.kind_test
       vars:
-        minikube_test__test_dir: kustomization/tests/priorityclass
+        kind_test__test_dir: kustomization/tests/priorityclass

@@ -1,0 +1,11 @@
+---
+# handlers file for kind_test
+- name: Delete kind
+  ansible.builtin.command:
+    argv:
+      - kind
+      - delete
+      - cluster
+      - "--name={{ kind_test__cluster_name }}"
+  changed_when: true
+  listen: delete kind
