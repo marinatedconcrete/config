@@ -153,11 +153,9 @@ stages:
   boot:
     - name: kairos-fedora-e2e access
       hostname: kairos-fedora-e2e
-      systemctl:
-        enable:
-          - sshd.service
-        start:
-          - sshd.service
+      commands:
+        - systemctl enable sshd.service || true
+        - systemctl start sshd.service || true
 k3s:
   enabled: true
 EOF
@@ -343,8 +341,8 @@ collect_ssh_diagnostics() {
     ssh_cmd 'cat /etc/os-release' >"${logs_dir}/guest-os-release.txt" 2>&1 || true
     ssh_cmd 'sudo -n systemctl --failed --no-pager' >"${logs_dir}/guest-systemctl-failed.txt" 2>&1 || true
     ssh_cmd 'sudo -n journalctl -b --no-pager' >"${logs_dir}/guest-journalctl-b.log" 2>&1 || true
-    ssh_cmd 'sudo -n k3s kubectl get nodes -o wide' >"${logs_dir}/guest-k3s-nodes.txt" 2>&1 || true
-    ssh_cmd 'sudo -n k3s kubectl get pods -A -o wide' >"${logs_dir}/guest-k3s-pods.txt" 2>&1 || true
+    ssh_cmd 'sudo -n env KUBECONFIG=/etc/rancher/k3s/k3s.yaml k3s kubectl get nodes -o wide' >"${logs_dir}/guest-k3s-nodes.txt" 2>&1 || true
+    ssh_cmd 'sudo -n env KUBECONFIG=/etc/rancher/k3s/k3s.yaml k3s kubectl get pods -A -o wide' >"${logs_dir}/guest-k3s-pods.txt" 2>&1 || true
 }
 
 cleanup_qemu() {
@@ -374,9 +372,12 @@ run_guest_checks() {
     log "Checking Kairos active boot state"
     ssh_cmd 'kairos-agent state get boot | tee /tmp/kairos-boot-state.txt && grep -q active_boot /tmp/kairos-boot-state.txt'
 
+    log "Waiting for K3s API"
+    ssh_cmd "timeout ${E2E_K3S_TIMEOUT} bash -c 'until sudo -n systemctl is-active --quiet k3s && sudo -n test -s /etc/rancher/k3s/k3s.yaml && sudo -n env KUBECONFIG=/etc/rancher/k3s/k3s.yaml k3s kubectl get nodes >/dev/null 2>&1; do sleep 10; done'"
+
     log "Waiting for K3s node readiness"
-    ssh_cmd "sudo -n k3s kubectl wait --for=condition=Ready nodes --all --timeout=${E2E_K3S_TIMEOUT}"
-    ssh_cmd 'sudo -n k3s kubectl get pods -A -o wide'
+    ssh_cmd "sudo -n env KUBECONFIG=/etc/rancher/k3s/k3s.yaml k3s kubectl wait --for=condition=Ready nodes --all --timeout=${E2E_K3S_TIMEOUT}"
+    ssh_cmd 'sudo -n env KUBECONFIG=/etc/rancher/k3s/k3s.yaml k3s kubectl get pods -A -o wide'
 
     log "Checking failed systemd units"
     ssh_cmd "test -z \"\$(sudo -n systemctl --failed --no-legend)\""
