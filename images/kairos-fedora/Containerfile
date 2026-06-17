@@ -6,7 +6,7 @@ FROM quay.io/kairos/kairos-init:v0.14.0@sha256:f9cbde8dd9f7a6c29920a55ef37d73207
 FROM scratch AS ctx
 COPY build_files /
 
-FROM fedora:44
+FROM fedora:45
 LABEL org.opencontainers.image.title="A custom Fedora-based Kairos image."
 LABEL org.opencontainers.image.title="kairos-fedora"
 ARG MODEL=generic
