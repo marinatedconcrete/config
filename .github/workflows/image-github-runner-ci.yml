@@ -18,7 +18,8 @@ on: # yamllint disable-line rule:truthy
       - images/github-runner-ci/**
 
 jobs:
-  build-container:
+  build-github-runner-ci:
+    name: Build GitHub Runner CI Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -46,7 +47,7 @@ jobs:
       - name: Build Image
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
-          context: .
+          context: images/github-runner-ci
           file: images/github-runner-ci/Containerfile
           labels: ${{ steps.metadata.outputs.labels }}
           load: ${{ github.ref_type != 'tag' }}
