@@ -49,6 +49,12 @@
       "release-type": "simple",
       "tag-separator": "-"
     },
+    "images/github-runner-ci": {
+      "include-v-in-tag": false,
+      "package-name": "github-runner-ci",
+      "release-type": "simple",
+      "tag-separator": "-"
+    },
     "images/vscode-ssh-server": {
       "include-v-in-tag": false,
       "package-name": "vscode-ssh-server",

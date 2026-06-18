@@ -42,6 +42,13 @@
       "sourceUrl": "https://github.com/marinatedconcrete/config"
     },
     {
+      "description": "Map github-runner-ci image to its monorepo changelog",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/marinatedconcrete/github-runner-ci"],
+      "sourceDirectory": "images/github-runner-ci",
+      "sourceUrl": "https://github.com/marinatedconcrete/config"
+    },
+    {
       "groupName": "marinatedconcrete Ansible Collection",
       "matchCurrentValue": "ansible-collection@**",
       "matchPackageNames": ["marinatedconcrete/config"]
@@ -50,6 +57,12 @@
       "groupName": "marinatedconcrete Kairos Fedora Image",
       "groupSlug": "marinatedconcrete-kairos-fedora",
       "matchCurrentValue": "kairos-fedora-**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
+      "groupName": "marinatedconcrete GitHub Runner CI Image",
+      "groupSlug": "marinatedconcrete-github-runner-ci",
+      "matchCurrentValue": "github-runner-ci-**",
       "matchPackageNames": ["marinatedconcrete/config"]
     },
     {

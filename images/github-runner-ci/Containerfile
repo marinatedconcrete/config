@@ -1,0 +1,31 @@
+FROM scratch AS ctx
+COPY build_files /
+
+# hadolint ignore=DL3007
+FROM ghcr.io/marinatedconcrete/devcontainer-base:latest
+
+LABEL org.opencontainers.image.title="github-runner-ci"
+LABEL org.opencontainers.image.description="A CI job image for ARC kubernetes-novolume runners."
+
+USER root
+
+ARG RUNNER_USER=runner
+ARG RUNNER_UID=1001
+ARG RUNNER_GID=1001
+
+RUN --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=tmpfs,dst=/tmp \
+    --mount=type=bind,from=ctx,source=/,target=/ctx \
+    /ctx/build.sh
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    /ctx/create-runner-user.sh
+
+ENV HOME="/home/${RUNNER_USER}" \
+    XDG_CACHE_HOME="/home/${RUNNER_USER}/.cache" \
+    XDG_CONFIG_HOME="/home/${RUNNER_USER}/.config" \
+    XDG_DATA_HOME="/home/${RUNNER_USER}/.local/share"
+
+WORKDIR /home/${RUNNER_USER}
+USER ${RUNNER_UID}:${RUNNER_GID}
