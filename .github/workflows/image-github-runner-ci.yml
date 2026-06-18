@@ -1,0 +1,66 @@
+---
+name: Build GitHub Runner CI Image
+
+on: # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/image-github-runner-ci.yml
+      - images/github-runner-ci/**
+    tags:
+      - github-runner-ci-*
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/image-github-runner-ci.yml
+      - images/github-runner-ci/**
+
+jobs:
+  build-container:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compute Version Tag
+        env:
+          BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('{0}-pr', github.event.number) }}
+        id: version_tag
+        run: echo "tag=$BRANCH" | sed -e 's/github-runner-ci-//' >> "$GITHUB_OUTPUT"
+      - name: Generate Metadata
+        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
+        id: metadata
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/github-runner-ci
+      - name: Build Image
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
+        with:
+          context: .
+          file: images/github-runner-ci/Containerfile
+          labels: ${{ steps.metadata.outputs.labels }}
+          load: ${{ github.ref_type != 'tag' }}
+          push: ${{ github.ref_type == 'tag' }}
+          tags: ghcr.io/${{ github.repository_owner }}/github-runner-ci:${{ steps.version_tag.outputs.tag }}
+      - name: Smoke Test Image
+        if: ${{ github.ref_type != 'tag' }}
+        run: |
+          docker run --rm ghcr.io/${{ github.repository_owner }}/github-runner-ci:${{ steps.version_tag.outputs.tag }} bash -lc '
+            test "$(id -u):$(id -g)" = "1001:1001"
+            test "$HOME" = "/home/runner"
+            test -w "$HOME"
+            git --version
+            just --version
+            shellcheck --version
+            yq --version
+          '
