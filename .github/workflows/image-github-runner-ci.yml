@@ -65,6 +65,8 @@ jobs:
             test -w "$HOME/.local/share"
             git --version
             just --version
+            jq --version
+            rg --version
             shellcheck --version
             yq --version
           '

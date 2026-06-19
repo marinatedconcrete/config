@@ -7,6 +7,8 @@ PACKAGES=(
     "bash"
     "ca-certificates"
     "findutils"
+    "jq"
+    "ripgrep"
     "shadow-utils"
     "ShellCheck"
     "unzip"
