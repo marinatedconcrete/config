@@ -21,6 +21,9 @@ spec:
                     operator: In
                     values:
                       - paperless
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
       volumes:
         - name: redis-storage
           persistentVolumeClaim:
@@ -38,6 +41,16 @@ spec:
             limits:
               cpu: 100m
               memory: 400Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            seccompProfile:
+              type: RuntimeDefault
           volumeMounts:
             - mountPath: "/data"
               name: redis-storage
