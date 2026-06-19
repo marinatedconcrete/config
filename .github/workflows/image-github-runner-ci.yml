@@ -24,6 +24,10 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+      run_job_container_test: ${{ steps.image_export.outputs.push }}
+      tag: ${{ steps.version_tag.outputs.tag }}
 
     steps:
       - name: Checkout Repo
@@ -36,25 +40,39 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Compute Version Tag
         env:
-          BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('{0}-pr', github.event.number) }}
+          BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('pr-{0}.{1}.{2}.{3}', github.event.number, github.run_id, github.run_number, github.run_attempt) }}
         id: version_tag
         run: echo "tag=$BRANCH" | sed -e 's/github-runner-ci-//' >> "$GITHUB_OUTPUT"
+      - name: Select Image Export Mode
+        id: image_export
+        env:
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" && "${HEAD_REPOSITORY}" != "${GITHUB_REPOSITORY}" ]]; then
+            echo "load=true" >> "$GITHUB_OUTPUT"
+            echo "push=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "load=false" >> "$GITHUB_OUTPUT"
+            echo "push=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Generate Metadata
         uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
         id: metadata
         with:
           images: ghcr.io/${{ github.repository_owner }}/github-runner-ci
       - name: Build Image
+        id: build
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: images/github-runner-ci
           file: images/github-runner-ci/Containerfile
           labels: ${{ steps.metadata.outputs.labels }}
-          load: ${{ github.ref_type != 'tag' }}
-          push: ${{ github.ref_type == 'tag' }}
+          load: ${{ steps.image_export.outputs.load }}
+          push: ${{ steps.image_export.outputs.push }}
           tags: ghcr.io/${{ github.repository_owner }}/github-runner-ci:${{ steps.version_tag.outputs.tag }}
       - name: Smoke Test Image
-        if: ${{ github.ref_type != 'tag' }}
         run: |
           docker run --rm ghcr.io/${{ github.repository_owner }}/github-runner-ci:${{ steps.version_tag.outputs.tag }} bash -lc '
             test "$(id -u):$(id -g)" = "1001:1001"
@@ -70,3 +88,49 @@ jobs:
             shellcheck --version
             yq --version
           '
+
+  test-github-actions-job-container:
+    name: Test GitHub Actions Job Container
+    needs: build-github-runner-ci
+    if: ${{ needs.build-github-runner-ci.outputs.run_job_container_test == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/github-runner-ci@${{ needs.build-github-runner-ci.outputs.digest }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Verify Actions Job Container
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test "${GITHUB_ACTIONS}" = "true"
+          test "$(id -u):$(id -g)" = "1001:1001"
+          test "${HOME}" = "/home/runner"
+          test -w "${HOME}"
+          test -w "${HOME}/.local"
+          test -w "${HOME}/.local/bin"
+          test -w "${HOME}/.local/share"
+          test -w "${GITHUB_WORKSPACE}"
+          test -w "${RUNNER_TEMP}"
+
+          touch "${GITHUB_WORKSPACE}/.github-runner-ci-write-test"
+          rm "${GITHUB_WORKSPACE}/.github-runner-ci-write-test"
+          printf 'github-runner-ci job container test\n' > "${RUNNER_TEMP}/github-runner-ci.txt"
+
+          test -f "${GITHUB_WORKSPACE}/justfile"
+          test "$(git -C "${GITHUB_WORKSPACE}" rev-parse --is-inside-work-tree)" = "true"
+          git -C "${GITHUB_WORKSPACE}" status --short
+          git --version
+          just --version
+          jq --version
+          rg --version
+          shellcheck --version
+          yq --version
