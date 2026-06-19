@@ -20,6 +20,8 @@ install -d \
     --group "${RUNNER_USER}" \
     "/home/${RUNNER_USER}/.cache" \
     "/home/${RUNNER_USER}/.config" \
+    "/home/${RUNNER_USER}/.local" \
+    "/home/${RUNNER_USER}/.local/bin" \
     "/home/${RUNNER_USER}/.local/share"
 
 git config --system init.defaultBranch main
