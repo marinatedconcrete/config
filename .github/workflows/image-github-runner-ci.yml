@@ -60,6 +60,9 @@ jobs:
             test "$(id -u):$(id -g)" = "1001:1001"
             test "$HOME" = "/home/runner"
             test -w "$HOME"
+            test -w "$HOME/.local"
+            test -w "$HOME/.local/bin"
+            test -w "$HOME/.local/share"
             git --version
             just --version
             shellcheck --version
