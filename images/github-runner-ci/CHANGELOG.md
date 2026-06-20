@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.1.0...github-runner-ci-1.2.0) (2026-06-20)
+
+
+### Features
+
+* install Homebrew in github-runner-ci image ([#791](https://github.com/marinatedconcrete/config/issues/791)) ([3039318](https://github.com/marinatedconcrete/config/commit/30393184d859504efea35ab277de259a40a91f0c))
+
 ## [1.1.0](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.0.1...github-runner-ci-1.1.0) (2026-06-19)
 
 
