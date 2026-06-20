@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.31...kustomize-unifi-network-application@v1.2.0) (2026-06-20)
+
+
+### Features
+
+* **unifi:** harden the mongodb container ([#790](https://github.com/marinatedconcrete/config/issues/790)) ([f5f93e9](https://github.com/marinatedconcrete/config/commit/f5f93e9462bfeac5330eef968d7213910df647f4))
+
+
+### Other Changes
+
+* **package:** update unifi to v8.0.24 ([#758](https://github.com/marinatedconcrete/config/issues/758)) ([879987f](https://github.com/marinatedconcrete/config/commit/879987f42b7f9f3914d9893fdbdc8ce1516cdc69))
+* **package:** update unifi to v8.0.26 ([#773](https://github.com/marinatedconcrete/config/issues/773)) ([f473dec](https://github.com/marinatedconcrete/config/commit/f473dec522833cc30013445b9d1973b6b497c982))
+
 ## [1.1.31](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.30...kustomize-unifi-network-application@v1.1.31) (2026-05-31)
 
 
