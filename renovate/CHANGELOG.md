@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.4.2...renovate-config-2.5.0) (2026-06-20)
+
+
+### Features
+
+* Introduce the github ci runner image ([#778](https://github.com/marinatedconcrete/config/issues/778)) ([8b9456a](https://github.com/marinatedconcrete/config/commit/8b9456af937d1ed001104d9fc8896f179524edfb))
+
 ## [2.4.2](https://github.com/marinatedconcrete/config/compare/renovate-config-2.4.1...renovate-config-2.4.2) (2026-06-01)
 
 
