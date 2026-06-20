@@ -81,6 +81,7 @@ jobs:
             test -w "$HOME/.local"
             test -w "$HOME/.local/bin"
             test -w "$HOME/.local/share"
+            brew --version
             git --version
             just --version
             jq --version
@@ -126,6 +127,11 @@ jobs:
           test -w "${HOME}/.local/share"
           test -w "${GITHUB_WORKSPACE}"
           test -w "${RUNNER_TEMP}"
+
+          brew --version
+          brew install hello
+          brew list --versions hello
+          hello --version
 
           touch "${GITHUB_WORKSPACE}/.github-runner-ci-write-test"
           rm "${GITHUB_WORKSPACE}/.github-runner-ci-write-test"

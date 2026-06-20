@@ -18,6 +18,7 @@ useradd \
 install -d \
     --owner "${RUNNER_USER}" \
     --group "${RUNNER_USER}" \
+    "/home/linuxbrew" \
     "/home/${RUNNER_USER}/.cache" \
     "/home/${RUNNER_USER}/.config" \
     "/home/${RUNNER_USER}/.local" \
