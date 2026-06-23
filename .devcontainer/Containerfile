@@ -1,0 +1,22 @@
+FROM ghcr.io/hadolint/hadolint:v2.14.0@sha256:27086352fd5e1907ea2b934eb1023f217c5ae087992eb59fde121dce9c9ff21e AS hadolint
+FROM registry.k8s.io/kustomize/kustomize:v5.8.1@sha256:899fcd3bc898160e62bcaf82932b0cb29ba38d16272353db2e7acbba82129429 AS kustomize
+
+FROM scratch AS ctx
+COPY .devcontainer/build_files /
+COPY ansible/requirements.txt /requirements.txt
+
+# hadolint ignore=DL3007
+FROM ghcr.io/marinatedconcrete/devcontainer-base:latest
+
+USER root
+
+COPY --chmod=0755 --from=hadolint /bin/hadolint /usr/local/bin/hadolint
+COPY --chmod=0755 --from=kustomize /app/kustomize /usr/local/bin/kustomize
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=tmpfs,dst=/tmp \
+    /ctx/build.sh
+
+USER vscode

@@ -3,7 +3,7 @@
   "build": {
     "cacheFrom": "ghcr.io/marinatedconcrete/config-devcontainer",
     "context": "..",
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Containerfile"
   },
   "customizations": {
     "vscode": {
@@ -34,7 +34,7 @@
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:3": {
       // We don't need this
-      // Docker CE is installed in the Dockerfile; the feature adds the DIND entrypoint and volumes.
+      // Docker CE is installed in the Containerfile; the feature adds the DIND entrypoint and volumes.
       "dockerDashComposeVersion": "none"
     },
     "ghcr.io/devcontainers/features/node:2": {
