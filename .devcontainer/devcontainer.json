@@ -3,7 +3,7 @@
   "build": {
     "cacheFrom": "ghcr.io/marinatedconcrete/config-devcontainer",
     "context": "..",
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Containerfile"
   },
   "customizations": {
     "vscode": {
@@ -34,24 +34,8 @@
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:3": {
       // We don't need this
-      "dockerDashComposeVersion": "none",
-      // Doesn't work on Debian Trixie
-      "moby": false
-    },
-    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
-      // renovate: datasource=github-releases depName=kubernetes/kubernetes
-      "version": "1.36.1"
-    },
-    "ghcr.io/devcontainers/features/git:1": {
-      "version": "os-provided"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {
-      // renovate: datasource=github-releases depName=cli/cli
-      "version": "2.95.0"
-    },
-    "ghcr.io/dhoeric/features/hadolint:1": {
-      // renovate: datasource=github-releases depName=hadolint/hadolint
-      "version": "2.14.0"
+      // Docker CE is installed in the Containerfile; the feature adds the DIND entrypoint and volumes.
+      "dockerDashComposeVersion": "none"
     },
     "ghcr.io/devcontainers/features/node:2": {
       "installYarnUsingApt": "false",
@@ -62,14 +46,6 @@
       "pnpmVersion": "none",
       // renovate: datasource=node-version depName=node
       "version": "24.17.0"
-    },
-    "ghcr.io/guiyomh/features/just:0": {
-      // renovate: datasource=github-releases depName=casey/just
-      "version": "1.53.0"
-    },
-    "ghcr.io/rio/features/kustomize:1": {
-      // renovate: datasource=github-releases depName=kubernetes-sigs/kustomize
-      "version": "5.8.1"
     }
   },
   "postCreateCommand": ".devcontainer/post-create-command.sh",
