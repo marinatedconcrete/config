@@ -1,5 +1,5 @@
 ---
-# vars file for minikube_test
+# vars file for kind_test
 
 # The kustomization directory to apply for the test.
-minikube_test__test_dir:
+kind_test__test_dir:
