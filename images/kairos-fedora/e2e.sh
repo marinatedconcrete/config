@@ -149,13 +149,6 @@ users:
       - admin
     ssh_authorized_keys:
       - ${public_key}
-stages:
-  boot:
-    - name: kairos-fedora-e2e access
-      hostname: kairos-fedora-e2e
-      commands:
-        - systemctl enable sshd.service || true
-        - systemctl start sshd.service || true
 k3s:
   enabled: true
 EOF
