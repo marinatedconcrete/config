@@ -6,20 +6,25 @@ on: # yamllint disable-line rule:truthy
     branches:
       - main
     paths:
+      - .devcontainer/Dockerfile
       - .github/workflows/image-kairos-fedora.yml
       - images/kairos-fedora/**
+      - justfile
     tags:
       - kairos-fedora-*
   pull_request:
     branches:
       - main
     paths:
+      - .devcontainer/Dockerfile
       - .github/workflows/image-kairos-fedora.yml
       - images/kairos-fedora/**
+      - justfile
 
 jobs:
   build-container:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
     permissions:
       contents: read
       packages: write
@@ -36,7 +41,7 @@ jobs:
       # Note: this must start with a number for the build to work correctly!
       - name: Compute Version Tag
         env:
-          BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('{0}-pr', github.event.number) }}
+          BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name == 'pull_request' && format('{0}-pr', github.event.number) || format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) }}
         id: version_tag
         run: echo "tag=$BRANCH" | sed -e 's/kairos-fedora-//' >> "$GITHUB_OUTPUT"
       - name: Generate Metadata
@@ -52,5 +57,34 @@ jobs:
           context: images/kairos-fedora
           file: images/kairos-fedora/Containerfile
           labels: ${{ steps.metadata.outputs.labels }}
-          push: ${{ github.ref_type == 'tag' }}
+          load: true
+          push: false
           tags: ghcr.io/${{ github.repository_owner }}/kairos-fedora:${{ steps.version_tag.outputs.tag }}
+      - name: Install E2E Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes curl openssh-client ovmf qemu-system-x86 qemu-utils
+      - name: Enable KVM Access
+        run: |
+          test -e /dev/kvm
+          sudo chmod a+rw /dev/kvm
+          test -r /dev/kvm
+          test -w /dev/kvm
+          ls -l /dev/kvm
+      - name: Run Kairos Fedora E2E
+        env:
+          KAIROS_IMAGE: ghcr.io/${{ github.repository_owner }}/kairos-fedora:${{ steps.version_tag.outputs.tag }}
+        run: bash images/kairos-fedora/e2e.sh
+      - name: Upload E2E Logs
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: kairos-fedora-e2e
+          path: |
+            build/e2e/kairos-fedora/install-cloud-config.yaml
+            build/e2e/kairos-fedora/id_ed25519.pub
+            build/e2e/kairos-fedora/logs
+          if-no-files-found: ignore
+      - name: Push Image
+        if: github.ref_type == 'tag'
+        run: docker push ghcr.io/${{ github.repository_owner }}/kairos-fedora:${{ steps.version_tag.outputs.tag }}
