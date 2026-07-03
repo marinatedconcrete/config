@@ -9,5 +9,5 @@
   "kustomization/components/paperless": "1.2.0",
   "kustomization/components/priorityclass": "1.0.3",
   "kustomization/components/unifi-network-application": "1.2.0",
-  "renovate": "2.4.2"
+  "renovate": "2.5.0"
 }
