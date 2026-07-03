@@ -3,7 +3,12 @@ FROM mcr.microsoft.com/devcontainers/python:3-3.14@sha256:882b17d068262c7af43001
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
+        curl \
         libssh-dev \
+        openssh-client \
+        ovmf \
+        qemu-system-x86 \
+        qemu-utils \
         shellcheck \
         yq \
     && apt-get clean \
