@@ -2,6 +2,8 @@
 
 set -e
 
+sudo /usr/local/share/docker-init.sh
+
 # Install prettier
 yarn --immutable
 
