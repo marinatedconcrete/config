@@ -362,6 +362,12 @@ run_guest_checks() {
     log "Checking Fedora identity"
     ssh_cmd 'grep -E "^(ID|ID_LIKE)=" /etc/os-release | grep -q fedora'
 
+    log "Checking SSH service configuration"
+    ssh_cmd 'sudo -n systemctl is-enabled --quiet sshd.service'
+    ssh_cmd 'sudo -n systemctl is-active --quiet sshd.service'
+    ssh_cmd 'sudo -n systemctl is-enabled sshd.socket | grep -qx masked'
+    ssh_cmd '! sudo -n systemctl is-active --quiet sshd.socket'
+
     log "Checking Kairos active boot state"
     ssh_cmd 'kairos-agent state get boot | tee /tmp/kairos-boot-state.txt && grep -q active_boot /tmp/kairos-boot-state.txt'
 
