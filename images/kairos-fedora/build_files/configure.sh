@@ -2,7 +2,10 @@
 
 set -euo pipefail
 
-systemctl enable sshd.socket
+# Kairos enables sshd.service during image initialization. Mask socket
+# activation because Fedora's sshd.socket conflicts with the daemon.
+systemctl mask sshd.socket
+systemctl enable sshd.service
 
 # Longhorn is not compatible with multipath.
 # See https://longhorn.io/kb/troubleshooting-volume-with-multipath/
