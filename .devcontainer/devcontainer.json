@@ -61,7 +61,7 @@
       "nvmVersion": "0.40.5",
       "pnpmVersion": "none",
       // renovate: datasource=node-version depName=node
-      "version": "24.17.0"
+      "version": "24.18.0"
     },
     "ghcr.io/guiyomh/features/just:0": {
       // renovate: datasource=github-releases depName=casey/just
