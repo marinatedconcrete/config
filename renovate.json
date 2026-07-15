@@ -155,9 +155,13 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["/^.*(Container|Docker)file$/"],
+      "managerFilePatterns": [
+        "/^.*(Container|Docker)file$/",
+        "/^\\.devcontainer/build_files/.*\\.sh$/",
+        "/^images/.*/build_files/.*\\.sh$/"
+      ],
       "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\nARG\\s+[A-Z_]+_VERSION=(?<currentValue>.+?)\\n"
+        "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\n(?:ARG\\s+)?[A-Z_]+_VERSION=(?<currentValue>.+?)\\n"
       ]
     },
     {
