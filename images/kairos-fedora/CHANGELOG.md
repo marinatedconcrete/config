@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.9.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.8.1...kairos-fedora-0.9.0) (2026-07-16)
+
+
+### Features
+
+* include tcpdump ([#814](https://github.com/marinatedconcrete/config/issues/814)) ([e0da7bb](https://github.com/marinatedconcrete/config/commit/e0da7bbd548c1be5a244289f9f1147efa8d2ff15))
+
+
+### Bug Fixes
+
+* use sshd service for kairos fedora ([#797](https://github.com/marinatedconcrete/config/issues/797)) ([a1f5522](https://github.com/marinatedconcrete/config/commit/a1f5522bd31160a20ac765238b2cbf9cc9b7d581))
+
+
+### Other Changes
+
+* **package:** update dependency k3s-io/k3s to v1.36.2+k3s1 ([1eef8e0](https://github.com/marinatedconcrete/config/commit/1eef8e0058a1e9e73ee14382d90577d6201e3e7e))
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.14.0 ([#756](https://github.com/marinatedconcrete/config/issues/756)) ([767c560](https://github.com/marinatedconcrete/config/commit/767c560a37e68e4d3ff97adef424b9edf14aff76))
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.15.2 ([#804](https://github.com/marinatedconcrete/config/issues/804)) ([b088bb6](https://github.com/marinatedconcrete/config/commit/b088bb6dbe61d6d72b565425ee86e4518d0ad48b))
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.16.1 ([#812](https://github.com/marinatedconcrete/config/issues/812)) ([0812717](https://github.com/marinatedconcrete/config/commit/0812717640129e7d81a6f9954cd59350e1c0592e))
+
 ## [0.8.1](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.8.0...kairos-fedora-0.8.1) (2026-05-30)
 
 
