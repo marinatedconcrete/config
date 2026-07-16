@@ -25,9 +25,10 @@ PACKAGES=(
     "openssh-server"
     # Used by `ansible.builtin.expect`
     "python3-pexpect"
+    "rsync"
     "systemd-networkd"
     "systemd-networkd-defaults"
-    "rsync"
+    "tcpdump"
     "vim"
 )
 
