@@ -18,6 +18,7 @@ COMMON_PACKAGES=(
     "iputils"
     # These are core utilities that seem silly to not include.
     "coreutils"
+    "jq"
     "sudo"
     "watch"
     # Source Control
