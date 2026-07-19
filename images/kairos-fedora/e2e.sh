@@ -297,6 +297,8 @@ ssh_cmd() {
         -o BatchMode=yes \
         -o ConnectTimeout=5 \
         -o LogLevel=ERROR \
+        -o ServerAliveCountMax=1 \
+        -o ServerAliveInterval=5 \
         -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         "kairos@127.0.0.1" \
@@ -325,6 +327,35 @@ wait_for_ssh() {
     done
 
     die "SSH did not become reachable before ${E2E_BOOT_TIMEOUT}"
+}
+
+reboot_and_wait_for_ssh() {
+    local boot_id
+    local deadline
+    local timeout_seconds
+
+    boot_id="$(ssh_cmd 'cat /proc/sys/kernel/random/boot_id')"
+    log "Rebooting installed system to validate SSH on an immutable boot"
+    ssh_cmd 'sudo -n systemctl reboot' >/dev/null 2>&1 || true
+    ssh_ready=0
+
+    timeout_seconds="$(duration_to_seconds "$E2E_BOOT_TIMEOUT")"
+    deadline=$((SECONDS + timeout_seconds))
+
+    while ((SECONDS < deadline)); do
+        if [[ -n "$qemu_pid" ]] && ! kill -0 "$qemu_pid" >/dev/null 2>&1; then
+            wait "$qemu_pid" || true
+            die "QEMU validation VM exited while rebooting"
+        fi
+
+        if ssh_cmd "test \"\$(cat /proc/sys/kernel/random/boot_id)\" != '${boot_id}'" >"${logs_dir}/ssh-reboot-wait-last.log" 2>&1; then
+            ssh_ready=1
+            return
+        fi
+        sleep 5
+    done
+
+    die "SSH did not become reachable after reboot before ${E2E_BOOT_TIMEOUT}"
 }
 
 collect_ssh_diagnostics() {
@@ -432,6 +463,7 @@ main() {
     phase="validate"
     start_qemu validate "" "$ovmf_code" "$ovmf_vars"
     wait_for_ssh
+    reboot_and_wait_for_ssh
     run_guest_checks
 
     phase="complete"
