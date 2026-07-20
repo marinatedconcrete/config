@@ -3,7 +3,7 @@
 set -eoux pipefail
 
 # renovate: datasource=github-releases depName=helm/helm
-HELM_VERSION=v3.21.1
+HELM_VERSION=v3.21.3
 
 tools_dir="$(mktemp -d)"
 trap 'rm -rf "${tools_dir}"' EXIT
