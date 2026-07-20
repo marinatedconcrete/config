@@ -1,0 +1,46 @@
+---
+name: Regenerate kube-vip manifests
+
+on:
+  push:
+    paths:
+      - justfile
+      - kustomization/components/kube-vip/kustomization.yml
+
+concurrency:
+  group: codegen-kube-vip-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  codegen-kube-vip:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+    steps:
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          app-id: ${{ vars.FORMWORK_REMOVER_APP_ID }}
+          private-key: ${{ secrets.FORMWORK_REMOVER_PRIVATE_KEY }}
+      - name: Checkout Repo
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Regenerate kube-vip manifests
+        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
+        with:
+          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
+          env: |
+            CI=1
+          imageName: ghcr.io/marinatedconcrete/config-devcontainer
+          push: never
+          runCmd: just codegen-kube-vip
+      - name: Commit regenerated manifests
+        run: |
+          git config user.name "formwork-remover[bot]"
+          git config user.email "${{ vars.FORMWORK_REMOVER_APP_ID }}+formwork-remover[bot]@users.noreply.github.com"
+          git add kustomization/components/kube-vip/daemonset/ kustomization/components/kube-vip/rbac.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "chore(package): regenerate kube-vip manifests"
+          git push
