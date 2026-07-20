@@ -142,8 +142,8 @@ codegen-kube-vip:
     yq -i 'del(select(.kind == "ClusterRoleBinding") | .subjects[] | select(.name == "kube-vip") | .namespace)' ${SCRATCH}
 
     # Sort rules.
-    yq -i '.rules[]?.resources |= sort_by(.)' ${SCRATCH}
-    yq -i '.rules[]?.verbs |= sort_by(.)' ${SCRATCH}
+    yq -i '(select(.kind == "ClusterRole") | .rules[].resources) |= sort_by(.)' ${SCRATCH}
+    yq -i '(select(.kind == "ClusterRole") | .rules[].verbs) |= sort_by(.)' ${SCRATCH}
 
     # Write out the final output.
     echo '# @codegen-command: just codegen-kube-vip' > ${DEST}
