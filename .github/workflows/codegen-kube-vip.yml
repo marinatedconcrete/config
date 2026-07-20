@@ -3,6 +3,8 @@ name: Regenerate kube-vip manifests
 
 on:
   push:
+    branches-ignore:
+      - main
     paths:
       - justfile
       - kustomization/components/kube-vip/kustomization.yml
