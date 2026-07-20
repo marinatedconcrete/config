@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.5](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.4...kustomize-kube-vip@v4.0.5) (2026-07-20)
+
+
+### Bug Fixes
+
+* **kube-vip:** fix spurious rules ([4b512d1](https://github.com/marinatedconcrete/config/commit/4b512d19f2b5b6c627a8ea2fee82f290e97b44f8))
+
 ## [4.0.4](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.3...kustomize-kube-vip@v4.0.4) (2026-07-20)
 
 
