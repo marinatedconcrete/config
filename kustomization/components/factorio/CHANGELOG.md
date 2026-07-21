@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/marinatedconcrete/config/compare/kustomize-factorio@v0.1.3...kustomize-factorio@v0.1.4) (2026-07-21)
+
+
+### Bug Fixes
+
+* **factorio:** fsGroup should be the nogroup group (65534) ([#820](https://github.com/marinatedconcrete/config/issues/820)) ([3b74b31](https://github.com/marinatedconcrete/config/commit/3b74b3188ed3a6d07017a69903387551f1b3e448))
+
 ## [0.1.3](https://github.com/marinatedconcrete/config/compare/kustomize-factorio@v0.1.2...kustomize-factorio@v0.1.3) (2025-04-22)
 
 
