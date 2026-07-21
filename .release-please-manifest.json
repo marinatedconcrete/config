@@ -1,5 +1,5 @@
 {
-  "ansible": "1.4.4",
+  "ansible": "1.4.5",
   "images/github-runner-ci": "1.2.0",
   "images/kairos-fedora": "0.9.0",
   "images/vscode-ssh-server": "0.1.4",

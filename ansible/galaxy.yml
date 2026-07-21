@@ -1,7 +1,7 @@
 namespace: marinatedconcrete
 name: config
 description: A collection of various useful things for us.
-version: 1.4.4
+version: 1.4.5
 readme: README.md
 authors:
   - robarnold
