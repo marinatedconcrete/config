@@ -53,7 +53,7 @@ spec:
               name: factorio-server-manager-data
       priorityClassName: application
       securityContext:
-        fsGroup: 65536
+        fsGroup: 65534
   volumeClaimTemplates:
     - apiVersion: v1
       kind: PersistentVolumeClaim
