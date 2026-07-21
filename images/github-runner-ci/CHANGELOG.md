@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.2.0...github-runner-ci-1.2.1) (2026-07-21)
+
+
+### Other Changes
+
+* **package:** pin ghcr.io/marinatedconcrete/devcontainer-base docker tag to a0b5ff1 ([#793](https://github.com/marinatedconcrete/config/issues/793)) ([25a6dee](https://github.com/marinatedconcrete/config/commit/25a6deec4c241b54172306e71ef3629a643f6dbb))
+
 ## [1.2.0](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.1.0...github-runner-ci-1.2.0) (2026-06-20)
 
 
