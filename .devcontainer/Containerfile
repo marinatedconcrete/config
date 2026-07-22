@@ -6,7 +6,7 @@ COPY .devcontainer/build_files /
 COPY ansible/requirements.txt /requirements.txt
 
 # hadolint ignore=DL3007
-FROM ghcr.io/marinatedconcrete/devcontainer-base:latest
+FROM ghcr.io/marinatedconcrete/devcontainer-base:latest@sha256:d17ec806979f4b4880312b8c4dbe5b4bbdc029dc51db371736299a71a411a074
 
 USER root
 
