@@ -28,7 +28,7 @@ jobs:
       contents: read
       packages: write
     env:
-      DEVCONTAINER_BASE_IMAGE: ghcr.io/${{ github.repository_owner }}/devcontainer-base:candidate-${{ github.sha }}
+      DEVCONTAINER_BASE_TAG: candidate-${{ github.sha }}
 
     steps:
       - name: Checkout Repo
@@ -46,7 +46,7 @@ jobs:
           file: images/devcontainer-base/Containerfile
           load: true
           push: false
-          tags: ${{ env.DEVCONTAINER_BASE_IMAGE }}
+          tags: ghcr.io/${{ github.repository_owner }}/devcontainer-base:${{ env.DEVCONTAINER_BASE_TAG }}
       - name: Validate Full CI Pipeline
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
@@ -60,6 +60,6 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           docker tag \
-            "${DEVCONTAINER_BASE_IMAGE}" \
+            "ghcr.io/${{ github.repository_owner }}/devcontainer-base:${DEVCONTAINER_BASE_TAG}" \
             ghcr.io/${{ github.repository_owner }}/devcontainer-base:latest
           docker push ghcr.io/${{ github.repository_owner }}/devcontainer-base:latest
