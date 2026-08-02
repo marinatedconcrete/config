@@ -2,9 +2,6 @@
 name: Run checks
 on:
   push:
-    paths-ignore:
-      - .github/workflows/image-devcontainer-base.yml
-      - images/devcontainer-base/**
 
 jobs:
   build:
