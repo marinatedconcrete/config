@@ -2,9 +2,9 @@
 name: Run checks
 on:
   push:
-    paths-ignore:
-      - .github/workflows/image-devcontainer-base.yml
-      - images/devcontainer-base/**
+
+env:
+  DEVCONTAINER_BASE_TAG: candidate-${{ github.sha }}
 
 jobs:
   build:
@@ -21,15 +21,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
+      - name: Build Candidate Base Image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
-          driver: docker-container
+          context: images/devcontainer-base
+          file: images/devcontainer-base/Containerfile
+          load: true
+          push: false
+          tags: ghcr.io/${{ github.repository_owner }}/devcontainer-base:${{ env.DEVCONTAINER_BASE_TAG }}
       - name: Build devcontainer image
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
           cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
-          cacheTo: ghcr.io/marinatedconcrete/config-devcontainer
           env: |
             CI=1
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
@@ -41,6 +44,14 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Build Candidate Base Image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: images/devcontainer-base
+          file: images/devcontainer-base/Containerfile
+          load: true
+          push: false
+          tags: ghcr.io/${{ github.repository_owner }}/devcontainer-base:${{ env.DEVCONTAINER_BASE_TAG }}
       - name: Check formatting
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
@@ -56,6 +67,14 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Build Candidate Base Image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: images/devcontainer-base
+          file: images/devcontainer-base/Containerfile
+          load: true
+          push: false
+          tags: ghcr.io/${{ github.repository_owner }}/devcontainer-base:${{ env.DEVCONTAINER_BASE_TAG }}
       - name: Validate configs
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
@@ -80,6 +99,14 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Build Candidate Base Image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: images/devcontainer-base
+          file: images/devcontainer-base/Containerfile
+          load: true
+          push: false
+          tags: ghcr.io/${{ github.repository_owner }}/devcontainer-base:${{ env.DEVCONTAINER_BASE_TAG }}
       - name: Validate configs
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
