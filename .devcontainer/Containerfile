@@ -1,4 +1,4 @@
-ARG DEVCONTAINER_BASE_TAG=latest
+ARG DEVCONTAINER_BASE_TAG=latest@sha256:4f117ffad50eaec7d27c4904d86a44c6019d4578da8d02af67d07a5ede475650
 
 FROM ghcr.io/hadolint/hadolint:v2.14.0@sha256:27086352fd5e1907ea2b934eb1023f217c5ae087992eb59fde121dce9c9ff21e AS hadolint
 FROM registry.k8s.io/kustomize/kustomize:v5.8.1@sha256:899fcd3bc898160e62bcaf82932b0cb29ba38d16272353db2e7acbba82129429 AS kustomize
