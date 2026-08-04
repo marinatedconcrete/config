@@ -3,6 +3,9 @@ name: Run checks
 on:
   push:
 
+env:
+  DEVCONTAINER_BASE_TAG: candidate-${{ github.sha }}
+
 jobs:
   build:
     permissions:
@@ -12,16 +15,29 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Set up Docker
+        uses: docker/setup-docker-action@77e84dbf09b47d1e29270283c22f16145aa85ca1 # v5
+        with:
+          daemon-config: |
+            {
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
       - name: Login to GitHub Container Registry
         uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
+      - name: Build Candidate Base Image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
-          driver: docker-container
+          context: images/devcontainer-base
+          file: images/devcontainer-base/Containerfile
+          load: true
+          push: false
+          tags: ghcr.io/${{ github.repository_owner }}/devcontainer-base:${{ env.DEVCONTAINER_BASE_TAG }}
       - name: Build devcontainer image
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
@@ -38,6 +54,14 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Build Candidate Base Image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: images/devcontainer-base
+          file: images/devcontainer-base/Containerfile
+          load: true
+          push: false
+          tags: ghcr.io/${{ github.repository_owner }}/devcontainer-base:${{ env.DEVCONTAINER_BASE_TAG }}
       - name: Check formatting
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
@@ -53,6 +77,14 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Build Candidate Base Image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: images/devcontainer-base
+          file: images/devcontainer-base/Containerfile
+          load: true
+          push: false
+          tags: ghcr.io/${{ github.repository_owner }}/devcontainer-base:${{ env.DEVCONTAINER_BASE_TAG }}
       - name: Validate configs
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
@@ -77,6 +109,14 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Build Candidate Base Image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: images/devcontainer-base
+          file: images/devcontainer-base/Containerfile
+          load: true
+          push: false
+          tags: ghcr.io/${{ github.repository_owner }}/devcontainer-base:${{ env.DEVCONTAINER_BASE_TAG }}
       - name: Validate configs
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
