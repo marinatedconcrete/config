@@ -15,6 +15,15 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Set up Docker
+        uses: docker/setup-docker-action@77e84dbf09b47d1e29270283c22f16145aa85ca1 # v5
+        with:
+          daemon-config: |
+            {
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
       - name: Login to GitHub Container Registry
         uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4
         with:
@@ -33,6 +42,7 @@ jobs:
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
           cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
+          cacheTo: ghcr.io/marinatedconcrete/config-devcontainer
           env: |
             CI=1
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
