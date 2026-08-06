@@ -22,6 +22,12 @@
       "pinDigests": false
     },
     {
+      "description": "Do not pin the repo-owned devcontainer base image",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/marinatedconcrete/devcontainer-base"],
+      "pinDigests": false
+    },
+    {
       "description": "Extract Kustomize's unusual release versions",
       "matchPackageNames": ["kubernetes-sigs/kustomize"],
       "extractVersion": "^kustomize/v(?<version>.*)$"
