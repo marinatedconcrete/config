@@ -3,7 +3,7 @@
 set -eoux pipefail
 
 # renovate: datasource=github-releases depName=cli/cli
-GH_VERSION=2.95.0
+GH_VERSION=2.97.0
 
 rpm="$(mktemp --tmpdir gh.XXXXXX.rpm)"
 trap 'rm -f "${rpm}"' EXIT
