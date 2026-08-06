@@ -156,6 +156,18 @@
       "matchUpdateTypes": ["patch"],
       "minimumReleaseAge": "1 week",
       "schedule": ["* * 14,28 * *"]
+    },
+    {
+      "description": "Require manual review for registries without release timestamps",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "ghcr.io/**",
+        "quay.io/**",
+        "registry.k8s.io/**",
+        "lscr.io/**"
+      ],
+      "minimumReleaseAgeBehaviour": "timestamp-optional",
+      "automerge": false
     }
   ],
   "customManagers": [
