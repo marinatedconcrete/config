@@ -6,20 +6,26 @@ on: # yamllint disable-line rule:truthy
     branches:
       - main
     paths:
-      - .devcontainer/Dockerfile
+      - .devcontainer/**
       - .github/workflows/image-kairos-fedora.yml
+      - ansible/**
+      - images/devcontainer-base/**
       - images/kairos-fedora/**
       - justfile
+      - kustomization/**
     tags:
       - kairos-fedora-*
   pull_request:
     branches:
       - main
     paths:
-      - .devcontainer/Dockerfile
+      - .devcontainer/**
       - .github/workflows/image-kairos-fedora.yml
+      - ansible/**
+      - images/devcontainer-base/**
       - images/kairos-fedora/**
       - justfile
+      - kustomization/**
 
 jobs:
   build-container:
@@ -63,7 +69,20 @@ jobs:
       - name: Install E2E Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install --no-install-recommends --yes curl openssh-client ovmf qemu-system-x86 qemu-utils
+          sudo apt-get install --no-install-recommends --yes curl openssh-client ovmf python3-venv qemu-system-x86 qemu-utils
+          sudo images/devcontainer-base/build_files/packages/just.sh
+
+          python3 -m venv "${RUNNER_TEMP}/kairos-e2e-venv"
+          "${RUNNER_TEMP}/kairos-e2e-venv/bin/pip" install --requirement ansible/requirements.txt
+          "${RUNNER_TEMP}/kairos-e2e-venv/bin/ansible-galaxy" collection install --force ansible
+          echo "${RUNNER_TEMP}/kairos-e2e-venv/bin" >> "$GITHUB_PATH"
+
+          mkdir -p "${RUNNER_TEMP}/kustomize-bin"
+          kustomize_container="$(docker create registry.k8s.io/kustomize/kustomize:v5.8.1@sha256:899fcd3bc898160e62bcaf82932b0cb29ba38d16272353db2e7acbba82129429)"
+          trap 'docker rm --force "$kustomize_container" >/dev/null' EXIT
+          docker cp "${kustomize_container}:/app/kustomize" "${RUNNER_TEMP}/kustomize-bin/kustomize"
+          chmod 0755 "${RUNNER_TEMP}/kustomize-bin/kustomize"
+          echo "${RUNNER_TEMP}/kustomize-bin" >> "$GITHUB_PATH"
       - name: Enable KVM Access
         run: |
           test -e /dev/kvm
@@ -74,7 +93,7 @@ jobs:
       - name: Run Kairos Fedora E2E
         env:
           KAIROS_IMAGE: ghcr.io/${{ github.repository_owner }}/kairos-fedora:${{ steps.version_tag.outputs.tag }}
-        run: bash images/kairos-fedora/e2e.sh
+        run: just e2e-kairos-fedora priorityclass
       - name: Upload E2E Logs
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
