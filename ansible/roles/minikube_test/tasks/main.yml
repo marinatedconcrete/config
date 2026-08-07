@@ -1,6 +1,7 @@
 ---
 # tasks file for minikube_test
 - name: Start minikube
+  when: minikube_test__provision_cluster | bool
   ansible.builtin.command:
     argv:
       - minikube
@@ -13,7 +14,9 @@
   changed_when: true
   notify: stop minikube
 - name: Setup local path provisioner
-  when: minikube_test__enable_local_path_storage | bool
+  when:
+    - minikube_test__provision_cluster | bool
+    - minikube_test__enable_local_path_storage | bool
   block:
     - name: Enable local path provisioner
       ansible.builtin.command:
