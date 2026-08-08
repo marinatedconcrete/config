@@ -43,6 +43,12 @@
       "package-name": "ansible-collection",
       "release-type": "simple"
     },
+    "images/buildah-action-runner": {
+      "include-v-in-tag": false,
+      "package-name": "buildah-action-runner",
+      "release-type": "simple",
+      "tag-separator": "-"
+    },
     "images/kairos-fedora": {
       "include-v-in-tag": false,
       "package-name": "kairos-fedora",
