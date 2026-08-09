@@ -35,6 +35,13 @@
       "versioning": "regex:^(?<compatibility>.+)[@\\-]v?(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+?)$"
     },
     {
+      "description": "Map buildah-action-runner image to its monorepo changelog",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/marinatedconcrete/buildah-action-runner"],
+      "sourceDirectory": "images/buildah-action-runner",
+      "sourceUrl": "https://github.com/marinatedconcrete/config"
+    },
+    {
       "description": "Map kairos-fedora image to its monorepo changelog",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/marinatedconcrete/kairos-fedora"],
@@ -51,6 +58,12 @@
     {
       "groupName": "marinatedconcrete Ansible Collection",
       "matchCurrentValue": "ansible-collection@**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
+      "groupName": "marinatedconcrete Buildah Action Runner Image",
+      "groupSlug": "marinatedconcrete-buildah-action-runner",
+      "matchCurrentValue": "buildah-action-runner-**",
       "matchPackageNames": ["marinatedconcrete/config"]
     },
     {
