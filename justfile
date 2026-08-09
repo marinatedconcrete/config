@@ -18,8 +18,8 @@ codegen-kube-vip:
     set -euo pipefail
 
     # renovate: datasource=docker depName=ghcr.io/kube-vip/kube-vip
-    KUBE_VIP_VERSION=v1.2.1
-    KUBE_VIP_DIGEST=sha256:49b77655f9f109bedc5eb25723bb0e4c57d8513ba33cc69c31be3f243eb2386d
+    KUBE_VIP_VERSION=v1.2.2
+    KUBE_VIP_DIGEST=sha256:b2e00d870995f9c32f4e87d28a4ddf10d53bf54b50dc4456c3ea8bb94a52b414
     KUBE_VIP_IMAGE=ghcr.io/kube-vip/kube-vip@${KUBE_VIP_DIGEST}
 
     # VIP DaemonSet manifest generation.
