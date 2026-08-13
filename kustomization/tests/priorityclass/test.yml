@@ -1,5 +1,5 @@
 ---
-- name: Unifi Network Appliance Tests
+- name: PriorityClass Tests
   gather_facts: false
   hosts: localhost
   roles:
