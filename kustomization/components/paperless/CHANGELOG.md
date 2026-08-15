@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.2.0...kustomize-paperless@v1.2.1) (2026-08-15)
+
+
+### Other Changes
+
+* **package:** update ghcr.io/paperless-ngx/paperless-ngx docker tag to v2.20.15 ([#846](https://github.com/marinatedconcrete/config/issues/846)) ([e7e0932](https://github.com/marinatedconcrete/config/commit/e7e09326da9f125c3c49845fccad6cdb69a9ff8d))
+
 ## [1.2.0](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.1.7...kustomize-paperless@v1.2.0) (2026-03-15)
 
 
