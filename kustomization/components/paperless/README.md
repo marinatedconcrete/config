@@ -38,7 +38,7 @@ resources:
 
 ## `paperless-secrets`
 
-This contains the administrator password used by the container, and any dates that you may want to ignore. The admin password is not user facing, because the container is set up to automatically login as the admin, assuming that some external mechanism (ex: Authelia) provides an authentication solution.
+This contains the administrator password used by the container, the secret key used for cryptographic signing, and any dates that you may want to ignore. The secret key must be a long, random value and remain stable across restarts and upgrades. The admin password is not user facing, because the container is set up to automatically login as the admin, assuming that some external mechanism (ex: Authelia) provides an authentication solution.
 
 ```yaml
 apiVersion: v1
@@ -50,6 +50,7 @@ stringData:
   # These dates may be sensitive or non-public (ex: birthdays) and thus best represented as a secret.
   ignored_dates: "2023-12-28,1980-04-23"
   paperless_admin_password: super-secure-unhashed-password
+  paperless_secret_key: long-random-secret-key
 ```
 
 

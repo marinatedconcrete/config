@@ -72,6 +72,11 @@ spec:
                 secretKeyRef:
                   name: paperless-secrets
                   key: paperless_admin_password
+            - name: PAPERLESS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secrets
+                  key: paperless_secret_key
             - name: PAPERLESS_TASK_WORKERS
               value: "2"
             - name: PAPERLESS_THREADS_PER_WORKER
