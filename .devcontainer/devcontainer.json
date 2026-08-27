@@ -46,7 +46,7 @@
       "nvmVersion": "0.40.7",
       "pnpmVersion": "none",
       // renovate: datasource=node-version depName=node
-      "version": "24.19.0"
+      "version": "24.20.0"
     }
   },
   "mounts": [
