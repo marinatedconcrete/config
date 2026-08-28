@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.6](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.4.5...ansible-collection@v1.4.6) (2026-08-27)
+
+
+### Other Changes
+
+* **package:** update dependency ansible to v14.3.1 ([#848](https://github.com/marinatedconcrete/config/issues/848)) ([3a266b5](https://github.com/marinatedconcrete/config/commit/3a266b55f3d61dfd2c782675b4c4a27d7e44d6cc))
+
 ## [1.4.5](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.4.4...ansible-collection@v1.4.5) (2026-08-06)
 
 
