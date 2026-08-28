@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.7](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.4.6...ansible-collection@v1.4.7) (2026-08-28)
+
+
+### Other Changes
+
+* **package:** update dependency ansible-lint to v26.8.0 ([#852](https://github.com/marinatedconcrete/config/issues/852)) ([e2af29e](https://github.com/marinatedconcrete/config/commit/e2af29e019275b9820c910949bdb939bf9e9983d))
+
 ## [1.4.6](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.4.5...ansible-collection@v1.4.6) (2026-08-27)
 
 
