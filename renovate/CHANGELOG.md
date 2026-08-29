@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.5.0...renovate-config-2.6.0) (2026-08-29)
+
+
+### Features
+
+* **buildah-action-runner:** create a buildah image to use in runners ([#842](https://github.com/marinatedconcrete/config/issues/842)) ([0912a80](https://github.com/marinatedconcrete/config/commit/0912a8021e20b2cce46dfd0f4881659fc5a1fad9))
+
 ## [2.5.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.4.2...renovate-config-2.5.0) (2026-07-03)
 
 
