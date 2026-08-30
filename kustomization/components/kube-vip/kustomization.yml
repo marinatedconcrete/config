@@ -4,7 +4,7 @@ kind: Component
 
 images:
   - name: ghcr.io/kube-vip/kube-vip
-    newTag: v1.2.1@sha256:49b77655f9f109bedc5eb25723bb0e4c57d8513ba33cc69c31be3f243eb2386d
+    newTag: v1.2.3@sha256:2fcdbb014a2e217b9ea1b6dacac53d6851b185af323cdd28d100ad82d74bc79a
 resources:
   - rbac.yml
   - daemonset/services.yml
