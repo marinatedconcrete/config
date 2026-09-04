@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.1](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.9.0...kairos-fedora-0.9.1) (2026-09-04)
+
+
+### Other Changes
+
+* **package:** update fedora docker tag to v45 ([#695](https://github.com/marinatedconcrete/config/issues/695)) ([dfcc54d](https://github.com/marinatedconcrete/config/commit/dfcc54dfe8a1aa5fec2aa12882577f47b8f76515))
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.17.3 ([#855](https://github.com/marinatedconcrete/config/issues/855)) ([3f627bd](https://github.com/marinatedconcrete/config/commit/3f627bd85e582f87607c575fa3424f37d7039046))
+
 ## [0.9.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.8.1...kairos-fedora-0.9.0) (2026-07-16)
 
 
