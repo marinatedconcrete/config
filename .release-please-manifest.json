@@ -10,5 +10,5 @@
   "kustomization/components/priorityclass": "1.0.3",
   "kustomization/components/unifi-network-application": "1.2.0",
   "renovate": "2.6.0",
-  "images/buildah-action-runner": "1.0.0"
+  "images/buildah-action-runner": "1.0.1"
 }
