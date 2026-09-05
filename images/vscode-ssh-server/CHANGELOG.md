@@ -2,34 +2,39 @@
 
 ## [0.1.4](https://github.com/marinatedconcrete/config/compare/vscode-ssh-server-0.1.3...vscode-ssh-server-0.1.4) (2026-06-07)
 
+
 ### Other Changes
 
-- **package:** Update the debian:stable-slim Docker digest to 5012d05. ([78dac95](https://github.com/marinatedconcrete/config/commit/78dac95449116665a43d7e1d98bf55072a3e0e4d))
+* **package:** update debian:stable-slim docker digest to 5012d05 ([78dac95](https://github.com/marinatedconcrete/config/commit/78dac95449116665a43d7e1d98bf55072a3e0e4d))
 
 ## [0.1.3](https://github.com/marinatedconcrete/config/compare/vscode-ssh-server-0.1.2...vscode-ssh-server-0.1.3) (2026-05-30)
 
+
 ### Other Changes
 
-- **package:** Update the debian:stable-slim Docker digest to 449673e. ([a66b748](https://github.com/marinatedconcrete/config/commit/a66b748a03b41c460fda062a82321be3e998d096))
-- **package:** Update the debian:stable-slim Docker digest to 85dfcff. ([1108e00](https://github.com/marinatedconcrete/config/commit/1108e00ef2e03529b51588ff83a029b00d89f9be))
-- **package:** Update the debian:stable-slim Docker digest to 8f0c555. ([e8e202c](https://github.com/marinatedconcrete/config/commit/e8e202c6089a9434411ec9120ca430ee874937cb))
-- **package:** Update the debian:stable-slim Docker digest to 99fc6d2. ([9ce60dc](https://github.com/marinatedconcrete/config/commit/9ce60dc40a3a14109db7086a8d1a65d203423706))
-- **package:** Update the debian:stable-slim Docker digest to ed542b2. ([7608b1c](https://github.com/marinatedconcrete/config/commit/7608b1c17caac8ee1dc99fef5bd8690ad163eef8))
+* **package:** update debian:stable-slim docker digest to 449673e ([a66b748](https://github.com/marinatedconcrete/config/commit/a66b748a03b41c460fda062a82321be3e998d096))
+* **package:** update debian:stable-slim docker digest to 85dfcff ([1108e00](https://github.com/marinatedconcrete/config/commit/1108e00ef2e03529b51588ff83a029b00d89f9be))
+* **package:** update debian:stable-slim docker digest to 8f0c555 ([e8e202c](https://github.com/marinatedconcrete/config/commit/e8e202c6089a9434411ec9120ca430ee874937cb))
+* **package:** update debian:stable-slim docker digest to 99fc6d2 ([9ce60dc](https://github.com/marinatedconcrete/config/commit/9ce60dc40a3a14109db7086a8d1a65d203423706))
+* **package:** update debian:stable-slim docker digest to ed542b2 ([7608b1c](https://github.com/marinatedconcrete/config/commit/7608b1c17caac8ee1dc99fef5bd8690ad163eef8))
 
 ## [0.1.2](https://github.com/marinatedconcrete/config/compare/vscode-ssh-server-0.1.1...vscode-ssh-server-0.1.2) (2025-12-08)
 
+
 ### Other Changes
 
-- **package:** Set the debian Docker tag to 7cb087f. ([#577](https://github.com/marinatedconcrete/config/issues/577)) ([66d92a0](https://github.com/marinatedconcrete/config/commit/66d92a034dbc36cb7501ab675c437646c22a72fb))
+* **package:** pin debian docker tag to 7cb087f ([#577](https://github.com/marinatedconcrete/config/issues/577)) ([66d92a0](https://github.com/marinatedconcrete/config/commit/66d92a034dbc36cb7501ab675c437646c22a72fb))
 
 ## [0.1.1](https://github.com/marinatedconcrete/config/compare/vscode-ssh-server-0.1.0...vscode-ssh-server-0.1.1) (2025-05-04)
 
+
 ### Bug Fixes
 
-- Update the VS Code README link. ([#374](https://github.com/marinatedconcrete/config/issues/374)) ([364a2ca](https://github.com/marinatedconcrete/config/commit/364a2ca342742f4b56d689a965bdf4366615448d))
+* Update vscode readme link ([#374](https://github.com/marinatedconcrete/config/issues/374)) ([364a2ca](https://github.com/marinatedconcrete/config/commit/364a2ca342742f4b56d689a965bdf4366615448d))
 
 ## 0.1.0 (2025-04-30)
 
+
 ### Features
 
-- Correct the vscode-ssh-package build. ([#365](https://github.com/marinatedconcrete/config/issues/365)) ([67fcffb](https://github.com/marinatedconcrete/config/commit/67fcffbd8e5da837849a24ded8d3873685fae894))
+* Get the vscode-ssh-package to build ([#365](https://github.com/marinatedconcrete/config/issues/365)) ([67fcffb](https://github.com/marinatedconcrete/config/commit/67fcffbd8e5da837849a24ded8d3873685fae894))

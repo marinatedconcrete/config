@@ -11,7 +11,8 @@
 - Use a maximum of 20 words in procedural sentences and 25 words in descriptive sentences.
 - Use the imperative form for instructions. Use complete sentences for explanations.
 - Do not use slang, idioms, or contractions.
-- Apply these rules to Markdown files, release notes, and comments in code, configuration files, and examples.
+- Apply these rules to Markdown files, new release notes, and comments in code, configuration files, and examples.
+- Keep past changelog entries unchanged, including their wording and Markdown format. Use the standard for all new entries.
 - Keep commands, identifiers, URLs, version numbers, and tool directives unchanged when you change prose.
 - Keep license text and third-party source text unchanged. For generated text, change the source or template when possible.
 - Check the wording against the standard. A formatting check does not show ASD-STE100 compliance.
