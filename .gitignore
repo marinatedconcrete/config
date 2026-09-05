@@ -12,5 +12,5 @@ ansible/.ansible
 !.yarn/sdks
 !.yarn/versions
 
-# Kairos Factory dumps stuff under /build locally
+# Kairos Factory writes local build output to /build.
 /build

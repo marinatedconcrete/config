@@ -4,9 +4,9 @@
   value: --device
 - op: add
   path: /spec/template/spec/containers/0/args/-
-  # Note that the vendor and product start out as 1a64:089a until the first inference when they
-  # switch to 18d1:9302.  See
-  # https://github.com/google-coral/edgetpu/issues/536#issuecomment-1033056048 as source of truth.
+  # The initial vendor and product IDs are 1a64:089a.
+  # After the first inference, these IDs change to 18d1:9302.
+  # See https://github.com/google-coral/edgetpu/issues/536#issuecomment-1033056048
   value: |
     name: coraltpu
     groups:

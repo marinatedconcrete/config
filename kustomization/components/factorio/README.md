@@ -4,11 +4,11 @@
 [![Pod Security Standard: Baseline](https://img.shields.io/badge/pod_security_standard-baseline-yellow?style=for-the-badge&logo=kubernetes&logoColor=%23326CE5)](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
 [![Priority Class](https://img.shields.io/badge/dynamic/yaml?style=for-the-badge&label=priorityclass&url=https%3A%2F%2Fgithub.com%2Fmarinatedconcrete%2Fconfig%2Fraw%2Frefs%2Fheads%2Fmain%2Fkustomization%2Fcomponents%2Ffactorio%2Fstatefulset.yml&query=%24.spec.template.spec.priorityClassName)](https://github.com/marinatedconcrete/config/tree/main/kustomization/components/priorityclass)
 
-This will deploy the [Open Factorio Server Manager](https://github.com/OpenFactorioServerManager/factorio-server-manager).
+This component installs the [Open Factorio Server Manager](https://github.com/OpenFactorioServerManager/factorio-server-manager).
 
-# Example Usage
+# Examples
 
-Note: please replace `{version}` with the desired version you wish to use.
+Replace `{version}` with the version that you want to use.
 
 ## Component
 

@@ -17,7 +17,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - env:
-            # MongoDB 8.0 can segfault on affected Linux kernels without this.
+            # This setting prevents MongoDB 8.0 segmentation faults on affected Linux kernels.
             # https://www.mongodb.com/docs/v8.2/release-notes/8.0/#mongodb-8.0-incompatible-with-kernel-6.19
             - name: GLIBC_TUNABLES
               value: glibc.pthread.rseq=1
@@ -176,9 +176,9 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            # MongoDB defaults to keeping 500MiB free for index builds and
-            # 250MiB for diagnostic data, so 1Gi triggers low-space warnings
-            # before a small UniFi install has much application data.
+            # MongoDB needs 500MiB of free space for index builds by default.
+            # MongoDB also needs 250MiB for diagnostic data.
+            # A 1Gi volume causes low-space warnings even with little UniFi application data.
             storage: 2Gi
         storageClassName: longhorn-encrypted
     - apiVersion: v1

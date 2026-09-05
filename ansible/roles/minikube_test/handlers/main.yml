@@ -1,5 +1,5 @@
 ---
-# handlers file for minikube_test
+# Define handlers for minikube_test here.
 - name: Stop minikube
   ansible.builtin.command:
     argv:

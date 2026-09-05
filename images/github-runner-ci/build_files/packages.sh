@@ -2,7 +2,7 @@
 
 set -eoux pipefail
 
-# The small set of broadly useful shell/system tools for CI job containers.
+# Install standard shell and system tools for CI job containers.
 PACKAGES=(
     "bash"
     "bubblewrap"
@@ -22,7 +22,7 @@ PACKAGES=(
 
 dnf upgrade -y
 
-# Homebrew-on-Linux needs a build toolchain for formulae that compile from source.
+# Build tools are necessary for Homebrew on Linux to compile packages from source.
 dnf group install \
     -y \
     development-tools

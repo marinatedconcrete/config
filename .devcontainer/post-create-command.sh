@@ -4,7 +4,7 @@ set -e
 
 sudo /usr/local/share/docker-init.sh
 
-# Install prettier
+# Install dependencies. Configure Prettier.
 yarn --immutable
 
 ansible-galaxy collection install --no-cache ansible
