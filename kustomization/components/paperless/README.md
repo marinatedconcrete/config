@@ -61,6 +61,7 @@ stringData:
   paperless_secret_key: long-random-secret-key
 ```
 
+
 # Samba Uploads
 
 Scanners with network access can upload documents to CIFS/SMB network shares.

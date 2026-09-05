@@ -2,10 +2,10 @@
 
 This directory contains [Renovate](https://docs.renovatebot.com/) configurations for use as [shared presets](https://docs.renovatebot.com/config-presets/).
 
-1. Add `github>marinatedconcrete/config//renovate/{file}` to your `extends` list.
-2. Replace `{file}` with the configuration name.
-3. Add `#renovate-config-{version}` to select a specified version.
-4. Replace `{version}` with a version from the [GitHub releases](https://github.com/marinatedconcrete/config/releases?q=%22renovate-config%22).
+Add `github>marinatedconcrete/config//renovate/{file}` to your `extends` list.
+Replace `{file}` with the configuration name.
+Add `#renovate-config-{version}` to select a specified version.
+Replace `{version}` with a version from the [GitHub releases](https://github.com/marinatedconcrete/config/releases?q=%22renovate-config%22).
 
 The examples below include a version tag.
 

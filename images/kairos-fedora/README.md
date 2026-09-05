@@ -20,10 +20,7 @@ The test uses the same procedure as an installation on physical hardware:
 2. Generate an installer ISO from that OCI image with AuroraBoot.
 3. Boot the installer ISO in QEMU.
 4. Submit the install through the Kairos WebUI on port 8080.
-5. Stop the virtual machine.
-6. Disconnect the ISO.
-7. Start the virtual machine from the installed disk.
-8. Check the operating system through SSH.
+5. Stop the virtual machine. Disconnect the ISO. Start the virtual machine from the installed disk. Check the operating system through SSH.
 
 By default, `just e2e-kairos-fedora` builds `images/kairos-fedora/Containerfile` locally as `kairos-fedora:0.0.0-e2e`.
 Set `KAIROS_IMAGE` to test a specified image reference.
