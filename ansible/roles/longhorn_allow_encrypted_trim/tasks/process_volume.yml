@@ -1,5 +1,5 @@
 ---
-# Tasks file for longhorn_allow_encrypted_trim to process each volume.
+# Process each volume for longhorn_allow_encrypted_trim.
 - name: Get pv storageClass
   ansible.builtin.set_fact:
     longhorn_allow_encrypted_trim_storage_class: >-
@@ -20,10 +20,10 @@
       "^Enter passphrase for ": "{{ encryption_key }}"
   become: true
   delegate_to: >-
-      {{
-        hostvars | list | select('match', '^' + volume.status.ownerID) | first
-      }}
-  no_log: true # This contains a secret!
+    {{
+      hostvars | list | select('match', '^' + volume.status.ownerID) | first
+    }}
+  no_log: true # Prevent log output that contains a secret.
   vars:
     device: "/dev/mapper/{{ volume.metadata.name }}"
     encryption_key: >-

@@ -12,7 +12,7 @@
     "vscode": {
       "extensions": [
         "esbenp.prettier-vscode",
-        // Enable VSCode to find the prettier package to use when formatting
+        // Let VS Code find the Prettier package for formatting.
         "arcanis.vscode-zipfs",
         "github.vscode-github-actions",
         "ms-kubernetes-tools.vscode-kubernetes-tools",
@@ -40,7 +40,7 @@
   "features": {
     "ghcr.io/devcontainers/features/node:2": {
       "installYarnUsingApt": "false",
-      // Save on space since we don't need this
+      // Disable unused node-gyp dependencies to save space.
       "nodeGypDependencies": "false",
       // renovate: datasource=github-releases depName=nvm-sh/nvm
       "nvmVersion": "0.40.7",

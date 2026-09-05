@@ -15,7 +15,7 @@ on: # yamllint disable-line rule:truthy
       - .github/workflows/image-devcontainer-base.yml
       - images/devcontainer-base/**
   schedule:
-    - cron: "0 0 * * 0" # Triggers every Sunday at midnight UTC
+    - cron: "0 0 * * 0" # Run each Sunday at midnight UTC.
 
 concurrency:
   cancel-in-progress: true

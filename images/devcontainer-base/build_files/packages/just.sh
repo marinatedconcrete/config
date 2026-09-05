@@ -2,8 +2,7 @@
 
 set -eoux pipefail
 
-# Just is so common and useful in our devcontainers, that we actually set it
-# up in the base image.
+# Install just in the base image for use in devcontainers.
 
 # renovate: datasource=github-releases depName=casey/just
 JUST_VERSION=1.58.0

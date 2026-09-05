@@ -1,5 +1,5 @@
 ---
-# Tasks file for longhorn_allow_encrypted_trim.
+# Define tasks for longhorn_allow_encrypted_trim.
 - name: Determine all StorageClasses
   ansible.builtin.set_fact:
     longhorn_allow_encrypted_trim_storage_classes_yaml: |-

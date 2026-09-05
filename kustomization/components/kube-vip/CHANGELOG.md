@@ -2,143 +2,123 @@
 
 ## [4.0.6](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.5...kustomize-kube-vip@v4.0.6) (2026-08-30)
 
-
 ### Other Changes
 
-* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1.2.3 ([#845](https://github.com/marinatedconcrete/config/issues/845)) ([871ea89](https://github.com/marinatedconcrete/config/commit/871ea89d558ea016f87e2845532f0b9707d7e6e2))
+- **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1.2.3 ([#845](https://github.com/marinatedconcrete/config/issues/845)) ([871ea89](https://github.com/marinatedconcrete/config/commit/871ea89d558ea016f87e2845532f0b9707d7e6e2))
 
 ## [4.0.5](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.4...kustomize-kube-vip@v4.0.5) (2026-07-20)
 
-
 ### Bug Fixes
 
-* **kube-vip:** fix spurious rules ([4b512d1](https://github.com/marinatedconcrete/config/commit/4b512d19f2b5b6c627a8ea2fee82f290e97b44f8))
+- **kube-vip:** fix spurious rules ([4b512d1](https://github.com/marinatedconcrete/config/commit/4b512d19f2b5b6c627a8ea2fee82f290e97b44f8))
 
 ## [4.0.4](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.3...kustomize-kube-vip@v4.0.4) (2026-07-20)
 
-
 ### Other Changes
 
-* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1.2.1 ([#817](https://github.com/marinatedconcrete/config/issues/817)) ([d863f20](https://github.com/marinatedconcrete/config/commit/d863f208b7354e427c84df932370c8f0ffefee38))
+- **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1.2.1 ([#817](https://github.com/marinatedconcrete/config/issues/817)) ([d863f20](https://github.com/marinatedconcrete/config/commit/d863f208b7354e427c84df932370c8f0ffefee38))
 
 ## [4.0.3](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.2...kustomize-kube-vip@v4.0.3) (2026-03-15)
 
-
 ### Other Changes
 
-* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1.0.4 ([#641](https://github.com/marinatedconcrete/config/issues/641)) ([df95134](https://github.com/marinatedconcrete/config/commit/df95134fa45d49dba9821c71e038a0186dd13cfe))
+- **package:** Update the ghcr.io/kube-vip/kube-vip Docker tag to v1.0.4. ([#641](https://github.com/marinatedconcrete/config/issues/641)) ([df95134](https://github.com/marinatedconcrete/config/commit/df95134fa45d49dba9821c71e038a0186dd13cfe))
 
 ## [4.0.2](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.1...kustomize-kube-vip@v4.0.2) (2025-12-28)
 
-
 ### Other Changes
 
-* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1.0.3 ([#598](https://github.com/marinatedconcrete/config/issues/598)) ([a6846ca](https://github.com/marinatedconcrete/config/commit/a6846ca6040ebbf7b03a6bc5fe96f80b6e06cb38))
+- **package:** Update the ghcr.io/kube-vip/kube-vip Docker tag to v1.0.3. ([#598](https://github.com/marinatedconcrete/config/issues/598)) ([a6846ca](https://github.com/marinatedconcrete/config/commit/a6846ca6040ebbf7b03a6bc5fe96f80b6e06cb38))
 
 ## [4.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.0...kustomize-kube-vip@v4.0.1) (2025-10-10)
 
-
 ### Bug Fixes
 
-* re-run kube-vip codegen ([42ca6c9](https://github.com/marinatedconcrete/config/commit/42ca6c902d6c7c1695596d9332d15ad96cff8c40))
-* regenerate kube-vip manifests ([c025b7a](https://github.com/marinatedconcrete/config/commit/c025b7aa3c35e879b03327372d146b678db21bc0))
-
+- Run the kube-vip manifest generator again. ([42ca6c9](https://github.com/marinatedconcrete/config/commit/42ca6c902d6c7c1695596d9332d15ad96cff8c40))
+- Generate the kube-vip manifests again. ([c025b7a](https://github.com/marinatedconcrete/config/commit/c025b7aa3c35e879b03327372d146b678db21bc0))
 
 ### Other Changes
 
-* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1.0.1 ([a0020c0](https://github.com/marinatedconcrete/config/commit/a0020c0bdecb36afdf3f929f09ef32db865d468d))
+- **package:** Update the ghcr.io/kube-vip/kube-vip Docker tag to v1.0.1. ([a0020c0](https://github.com/marinatedconcrete/config/commit/a0020c0bdecb36afdf3f929f09ef32db865d468d))
 
 ## [4.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v3.0.2...kustomize-kube-vip@v4.0.0) (2025-08-30)
 
-
 ### ⚠ BREAKING CHANGES
 
-* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1 (https://github.com/marinatedconcrete/config/pull/453)
+- **package:** Update the ghcr.io/kube-vip/kube-vip Docker tag to v1 (https://github.com/marinatedconcrete/config/pull/453).
 
 ### Other Changes
 
-* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1 (https://github.com/marinatedconcrete/config/pull/453) ([b708ee5](https://github.com/marinatedconcrete/config/commit/b708ee54637bbf95e24bd7bcc53f4ec5e3fc6881))
+- **package:** Update the ghcr.io/kube-vip/kube-vip Docker tag to v1 (https://github.com/marinatedconcrete/config/pull/453). ([b708ee5](https://github.com/marinatedconcrete/config/commit/b708ee54637bbf95e24bd7bcc53f4ec5e3fc6881))
 
 ## [3.0.2](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v3.0.1...kustomize-kube-vip@v3.0.2) (2025-07-02)
 
-
 ### Other Changes
 
-* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v0.9.2 ([533ab8d](https://github.com/marinatedconcrete/config/commit/533ab8d3957faa1775acff84cf3f7a8b3f46e607))
+- **package:** Update the ghcr.io/kube-vip/kube-vip Docker tag to v0.9.2. ([533ab8d](https://github.com/marinatedconcrete/config/commit/533ab8d3957faa1775acff84cf3f7a8b3f46e607))
 
 ## [3.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v3.0.0...kustomize-kube-vip@v3.0.1) (2025-05-12)
 
-
 ### Bug Fixes
 
-* update RBAC from incorrect `endpoints` ([e31b9b9](https://github.com/marinatedconcrete/config/commit/e31b9b9705dcfc58df5ece80a6b3ebdad4be9f6b))
+- Correct the `endpoints` RBAC configuration. ([e31b9b9](https://github.com/marinatedconcrete/config/commit/e31b9b9705dcfc58df5ece80a6b3ebdad4be9f6b))
 
 ## [3.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v2.0.1...kustomize-kube-vip@v3.0.0) (2025-05-04)
 
-
 ### ⚠ BREAKING CHANGES
 
-* split kube-vip service and control plane VIP DaemonSets ([#376](https://github.com/marinatedconcrete/config/issues/376))
+- Use separate kube-vip DaemonSets for services and the control plane VIP. ([#376](https://github.com/marinatedconcrete/config/issues/376))
 
 ### Features
 
-* codegen kube-vip RBAC ([#355](https://github.com/marinatedconcrete/config/issues/355)) ([be3a291](https://github.com/marinatedconcrete/config/commit/be3a29150d9ed2b24c7f89c6ed805afd1aa8e9a0))
-* split kube-vip service and control plane VIP DaemonSets ([#376](https://github.com/marinatedconcrete/config/issues/376)) ([cb7a9d0](https://github.com/marinatedconcrete/config/commit/cb7a9d09c1736d0e9fb7c858183a17208ceb3430))
-
+- Generate kube-vip RBAC manifests. ([#355](https://github.com/marinatedconcrete/config/issues/355)) ([be3a291](https://github.com/marinatedconcrete/config/commit/be3a29150d9ed2b24c7f89c6ed805afd1aa8e9a0))
+- Use separate kube-vip DaemonSets for services and the control plane VIP. ([#376](https://github.com/marinatedconcrete/config/issues/376)) ([cb7a9d0](https://github.com/marinatedconcrete/config/commit/cb7a9d09c1736d0e9fb7c858183a17208ceb3430))
 
 ### Bug Fixes
 
-* make it easier to override the namespace ([#352](https://github.com/marinatedconcrete/config/issues/352)) ([2a01510](https://github.com/marinatedconcrete/config/commit/2a015103aaabdb88ffa80580a43b873e04f91a3c))
-
+- Make the namespace easier to change. ([#352](https://github.com/marinatedconcrete/config/issues/352)) ([2a01510](https://github.com/marinatedconcrete/config/commit/2a015103aaabdb88ffa80580a43b873e04f91a3c))
 
 ### Other Changes
 
-* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v0.9.0 ([#315](https://github.com/marinatedconcrete/config/issues/315)) ([704dcf0](https://github.com/marinatedconcrete/config/commit/704dcf02e312d27fd733f46d3ba681aa14f9bab7))
-* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v0.9.1 ([587b908](https://github.com/marinatedconcrete/config/commit/587b908463c70125587df1ef7d80d1b19e1223cb))
+- **package:** Update the ghcr.io/kube-vip/kube-vip Docker tag to v0.9.0. ([#315](https://github.com/marinatedconcrete/config/issues/315)) ([704dcf0](https://github.com/marinatedconcrete/config/commit/704dcf02e312d27fd733f46d3ba681aa14f9bab7))
+- **package:** Update the ghcr.io/kube-vip/kube-vip Docker tag to v0.9.1. ([587b908](https://github.com/marinatedconcrete/config/commit/587b908463c70125587df1ef7d80d1b19e1223cb))
 
 ## [2.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v2.0.0...kustomize-kube-vip@v2.0.1) (2025-04-20)
 
-
 ### Bug Fixes
 
-* update RBAC for kube-vip ([#321](https://github.com/marinatedconcrete/config/issues/321)) ([f5d2645](https://github.com/marinatedconcrete/config/commit/f5d2645328d2c1b2c5091ee38b1a790070d53943))
-
+- Update RBAC for kube-vip. ([#321](https://github.com/marinatedconcrete/config/issues/321)) ([f5d2645](https://github.com/marinatedconcrete/config/commit/f5d2645328d2c1b2c5091ee38b1a790070d53943))
 
 ### Documentation Updates
 
-* fix kube-vip priorityclass ([01de083](https://github.com/marinatedconcrete/config/commit/01de083f5fd404f823abd7079e33363c1de85e19))
+- Correct the kube-vip priority class. ([01de083](https://github.com/marinatedconcrete/config/commit/01de083f5fd404f823abd7079e33363c1de85e19))
 
 ## [2.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v1.0.1...kustomize-kube-vip@v2.0.0) (2025-04-15)
 
-
 ### ⚠ BREAKING CHANGES
 
-* require `priorityclass` component, and add appropriate `priorityClass` ([#285](https://github.com/marinatedconcrete/config/issues/285))
+- Add the required `priorityclass` component. Set the correct `priorityClass`. ([#285](https://github.com/marinatedconcrete/config/issues/285))
 
 ### Features
 
-* require `priorityclass` component, and add appropriate `priorityClass` ([#285](https://github.com/marinatedconcrete/config/issues/285)) ([a148a93](https://github.com/marinatedconcrete/config/commit/a148a93e5638ad7b0822a1c23f58154e8642f5f5))
-
+- Add the required `priorityclass` component. Set the correct `priorityClass`. ([#285](https://github.com/marinatedconcrete/config/issues/285)) ([a148a93](https://github.com/marinatedconcrete/config/commit/a148a93e5638ad7b0822a1c23f58154e8642f5f5))
 
 ### Documentation Updates
 
-* Add and Standardize Badging ([#278](https://github.com/marinatedconcrete/config/issues/278)) ([9f21755](https://github.com/marinatedconcrete/config/commit/9f21755bdeaa287887215ca76586aa070d17656e))
-
+- Add consistent badges. ([#278](https://github.com/marinatedconcrete/config/issues/278)) ([9f21755](https://github.com/marinatedconcrete/config/commit/9f21755bdeaa287887215ca76586aa070d17656e))
 
 ### Other Changes
 
-* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v0.8.10 ([06a7858](https://github.com/marinatedconcrete/config/commit/06a7858dca7bf6075ef091562b0206b2cf23c38b))
+- **package:** Update the ghcr.io/kube-vip/kube-vip Docker tag to v0.8.10. ([06a7858](https://github.com/marinatedconcrete/config/commit/06a7858dca7bf6075ef091562b0206b2cf23c38b))
 
 ## [1.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v1.0.0...kustomize-kube-vip@v1.0.1) (2025-02-15)
 
-
 ### Other Changes
 
-* **deps:** pin kube-vip container ([6d0f68c](https://github.com/marinatedconcrete/config/commit/6d0f68c1e105d5660077ad496fd2b8eff7938410))
+- **deps:** Set a fixed kube-vip image version. ([6d0f68c](https://github.com/marinatedconcrete/config/commit/6d0f68c1e105d5660077ad496fd2b8eff7938410))
 
 ## [1.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip-v0.1.0...kustomize-kube-vip@v1.0.0) (2025-02-14)
 
-
 ### Documentation Updates
 
-* add correct example usage for new packaging of kube-vip ([01f358e](https://github.com/marinatedconcrete/config/commit/01f358e733be91690ba2ab4ba02bc4fa4c4b217c))
+- Add a correct example for the new kube-vip package format. ([01f358e](https://github.com/marinatedconcrete/config/commit/01f358e733be91690ba2ab4ba02bc4fa4c4b217c))

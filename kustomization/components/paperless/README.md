@@ -4,13 +4,15 @@
 [![Pod Security Standard: Baseline](https://img.shields.io/badge/pod_security_standard-baseline-yellow?style=for-the-badge&logo=kubernetes&logoColor=%23326CE5)](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
 [![Priority Class](https://img.shields.io/badge/dynamic/yaml?style=for-the-badge&label=priorityclass&url=https%3A%2F%2Fgithub.com%2Fmarinatedconcrete%2Fconfig%2Fraw%2Frefs%2Fheads%2Fmain%2Fkustomization%2Fcomponents%2Fpaperless%2Fstatefulset.yml&query=%24.spec.template.spec.priorityClassName)](https://github.com/marinatedconcrete/config/tree/main/kustomization/components/priorityclass)
 
-This will deploy an instance of [paperless-ngx](https://docs.paperless-ngx.com/). This component requires a Redis instance (provided via the component of the same name) and includes a Samba container for uploading scanned documents over the network.
+This component installs [paperless-ngx](https://docs.paperless-ngx.com/).
+A Redis instance is necessary. The Redis component supplies this instance.
+The component includes a Samba container for scanned document uploads through the network.
 
-# Example Usage
+# Examples
 
-Note: please replace `{version}` with the desired version you wish to use.
+Replace `{version}` with the version that you want to use.
 
-See below for additionally required patches and secrets.
+See the required patches and secrets below.
 
 ## Component
 
@@ -38,7 +40,13 @@ resources:
 
 ## `paperless-secrets`
 
-This contains the administrator password used by the container, the secret key used for cryptographic signing, and any dates that you may want to ignore. The secret key must be a long, random value and remain stable across restarts and upgrades. The admin password is not user facing, because the container is set up to automatically login as the admin, assuming that some external mechanism (ex: Authelia) provides an authentication solution.
+This secret contains the administrator password, the secret key for cryptographic signing, and the dates to ignore.
+Use a long, random value for the secret key.
+Keep this value unchanged across restarts and upgrades.
+
+The container logs in as the administrator automatically.
+Users do not enter this password.
+This configuration needs an external authentication service, such as Authelia.
 
 ```yaml
 apiVersion: v1
@@ -46,31 +54,30 @@ kind: Secret
 metadata:
   name: paperless-secrets
 stringData:
-  # comma separate multiple dates
-  # These dates may be sensitive or non-public (ex: birthdays) and thus best represented as a secret.
+  # Separate multiple dates with commas.
+  # Store private dates, such as birthdays, in a secret.
   ignored_dates: "2023-12-28,1980-04-23"
   paperless_admin_password: super-secure-unhashed-password
   paperless_secret_key: long-random-secret-key
 ```
 
-
 # Samba Uploads
 
-Network-enabled scanners can upload scanned documents directly to CIFS/SMB network
-shares. This container exposes the `paperless-scans` PVC so
-scanned documents can be consumed automatically. Files are removed from this PVC
-once processed.
+Scanners with network access can upload documents to CIFS/SMB network shares.
+The Samba container gives scanners access to the `paperless-scans` PVC.
+Paperless processes these files automatically.
+Paperless removes each file from this PVC after processing.
 
 ### `kustomization.yml`
 
 ```yaml
 patches:
-  # Configure the external IP for the samba service
+  # Configure the external IP address for the Samba service.
   - path: patches/configure-samba-address.yml
     target:
       kind: Service
       name: samba
-  # Alternatively, configure a kube-vip annotation
+  # As an alternative, configure a kube-vip annotation.
   - path: patches/configure-samba-annotation.yml
     target:
       kind: Service
@@ -103,7 +110,8 @@ spec:
 
 ## Set the paperless hostname
 
-You may want to configure the [PAPERLESS_URL](https://docs.paperless-ngx.com/configuration/#PAPERLESS_URL) setting to ensure proper security, especially if this service is exposed on the internet.
+Use [PAPERLESS_URL](https://docs.paperless-ngx.com/configuration/#PAPERLESS_URL) to configure the service URL for security checks.
+This setting is very important when users can access the service from the internet.
 
 ```yaml
 patches:

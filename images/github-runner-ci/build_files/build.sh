@@ -4,6 +4,6 @@ set -ouex pipefail
 
 /ctx/packages.sh
 
-# Cleanup
+# Remove package caches.
 dnf clean all
 rm -rf /var/lib/dnf

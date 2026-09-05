@@ -1,8 +1,8 @@
 # CoralTPU device definition for generic-device-plugin
 
-This will add a definition for the [Coral TPU USB Accelerator](https://coral.ai/products/accelerator) to your [Generic Device Plugin](https://github.com/sdwilsh/ansible-playbooks/kustomization/components/generic-device-plugin).
+This component adds a definition for the [Coral TPU USB Accelerator](https://coral.ai/products/accelerator) to your [Generic Device Plugin](https://github.com/sdwilsh/ansible-playbooks/kustomization/components/generic-device-plugin).
 
-# Example Usage
+# Examples
 
 ```yaml
 ---

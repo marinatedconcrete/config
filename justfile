@@ -1,9 +1,9 @@
-# Lists all targets
+# List all recipes.
 [private]
 default:
     @just --list
 
-# Check if files were auto-formated properly
+# Check the file format.
 [group('format')]
 check-format:
     #!/usr/bin/env bash
@@ -11,7 +11,7 @@ check-format:
     just --unstable --fmt --check -f justfile
     yarn prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md
 
-# Generates the manifests for kube-vip.
+# Generate the kube-vip manifests.
 [group('codegen')]
 codegen-kube-vip:
     #!/usr/bin/env bash
@@ -22,7 +22,7 @@ codegen-kube-vip:
     KUBE_VIP_DIGEST=sha256:2fcdbb014a2e217b9ea1b6dacac53d6851b185af323cdd28d100ad82d74bc79a
     KUBE_VIP_IMAGE=ghcr.io/kube-vip/kube-vip@${KUBE_VIP_DIGEST}
 
-    # VIP DaemonSet manifest generation.
+    # Generate the VIP DaemonSet manifest.
     DEST=kustomization/components/kube-vip/daemonset/vip.yml
     SCRATCH=$(mktemp --tmpdir daemonset-XXX.yml)
     docker run --network host --rm ${KUBE_VIP_IMAGE} \
@@ -35,37 +35,37 @@ codegen-kube-vip:
             --taint \
         > ${SCRATCH}
 
-    # Drop namespace and let user configure this.
+    # Remove the namespace so the user can configure it.
     yq -i 'del(.metadata.namespace)' ${SCRATCH}
 
-    # Remove creationTimestamp fields as we do not care about them.
+    # Remove the unused creationTimestamp fields.
     yq -i 'del(.metadata.creationTimestamp)' ${SCRATCH}
     yq -i 'del(.spec.template.metadata.creationTimestamp)' ${SCRATCH}
 
-    # Remove empty objects that get added by their generator.
+    # Remove empty objects from the generated manifest.
     yq -i 'del(.spec.template.spec.containers[0].resources)' ${SCRATCH}
     yq -i 'del(.spec.updateStrategy)' ${SCRATCH}
 
-    # Remove the tag from the image, as it is managed by the `kustomization.yml` file.
+    # Remove the image tag. The `kustomization.yml` file controls this tag.
     yq -i '.spec.template.spec.containers[0].image = "ghcr.io/kube-vip/kube-vip"' ${SCRATCH}
 
-    # Remove VIP address, as this is a required patch.
+    # Remove the VIP address. The user must set this address with a patch.
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "address"))' ${SCRATCH}
 
     # Remove prometheus_server.
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "prometheus_server"))' ${SCRATCH}
 
-    # Set cp_namespace via a reference.
+    # Set cp_namespace with a field reference.
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "cp_namespace") | .value)' ${SCRATCH}
     yq -i '(.spec.template.spec.containers[0].env[] | select(.name == "cp_namespace") | .valueFrom.fieldRef.fieldPath) = "metadata.namespace"' ${SCRATCH}
 
-    # Add appropriate priorityClassName to the manifest.
+    # Set priorityClassName in the manifest.
     yq -i '.spec.template.spec.priorityClassName = "system-cluster-critical"' ${SCRATCH}
 
-    # Sort the container's env by the name of the environment variables to set.
+    # Sort the environment variables by name.
     yq -i '.spec.template.spec.containers[0].env |= sort_by(.name)' ${SCRATCH}
 
-    # Write out the final output.
+    # Write the final manifest.
     echo '# @codegen-command: just codegen-kube-vip' > ${DEST}
     echo '# @generated' >> ${DEST}
     echo '---' >> ${DEST}
@@ -74,7 +74,7 @@ codegen-kube-vip:
         >> ${DEST}
 
 
-    # Services DaemonSet manifest generation.
+    # Generate the services DaemonSet manifest.
     DEST=kustomization/components/kube-vip/daemonset/services.yml
     SCRATCH=$(mktemp --tmpdir daemonset-XXX.yml)
     docker run --network host --rm ${KUBE_VIP_IMAGE} \
@@ -85,23 +85,23 @@ codegen-kube-vip:
             --servicesElection \
         > ${SCRATCH}
 
-    # Set a unique name that is different from the control plane daemonset.
+    # Set a name that differs from the control plane DaemonSet name.
     yq -i '.metadata.name = "kube-vip-svc-ds"' ${SCRATCH}
     yq -i '.spec.selector.matchLabels."app.kubernetes.io/name" = "kube-vip-svc-ds"' ${SCRATCH}
     yq -i '.spec.template.metadata.labels."app.kubernetes.io/name" = "kube-vip-svc-ds"' ${SCRATCH}
 
-    # Drop namespace and let user configure this.
+    # Remove the namespace so the user can configure it.
     yq -i 'del(.metadata.namespace)' ${SCRATCH}
 
-    # Remove creationTimestamp fields as we do not care about them.
+    # Remove the unused creationTimestamp fields.
     yq -i 'del(.metadata.creationTimestamp)' ${SCRATCH}
     yq -i 'del(.spec.template.metadata.creationTimestamp)' ${SCRATCH}
 
-    # Remove empty objects that get added by their generator.
+    # Remove empty objects from the generated manifest.
     yq -i 'del(.spec.template.spec.containers[0].resources)' ${SCRATCH}
     yq -i 'del(.spec.updateStrategy)' ${SCRATCH}
 
-    # Remove the tag from the image, as it is managed by the `kustomization.yml` file.
+    # Remove the image tag. The `kustomization.yml` file controls this tag.
     yq -i '.spec.template.spec.containers[0].image = "ghcr.io/kube-vip/kube-vip"' ${SCRATCH}
 
     # Remove unused environment settings.
@@ -110,16 +110,16 @@ codegen-kube-vip:
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "prometheus_server"))' ${SCRATCH}
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "vip_address"))' ${SCRATCH}
 
-    # Set cp_namespace via a reference.
+    # Set cp_namespace with a field reference.
     yq -i '.spec.template.spec.containers[0].env += [{"name": "cp_namespace", "valueFrom": { "fieldRef": { "fieldPath": "metadata.namespace"}}}]' ${SCRATCH}
 
-    # Add appropriate priorityClassName to the manifest.
+    # Set priorityClassName in the manifest.
     yq -i '.spec.template.spec.priorityClassName = "critical-application-infra"' ${SCRATCH}
 
-    # Sort the container's env by the name of the environment variables to set.
+    # Sort the environment variables by name.
     yq -i '.spec.template.spec.containers[0].env |= sort_by(.name)' ${SCRATCH}
 
-    # Write out the final output.
+    # Write the final manifest.
     echo '# @codegen-command: just codegen-kube-vip' > ${DEST}
     echo '# @generated' >> ${DEST}
     echo '---' >> ${DEST}
@@ -128,7 +128,7 @@ codegen-kube-vip:
         >> ${DEST}
 
 
-    # RBAC manifest generation.
+    # Generate the RBAC manifest.
     DEST=kustomization/components/kube-vip/rbac.yml
     SCRATCH=$(mktemp --tmpdir rbac-XXX.yml)
 
@@ -137,15 +137,15 @@ codegen-kube-vip:
             --namespace=kube-vip \
         > ${SCRATCH}
 
-    # Drop namespace and let user configure this.
+    # Remove the namespace so the user can configure it.
     yq -i 'del(.metadata.namespace)' ${SCRATCH}
     yq -i 'del(select(.kind == "ClusterRoleBinding") | .subjects[] | select(.name == "kube-vip") | .namespace)' ${SCRATCH}
 
-    # Sort rules.
+    # Sort the rules.
     yq -i '(select(.kind == "ClusterRole") | .rules[].resources) |= sort_by(.)' ${SCRATCH}
     yq -i '(select(.kind == "ClusterRole") | .rules[].verbs) |= sort_by(.)' ${SCRATCH}
 
-    # Write out the final output.
+    # Write the final manifest.
     echo '# @codegen-command: just codegen-kube-vip' > ${DEST}
     echo '# @generated' >> ${DEST}
     echo '---' >> ${DEST}
@@ -153,7 +153,7 @@ codegen-kube-vip:
         | sed -e "s/'/\"/g" \
         >> ${DEST}
 
-# Auto-format files
+# Format the files.
 [group('format')]
 format:
     #!/usr/bin/env bash
@@ -161,18 +161,18 @@ format:
     just --unstable --fmt -f justfile
     yarn prettier --no-error-on-unmatched-pattern --log-level warn --write **/*.yml **/*.json **/*.md
 
-# Lint ansible plays, roles, and configuration
+# Check Ansible plays, roles, and configuration.
 [group('lint')]
 ansible-lint:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # We need a valid .kube/context file for ansible-lint to be happy.
+    # Start Minikube to supply a correct Kubernetes context for ansible-lint.
     minikube start --interactive=false --profile=ansible-lint
     cd ansible && ansible-lint
     minikube stop --profile=ansible-lint
 
-# Lint Container and Docker files with hado
+# Check Containerfiles and Dockerfiles with hadolint.
 [group('lint')]
 hado-lint:
     #!/usr/bin/env bash
@@ -183,7 +183,7 @@ hado-lint:
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
 
-# Lint all Kustomize files to make sure they're well formed
+# Check all Kustomize files.
 [group('lint')]
 kustomize-lint:
     #!/usr/bin/env bash
@@ -194,7 +194,7 @@ kustomize-lint:
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
 
-# Lint renovate configuration
+# Check the Renovate configuration.
 [group('lint')]
 renovate-lint:
     #!/usr/bin/env bash
@@ -204,7 +204,7 @@ renovate-lint:
         yarn renovate-config-validator ${file}
     done
 
-# Lint shell scripts with shell check
+# Check shell scripts with ShellCheck.
 [group('lint')]
 shellcheck-lint:
     #!/usr/bin/env bash
@@ -215,23 +215,23 @@ shellcheck-lint:
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
 
-# Runs all linters
+# Run all linters.
 [group('lint')]
 lint: ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
 
-# Run the Kairos Fedora boot/install end-to-end test
+# Run the Kairos Fedora end-to-end test for startup and installation.
 [group('test')]
 e2e-kairos-fedora:
     #!/usr/bin/env bash
     set -euo pipefail
     bash images/kairos-fedora/e2e.sh
 
-# Run a single test
+# Run one component test.
 [group('test')]
 kustomization-test component:
     ansible-playbook kustomization/tests/{{ component }}/test.yml
 
-# Run all the tests for the kustomize files
+# Run all Kustomize component tests.
 [group('test')]
 kustomization-tests:
     #!/usr/bin/env bash
@@ -242,7 +242,7 @@ kustomization-tests:
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
 
-# Run all tests
+# Run all tests..
 [group('test')]
 test: kustomization-tests
 
@@ -270,12 +270,12 @@ release-please-build project dest="":
         dest_path="/tmp/${component}.yml"
     fi
 
-    # Run component tests before building the release artifact.
+    # Run component tests before the release build.
     just kustomization-test "${component}"
     kustomize build "${component_path}/" -o "${dest_path}"
     echo "${dest_path}"
 
-# Regenerate Yarn integrations with other tools, like VSCode
+# Generate the Yarn integration files for tools such as VS Code.
 regen-yarn-sdks:
     #!/usr/bin/env bash
     set -euo pipefail

@@ -1,4 +1,4 @@
-# Where incoming raw scans should go
+# Store new scans in this volume.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -11,7 +11,7 @@ spec:
     requests:
       storage: 1Gi
 ---
-# Where paperless keeps its database
+# Store the Paperless database in this volume.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -24,7 +24,7 @@ spec:
     requests:
       storage: 4Gi
 ---
-# Where paperless keeps processed documents
+# Store processed Paperless documents in this volume.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -37,7 +37,7 @@ spec:
     requests:
       storage: 1Gi
 ---
-# This seems related to the [document exporter](https://docs.paperless-ngx.com/administration/#utilities-exporter) feature
+# This volume is for document exports. See https://docs.paperless-ngx.com/administration/#utilities-exporter
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
