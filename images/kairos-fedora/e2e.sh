@@ -42,6 +42,8 @@ E2E_BOOT_TIMEOUT="${E2E_BOOT_TIMEOUT:-15m}"
 E2E_K3S_TIMEOUT="${E2E_K3S_TIMEOUT:-10m}"
 E2E_WEBUI_PORT="${E2E_WEBUI_PORT:-18080}"
 E2E_SSH_PORT="${E2E_SSH_PORT:-10022}"
+E2E_K3S_PORT="${E2E_K3S_PORT:-16443}"
+E2E_KUSTOMIZATION_TEST="${E2E_KUSTOMIZATION_TEST:-}"
 KAIROS_E2E_VERSION="${KAIROS_E2E_VERSION:-0.0.0-e2e}"
 # renovate: datasource=docker depName=quay.io/kairos/auroraboot
 AURORABOOT_IMAGE="${AURORABOOT_IMAGE:-quay.io/kairos/auroraboot:v0.20.1}"
@@ -50,6 +52,7 @@ logs_dir="${E2E_WORKDIR}/logs"
 disk_path="${E2E_WORKDIR}/kairos-fedora.qcow2"
 ssh_key="${E2E_WORKDIR}/id_ed25519"
 cloud_config="${E2E_WORKDIR}/install-cloud-config.yaml"
+kubeconfig="${E2E_WORKDIR}/kubeconfig"
 qemu_pid=""
 ssh_ready=0
 phase="host"
@@ -192,7 +195,7 @@ start_qemu() {
     else
         qemu_args+=(
             -boot "order=c,menu=off"
-            -netdev "user,id=net0,hostfwd=tcp:127.0.0.1:${E2E_SSH_PORT}-:22"
+            -netdev "user,id=net0,hostfwd=tcp:127.0.0.1:${E2E_SSH_PORT}-:22,hostfwd=tcp:127.0.0.1:${E2E_K3S_PORT}-:6443"
             -device "virtio-net-pci,netdev=net0"
         )
     fi
@@ -358,6 +361,29 @@ reboot_and_wait_for_ssh() {
     die "SSH did not become reachable after reboot before ${E2E_BOOT_TIMEOUT}"
 }
 
+write_kubeconfig() {
+    log "Writing host kubeconfig for K3s on localhost:${E2E_K3S_PORT}"
+    ssh_cmd 'sudo -n cat /etc/rancher/k3s/k3s.yaml' >"$kubeconfig"
+    sed -i "s#server: https://127.0.0.1:6443#server: https://127.0.0.1:${E2E_K3S_PORT}#" "$kubeconfig"
+    chmod 0600 "$kubeconfig"
+    grep -q "server: https://127.0.0.1:${E2E_K3S_PORT}" "$kubeconfig" || die "failed to rewrite K3s server in ${kubeconfig}"
+}
+
+run_kustomization_test() {
+    local component="$1"
+    local playbook="${repo_root}/kustomization/tests/${component}/test.yml"
+    local test_log="${logs_dir}/kustomization-${component}.log"
+
+    [[ "$component" =~ ^[a-z0-9][a-z0-9-]*$ ]] || die "invalid kustomization test name: ${component}"
+    [[ -f "$playbook" ]] || die "kustomization test does not exist: ${component}"
+
+    log "Running ${component} kustomization test against Kairos K3s"
+    KUBECONFIG="$kubeconfig" ansible-playbook "$playbook" \
+        --extra-vars minikube_test__provision_cluster=false \
+        --extra-vars kubernetes_core_k8s__context=default \
+        2>&1 | tee "$test_log"
+}
+
 collect_ssh_diagnostics() {
     [[ "$ssh_ready" == 1 ]] || return 0
 
@@ -386,6 +412,7 @@ on_exit() {
     fi
 
     cleanup_qemu
+    rm -f -- "$kubeconfig"
     exit "$status"
 }
 
@@ -429,11 +456,16 @@ main() {
     require_cmd ssh
     require_cmd ssh-keygen
 
+    if [[ -n "$E2E_KUSTOMIZATION_TEST" ]]; then
+        require_cmd ansible-playbook
+        require_cmd kustomize
+    fi
+
     [[ -e /dev/kvm ]] || die "/dev/kvm is unavailable; enable KVM before running this test"
     [[ -r /dev/kvm && -w /dev/kvm ]] || die "/dev/kvm exists but is not readable and writable by this user"
 
     mkdir -p "$logs_dir"
-    if [[ -z "${KAIROS_IMAGE:-}" ]]; then
+    if [[ -z "${KAIROS_IMAGE:-}" && -z "${KAIROS_ISO:-}" ]]; then
         build_default_image "$kairos_image"
     fi
 
@@ -465,6 +497,12 @@ main() {
     wait_for_ssh
     reboot_and_wait_for_ssh
     run_guest_checks
+
+    if [[ -n "$E2E_KUSTOMIZATION_TEST" ]]; then
+        phase="kustomization-${E2E_KUSTOMIZATION_TEST}"
+        write_kubeconfig
+        run_kustomization_test "$E2E_KUSTOMIZATION_TEST"
+    fi
 
     phase="complete"
     log "Kairos Fedora e2e completed successfully"

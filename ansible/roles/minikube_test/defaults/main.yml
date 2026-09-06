@@ -5,6 +5,10 @@
 # https://minikube.sigs.k8s.io/docs/tutorials/local_path_provisioner/
 minikube_test__enable_local_path_storage: false
 
+# If this role should provision a minikube cluster. Disable this to apply the
+# kustomization to an existing Kubernetes context.
+minikube_test__provision_cluster: true
+
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
 minikube_test__kubernetes_version: v1.36.2
 

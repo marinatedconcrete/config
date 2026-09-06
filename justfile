@@ -221,10 +221,10 @@ lint: ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
 
 # Run the Kairos Fedora boot/install end-to-end test
 [group('test')]
-e2e-kairos-fedora:
+e2e-kairos-fedora component="":
     #!/usr/bin/env bash
     set -euo pipefail
-    bash images/kairos-fedora/e2e.sh
+    E2E_KUSTOMIZATION_TEST="{{ component }}" bash images/kairos-fedora/e2e.sh
 
 # Run a single test
 [group('test')]
