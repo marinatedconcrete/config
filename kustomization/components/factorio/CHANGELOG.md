@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/marinatedconcrete/config/compare/kustomize-factorio@v0.1.4...kustomize-factorio@v0.1.5) (2026-09-07)
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
 ## [0.1.4](https://github.com/marinatedconcrete/config/compare/kustomize-factorio@v0.1.3...kustomize-factorio@v0.1.4) (2026-07-21)
 
 
