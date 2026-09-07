@@ -272,7 +272,7 @@ release-please-build project dest="":
 
     # Run component tests before the release build.
     just kustomization-test "${component}"
-    kustomize build "${component_path}/" > "${dest_path}"
+    kustomize build "${component_path}/" -o "${dest_path}"
     echo "${dest_path}"
 
 # Generate the Yarn integration files for tools such as VS Code.
