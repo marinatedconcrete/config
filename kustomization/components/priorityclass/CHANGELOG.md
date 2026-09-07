@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/marinatedconcrete/config/compare/kustomize-priorityclass@v1.0.3...kustomize-priorityclass@v1.0.4) (2026-09-07)
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
 ## [1.0.3](https://github.com/marinatedconcrete/config/compare/kustomize-priorityclass@v1.0.2...kustomize-priorityclass@v1.0.3) (2025-03-02)
 
 
