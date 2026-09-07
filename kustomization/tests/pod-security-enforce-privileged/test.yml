@@ -1,0 +1,12 @@
+---
+- name: Test pod-security-enforce-privileged
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Check rendered Namespace labels
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ playbook_dir }}/../pod_security.py"
+          - pod-security-enforce-privileged
+      changed_when: false

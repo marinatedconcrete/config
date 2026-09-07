@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: does-not-matter
+  labels:
+    pod-security.kubernetes.io/enforce: baseline
+    # renovate: datasource=github-tags depName=kubernetes/kubernetes extractVersion=^(?<version>v\d+\.\d+)\.\d+$
+    pod-security.kubernetes.io/enforce-version: v1.36

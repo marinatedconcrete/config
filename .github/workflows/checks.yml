@@ -101,6 +101,11 @@ jobs:
           - kube-vip
           - mosquitto
           - paperless
+          - pod-security-audit-warn-baseline
+          - pod-security-audit-warn-restricted
+          - pod-security-enforce-baseline
+          - pod-security-enforce-restricted
+          - pod-security-enforce-privileged
           - priorityclass
           - unifi-network-application
   lint:
