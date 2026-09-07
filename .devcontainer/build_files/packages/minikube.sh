@@ -3,7 +3,7 @@
 set -eoux pipefail
 
 # renovate: datasource=github-releases depName=kubernetes/minikube
-MINIKUBE_VERSION=v1.38.1
+MINIKUBE_VERSION=v1.39.0
 
 minikube="$(mktemp --tmpdir minikube.XXXXXX)"
 trap 'rm -f "${minikube}"' EXIT
