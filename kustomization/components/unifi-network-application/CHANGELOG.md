@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.2.0...kustomize-unifi-network-application@v1.2.1) (2026-09-07)
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
 ## [1.2.0](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.31...kustomize-unifi-network-application@v1.2.0) (2026-06-20)
 
 
