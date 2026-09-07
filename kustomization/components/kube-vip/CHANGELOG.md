@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.7](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.6...kustomize-kube-vip@v4.0.7) (2026-09-07)
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
 ## [4.0.6](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.5...kustomize-kube-vip@v4.0.6) (2026-08-30)
 
 
