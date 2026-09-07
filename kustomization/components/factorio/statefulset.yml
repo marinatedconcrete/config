@@ -61,9 +61,9 @@ spec:
         labels:
           # Use this PVC to configure attached PVs.
           recurring-job.longhorn.io/source: enabled
-          # Opt out of the default group.
+          # Exclude this volume from the default group.
           recurring-job-group.longhorn.io/default: disabled
-          # Opt into the game group.
+          # Include this volume in the game group.
           recurring-job-group.longhorn.io/game: enabled
         name: factorio-config
       spec:
@@ -79,9 +79,9 @@ spec:
         labels:
           # Use this PVC to configure attached PVs.
           recurring-job.longhorn.io/source: enabled
-          # Opt out of the default group.
+          # Exclude this volume from the default group.
           recurring-job-group.longhorn.io/default: disabled
-          # Opt into the game group.
+          # Include this volume in the game group.
           recurring-job-group.longhorn.io/game: enabled
         name: factorio-mods
       spec:
@@ -97,9 +97,9 @@ spec:
         labels:
           # Use this PVC to configure attached PVs.
           recurring-job.longhorn.io/source: enabled
-          # Opt out of the default group.
+          # Exclude this volume from the default group.
           recurring-job-group.longhorn.io/default: disabled
-          # Opt into the game group.
+          # Include this volume in the game group.
           recurring-job-group.longhorn.io/game: enabled
         name: factorio-saves
       spec:
@@ -115,9 +115,9 @@ spec:
         labels:
           # Use this PVC to configure attached PVs.
           recurring-job.longhorn.io/source: enabled
-          # Opt out of the default group.
+          # Exclude this volume from the default group.
           recurring-job-group.longhorn.io/default: disabled
-          # Opt into the game group.
+          # Include this volume in the game group.
           recurring-job-group.longhorn.io/game: enabled
         name: factorio-server-manager-data
       spec:

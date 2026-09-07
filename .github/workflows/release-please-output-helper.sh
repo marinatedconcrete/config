@@ -9,7 +9,7 @@ fi
 
 printf '%s' "$OUTPUTS" > /tmp/release-please-output.json
 
-# Build a JSON array describing released kustomization components for matrix consumption.
+# Build a JSON array of released Kustomize components for the workflow matrix.
 components='[]'
 released_paths=$(jq -r '.paths_released | fromjson | map(select(startswith("kustomization")))[]' /tmp/release-please-output.json)
 if [ -n "$released_paths" ]; then

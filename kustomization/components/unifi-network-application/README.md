@@ -4,14 +4,14 @@
 [![Pod Security Standard: Baseline](https://img.shields.io/badge/pod_security_standard-baseline-yellow?style=for-the-badge&logo=kubernetes&logoColor=%23326CE5)](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
 [![Priority Class](https://img.shields.io/badge/dynamic/yaml?style=for-the-badge&label=priorityclass&url=https%3A%2F%2Fgithub.com%2Fmarinatedconcrete%2Fconfig%2Fraw%2Frefs%2Fheads%2Fmain%2Fkustomization%2Fcomponents%2Funifi-network-application%2Fstatefulset.yml&query=%24.spec.template.spec.priorityClassName)](https://github.com/marinatedconcrete/config/tree/main/kustomization/components/priorityclass)
 
-This will deploy the [Unifi Network Application](https://github.com/linuxserver/docker-unifi-network-application), and
-assumes you are using [Traefik Proxy](https://traefik.io/traefik).
+This component installs the [Unifi Network Application](https://github.com/linuxserver/docker-unifi-network-application).
+The component needs [Traefik Proxy](https://traefik.io/traefik).
 
-# Example Usage
+# Examples
 
-Note: please replace `{version}` with the desired version you wish to use.
+Replace `{version}` with the version that you want to use.
 
-See below for additionally required patches and secrets.
+See the required patches and secrets below.
 
 ## Component
 
@@ -51,7 +51,7 @@ patches:
 
 #### `patches/add_una_svc_serverstransport.yml`
 
-The format of the annotation value is: `<deployed-namespace>-unifi-network-application-serverstransport@kubernetescrd`.
+Use this format for the annotation value: `<deployed-namespace>-unifi-network-application-serverstransport@kubernetescrd`.
 
 ```yaml
 ---
@@ -67,11 +67,11 @@ metadata:
 
 ### `una-secret`
 
-This needs to have the following keys defined:
+Define this key in the secret:
 
 - `MONGO_PASS`
 
-You can include additional keys as well for further configuration.
+You can add more keys to configure other settings.
 
 ```yaml
 apiVersion: v1

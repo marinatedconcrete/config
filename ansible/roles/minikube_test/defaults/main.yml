@@ -1,14 +1,14 @@
 ---
-# defaults file for minikube_test
+# Define default variables for minikube_test.
 
-# If the test harness should enable local path storage.  See
+# Enable local path storage for the test when true. See
 # https://minikube.sigs.k8s.io/docs/tutorials/local_path_provisioner/
 minikube_test__enable_local_path_storage: false
 
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
 minikube_test__kubernetes_version: v1.36.2
 
-# The number of nodes needed for the test.
+# The number of nodes for the test.
 minikube_test__minikube_nodes: 1
 
 # The directory to pass to kustomize for the test.

@@ -1,13 +1,16 @@
-# Marinated Concrete's VSCode-compatible ssh server
-This runs a little ssh server that's compatible with VSCode's remote SSH feature. Unfortunately, the [LinuxServer one](https://docs.linuxserver.io/images/docker-openssh-server/) cannot be used because it is based on Alpine so it lacks glibc, a [known limitation](https://code.visualstudio.com/docs/remote/ssh#_remote-ssh-limitations).
+# Marinated Concrete SSH Server for VS Code
+This SSH server supports the VS Code Remote SSH feature.
+The [LinuxServer image](https://docs.linuxserver.io/images/docker-openssh-server/) uses Alpine Linux, which does not include glibc.
+The missing glibc library is a [known limitation](https://code.visualstudio.com/docs/remote/ssh#_remote-ssh-limitations) for VS Code Remote SSH.
 
-It's also less flexible/more opinionated. The intention is to run it as a sidecar to an existing application you have, such as esphome, HomeAssistant, or zwave-js.
+Run this container as a sidecar for an application such as ESPHome, Home Assistant, or zwave-js.
+This image has fewer configuration options than the LinuxServer image.
 
 ## Configuration:
-In a new container alongside your application's container:
-- Set the environment variable `AUTHORIZED_KEYS_URL` to a path containing your authorized keys. For instance, `https://github.com/$GH_USERNAME.keys`.
-- Mount a small empty dir in `/config` - this will container your server's ssh host key, which must be persisted
-- Mount the volume you want accessible over ssh in `/data`. When you ssh in, this is the directory where you'll start.
+Add a container next to the application container.
+- Set `AUTHORIZED_KEYS_URL` to the URL of your authorized keys. For example, use `https://github.com/$GH_USERNAME.keys`.
+- Mount a small persistent volume at `/config`. This volume stores the SSH host key.
+- Mount the volume for SSH access at `/data`. SSH sessions start in this directory.
 
 ## Examples
 ```yaml
@@ -34,12 +37,12 @@ spec:
         volumeMounts:
             - mountPath: "/config"
               name: esphome-config
-        # ... the rest of the esp config
-        # Now add the sidecar:
+        # Add other ESPHome settings here.
+        # Add the sidecar.
       - name: ssh-server
         env:
         - name: AUTHORIZED_KEYS_URL
-          # Swap in your github username
+          # Replace this username with your GitHub username.
           value: "https://github.com/marinatedconcrete.keys"
         image: ghcr.io/marinatedconcrete/config/vscode-ssh-server
         ports:
@@ -54,21 +57,21 @@ spec:
         persistentVolumeClaim:
           claimName: esphome-configs
 
-      # Option 1 (preferred): Let the ssh server autogenerate its key
-      # It will persist the keys into this volume
+      # Option 1 (recommended): Let the SSH server generate its host key.
+      # The server stores the host key in this volume.
       - name: config
         persistentVolumeClaim:
           claimName: ssh-config-pvc
 
-      # Option 2: Pre-provisioned key via a k8s Secret
-      # The secret should have a key named ssh_host_ed25519_key and a corresponding ssh_host_ed25519_key.pub
+      # Option 2: Supply an existing host key with a Kubernetes Secret.
+      # Include ssh_host_ed25519_key and the related ssh_host_ed25519_key.pub in the Secret.
       - name: config
         secret:
           secretName: ssh-host-keys
           defaultMode: 0400
 
 ---
-# PVC for esphome configurations, mounted in the ssh container at /data
+# Mount this PVC at /data in the SSH container for ESPHome configuration files.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -80,7 +83,7 @@ spec:
     requests:
       storage: 1Gi
 ---
-# PVC for /config (only needed for option 1)
+# Use this PVC for /config only with option 1.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

@@ -1,8 +1,8 @@
-# See https://kairos.io/docs/reference/kairos-factory/ for more details.
+# See https://kairos.io/docs/reference/kairos-factory/ for more information.
 
 FROM quay.io/kairos/kairos-init:v0.17.3@sha256:7f35a5025559ac2f1f5f52e89e52a91f67b783ef03ff1c1ac06a690a482e805d AS kairos-init
 
-# Allow build scripts to be referenced without being copied into the final image.
+# Make build scripts available without copies in the final image.
 FROM scratch AS ctx
 COPY build_files /
 
@@ -29,7 +29,7 @@ RUN /kairos-init \
     --provider-k3s-version "${KUBERNETES_VERSION}" \
     --version "${VERSION}"
 
-# Our customizations!
+# Apply the custom configuration.
 # hadolint ignore=DL3059
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/cache \
@@ -48,7 +48,7 @@ RUN /kairos-init \
     --provider-k3s-version "${KUBERNETES_VERSION}" \
     --version "${VERSION}"
 
-# Final configuration after Kairos has been initialized
+# Apply the final configuration after Kairos initialization.
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=cache,dst=/var/cache \
     --mount=type=cache,dst=/var/log \

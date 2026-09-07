@@ -7,7 +7,7 @@ components:
   - ../../components/unifi-network-application
 namespace: unifi-network-application-test
 patches:
-  # TODO(https://github.com/marinatedconcrete/config/issues/56): we can allow this to exist once we have traefik
+  # TODO(https://github.com/marinatedconcrete/config/issues/56): Enable this resource after Traefik is available.
   - patch: |-
       $patch: delete
       apiVersion: traefik.io/v1alpha1
@@ -16,7 +16,7 @@ patches:
         name: this-is-ignored-but-is-required
     target:
       kind: ServersTransport
-  # Change storage class so we use minikube's local path provisioner.
+  # Set the storage class to use the Minikube local path provisioner.
   - patch: |-
       apiVersion: apps/v1
       kind: StatefulSet

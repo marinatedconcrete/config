@@ -27,7 +27,7 @@ spec:
           persistentVolumeClaim:
             claimName: paperless-export
       initContainers:
-        # Paperless needs the trash dir to exist on startup
+        # Create the trash directory before Paperless starts.
         - name: prep-trash-dir
           image: ghcr.io/paperless-ngx/paperless-ngx
           command:

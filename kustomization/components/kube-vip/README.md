@@ -3,13 +3,13 @@
 [![Current Version](https://img.shields.io/badge/dynamic/json?style=for-the-badge&label=version&query=%24.kustomization%2Fcomponents%2Fkube-vip&url=https%3A%2F%2Fraw.githubusercontent.com%2Fmarinatedconcrete%2Fconfig%2Frefs%2Fheads%2Fmain%2F.release-please-manifest.json)](https://github.com/marinatedconcrete/config/releases?q=%22kustomize-kube-vip%22)
 [![Pod Security Standard: Privileged](https://img.shields.io/badge/pod_security_standard-privileged-red?style=for-the-badge&logo=kubernetes&logoColor=%23326CE5)](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
 
-This will deploy [kub-vip](https://kube-vip.io/) as two `DaemonSet`s:
-1) for the control plane
-2) for all services' ingress IP address
+This component installs [kube-vip](https://kube-vip.io/) as two `DaemonSet` resources:
+1) One for the control plane.
+2) One for the ingress IP addresses of all services.
 
-# Example Usage
+# Examples
 
-Note: please replace `{version}` with the desired version you wish to use.
+Replace `{version}` with the version that you want to use.
 
 ## Component
 
@@ -39,7 +39,7 @@ resources:
 
 ### Set the VIP Address
 
-This is the controlplane VIP address for your cluster.
+Set the control plane VIP address for your cluster.
 
 #### `kustomization.yml`
 

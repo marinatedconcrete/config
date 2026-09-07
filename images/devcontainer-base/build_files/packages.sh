@@ -2,29 +2,28 @@
 
 set -eoux pipefail
 
-# The set of packages that are needed for this build to work.
+# Install the required build packages.
 CORE_PACKAGES=(
     "curl"
     "gzip"
     "tar"
 )
 
-# The set of packages that we agree are too useful to not have in the base
-# image.
+# Install standard tools in the base image.
 COMMON_PACKAGES=(
-    # It's never DNS, but it's good to verify that...
+    # Install DNS diagnostic tools.
     "bind-utils"
     "iproute"
     "iputils"
-    # These are core utilities that seem silly to not include.
+    # Install basic system utilities.
     "coreutils"
     "jq"
     "sudo"
     "watch"
-    # Source Control
+    # Install version control tools.
     "diffutils"
     "git"
-    # Editor of choice.
+    # Install the text editor.
     "vim"
 )
 
@@ -35,5 +34,5 @@ dnf install \
     "${CORE_PACKAGES[@]}" \
     "${COMMON_PACKAGES[@]}"
 
-# Now we can invoke some additional scripts for potentially more complicated installs.
+# Run the scripts for additional package installation.
 /ctx/packages/just.sh

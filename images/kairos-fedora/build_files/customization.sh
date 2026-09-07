@@ -2,28 +2,28 @@
 
 set -ouex pipefail
 
-# Additional Packages
+# Install additional packages.
 PACKAGES=(
-    # Required for AMD GPU initialization.
+    # Initialize AMD GPUs.
     "amd-gpu-firmware"
-    # CPU microcode updates for AMD nodes.
+    # Update CPU microcode for AMD nodes.
     "amd-ucode-firmware"
-    # Required for Intel Quick Sync/VAAPI on systems using i915.
+    # Supply Intel Quick Sync/VAAPI support for systems that use i915.
     "intel-gpu-firmware"
-    # Firmware for Intel Wi-Fi adapters used by some nodes.
+    # Supply firmware for Intel Wi-Fi adapters.
     "iwlwifi-mvm-firmware"
-    # CPU microcode updates for Intel nodes.
+    # Update CPU microcode for Intel nodes.
     "microcode_ctl"
-    # Firmware for MediaTek Wi-Fi/Bluetooth adapters used by some nodes.
+    # Supply firmware for MediaTek Wi-Fi/Bluetooth adapters.
     "mt7xxx-firmware"
-    # Firmware for Realtek NICs and Intel Bluetooth used by several nodes.
+    # Supply firmware for Realtek NICs and Intel Bluetooth adapters.
     "linux-firmware"
-    # Wireless regulatory database referenced by cfg80211.
+    # Supply the wireless regulatory database for cfg80211.
     "wireless-regdb"
-    # Required by Longhorn for iSCSI volume support.
+    # Supply iSCSI volume support for Longhorn.
     "iscsi-initiator-utils"
     "openssh-server"
-    # Used by `ansible.builtin.expect`
+    # Supply the dependency for `ansible.builtin.expect`.
     "python3-pexpect"
     "rsync"
     "systemd-networkd"

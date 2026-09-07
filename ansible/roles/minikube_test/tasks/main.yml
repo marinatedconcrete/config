@@ -1,5 +1,5 @@
 ---
-# tasks file for minikube_test
+# Define tasks for minikube_test.
 - name: Start minikube
   ansible.builtin.command:
     argv:

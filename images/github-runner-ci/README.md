@@ -1,15 +1,13 @@
-# Marinated Concrete's GitHub Runner CI Image
+# Marinated Concrete GitHub Runner CI Image
 
-This image is intended for GitHub Actions job containers running on ARC
-`kubernetes-novolume` runners.
+Use this image for GitHub Actions job containers on ARC `kubernetes-novolume` runners.
 
-It inherits from `ghcr.io/marinatedconcrete/devcontainer-base`, installs a small
-set of common shell/system tools plus Homebrew, and runs as `runner` with
-UID/GID `1001:1001` so job containers match the ownership of the ARC runner
-workspace. The default home directory is `/home/runner`, and it is writable by
-that user.
+The image uses `ghcr.io/marinatedconcrete/devcontainer-base` as its base.
+It includes standard shell tools, system tools, and Homebrew.
+The container runs as `runner` with UID/GID `1001:1001`.
+These IDs match the ownership of the ARC runner workspace.
+The `runner` user can write to its home directory, `/home/runner`.
 
-Language runtimes and domain-specific tools such as Node.js, Python, the GitHub
-CLI, Kubernetes tooling, and container-specific linters are intentionally left
-for downstream CI images or workflows to choose. Workflows can use `brew` to
-install additional packages at job runtime.
+Select language runtimes and tools for each CI image or workflow that uses this base image.
+Examples include Node.js, Python, the GitHub CLI, Kubernetes tools, and container linters.
+Workflows can use `brew` to install more packages when a job runs.
