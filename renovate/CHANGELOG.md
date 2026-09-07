@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.1](https://github.com/marinatedconcrete/config/compare/renovate-config-2.6.0...renovate-config-2.6.1) (2026-09-07)
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
 ## [2.6.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.5.0...renovate-config-2.6.0) (2026-08-29)
 
 
