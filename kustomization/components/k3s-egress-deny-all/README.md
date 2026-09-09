@@ -1,10 +1,10 @@
 # k3s-egress-deny-all
 
-Select all pods and allow no egress until another policy allows it.
+This component selects all pods. It permits no egress unless another policy permits that access.
 
 ## Usage
 
-Replace `{version}` with a published version. Set your namespace in the consuming Kustomization.
+Replace `{version}` with a published version. Set your namespace in the consumer Kustomization.
 
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -14,7 +14,7 @@ components:
   - https://github.com/marinatedconcrete/config/kustomization/components/k3s-egress-deny-all?ref=kustomize-k3s-egress-deny-all@v{version}
 ```
 
-Alternatively, use the release artifact under `resources`:
+You can also use the release artifact under `resources`:
 
 ```yaml
 resources:

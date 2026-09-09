@@ -1,10 +1,12 @@
 # k3s-egress-kubernetes-api
 
-Require a patch supplying API endpoints and ports. Unpatched, this selects all pods and allows no egress; it does not discover endpoints.
+This component requires a patch with API endpoints and ports.
+Without the patch, it selects all pods and permits no egress.
+It does not find endpoints automatically.
 
 ## Usage
 
-Replace `{version}` with a published version. Set your namespace in the consuming Kustomization.
+Replace `{version}` with a published version. Set your namespace in the consumer Kustomization.
 
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -14,7 +16,7 @@ components:
   - https://github.com/marinatedconcrete/config/kustomization/components/k3s-egress-kubernetes-api?ref=kustomize-k3s-egress-kubernetes-api@v{version}
 ```
 
-Alternatively, use the release artifact under `resources`:
+You can also use the release artifact under `resources`:
 
 ```yaml
 resources:

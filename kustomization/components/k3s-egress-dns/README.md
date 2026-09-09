@@ -1,10 +1,10 @@
 # k3s-egress-dns
 
-Allow kube-dns pods and the K3s DNS service IP on UDP/TCP 53.
+This component permits access to kube-dns pods and the K3s DNS service IP on UDP/TCP 53.
 
 ## Usage
 
-Replace `{version}` with a published version. Set your namespace in the consuming Kustomization.
+Replace `{version}` with a published version. Set your namespace in the consumer Kustomization.
 
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -14,7 +14,7 @@ components:
   - https://github.com/marinatedconcrete/config/kustomization/components/k3s-egress-dns?ref=kustomize-k3s-egress-dns@v{version}
 ```
 
-Alternatively, use the release artifact under `resources`:
+You can also use the release artifact under `resources`:
 
 ```yaml
 resources:

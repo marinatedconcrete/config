@@ -1,10 +1,10 @@
 # k3s-egress-pods-and-services
 
-Allow the configured pod and service CIDRs on all ports.
+This component permits access to the configured pod and service CIDRs on all ports.
 
 ## Usage
 
-Replace `{version}` with a published version. Set your namespace in the consuming Kustomization.
+Replace `{version}` with a published version. Set your namespace in the consumer Kustomization.
 
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -14,7 +14,7 @@ components:
   - https://github.com/marinatedconcrete/config/kustomization/components/k3s-egress-pods-and-services?ref=kustomize-k3s-egress-pods-and-services@v{version}
 ```
 
-Alternatively, use the release artifact under `resources`:
+You can also use the release artifact under `resources`:
 
 ```yaml
 resources:

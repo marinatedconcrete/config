@@ -1,6 +1,9 @@
 # K3s egress components
 
-These opt-in IPv4 NetworkPolicy components configure outbound access. They do not install an enforcement engine or configure ingress. Every component defaults to selecting all pods in the consuming namespace; set `namespace` in the consuming Kustomization.
+These IPv4 NetworkPolicy components control outbound access. You select the components that your workloads need.
+The components do not install a network policy controller or configure ingress.
+Each component selects all pods in the consumer namespace by default.
+Set `namespace` in the consumer Kustomization.
 
 | Component                      | Policy name                            | Allowed egress                               |
 | ------------------------------ | -------------------------------------- | -------------------------------------------- |
@@ -10,61 +13,124 @@ These opt-in IPv4 NetworkPolicy components configure outbound access. They do no
 | `k3s-egress-pods-and-services` | `pods-and-services-egress`             | Configured pod and service CIDRs, all ports  |
 | `k3s-egress-kubernetes-api`    | `allow-egress-kubernetes-api`          | None until patched with endpoints and ports  |
 
-NetworkPolicies are additive: a deny-all policy establishes isolation, but cannot veto access another policy allows. Adding any of these egress policies can isolate selected pods that previously had unrestricted access. Prefer one baseline and only the extensions a workload needs. DNS-only is independently usable; public-internet already includes DNS, so do not also include the DNS component in the same Kustomization.
+NetworkPolicies permit the combined access from all applicable policies.
+A deny-all policy cannot prevent access that another policy permits.
+An egress policy can isolate pods that previously had unrestricted access.
+Use one baseline policy. Add only the extension policies that the workload needs.
+You can use the DNS component separately. The public-internet component includes DNS.
+Do not add the DNS component separately when you use public-internet.
 
 ## Defaults and portability
 
-The [K3s defaults](https://docs.k3s.io/cli/server) are pod CIDR `10.42.0.0/16`, service CIDR `10.43.0.0/16`, and DNS service address `10.43.0.10`. Verify your actual `cluster-cidr`, `service-cidr`, and `cluster-dns` configuration. They are independent values; do not derive one from another. DNS also selects pods labeled `k8s-app: kube-dns` in `kube-system`.
+The [K3s defaults](https://docs.k3s.io/cli/server) are pod CIDR `10.42.0.0/16`, service CIDR `10.43.0.0/16`, and DNS service address `10.43.0.10`.
+Check your `cluster-cidr`, `service-cidr`, and `cluster-dns` configuration.
+These values are independent. Do not calculate one value from another value.
+The DNS policy also selects pods with the label `k8s-app: kube-dns` in `kube-system`.
 
-Public egress excludes all RFC1918 space: `10.0.0.0/8`, `172.16.0.0/12`, and `192.168.0.0/16`. This is an IPv4 complement of those ranges, not an exhaustive classification of globally reachable addresses. Add exclusions for pod/service CIDRs outside RFC1918 and any other locally routed ranges, including CGNAT (`100.64.0.0/10`) and link-local (`169.254.0.0/16`) where appropriate. A cluster using publicly numbered pod, service, node, or LAN addresses must exclude those explicitly.
+Public egress excludes these RFC1918 ranges: `10.0.0.0/8`, `172.16.0.0/12`, and `192.168.0.0/16`.
+Other IPv4 destinations remain accessible by default. Some of these destinations can have private routes in your network.
+Add exclusions for pod and service CIDRs outside RFC1918.
+Add exclusions for other ranges with local routes.
+These ranges can include CGNAT (`100.64.0.0/10`) and link-local (`169.254.0.0/16`) addresses.
+Also exclude public address ranges that your cluster uses for pods, services, nodes, or LANs.
 
-No component grants IPv6 egress. Dual-stack and IPv6-only configurations are outside this version's supported defaults; do not simply add `::/0`.
+No component permits IPv6 egress. This version does not support dual-stack or IPv6-only configurations.
+Do not add `::/0` without the necessary IPv6 rules and exclusions.
 
-The API component intentionally starts with `egress: []`. Patch in exact endpoint addresses and ports before using it. K3s node endpoints normally use TCP/6443; the Kubernetes service normally uses TCP/443. These may need separate rules to account for translation. Discover addresses from the cluster configuration and Kubernetes service EndpointSlices; they are not discovered by this component. Network reachability does not grant Kubernetes API authorization.
+The API component starts with `egress: []`.
+Before you use the component, add a patch with the exact endpoint addresses and ports.
+K3s node endpoints usually use TCP/6443. The Kubernetes service usually uses TCP/443.
+Address translation can require separate rules for these destinations.
+Get the addresses from your cluster configuration and Kubernetes service EndpointSlices.
+The component does not find the addresses automatically.
+Network access does not give Kubernetes API authorization.
 
 ## Complete customization example
 
-The [example Kustomization](examples/k3s-egress/kustomization.yml) and its [local wrapper component](examples/k3s-egress/cluster-network/kustomization.yml) are buildable directly from this checkout:
+The [example Kustomization](examples/k3s-egress/kustomization.yml) uses a [local wrapper component](examples/k3s-egress/cluster-network/kustomization.yml).
+Build the example from this repository:
 
 ```sh
 kustomize build kustomization/examples/k3s-egress
 ```
 
-The example demonstrates custom pod/service ranges (`172.20.0.0/16`, `172.21.0.0/16`), a DNS address (`172.21.0.53/32`) and selectors, multiple API endpoints, an optional API service rule, extra public exclusions, and a narrowly selected private HTTPS exception. Its documentation-only API addresses must be replaced before deployment. It deliberately includes all extensions to exercise composition; remove extensions your workload does not need.
+The example uses pod and service ranges `172.20.0.0/16` and `172.21.0.0/16`.
+It changes the DNS address to `172.21.0.53/32` and supplies DNS selectors.
+It includes API endpoints, an optional API service rule, additional public exclusions, and a private HTTPS exception.
+Replace the example API addresses before deployment.
+The example includes all extensions to test their combined result.
+Remove extensions that your workload does not need.
 
-Copy the wrapper into your own repository and replace its relative upstream references with pinned component URLs, using the pattern in each component README. Keep the wrapper relative reference in namespace consumers. That centralizes network patches without repeating them in every namespace.
+Copy the wrapper component into your repository.
+Replace its relative upstream references with component URLs that specify release tags.
+Use the URL format in each component README.
+Keep relative references to the wrapper component in namespace consumers.
+This wrapper component keeps common network patches in one location.
 
-Each patch targets a named NetworkPolicy and replaces the complete `/spec/egress` list. This removes old defaults instead of appending destinations or relying on numbered list entries. When replacing public egress, retain the RFC1918 exclusions. When replacing DNS egress, retain both UDP and TCP 53 and the desired pod/service paths. The DNS namespace and pod selectors belong to the same peer so both must match.
+Each patch selects a named NetworkPolicy. It replaces the complete `/spec/egress` list.
+This replacement removes the old defaults. It does not depend on positions in the destination list.
+Keep the RFC1918 exclusions when you replace the public egress rules.
+Keep UDP and TCP 53 when you replace the DNS rules.
+Keep the necessary DNS pod and service paths.
+The DNS namespace and pod selectors are in the same peer. Both selectors must match.
 
-The wrapper also demonstrates replacing `/spec/podSelector`. In the example, every policy selects `app: example`. Pods without that label are not isolated by these policies. In a namespace-wide baseline, leave `podSelector: {}` and narrow only extension policies to the pods that need them. The [private access policy](examples/k3s-egress/cluster-network/private-access.yml) grants one destination and port; add such explicit policies instead of removing private exclusions from the public baseline. Local device and subnet policies remain consumer-owned.
+The wrapper component also replaces `/spec/podSelector`.
+Every policy in the example selects `app: example`.
+These policies do not isolate pods without that label.
+For a namespace-wide baseline, keep `podSelector: {}`.
+Limit extension policies to the pods that need them.
+The [private access policy](examples/k3s-egress/cluster-network/private-access.yml) permits one destination and port.
+Add separate policies for private access. Keep the private exclusions in the public baseline.
+Keep local device and subnet policies in the consumer repository.
 
 ## Releases
 
-Each flat `k3s-egress-*` component is independently released with tags `kustomize-<component>@v<version>`. README examples show both remote component references and downloadable `kustomize-<component>.yml` artifacts. No namespace is embedded in those artifacts.
+Each `k3s-egress-*` component has independent releases with tags `kustomize-<component>@v<version>`.
+The README examples show remote component references and downloadable `kustomize-<component>.yml` artifacts.
+These artifacts do not specify a namespace.
 
-Public-internet composes `../k3s-egress-dns` from the same Git tree. Its tag therefore captures the DNS implementation at that commit, independent of the DNS component's own version. Whenever DNS behavior changes, include a corresponding conventional feature/fix commit affecting the public-internet component and release it too. Its changelog should explain the inherited DNS change. DNS-only consumers and public-internet consumers then update their respective pinned versions.
+Public-internet includes `../k3s-egress-dns` from the same Git tree.
+Its release tag identifies the DNS implementation at that commit.
+The separate DNS component version does not control this dependency.
+When DNS behavior changes, include a conventional feature or fix commit for the public-internet component.
+Make a new public-internet release with that change.
+Explain the DNS change in its changelog.
+Consumers of each component must update their release references to get the change.
 
 ## Validation and enforcement
 
-The five component test entrypoints render defaults and the complete custom wrapper, then assert exact rules, selectors, namespace assignment, and unique resource identities. They do not start Minikube or modify a cluster.
+The five component tests render the defaults and the complete wrapper component.
+The tests check exact rules, selectors, namespaces, and unique resource identities.
+They do not start Minikube or change a cluster.
 
 ```sh
 just kustomization-test k3s-egress-public-internet
 just release-please-build kustomize-k3s-egress-public-internet /tmp/public-internet.yml
 ```
 
-Run these through the repository devcontainer. Formatting and lint checks remain `just check-format` and `just lint`. Existing Minikube apply tests elsewhere in the repository provide schema/application checks, not evidence that egress is enforced.
+Run these commands through the repository devcontainer.
+Run `just check-format` to check formatting.
+Run `just lint` to run the lint checks.
+Other repository tests apply resources to Minikube to check their schema and application.
+Those tests do not show that the network enforces egress rules.
 
-[Kubernetes documents](https://kubernetes.io/docs/concepts/services-networking/network-policies/) that enforcement requires a supporting network implementation and that service address translation may happen before or after policy evaluation. Test DNS through the service address, direct pod/service destinations, API service and endpoints, and public/private destinations on the target K3s networking implementation. Host-networked workloads and node traffic have special limitations; do not treat these policies as host firewalls.
+[Kubernetes documentation](https://kubernetes.io/docs/concepts/services-networking/network-policies/) describes the required support from the network implementation.
+Service address translation can occur before or after policy evaluation.
+Test DNS access through the service address on your K3s network.
+Test direct pod and service destinations.
+Test the API service and its endpoints.
+Test public and private destinations.
+Host-networked workloads and node traffic have different restrictions.
+Do not use these policies as host firewalls.
 
 ## Follow-up ansible migration
 
-After upstream tags and artifacts are published:
+After upstream tags and artifacts are available, do these steps:
 
-1. Replace the local generic policy implementations with wrapper components pinned to published tags. Keep local component paths and existing policy names to minimize consumer changes. Configure actual pod/service CIDRs, DNS settings, and API endpoints in those wrappers.
-2. Retain management, family, IoT, camera, monitoring, and Traefik MQTT exceptions locally. Do not upstream their addresses or broaden private access during migration.
-3. Render every affected namespace before and after. Review expected tightening from the old selected exclusions to all RFC1918 ranges. If a required route is newly blocked, add a reviewed narrow extension rather than relaxing the baseline.
-4. Account for the new `dns-egress` resource. Where namespace assignment currently patches individual policy names (including Traefik, cert-manager, and monitoring consumers), ensure any new DNS policy receives the intended namespace. Update DNS-specific patches to target `dns-egress`.
-5. Before broader adoption, validate one representative namespace on K3s: DNS over UDP and TCP, public connectivity, required private routes, blocked unapproved private routes, and required API service/endpoint connectivity. Inspect the union of policies, not just the baseline. Roll back the wrapper reference if required traffic fails, then investigate the missing path.
+1. Replace local generic policies with wrapper components that specify published release tags. Keep local component paths and existing policy names. Configure the actual pod and service CIDRs in those wrapper components. Configure their DNS settings and API endpoints.
+2. Keep management, family, IoT, camera, monitoring, and Traefik MQTT exceptions in the local repository. Do not put their addresses in upstream components. Do not increase private access during migration.
+3. Render each affected namespace before and after the change. Check the effect of exclusions for all RFC1918 ranges. If an exclusion blocks a necessary route, add an extension policy for that route. Keep the baseline exclusions.
+4. Check the namespace of the new `dns-egress` resource. Some consumers assign namespaces through patches that select individual policy names. These consumers include Traefik, cert-manager, and monitoring. Add a namespace patch for the DNS policy where necessary. Change DNS rule patches to select `dns-egress`.
+5. Test one representative namespace on K3s before you change more namespaces. Test DNS access over UDP and TCP. Test public access and the necessary private routes. Make sure that the policies block other private routes. Test the necessary API service and endpoint connections. Examine all applicable policies together. If necessary traffic fails, restore the previous wrapper reference. Then examine the failed network path.
 
 This upstream change does not migrate ansible consumers or apply policies to the live cluster.
