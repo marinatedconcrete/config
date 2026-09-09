@@ -70,24 +70,24 @@
       "package-name": "kustomize-factorio",
       "release-type": "simple"
     },
-    "kustomization/components/k3s-deny-all-egress": {
-      "package-name": "kustomize-k3s-deny-all-egress",
+    "kustomization/components/k3s-egress-deny-all": {
+      "package-name": "kustomize-k3s-egress-deny-all",
       "release-type": "simple"
     },
-    "kustomization/components/k3s-dns-egress": {
-      "package-name": "kustomize-k3s-dns-egress",
+    "kustomization/components/k3s-egress-dns": {
+      "package-name": "kustomize-k3s-egress-dns",
       "release-type": "simple"
     },
-    "kustomization/components/k3s-kubernetes-api-egress": {
-      "package-name": "kustomize-k3s-kubernetes-api-egress",
+    "kustomization/components/k3s-egress-kubernetes-api": {
+      "package-name": "kustomize-k3s-egress-kubernetes-api",
       "release-type": "simple"
     },
-    "kustomization/components/k3s-pods-and-services-egress": {
-      "package-name": "kustomize-k3s-pods-and-services-egress",
+    "kustomization/components/k3s-egress-pods-and-services": {
+      "package-name": "kustomize-k3s-egress-pods-and-services",
       "release-type": "simple"
     },
-    "kustomization/components/k3s-public-internet-egress": {
-      "package-name": "kustomize-k3s-public-internet-egress",
+    "kustomization/components/k3s-egress-public-internet": {
+      "package-name": "kustomize-k3s-egress-public-internet",
       "release-type": "simple"
     },
     "kustomization/components/kube-vip": {

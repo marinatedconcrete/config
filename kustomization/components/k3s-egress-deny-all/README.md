@@ -1,6 +1,6 @@
-# k3s-dns-egress
+# k3s-egress-deny-all
 
-Allow kube-dns pods and the K3s DNS service IP on UDP/TCP 53.
+Select all pods and allow no egress until another policy allows it.
 
 ## Usage
 
@@ -11,14 +11,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: example
 components:
-  - https://github.com/marinatedconcrete/config/kustomization/components/k3s-dns-egress?ref=kustomize-k3s-dns-egress@v{version}
+  - https://github.com/marinatedconcrete/config/kustomization/components/k3s-egress-deny-all?ref=kustomize-k3s-egress-deny-all@v{version}
 ```
 
 Alternatively, use the release artifact under `resources`:
 
 ```yaml
 resources:
-  - https://github.com/marinatedconcrete/config/releases/download/kustomize-k3s-dns-egress@v{version}/kustomize-k3s-dns-egress.yml
+  - https://github.com/marinatedconcrete/config/releases/download/kustomize-k3s-egress-deny-all@v{version}/kustomize-k3s-egress-deny-all.yml
 ```
 
 See the [network policy guide](../../k3s-network-policies.md) for defaults, complete patch examples, limitations, testing, and migration.

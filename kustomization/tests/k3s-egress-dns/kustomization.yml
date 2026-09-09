@@ -2,5 +2,5 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 components:
-  - ../../components/k3s-deny-all-egress
+  - ../../components/k3s-egress-dns
 namespace: egress-test

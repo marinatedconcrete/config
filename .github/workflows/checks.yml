@@ -98,11 +98,11 @@ jobs:
       matrix:
         kustomization-test:
           - factorio
-          - k3s-deny-all-egress
-          - k3s-dns-egress
-          - k3s-public-internet-egress
-          - k3s-pods-and-services-egress
-          - k3s-kubernetes-api-egress
+          - k3s-egress-deny-all
+          - k3s-egress-dns
+          - k3s-egress-public-internet
+          - k3s-egress-pods-and-services
+          - k3s-egress-kubernetes-api
           - kube-vip
           - mosquitto
           - paperless

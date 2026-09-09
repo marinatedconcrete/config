@@ -1,6 +1,6 @@
-# k3s-deny-all-egress
+# k3s-egress-pods-and-services
 
-Select all pods and allow no egress until another policy allows it.
+Allow the configured pod and service CIDRs on all ports.
 
 ## Usage
 
@@ -11,14 +11,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: example
 components:
-  - https://github.com/marinatedconcrete/config/kustomization/components/k3s-deny-all-egress?ref=kustomize-k3s-deny-all-egress@v{version}
+  - https://github.com/marinatedconcrete/config/kustomization/components/k3s-egress-pods-and-services?ref=kustomize-k3s-egress-pods-and-services@v{version}
 ```
 
 Alternatively, use the release artifact under `resources`:
 
 ```yaml
 resources:
-  - https://github.com/marinatedconcrete/config/releases/download/kustomize-k3s-deny-all-egress@v{version}/kustomize-k3s-deny-all-egress.yml
+  - https://github.com/marinatedconcrete/config/releases/download/kustomize-k3s-egress-pods-and-services@v{version}/kustomize-k3s-egress-pods-and-services.yml
 ```
 
 See the [network policy guide](../../k3s-network-policies.md) for defaults, complete patch examples, limitations, testing, and migration.

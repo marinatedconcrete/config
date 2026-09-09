@@ -1,11 +1,11 @@
 ---
-- name: Validate k3s-kubernetes-api-egress rendering
+- name: Validate k3s-egress-deny-all rendering
   hosts: localhost
   connection: local
   gather_facts: false
   vars:
     expected_egress:
-      allow-egress-kubernetes-api: []
+      deny-all-egress: []
   tasks:
     - name: Check default render
       ansible.builtin.include_tasks: ../k3s-egress-assertions.yml

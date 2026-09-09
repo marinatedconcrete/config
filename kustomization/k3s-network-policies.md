@@ -4,11 +4,11 @@ These opt-in IPv4 NetworkPolicy components configure outbound access. They do no
 
 | Component                      | Policy name                            | Allowed egress                               |
 | ------------------------------ | -------------------------------------- | -------------------------------------------- |
-| `k3s-deny-all-egress`          | `deny-all-egress`                      | None                                         |
-| `k3s-dns-egress`               | `dns-egress`                           | kube-dns pods and DNS service IP, UDP/TCP 53 |
-| `k3s-public-internet-egress`   | `public-internet-egress`, `dns-egress` | DNS and IPv4 destinations outside RFC1918    |
-| `k3s-pods-and-services-egress` | `pods-and-services-egress`             | Configured pod and service CIDRs, all ports  |
-| `k3s-kubernetes-api-egress`    | `allow-egress-kubernetes-api`          | None until patched with endpoints and ports  |
+| `k3s-egress-deny-all`          | `deny-all-egress`                      | None                                         |
+| `k3s-egress-dns`               | `dns-egress`                           | kube-dns pods and DNS service IP, UDP/TCP 53 |
+| `k3s-egress-public-internet`   | `public-internet-egress`, `dns-egress` | DNS and IPv4 destinations outside RFC1918    |
+| `k3s-egress-pods-and-services` | `pods-and-services-egress`             | Configured pod and service CIDRs, all ports  |
+| `k3s-egress-kubernetes-api`    | `allow-egress-kubernetes-api`          | None until patched with endpoints and ports  |
 
 NetworkPolicies are additive: a deny-all policy establishes isolation, but cannot veto access another policy allows. Adding any of these egress policies can isolate selected pods that previously had unrestricted access. Prefer one baseline and only the extensions a workload needs. DNS-only is independently usable; public-internet already includes DNS, so do not also include the DNS component in the same Kustomization.
 
@@ -40,17 +40,17 @@ The wrapper also demonstrates replacing `/spec/podSelector`. In the example, eve
 
 ## Releases
 
-Each flat `k3s-*` component is independently released with tags `kustomize-<component>@v<version>`. README examples show both remote component references and downloadable `kustomize-<component>.yml` artifacts. No namespace is embedded in those artifacts.
+Each flat `k3s-egress-*` component is independently released with tags `kustomize-<component>@v<version>`. README examples show both remote component references and downloadable `kustomize-<component>.yml` artifacts. No namespace is embedded in those artifacts.
 
-Public-internet composes `../k3s-dns-egress` from the same Git tree. Its tag therefore captures the DNS implementation at that commit, independent of the DNS component's own version. Whenever DNS behavior changes, include a corresponding conventional feature/fix commit affecting the public-internet component and release it too. Its changelog should explain the inherited DNS change. DNS-only consumers and public-internet consumers then update their respective pinned versions.
+Public-internet composes `../k3s-egress-dns` from the same Git tree. Its tag therefore captures the DNS implementation at that commit, independent of the DNS component's own version. Whenever DNS behavior changes, include a corresponding conventional feature/fix commit affecting the public-internet component and release it too. Its changelog should explain the inherited DNS change. DNS-only consumers and public-internet consumers then update their respective pinned versions.
 
 ## Validation and enforcement
 
 The five component test entrypoints render defaults and the complete custom wrapper, then assert exact rules, selectors, namespace assignment, and unique resource identities. They do not start Minikube or modify a cluster.
 
 ```sh
-just kustomization-test k3s-public-internet-egress
-just release-please-build kustomize-k3s-public-internet-egress /tmp/public-internet.yml
+just kustomization-test k3s-egress-public-internet
+just release-please-build kustomize-k3s-egress-public-internet /tmp/public-internet.yml
 ```
 
 Run these through the repository devcontainer. Formatting and lint checks remain `just check-format` and `just lint`. Existing Minikube apply tests elsewhere in the repository provide schema/application checks, not evidence that egress is enforced.

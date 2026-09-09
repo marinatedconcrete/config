@@ -1,5 +1,5 @@
 ---
-- name: Validate k3s-pods-and-services-egress rendering
+- name: Validate k3s-egress-pods-and-services rendering
   hosts: localhost
   connection: local
   gather_facts: false

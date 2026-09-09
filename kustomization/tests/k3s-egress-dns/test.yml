@@ -1,5 +1,5 @@
 ---
-- name: Validate k3s-dns-egress rendering
+- name: Validate k3s-egress-dns rendering
   hosts: localhost
   connection: local
   gather_facts: false
