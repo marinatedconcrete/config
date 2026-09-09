@@ -1,0 +1,13 @@
+---
+- name: Validate k3s-deny-all-egress rendering
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    expected_egress:
+      deny-all-egress: []
+  tasks:
+    - name: Check default render
+      ansible.builtin.include_tasks: ../k3s-egress-assertions.yml
+    - name: Check documented custom networking example
+      ansible.builtin.include_tasks: ../k3s-egress-custom.yml

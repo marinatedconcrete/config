@@ -1,0 +1,66 @@
+---
+- name: Verify example replaces complete lists and scopes every policy
+  ansible.builtin.include_tasks: k3s-egress-assertions.yml
+  vars:
+    render_dir: "{{ playbook_dir }}/../../examples/k3s-egress"
+    expected_namespace: egress-example
+    expected_selector:
+      matchLabels:
+        app: example
+    expected_egress:
+      deny-all-egress: []
+      dns-egress:
+        - to:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: dns-system
+              podSelector:
+                matchLabels:
+                  app: cluster-dns
+            - ipBlock:
+                cidr: 172.21.0.53/32
+          ports:
+            - protocol: UDP
+              port: 53
+            - protocol: TCP
+              port: 53
+      public-internet-egress:
+        - to:
+            - ipBlock:
+                cidr: 0.0.0.0/0
+                except:
+                  - 10.0.0.0/8
+                  - 172.16.0.0/12
+                  - 192.168.0.0/16
+                  - 100.64.0.0/10
+                  - 169.254.0.0/16
+                  - 198.18.0.0/15
+                  - 192.0.2.0/24
+      pods-and-services-egress:
+        - to:
+            - ipBlock:
+                cidr: 172.20.0.0/16
+            - ipBlock:
+                cidr: 172.21.0.0/16
+      allow-egress-kubernetes-api:
+        - to:
+            - ipBlock:
+                cidr: 192.0.2.10/32
+            - ipBlock:
+                cidr: 192.0.2.11/32
+          ports:
+            - protocol: TCP
+              port: 6443
+        - to:
+            - ipBlock:
+                cidr: 172.21.0.1/32
+          ports:
+            - protocol: TCP
+              port: 443
+      example-private-egress:
+        - to:
+            - ipBlock:
+                cidr: 172.22.0.50/32
+          ports:
+            - protocol: TCP
+              port: 443

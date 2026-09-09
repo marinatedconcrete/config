@@ -37,9 +37,7 @@
           "type": "yaml"
         }
       ],
-      "exclude-paths": [
-        "ansible/requirements.txt"
-      ],
+      "exclude-paths": ["ansible/requirements.txt"],
       "package-name": "ansible-collection",
       "release-type": "simple"
     },
@@ -70,6 +68,26 @@
     },
     "kustomization/components/factorio": {
       "package-name": "kustomize-factorio",
+      "release-type": "simple"
+    },
+    "kustomization/components/k3s-deny-all-egress": {
+      "package-name": "kustomize-k3s-deny-all-egress",
+      "release-type": "simple"
+    },
+    "kustomization/components/k3s-dns-egress": {
+      "package-name": "kustomize-k3s-dns-egress",
+      "release-type": "simple"
+    },
+    "kustomization/components/k3s-kubernetes-api-egress": {
+      "package-name": "kustomize-k3s-kubernetes-api-egress",
+      "release-type": "simple"
+    },
+    "kustomization/components/k3s-pods-and-services-egress": {
+      "package-name": "kustomize-k3s-pods-and-services-egress",
+      "release-type": "simple"
+    },
+    "kustomization/components/k3s-public-internet-egress": {
+      "package-name": "kustomize-k3s-public-internet-egress",
       "release-type": "simple"
     },
     "kustomization/components/kube-vip": {

@@ -10,5 +10,10 @@
   "kustomization/components/priorityclass": "1.0.3",
   "kustomization/components/unifi-network-application": "1.2.0",
   "renovate": "2.6.0",
-  "images/buildah-action-runner": "1.0.1"
+  "images/buildah-action-runner": "1.0.1",
+  "kustomization/components/k3s-deny-all-egress": "0.0.0",
+  "kustomization/components/k3s-dns-egress": "0.0.0",
+  "kustomization/components/k3s-kubernetes-api-egress": "0.0.0",
+  "kustomization/components/k3s-pods-and-services-egress": "0.0.0",
+  "kustomization/components/k3s-public-internet-egress": "0.0.0"
 }
