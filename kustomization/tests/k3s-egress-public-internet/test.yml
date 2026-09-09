@@ -1,0 +1,35 @@
+---
+- name: Validate k3s-egress-public-internet rendering
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    expected_egress:
+      public-internet-egress:
+        - to:
+            - ipBlock:
+                cidr: 0.0.0.0/0
+                except:
+                  - 10.0.0.0/8
+                  - 172.16.0.0/12
+                  - 192.168.0.0/16
+      dns-egress:
+        - to:
+            - namespaceSelector:
+                matchLabels:
+                  kubernetes.io/metadata.name: kube-system
+              podSelector:
+                matchLabels:
+                  k8s-app: kube-dns
+            - ipBlock:
+                cidr: 10.43.0.10/32
+          ports:
+            - protocol: UDP
+              port: 53
+            - protocol: TCP
+              port: 53
+  tasks:
+    - name: Check default render
+      ansible.builtin.include_tasks: ../k3s-egress-assertions.yml
+    - name: Check documented custom networking example
+      ansible.builtin.include_tasks: ../k3s-egress-custom.yml
