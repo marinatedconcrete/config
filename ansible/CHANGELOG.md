@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.4.7...ansible-collection@v1.5.0) (2026-09-13)
+
+
+### Features
+
+* **package:** Update dependency kubernetes/kubernetes to v1.37.0 ([#890](https://github.com/marinatedconcrete/config/issues/890)) ([fe756cf](https://github.com/marinatedconcrete/config/commit/fe756cf9b9d17ddd3616da8bd28b091e5f2fe127))
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
 ## [1.4.7](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.4.6...ansible-collection@v1.4.7) (2026-08-28)
 
 
