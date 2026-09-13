@@ -172,3 +172,18 @@ jobs:
           CANDIDATE: ${{ inputs.candidate }}
           IMAGE_DIGEST: ${{ needs.kairos-fedora.outputs.digest || needs.buildah-action-runner.outputs.digest || needs.github-runner-ci.outputs.digest || needs.vscode-ssh-server.outputs.digest }}
         run: node .github/release/publish-cli.mjs
+      # The kairos-fedora job made these files. This job runs no code from the
+      # image. Run this job again to add notes that a failed step did not add.
+      - name: Download Image Release Notes
+        if: fromJson(inputs.candidate).project == 'kairos-fedora'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: kairos-fedora-release-notes-${{ fromJson(inputs.candidate).version }}
+          path: build/release
+      - name: Publish Image Release Notes
+        if: fromJson(inputs.candidate).project == 'kairos-fedora'
+        uses: ./actions/image-release-notes/publish
+        with:
+          component: kairos-fedora
+          tag: ${{ fromJson(inputs.candidate).tag }}
+          token: ${{ steps.app-token.outputs.token }}

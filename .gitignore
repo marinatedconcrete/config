@@ -5,5 +5,5 @@ ansible/.ansible
 node_modules/
 .pnpm-store/
 
-# Kairos Factory writes local build output to /build.
+# The local builds write output to /build.
 /build

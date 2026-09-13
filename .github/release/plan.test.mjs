@@ -274,3 +274,55 @@ test("no pending releases produces an empty successful plan", async () => {
     { candidates: [], errors: [] },
   );
 });
+
+test("an action releases as a source package with its package name", async () => {
+  const actionPath = "actions/image-release-notes";
+  const pr = {
+    number: 894,
+    sha,
+    headBranchName:
+      "release-please--branches--main--components--image-release-notes",
+    baseBranchName: "main",
+    title: "chore(main): release image-release-notes 0.1.0",
+    body: ":robot: I have created a release *beep* *boop*\n---\n\n## 0.1.0 (2026-11-02)\n\n### Features\n\n* Add the action.\n\n---\nThis PR was generated with [Release Please](https://github.com/googleapis/release-please).",
+    labels: ["autorelease: pending"],
+    files: [],
+  };
+  const github = {
+    repository: { owner: "example", repo: "config" },
+    async *pullRequestIterator() {
+      yield pr;
+    },
+  };
+  const manifest = new Manifest(
+    github,
+    "main",
+    {
+      [actionPath]: {
+        releaseType: "simple",
+        packageName: "image-release-notes",
+        includeComponentInTag: true,
+        includeVInTag: false,
+        tagSeparator: "-",
+      },
+    },
+    {},
+  );
+  const api = async (endpoint) =>
+    endpoint.startsWith("pulls/")
+      ? {
+          number: 894,
+          merged: true,
+          base: { ref: "main" },
+          merge_commit_sha: sha,
+        }
+      : {
+          content: Buffer.from(
+            JSON.stringify({ [actionPath]: "0.1.0" }),
+          ).toString("base64"),
+        };
+  const [release] = await planReleases({ github, api, manifest });
+  assert.equal(release.project, "image-release-notes");
+  assert.equal(release.kind, "source");
+  assert.equal(release.tag, "image-release-notes-0.1.0");
+});

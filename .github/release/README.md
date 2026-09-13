@@ -28,7 +28,7 @@ GitHub and GHCR do not support one transaction for all publication operations.
 | Buildah Action Runner | Image build and smoke test | Tested image digest in GHCR |
 | GitHub Runner CI | Image build, smoke test, and Actions job-container test | Tested image digest in GHCR |
 | VSCode SSH Server | Image build and smoke test | Tested image digest in GHCR |
-| Ansible and Renovate | Format, lint, and component tests | Git tag and GitHub release |
+| Ansible, Renovate, and actions | Format, lint, and component tests | Git tag and GitHub release |
 
 Patch-only components must pass their tests.
 They do not upload an empty manifest.
@@ -38,6 +38,12 @@ This tag is not a release version.
 The publisher assigns the release version to the tested digest without a rebuild.
 PR and branch image checks keep their existing publication rules.
 Image tag pushes do not start another build.
+
+The Kairos Fedora build also generates image release notes and an SBOM.
+After publication, the publisher adds them to the release.
+They are not part of the validation record.
+If this step fails, run the failed publish job again.
+A new recovery run finds the published release and does not add the notes.
 
 ## Concurrency
 
