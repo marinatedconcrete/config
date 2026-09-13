@@ -1,0 +1,102 @@
+---
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+components:
+  - ../../../components/k3s-egress-deny-all
+  - ../../../components/k3s-egress-public-internet
+  - ../../../components/k3s-egress-pods-and-services
+  - ../../../components/k3s-egress-kubernetes-api
+patches:
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: NetworkPolicy
+      name: dns-egress
+    patch: |
+      - op: replace
+        path: /spec/egress
+        value:
+        - to:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: dns-system
+            podSelector:
+              matchLabels:
+                app: cluster-dns
+          - ipBlock:
+              cidr: 172.21.0.53/32
+          ports:
+          - protocol: UDP
+            port: 53
+          - protocol: TCP
+            port: 53
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: NetworkPolicy
+      name: public-internet-egress
+    patch: |
+      - op: replace
+        path: /spec/egress
+        value:
+        - to:
+          - ipBlock:
+              cidr: 0.0.0.0/0
+              except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 100.64.0.0/10
+              - 169.254.0.0/16
+              - 198.18.0.0/15
+              - 192.0.2.0/24
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: NetworkPolicy
+      name: pods-and-services-egress
+    patch: |
+      - op: replace
+        path: /spec/egress
+        value:
+        - to:
+          - ipBlock:
+              cidr: 172.20.0.0/16
+          - ipBlock:
+              cidr: 172.21.0.0/16
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: NetworkPolicy
+      name: allow-egress-kubernetes-api
+    patch: |
+      - op: replace
+        path: /spec/egress
+        value:
+        - to:
+          - ipBlock:
+              cidr: 192.0.2.10/32
+          - ipBlock:
+              cidr: 192.0.2.11/32
+          ports:
+          - protocol: TCP
+            port: 6443
+        - to:
+          - ipBlock:
+              cidr: 172.21.0.1/32
+          ports:
+          - protocol: TCP
+            port: 443
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: NetworkPolicy
+      name: .*
+    patch: |
+      - op: replace
+        path: /spec/podSelector
+        value:
+          matchLabels:
+            app: example
+resources:
+  - private-access.yml

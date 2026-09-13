@@ -1,0 +1,42 @@
+---
+- name: Render policies
+  ansible.builtin.command:
+    argv:
+      - kustomize
+      - build
+      - "{{ render_dir | default(playbook_dir) }}"
+  register: rendered
+  changed_when: false
+- name: Parse policies
+  ansible.builtin.set_fact:
+    policies: "{{ rendered.stdout | from_yaml_all | list }}"
+- name: Check resource count and unique identities
+  ansible.builtin.assert:
+    that:
+      - policies | length == expected_egress | length
+      - policies | map(attribute="metadata.name") | unique | length == policies | length
+    quiet: true
+- name: Check each policy contract
+  ansible.builtin.assert:
+    that:
+      - item.apiVersion == "networking.k8s.io/v1"
+      - item.kind == "NetworkPolicy"
+      - item.metadata.namespace == expected_namespace | default("egress-test")
+      - item.spec.policyTypes == ["Egress"]
+      - '"ingress" not in item.spec'
+      - item.spec.podSelector == expected_selector | default({})
+      - item.spec.egress == expected_egress[item.metadata.name]
+    quiet: true
+  loop: "{{ policies }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+- name: Reject accidental home-network addresses
+  ansible.builtin.assert:
+    that:
+      - '"10.97.75." not in rendered.stdout'
+      - '"192.168.4." not in rendered.stdout'
+      - '"192.168.7." not in rendered.stdout'
+      - '"192.168.8." not in rendered.stdout'
+      - '"192.168.9." not in rendered.stdout'
+      - '"::/0" not in rendered.stdout'
+    quiet: true
