@@ -173,6 +173,14 @@
   "customManagers": [
     {
       "customType": "regex",
+      "description": "Update the tool images that the shell scripts run",
+      "managerFilePatterns": ["/^images/.*\\.sh$/"],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\n[A-Z_]+_IMAGE=\"\\$\\{[A-Z_]+:-[^:\"@]+:(?<currentValue>[^@:\"}]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?\\}\""
+      ]
+    },
+    {
+      "customType": "regex",
       "managerFilePatterns": [
         "/^.*(Container|Docker)file$/",
         "/^\\.devcontainer/build_files/.*\\.sh$/",

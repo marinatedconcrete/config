@@ -44,7 +44,7 @@ E2E_WEBUI_PORT="${E2E_WEBUI_PORT:-18080}"
 E2E_SSH_PORT="${E2E_SSH_PORT:-10022}"
 KAIROS_E2E_VERSION="${KAIROS_E2E_VERSION:-0.0.0-e2e}"
 # renovate: datasource=docker depName=quay.io/kairos/auroraboot
-AURORABOOT_IMAGE="${AURORABOOT_IMAGE:-quay.io/kairos/auroraboot:v0.20.1}"
+AURORABOOT_IMAGE="${AURORABOOT_IMAGE:-quay.io/kairos/auroraboot:v0.20.1@sha256:780e9884a1ac6dc41d03c48e010a2a3d2cb2d2bcd197215b420618dbdd4fca63}"
 
 logs_dir="${E2E_WORKDIR}/logs"
 guest_hostname="kairos-fedora-e2e"
