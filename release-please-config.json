@@ -29,6 +29,12 @@
   "include-component-in-tag": true,
   "include-v-in-tag": true,
   "packages": {
+    "actions/image-release-notes": {
+      "include-v-in-tag": false,
+      "package-name": "image-release-notes",
+      "release-type": "simple",
+      "tag-separator": "-"
+    },
     "ansible": {
       "extra-files": [
         {
