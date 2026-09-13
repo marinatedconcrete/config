@@ -47,6 +47,7 @@ KAIROS_E2E_VERSION="${KAIROS_E2E_VERSION:-0.0.0-e2e}"
 AURORABOOT_IMAGE="${AURORABOOT_IMAGE:-quay.io/kairos/auroraboot:v0.20.1}"
 
 logs_dir="${E2E_WORKDIR}/logs"
+guest_hostname="kairos-fedora-e2e"
 disk_path="${E2E_WORKDIR}/kairos-fedora.qcow2"
 ssh_key="${E2E_WORKDIR}/id_ed25519"
 cloud_config="${E2E_WORKDIR}/install-cloud-config.yaml"
@@ -142,7 +143,7 @@ generate_cloud_config() {
     public_key="$(<"${ssh_key}.pub")"
     cat >"$cloud_config" <<EOF
 #cloud-config
-hostname: kairos-fedora-e2e
+hostname: ${guest_hostname}
 users:
   - name: kairos
     groups:
@@ -296,6 +297,7 @@ ssh_cmd() {
         -p "$E2E_SSH_PORT" \
         -o BatchMode=yes \
         -o ConnectTimeout=5 \
+        -o IdentitiesOnly=yes \
         -o LogLevel=ERROR \
         -o ServerAliveCountMax=1 \
         -o ServerAliveInterval=5 \
@@ -398,6 +400,10 @@ run_guest_checks() {
     ssh_cmd 'sudo -n systemctl is-active --quiet sshd.service'
     ssh_cmd 'sudo -n systemctl is-enabled sshd.socket | grep -qx masked'
     ssh_cmd '! sudo -n systemctl is-active --quiet sshd.socket'
+
+    log "Checking the hostname command"
+    ssh_cmd 'command -v hostname >/dev/null'
+    ssh_cmd "test \"\$(hostname)\" = '${guest_hostname}'"
 
     log "Checking Kairos active boot state"
     ssh_cmd 'kairos-agent state get boot | tee /tmp/kairos-boot-state.txt && grep -q active_boot /tmp/kairos-boot-state.txt'
