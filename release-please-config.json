@@ -37,9 +37,7 @@
           "type": "yaml"
         }
       ],
-      "exclude-paths": [
-        "ansible/requirements.txt"
-      ],
+      "exclude-paths": ["ansible/requirements.txt"],
       "package-name": "ansible-collection",
       "release-type": "simple"
     },
@@ -97,6 +95,31 @@
       "package-name": "renovate-config",
       "release-type": "simple",
       "tag-separator": "-"
+    },
+    "kustomization/components/pod-security-audit-warn-baseline": {
+      "package-name": "kustomize-pod-security-audit-warn-baseline",
+      "release-type": "simple",
+      "initial-version": "1.0.0"
+    },
+    "kustomization/components/pod-security-audit-warn-restricted": {
+      "package-name": "kustomize-pod-security-audit-warn-restricted",
+      "release-type": "simple",
+      "initial-version": "1.0.0"
+    },
+    "kustomization/components/pod-security-enforce-baseline": {
+      "package-name": "kustomize-pod-security-enforce-baseline",
+      "release-type": "simple",
+      "initial-version": "1.0.0"
+    },
+    "kustomization/components/pod-security-enforce-restricted": {
+      "package-name": "kustomize-pod-security-enforce-restricted",
+      "release-type": "simple",
+      "initial-version": "1.0.0"
+    },
+    "kustomization/components/pod-security-enforce-privileged": {
+      "package-name": "kustomize-pod-security-enforce-privileged",
+      "release-type": "simple",
+      "initial-version": "1.0.0"
     }
   },
   "separate-pull-requests": true,

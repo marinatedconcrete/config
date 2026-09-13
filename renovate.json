@@ -203,6 +203,16 @@
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\n\\s+?[A-Z_]+_VERSION=(?<currentValue>[^@\\n]+)\\n\\s+?[A-Z_]+_DIGEST=(?<currentDigest>sha256:[a-f0-9]{64})\\n"
       ]
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^kustomization/components/pod-security-enforce-(baseline|restricted)/namespace-labels\\.yml$/"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:(?:\\s*datasource=(?<datasource>(\\w|-)+))(?:\\s*depName=(?<depName>(\\w|-|\\/|\\.)+))(?:\\s*extractVersion=(?<extractVersion>.+?))\\n\\s+pod-security\\.kubernetes\\.io/enforce-version:\\s+(?<currentValue>v\\d+\\.\\d+)"
+      ],
+      "versioningTemplate": "semver-coerced"
     }
   ]
 }
