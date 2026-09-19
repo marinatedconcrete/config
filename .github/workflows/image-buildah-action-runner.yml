@@ -8,18 +8,30 @@ on: # yamllint disable-line rule:truthy
     paths:
       - .github/workflows/image-buildah-action-runner.yml
       - images/buildah-action-runner/**
-    tags:
-      - buildah-action-runner-*
   pull_request:
     branches:
       - main
     paths:
       - .github/workflows/image-buildah-action-runner.yml
       - images/buildah-action-runner/**
+  workflow_call:
+    inputs:
+      sha:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+    outputs:
+      digest:
+        value: ${{ jobs.build-buildah-action-runner.outputs.digest }}
+
 
 jobs:
   build-buildah-action-runner:
     name: Build Buildah Action Runner Image
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,6 +40,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.sha || github.sha }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
@@ -36,7 +50,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Compute Version Tag
         env:
-          BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('pr-{0}.{1}.{2}.{3}', github.event.number, github.run_id, github.run_number, github.run_attempt) }}
+          BRANCH: ${{ inputs.sha && format('candidate-{0}-{1}-{2}', inputs.sha, github.run_id, github.run_attempt) || github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('pr-{0}.{1}.{2}.{3}', github.event.number, github.run_id, github.run_number, github.run_attempt) }}
         id: version_tag
         run: echo "tag=$BRANCH" | sed -e 's/buildah-action-runner-//' >> "$GITHUB_OUTPUT"
       - name: Select Image Export Mode
@@ -64,13 +78,16 @@ jobs:
         with:
           context: images/buildah-action-runner
           file: images/buildah-action-runner/Containerfile
-          labels: ${{ steps.metadata.outputs.labels }}
+          labels: |
+            ${{ steps.metadata.outputs.labels }}
+            org.opencontainers.image.revision=${{ inputs.sha || github.sha }}
           load: ${{ steps.image_export.outputs.load }}
           push: ${{ steps.image_export.outputs.push }}
           tags: ghcr.io/${{ github.repository_owner }}/buildah-action-runner:${{ steps.version_tag.outputs.tag }}
       - name: Smoke Test Image
         run: |
           docker run --rm ghcr.io/${{ github.repository_owner }}/buildah-action-runner:${{ steps.version_tag.outputs.tag }} bash -lc '
+            set -e
             buildah --version
             curl --version
             jq --version
