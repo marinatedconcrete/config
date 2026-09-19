@@ -81,6 +81,7 @@ jobs:
           labels: |
             ${{ steps.metadata.outputs.labels }}
             org.opencontainers.image.revision=${{ inputs.sha || github.sha }}
+            org.opencontainers.image.version=${{ inputs.version || steps.metadata.outputs.version }}
           load: ${{ steps.image_export.outputs.load }}
           push: ${{ steps.image_export.outputs.push }}
           tags: ghcr.io/${{ github.repository_owner }}/buildah-action-runner:${{ steps.version_tag.outputs.tag }}

@@ -67,6 +67,7 @@ jobs:
           labels: |
             ${{ steps.metadata.outputs.labels }}
             org.opencontainers.image.revision=${{ inputs.sha || github.sha }}
+            org.opencontainers.image.version=${{ inputs.version || steps.metadata.outputs.version }}
           push: ${{ inputs.sha != '' }}
           load: ${{ inputs.sha == '' }}
           tags: ghcr.io/${{ github.repository_owner }}/vscode-ssh-server:${{ steps.version_tag.outputs.tag }}
