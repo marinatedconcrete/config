@@ -60,5 +60,8 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
           runCmd: |
+            set -euo pipefail
             just release-please-build ${{ matrix.component.project }} /tmp/${{ matrix.component.project }}.yml
-            gh release upload ${{ matrix.component.tag }} /tmp/${{ matrix.component.project }}.yml
+            if [ -s /tmp/${{ matrix.component.project }}.yml ]; then
+              gh release upload ${{ matrix.component.tag }} /tmp/${{ matrix.component.project }}.yml
+            fi
