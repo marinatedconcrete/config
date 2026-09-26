@@ -8,14 +8,24 @@ on: # yamllint disable-line rule:truthy
     paths:
       - .github/workflows/image-github-runner-ci.yml
       - images/github-runner-ci/**
-    tags:
-      - github-runner-ci-*
   pull_request:
     branches:
       - main
     paths:
       - .github/workflows/image-github-runner-ci.yml
       - images/github-runner-ci/**
+  workflow_call:
+    inputs:
+      sha:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+    outputs:
+      digest:
+        value: ${{ jobs.build-github-runner-ci.outputs.digest }}
+
 
 jobs:
   build-github-runner-ci:
@@ -32,6 +42,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.sha || github.sha }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
@@ -40,7 +52,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Compute Version Tag
         env:
-          BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('pr-{0}.{1}.{2}.{3}', github.event.number, github.run_id, github.run_number, github.run_attempt) }}
+          BRANCH: ${{ inputs.sha && format('candidate-{0}-{1}-{2}', inputs.sha, github.run_id, github.run_attempt) || github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('pr-{0}.{1}.{2}.{3}', github.event.number, github.run_id, github.run_number, github.run_attempt) }}
         id: version_tag
         run: echo "tag=$BRANCH" | sed -e 's/github-runner-ci-//' >> "$GITHUB_OUTPUT"
       - name: Select Image Export Mode
@@ -68,13 +80,17 @@ jobs:
         with:
           context: images/github-runner-ci
           file: images/github-runner-ci/Containerfile
-          labels: ${{ steps.metadata.outputs.labels }}
+          labels: |
+            ${{ steps.metadata.outputs.labels }}
+            org.opencontainers.image.revision=${{ inputs.sha || github.sha }}
+            org.opencontainers.image.version=${{ inputs.version || steps.metadata.outputs.version }}
           load: ${{ steps.image_export.outputs.load }}
           push: ${{ steps.image_export.outputs.push }}
           tags: ghcr.io/${{ github.repository_owner }}/github-runner-ci:${{ steps.version_tag.outputs.tag }}
       - name: Smoke Test Image
         run: |
           docker run --rm ghcr.io/${{ github.repository_owner }}/github-runner-ci:${{ steps.version_tag.outputs.tag }} bash -lc '
+            set -e
             test "$(id -u):$(id -g)" = "1001:1001"
             test "$HOME" = "/home/runner"
             test -w "$HOME"
@@ -107,6 +123,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.sha || github.sha }}
       - name: Verify Actions Job Container
         shell: bash
         run: |
