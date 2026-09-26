@@ -3,6 +3,8 @@ COPY build_files /
 
 FROM quay.io/fedora/fedora-minimal:44
 
+# This is the local account name, not a credential.
+# hadolint ignore=DL3064
 ARG USERNAME=vscode
 ARG USERID=1000
 ARG GROUPID=1000
