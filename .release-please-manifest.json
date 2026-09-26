@@ -1,4 +1,5 @@
 {
+  "actions/image-release-notes": "0.0.0",
   "ansible": "1.4.7",
   "images/github-runner-ci": "1.2.2",
   "images/kairos-fedora": "0.9.0",
