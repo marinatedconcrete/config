@@ -13,7 +13,7 @@
   "images/buildah-action-runner": "1.0.1",
   "kustomization/components/pod-security-audit-warn-baseline": "0.0.0",
   "kustomization/components/pod-security-audit-warn-restricted": "0.0.0",
-  "kustomization/components/pod-security-enforce-baseline": "0.0.0",
+  "kustomization/components/pod-security-enforce-baseline": "1.0.0",
   "kustomization/components/pod-security-enforce-restricted": "0.0.0",
   "kustomization/components/pod-security-enforce-privileged": "0.0.0"
 }
