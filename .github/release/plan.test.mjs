@@ -178,3 +178,73 @@ for (const [project, version, prerelease] of [
     );
   });
 }
+
+test("rejected candidates do not prevent a valid package from being planned", async () => {
+  const paths = ["images/kairos-fedora", "ansible", "renovate", path];
+  const errors = [];
+  const manifest = {
+    buildReleases: async () =>
+      paths.map((path, index) => ({
+        path,
+        sha,
+        pullRequest: { number: index + 1 },
+        tag: {
+          version: { toString: () => "1.0.0" },
+          toString: () => `package-${index}@v1.0.0`,
+        },
+        notes: "Release notes.",
+      })),
+  };
+  const api = async (endpoint) => {
+    if (endpoint.startsWith("pulls/")) {
+      const number = Number(endpoint.split("/")[1]);
+      return {
+        number,
+        merged: true,
+        base: { ref: "main" },
+        merge_commit_sha: number === 2 ? "b".repeat(40) : sha,
+      };
+    }
+    if (endpoint.includes("release-package.yml")) return null;
+    return {
+      content: Buffer.from(
+        JSON.stringify(
+          Object.fromEntries(
+            paths.map((path) => [
+              path,
+              path === "renovate" ? "2.0.0" : "1.0.0",
+            ]),
+          ),
+        ),
+      ).toString("base64"),
+    };
+  };
+  const candidates = await planReleases({
+    manifest,
+    api,
+    onError: (error) => errors.push(error.message),
+  });
+  assert.deepEqual(
+    candidates.map((candidate) => candidate.path),
+    [path],
+  );
+  assert.equal(errors.length, 3);
+  assert.match(
+    errors[0],
+    /images\/kairos-fedora \(PR #1\): Image commit predates/,
+  );
+  assert.match(errors[1], /ansible \(PR #2\): Release source/);
+  assert.match(errors[2], /renovate \(PR #3\): Release version/);
+});
+
+test("manual recovery reports a rejected candidate without a second count error", async () => {
+  const errors = [];
+  const candidates = await planReleases({
+    ...fixture({ version: "2.0.0" }),
+    requested: "894",
+    onError: (error) => errors.push(error.message),
+  });
+  assert.deepEqual(candidates, []);
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /PR #894.*version does not match/);
+});

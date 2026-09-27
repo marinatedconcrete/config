@@ -57,8 +57,15 @@ export async function tagCommit(api, tag) {
   });
   if (!ref) return null;
   let object = ref.object;
-  while (object.type === "tag")
+  const visited = new Set();
+  while (object.type === "tag") {
+    if (visited.has(object.sha) || visited.size >= 16)
+      throw new Error(
+        `Tag ${tag} exceeds the annotation traversal limit or contains a cycle`,
+      );
+    visited.add(object.sha);
     object = (await api(`git/tags/${object.sha}`)).object;
+  }
   if (object.type !== "commit")
     throw new Error(`Tag ${tag} does not identify a commit`);
   return object.sha;

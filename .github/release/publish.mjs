@@ -21,6 +21,8 @@ export async function publishRelease({
 }) {
   const { tag, sha, pr } = candidate;
   if (!/^[a-f0-9]{40}$/.test(sha)) throw new Error("Invalid release commit");
+  if (candidate.kind === "image" && typeof promote !== "function")
+    throw new Error("Missing image promotion function");
   const existingSha = await tagCommit(api, tag);
   if (existingSha && existingSha !== sha)
     throw new Error("Existing tag points to a different commit");

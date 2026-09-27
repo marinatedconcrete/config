@@ -182,7 +182,13 @@ test("image recovery uses the first validated digest even after a different rebu
   const second = `sha256:${"2".repeat(64)}`;
   state.failAfter = "POST releases";
   await assert.rejects(
-    publishRelease({ api, candidate: image, imageDigest: first }),
+    publishRelease({
+      api,
+      candidate: image,
+      imageDigest: first,
+      promote: async () => {},
+    }),
+    /Interrupted/,
   );
   let promoted;
   await publishRelease({
@@ -213,3 +219,21 @@ test("failed image promotion leaves a draft and pending PR", async () => {
   assert.equal(state.release.draft, true);
   assert.deepEqual(state.labels, ["autorelease: pending"]);
 });
+
+for (const promote of [undefined, null, true]) {
+  test(`invalid promotion callback ${promote} stops all writes`, async () => {
+    const { state, api } = server();
+    await assert.rejects(
+      publishRelease({
+        api,
+        candidate: { ...candidate, kind: "image" },
+        imageDigest: `sha256:${"1".repeat(64)}`,
+        promote,
+      }),
+      /Missing image promotion function/,
+    );
+    assert.equal(state.tag, null);
+    assert.equal(state.release, null);
+    assert(state.operations.every((operation) => operation.startsWith("GET ")));
+  });
+}

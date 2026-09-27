@@ -26,6 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       candidates: ${{ steps.plan.outputs.candidates }}
+      errors: ${{ steps.plan.outputs.errors }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
@@ -62,3 +63,21 @@ jobs:
     with:
       candidate: ${{ toJson(matrix.candidate) }}
     secrets: inherit
+
+  rejected-candidates:
+    needs: plan
+    if: needs.plan.outputs.errors != '[]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report Rejected Candidates
+        env:
+          ERRORS: ${{ needs.plan.outputs.errors }}
+        run: |
+          node --input-type=module <<'JS'
+          import { appendFileSync } from 'node:fs';
+          const errors = JSON.parse(process.env.ERRORS);
+          console.error(errors.join('\n'));
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+            'Rejected release candidates:\n\n' + errors.map(error => '- ' + error).join('\n') + '\n');
+          process.exitCode = 1;
+          JS

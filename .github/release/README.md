@@ -46,6 +46,11 @@ GitHub can keep up to 100 pending runs in this concurrency group.
 A full queue can reject additional runs.
 Each run discovers pending release PRs again.
 One failed package does not cancel another package.
+The planner records errors separately for each candidate.
+Valid candidates continue to validation and publication.
+A separate job reports rejected candidates and makes the workflow fail.
+Each error identifies the package path and release PR.
+A failure during release discovery still stops planning.
 Publication also uses a separate concurrency group for each release tag.
 
 The GitHub App creates tags and publishes releases.
@@ -68,6 +73,14 @@ Use the PR number even if the release tag does not exist.
 Explicit recovery can find PRs outside the automatic 200-PR search window.
 The workflow obtains the version from Release Please and checks the original merge commit.
 Later commits and releases do not change this source commit.
+
+The validation workflows and publisher use the commit that started the workflow.
+The source checkout uses the selected release commit.
+Start a new recovery run on `main` to use publication fixes without a new package version.
+A rerun of an existing workflow uses its original workflow commit.
+Publisher changes must preserve compatibility with existing validation records.
+An incompatible record must stop publication before any write.
+The image migration check prevents legacy tag builds; it does not select the publisher commit.
 
 Recovery runs validation again.
 If a draft already contains an image digest, publication uses that previously validated digest.
@@ -94,8 +107,17 @@ The pending label is removed last.
 A tag, draft, or partial upload alone does not indicate successful publication.
 Check the workflow result and the published release.
 
-Candidate images can remain after failed runs.
-Delete unused candidate tags through a separate registry cleanup process.
+Candidate tags remain after successful and failed runs.
+Successful candidate tags remain as aliases of the released digest without a time limit.
+An alias does not require another copy of the image layers.
+The release workflow does not delete package versions.
+The [GitHub Packages API](https://docs.github.com/en/rest/packages/packages) deletes a container version, including all its tags.
+Do not delete a version that has a release tag.
+Do not delete a digest referenced by a draft validation record.
+Keep failed candidates until recovery succeeds or an operator abandons the release.
+Before manual cleanup, check all tags and draft validation records for each candidate digest.
+Delete only abandoned candidate versions that have no release tags or draft references.
+Automatic cleanup requires a separate retention policy and is not part of this workflow.
 Dependency changes can produce different bytes when the same commit is rebuilt.
 The workflow does not guarantee reproducible builds.
 
