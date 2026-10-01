@@ -1,7 +1,7 @@
 FROM scratch AS ctx
 COPY build_files /
 
-FROM quay.io/fedora/fedora-minimal:44
+FROM quay.io/fedora/fedora-minimal:46
 
 # This is the local account name, not a credential.
 # hadolint ignore=DL3064
