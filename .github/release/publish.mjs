@@ -89,7 +89,7 @@ export async function publishRelease({
   const remoteAssets = await allPages(api, `releases/${release.id}/assets`);
   for (const asset of assets) {
     let remote = remoteAssets.find((item) => item.name === asset.name);
-    if (remote?.state === "starter" && release.draft) {
+    if (["starter", "open"].includes(remote?.state) && release.draft) {
       await api(`releases/assets/${remote.id}`, { method: "DELETE" });
       remote = null;
     }
@@ -126,4 +126,55 @@ export async function publishRelease({
     { method: "DELETE", missing: true },
   );
   return receipt;
+}
+
+export async function recoverPublishedRelease({ api, candidate, verifyImage }) {
+  const release = (await allPages(api, "releases")).find(
+    (item) => item.tag_name === candidate.tag,
+  );
+  if (!release || release.draft) return false;
+  if ((await tagCommit(api, candidate.tag)) !== candidate.sha)
+    throw new Error("Published tag does not match the release commit");
+  const match = release.body?.match(marker);
+  if (!match) throw new Error("Existing release has no validation receipt");
+  const receipt = JSON.parse(Buffer.from(match[1], "base64").toString());
+  if (JSON.stringify(identity(receipt)) !== JSON.stringify(identity(candidate)))
+    throw new Error("Existing release identifies a different candidate");
+  if (!Array.isArray(receipt.assets))
+    throw new Error("Invalid validation assets");
+  const remoteAssets = await allPages(api, `releases/${release.id}/assets`);
+  for (const asset of receipt.assets) {
+    if (
+      typeof asset.name !== "string" ||
+      !Number.isSafeInteger(asset.size) ||
+      asset.size <= 0 ||
+      !/^sha256:[a-f0-9]{64}$/.test(asset.digest)
+    )
+      throw new Error("Invalid validation asset");
+    const remote = remoteAssets.find((item) => item.name === asset.name);
+    if (!remote || remote.state !== "uploaded" || remote.size !== asset.size)
+      throw new Error("Published release is missing a complete asset");
+    const data = await api(`releases/assets/${remote.id}`, { binary: true });
+    if (data.length !== asset.size || digest(data) !== asset.digest)
+      throw new Error("Published asset differs from the validation receipt");
+  }
+  if (candidate.kind === "image") {
+    if (
+      !/^sha256:[a-f0-9]{64}$/.test(receipt.imageDigest) ||
+      typeof verifyImage !== "function"
+    )
+      throw new Error("Missing published image verification");
+    await verifyImage(candidate, receipt.imageDigest);
+  }
+  if ((await tagCommit(api, candidate.tag)) !== candidate.sha)
+    throw new Error("Release tag changed during recovery");
+  await api(`issues/${candidate.pr}/labels`, {
+    method: "POST",
+    body: { labels: ["autorelease: tagged"] },
+  });
+  await api(
+    `issues/${candidate.pr}/labels/${encodeURIComponent("autorelease: pending")}`,
+    { method: "DELETE", missing: true },
+  );
+  return true;
 }

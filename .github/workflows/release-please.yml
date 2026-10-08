@@ -34,15 +34,6 @@ jobs:
         with:
           app-id: ${{ vars.FORMWORK_REMOVER_APP_ID }}
           private-key: ${{ secrets.FORMWORK_REMOVER_PRIVATE_KEY }}
-      - name: Update Release PRs
-        if: inputs.release_pr == ''
-        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
-        with:
-          token: ${{ steps.app-token.outputs.token }}
-          target-branch: main
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
-          skip-github-release: true
       - name: Install Release Tools
         run: npm ci --prefix .github/release --ignore-scripts
       - name: Select Release Commits
@@ -81,3 +72,26 @@ jobs:
             'Rejected release candidates:\n\n' + errors.map(error => '- ' + error).join('\n') + '\n');
           process.exitCode = 1;
           JS
+
+  update-prs:
+    needs: [plan, release, rejected-candidates]
+    if: >-
+      always() && !cancelled() && github.ref == 'refs/heads/main' &&
+      inputs.release_pr == '' && needs.plan.result == 'success' &&
+      needs.plan.outputs.errors == '[]' &&
+      (needs.release.result == 'success' || needs.release.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          app-id: ${{ vars.FORMWORK_REMOVER_APP_ID }}
+          private-key: ${{ secrets.FORMWORK_REMOVER_PRIVATE_KEY }}
+      - name: Update Release PRs
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          target-branch: main
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          skip-github-release: true

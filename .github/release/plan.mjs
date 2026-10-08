@@ -111,23 +111,32 @@ export async function planReleases({
   return candidates;
 }
 
+export async function collectPlan(createContext) {
+  const errors = [];
+  let candidates = [];
+  try {
+    candidates = await planReleases({
+      ...(await createContext()),
+      onError: (error) => errors.push(error.message),
+    });
+  } catch (error) {
+    errors.push(`Release planning: ${error.message}`);
+  }
+  return { candidates, errors };
+}
+
 if (
   process.argv[1] &&
   import.meta.url === new URL(`file://${process.argv[1]}`).href
 ) {
-  const repository = process.env.GITHUB_REPOSITORY;
-  const [owner, repo] = repository.split("/");
-  const token = process.env.GH_TOKEN;
-  const api = githubApi(repository, token);
-  const github = await GitHub.create({ owner, repo, token });
-  const manifest = await Manifest.fromManifest(github, "main");
-  const errors = [];
-  const candidates = await planReleases({
-    github,
-    api,
-    manifest,
-    requested: process.env.RELEASE_PR,
-    onError: (error) => errors.push(error.message),
+  const { candidates, errors } = await collectPlan(async () => {
+    const repository = process.env.GITHUB_REPOSITORY;
+    const [owner, repo] = repository.split("/");
+    const token = process.env.GH_TOKEN;
+    const api = githubApi(repository, token);
+    const github = await GitHub.create({ owner, repo, token });
+    const manifest = await Manifest.fromManifest(github, "main");
+    return { github, api, manifest, requested: process.env.RELEASE_PR };
   });
   appendFileSync(
     process.env.GITHUB_OUTPUT,

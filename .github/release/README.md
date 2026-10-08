@@ -50,7 +50,11 @@ The planner records errors separately for each candidate.
 Valid candidates continue to validation and publication.
 A separate job reports rejected candidates and makes the workflow fail.
 Each error identifies the package path and release PR.
-A failure during release discovery still stops planning.
+A failure during release discovery stops publication and produces a planning error.
+The error-reporting job reports setup failures and invalid recovery requests.
+Release Please updates release PRs after successful publication.
+It also updates PRs when no releases are pending.
+Planning or publication failures prevent those updates.
 Publication also uses a separate concurrency group for each release tag.
 
 The GitHub App creates tags and publishes releases.
@@ -82,7 +86,11 @@ Publisher changes must preserve compatibility with existing validation records.
 An incompatible record must stop publication before any write.
 The image migration check prevents legacy tag builds; it does not select the publisher commit.
 
-Recovery runs validation again.
+Recovery first checks for an existing published release.
+It verifies the commit, validation record, asset sizes, asset hashes, and image version digest.
+It then completes the PR labels without a rebuild or image publication.
+A verification failure stops recovery without a label change.
+New releases and drafts run validation again.
 If a draft already contains an image digest, publication uses that previously validated digest.
 Keep candidate images available until publication succeeds.
 If the saved digest is unavailable, publication stops.
@@ -91,7 +99,10 @@ Existing Git tags must identify the selected commit.
 Existing version image tags must identify the saved digest.
 Existing release assets must match the validated bytes.
 A difference stops publication; the workflow does not replace the existing artifact.
-An incomplete `starter` asset can be removed from a draft before another upload.
+Incomplete `starter` and `open` assets can be removed from a draft before another upload.
+Unknown asset states stop publication without deletion.
+A draft still requires rebuilt assets to match its validation record.
+If those bytes cannot be reproduced, restore the original validated artifacts before recovery.
 
 The draft body contains a validation record in an HTML comment.
 Keep this record unchanged.

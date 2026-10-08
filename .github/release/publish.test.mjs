@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { publishRelease } from "./publish.mjs";
+import { publishRelease, recoverPublishedRelease } from "./publish.mjs";
 
 const candidate = {
   tag: "kustomize-example@v1.0.0",
@@ -237,3 +237,129 @@ for (const promote of [undefined, null, true]) {
     assert(state.operations.every((operation) => operation.startsWith("GET ")));
   });
 }
+
+for (const operation of [
+  "PATCH releases/1",
+  "POST issues/12/labels",
+  "DELETE issues/12/labels/autorelease%3A%20pending",
+]) {
+  test(`published recovery after ${operation} verifies stored bytes without a rebuild`, async () => {
+    const { state, api } = server();
+    state.failAfter = operation;
+    await assert.rejects(
+      publishRelease({ api, candidate, assets }),
+      /Interrupted/,
+    );
+    state.operations = [];
+    assert.equal(await recoverPublishedRelease({ api, candidate }), true);
+    assert.deepEqual(state.assets[0].data, assets[0].data);
+    assert(!state.labels.includes("autorelease: pending"));
+    assert(
+      state.operations
+        .filter((operation) => !operation.startsWith("GET "))
+        .every((operation) => operation.includes("issues/12/labels")),
+    );
+  });
+}
+
+test("new releases and drafts still require validation", async () => {
+  const { state, api } = server();
+  assert.equal(await recoverPublishedRelease({ api, candidate }), false);
+  state.failAfter = "POST releases";
+  await assert.rejects(
+    publishRelease({ api, candidate, assets }),
+    /Interrupted/,
+  );
+  state.operations = [];
+  assert.equal(await recoverPublishedRelease({ api, candidate }), false);
+  assert(state.operations.every((operation) => operation.startsWith("GET ")));
+});
+
+for (const defect of ["bytes", "missing", "open", "tag", "receipt"]) {
+  test(`published recovery rejects ${defect} without writes`, async () => {
+    const { state, api } = server();
+    await publishRelease({ api, candidate, assets });
+    if (defect === "bytes")
+      state.assets[0].data = Buffer.from("different bytes");
+    if (defect === "missing") state.assets = [];
+    if (defect === "open") state.assets[0].state = "open";
+    if (defect === "tag") state.tag = "b".repeat(40);
+    if (defect === "receipt") state.release.body = "No receipt";
+    state.operations = [];
+    await assert.rejects(recoverPublishedRelease({ api, candidate }));
+    assert(state.operations.every((operation) => operation.startsWith("GET ")));
+  });
+}
+
+test("published image recovery checks the saved digest before completing labels", async () => {
+  const { state, api } = server();
+  const image = { ...candidate, kind: "image", project: "kairos-fedora" };
+  const imageDigest = `sha256:${"1".repeat(64)}`;
+  state.failAfter = "PATCH releases/1";
+  await assert.rejects(
+    publishRelease({
+      api,
+      candidate: image,
+      imageDigest,
+      promote: async () => {},
+    }),
+    /Interrupted/,
+  );
+  state.operations = [];
+  await assert.rejects(
+    recoverPublishedRelease({
+      api,
+      candidate: image,
+      verifyImage: async () => {
+        throw new Error("Registry unavailable");
+      },
+    }),
+    /Registry unavailable/,
+  );
+  assert(state.operations.every((operation) => operation.startsWith("GET ")));
+  let verified;
+  assert.equal(
+    await recoverPublishedRelease({
+      api,
+      candidate: image,
+      verifyImage: async (_, digest) => {
+        verified = digest;
+      },
+    }),
+    true,
+  );
+  assert.equal(verified, imageDigest);
+  assert(!state.labels.includes("autorelease: pending"));
+});
+
+test("an open draft asset is deleted and uploaded again", async () => {
+  const { state, api } = server();
+  state.failAfter = "POST releases";
+  await assert.rejects(
+    publishRelease({ api, candidate, assets }),
+    /Interrupted/,
+  );
+  state.assets.push({ id: 1, name: assets[0].name, state: "open", size: 0 });
+  await publishRelease({ api, candidate, assets });
+  assert.equal(state.assets.length, 1);
+  assert.equal(state.assets[0].state, "uploaded");
+  assert(state.operations.includes("DELETE releases/assets/1"));
+});
+
+test("unknown draft asset states are preserved for inspection", async () => {
+  const { state, api } = server();
+  state.failAfter = "POST releases";
+  await assert.rejects(
+    publishRelease({ api, candidate, assets }),
+    /Interrupted/,
+  );
+  state.assets.push({ id: 1, name: assets[0].name, state: "unknown", size: 0 });
+  state.operations = [];
+  await assert.rejects(
+    publishRelease({ api, candidate, assets }),
+    /Incomplete/,
+  );
+  assert(
+    !state.operations.some((operation) => operation.startsWith("DELETE ")),
+  );
+});

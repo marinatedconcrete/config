@@ -43,3 +43,18 @@ export function promoteImage(image, version, digest, run = execFileSync) {
   if (inspect(target) !== digest)
     throw new Error("Published image digest differs");
 }
+
+export function verifyPublishedImage(
+  image,
+  version,
+  digest,
+  run = execFileSync,
+) {
+  const output = run(
+    "docker",
+    ["buildx", "imagetools", "inspect", `${image}:${version}`],
+    { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+  );
+  if (output.match(/^Digest:\s+(sha256:[a-f0-9]{64})$/m)?.[1] !== digest)
+    throw new Error("Published image digest differs");
+}

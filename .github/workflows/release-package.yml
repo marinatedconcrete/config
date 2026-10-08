@@ -18,8 +18,36 @@ concurrency:
   queue: max
 
 jobs:
+  recover:
+    runs-on: ubuntu-latest
+    outputs:
+      recovered: ${{ steps.recover.outputs.recovered }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+      - name: Login to GitHub Container Registry
+        if: fromJson(inputs.candidate).kind == 'image'
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          app-id: ${{ vars.FORMWORK_REMOVER_APP_ID }}
+          private-key: ${{ secrets.FORMWORK_REMOVER_PRIVATE_KEY }}
+      - name: Recover Published Release
+        id: recover
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          CANDIDATE: ${{ inputs.candidate }}
+        run: node .github/release/recover-cli.mjs
+
   component:
-    if: fromJson(inputs.candidate).kind == 'component'
+    needs: recover
+    if: needs.recover.outputs.recovered == 'false' && fromJson(inputs.candidate).kind == 'component'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -53,7 +81,8 @@ jobs:
           if-no-files-found: error
 
   source:
-    if: fromJson(inputs.candidate).kind == 'source'
+    needs: recover
+    if: needs.recover.outputs.recovered == 'false' && fromJson(inputs.candidate).kind == 'source'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -70,7 +99,8 @@ jobs:
           runCmd: yarn --immutable && just check-format && just lint && just test
 
   kairos-fedora:
-    if: fromJson(inputs.candidate).project == 'kairos-fedora'
+    needs: recover
+    if: needs.recover.outputs.recovered == 'false' && fromJson(inputs.candidate).project == 'kairos-fedora'
     uses: ./.github/workflows/image-kairos-fedora.yml
     with:
       sha: ${{ fromJson(inputs.candidate).sha }}
@@ -78,7 +108,8 @@ jobs:
     secrets: inherit
 
   buildah-action-runner:
-    if: fromJson(inputs.candidate).project == 'buildah-action-runner'
+    needs: recover
+    if: needs.recover.outputs.recovered == 'false' && fromJson(inputs.candidate).project == 'buildah-action-runner'
     uses: ./.github/workflows/image-buildah-action-runner.yml
     with:
       sha: ${{ fromJson(inputs.candidate).sha }}
@@ -86,7 +117,8 @@ jobs:
     secrets: inherit
 
   github-runner-ci:
-    if: fromJson(inputs.candidate).project == 'github-runner-ci'
+    needs: recover
+    if: needs.recover.outputs.recovered == 'false' && fromJson(inputs.candidate).project == 'github-runner-ci'
     uses: ./.github/workflows/image-github-runner-ci.yml
     with:
       sha: ${{ fromJson(inputs.candidate).sha }}
@@ -94,7 +126,8 @@ jobs:
     secrets: inherit
 
   vscode-ssh-server:
-    if: fromJson(inputs.candidate).project == 'vscode-ssh-server'
+    needs: recover
+    if: needs.recover.outputs.recovered == 'false' && fromJson(inputs.candidate).project == 'vscode-ssh-server'
     uses: ./.github/workflows/image-vscode-ssh-server.yml
     with:
       sha: ${{ fromJson(inputs.candidate).sha }}
@@ -102,9 +135,12 @@ jobs:
     secrets: inherit
 
   publish:
-    needs: [component, source, kairos-fedora, buildah-action-runner, github-runner-ci, vscode-ssh-server]
+    needs: [recover, component, source, kairos-fedora, buildah-action-runner, github-runner-ci, vscode-ssh-server]
     if: >-
-      always() && !cancelled() && contains(needs.*.result, 'success') &&
+      always() && !cancelled() && needs.recover.outputs.recovered == 'false' &&
+      (needs.component.result == 'success' || needs.source.result == 'success' ||
+      needs.kairos-fedora.result == 'success' || needs.buildah-action-runner.result == 'success' ||
+      needs.github-runner-ci.result == 'success' || needs.vscode-ssh-server.result == 'success') &&
       !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     runs-on: ubuntu-latest
     steps:

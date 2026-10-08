@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { promoteImage } from "./image.mjs";
+import { promoteImage, verifyPublishedImage } from "./image.mjs";
 
 const digest = `sha256:${"a".repeat(64)}`;
 const other = `sha256:${"b".repeat(64)}`;
@@ -66,3 +66,16 @@ test("registry authentication failure is not treated as a missing image", () => 
   );
   assert(calls.every((args) => args[2] === "inspect"));
 });
+
+for (const existing of [digest, other, null]) {
+  test(`published image verification never writes: ${existing}`, () => {
+    const { calls, run } = registry(existing);
+    if (existing === digest)
+      verifyPublishedImage("registry/example", "1.0.0", digest, run);
+    else
+      assert.throws(() =>
+        verifyPublishedImage("registry/example", "1.0.0", digest, run),
+      );
+    assert(calls.every((args) => args[2] === "inspect"));
+  });
+}

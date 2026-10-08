@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { Manifest } from "release-please";
-import { planReleases } from "./plan.mjs";
+import { planReleases, collectPlan } from "./plan.mjs";
 
 const sha = "a".repeat(40);
 const path = "kustomization/components/pod-security-enforce-privileged";
@@ -247,4 +247,30 @@ test("manual recovery reports a rejected candidate without a second count error"
   assert.deepEqual(candidates, []);
   assert.equal(errors.length, 1);
   assert.match(errors[0], /PR #894.*version does not match/);
+});
+
+for (const failure of ["setup", "discovery", "unparsed PR"]) {
+  test(`${failure} produces structured errors and no candidates`, async () => {
+    const result = await collectPlan(async () => {
+      if (failure === "setup") throw new Error("API unavailable");
+      const context = fixture();
+      context.manifest.buildReleases = async () => {
+        if (failure === "discovery") throw new Error("Discovery failed");
+        return [];
+      };
+      return { ...context, requested: "894" };
+    });
+    assert.deepEqual(result.candidates, []);
+    assert.equal(result.errors.length, 1);
+    assert.match(result.errors[0], /Release planning:/);
+  });
+}
+
+test("no pending releases produces an empty successful plan", async () => {
+  assert.deepEqual(
+    await collectPlan(async () => ({
+      manifest: { buildReleases: async () => [] },
+    })),
+    { candidates: [], errors: [] },
+  );
 });
