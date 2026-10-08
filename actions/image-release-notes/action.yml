@@ -1,0 +1,114 @@
+---
+name: Image Release Notes
+description: Generate the component and package release notes for a container image.
+
+inputs:
+  artifact-name:
+    description: The name of the workflow artifact. Leave this input empty to skip the upload.
+    required: false
+    default: ""
+  component:
+    description: The prefix for the output files and for the release tags of this image.
+    required: true
+  components-script:
+    description: The path to a script that runs in the image and prints more component rows.
+    required: false
+    default: ""
+  directory:
+    description: The directory for the output files.
+    required: false
+    default: build/release
+  highlight-packages:
+    description: The packages to show in the component table. Separate the names with spaces.
+    required: false
+    default: ""
+  image:
+    description: The OCI image reference to examine. The image must be in the local Docker daemon.
+    required: true
+  package-type:
+    description: The package type for the tables. The SBOM keeps all package types.
+    required: false
+    default: rpm
+  tag:
+    description: The tag of this release. The action names this tag in the change table, and does not compare the release with itself.
+    required: false
+    default: ""
+  token:
+    description: The token that the action uses to read releases.
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  notes-path:
+    description: The path of the Markdown release notes.
+    value: ${{ steps.generate.outputs.notes-path }}
+  previous-tag:
+    description: The tag of the release that the change table compares with.
+    value: ${{ steps.previous_release.outputs.tag }}
+  sbom-path:
+    description: The path of the CycloneDX SBOM.
+    value: ${{ steps.generate.outputs.sbom-path }}
+
+runs:
+  using: composite
+  steps:
+    # The SBOM of the previous release supplies the package changes. The first
+    # release has no previous SBOM. The script then omits that section. This
+    # step needs read access only, so it runs with the other build steps.
+    - name: Download Previous SBOM
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        COMPONENT: ${{ inputs.component }}
+        DIRECTORY: ${{ inputs.directory }}
+        GH_TOKEN: ${{ inputs.token }}
+        TAG: ${{ inputs.tag }}
+      id: previous_release
+      shell: bash
+      run: |
+        set -euo pipefail
+        tag="$(bash "${ACTION_PATH}/previous-sbom.sh" \
+          --component "$COMPONENT" \
+          --current-tag "$TAG" \
+          --directory "$DIRECTORY")"
+        echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+    # The script omits the change table when the previous SBOM is absent, so
+    # this step passes the path without a test.
+    - name: Generate Image Release Notes
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        COMPONENT: ${{ inputs.component }}
+        COMPONENTS_SCRIPT: ${{ inputs.components-script }}
+        DIRECTORY: ${{ inputs.directory }}
+        HIGHLIGHT_PACKAGES: ${{ inputs.highlight-packages }}
+        IMAGE: ${{ inputs.image }}
+        PACKAGE_TYPE: ${{ inputs.package-type }}
+        PREVIOUS_TAG: ${{ steps.previous_release.outputs.tag }}
+      id: generate
+      shell: bash
+      run: |
+        set -euo pipefail
+        notes="${DIRECTORY}/${COMPONENT}-notes.md"
+        sbom="${DIRECTORY}/${COMPONENT}-sbom.cdx.json"
+
+        bash "${ACTION_PATH}/release-notes.sh" \
+          --components-script "$COMPONENTS_SCRIPT" \
+          --highlights "$HIGHLIGHT_PACKAGES" \
+          --image "$IMAGE" \
+          --notes "$notes" \
+          --package-type "$PACKAGE_TYPE" \
+          --previous-sbom "${DIRECTORY}/previous/${COMPONENT}-sbom.cdx.json" \
+          --previous-tag "$PREVIOUS_TAG" \
+          --sbom "$sbom"
+
+        echo "notes-path=${notes}" >> "$GITHUB_OUTPUT"
+        echo "sbom-path=${sbom}" >> "$GITHUB_OUTPUT"
+        cat "$notes" >> "$GITHUB_STEP_SUMMARY"
+    - name: Upload Image Release Notes
+      if: inputs.artifact-name != ''
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: |
+          ${{ inputs.directory }}/${{ inputs.component }}-sbom.cdx.json
+          ${{ inputs.directory }}/${{ inputs.component }}-notes.md
+        if-no-files-found: error

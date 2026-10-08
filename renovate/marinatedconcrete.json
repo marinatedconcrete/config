@@ -42,6 +42,14 @@
       "sourceUrl": "https://github.com/marinatedconcrete/config"
     },
     {
+      "description": "Map the image release notes action to its monorepo changelog",
+      "matchDatasources": ["github-tags"],
+      "matchCurrentValue": "image-release-notes-**",
+      "matchPackageNames": ["marinatedconcrete/config"],
+      "sourceDirectory": "actions/image-release-notes",
+      "sourceUrl": "https://github.com/marinatedconcrete/config"
+    },
+    {
       "description": "Map kairos-fedora image to its monorepo changelog",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/marinatedconcrete/kairos-fedora"],
@@ -64,6 +72,12 @@
       "groupName": "marinatedconcrete Buildah Action Runner Image",
       "groupSlug": "marinatedconcrete-buildah-action-runner",
       "matchCurrentValue": "buildah-action-runner-**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
+      "groupName": "marinatedconcrete Image Release Notes Action",
+      "groupSlug": "marinatedconcrete-image-release-notes",
+      "matchCurrentValue": "image-release-notes-**",
       "matchPackageNames": ["marinatedconcrete/config"]
     },
     {

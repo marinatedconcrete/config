@@ -8,6 +8,7 @@ on: # yamllint disable-line rule:truthy
     paths:
       - .devcontainer/Dockerfile
       - .github/workflows/image-kairos-fedora.yml
+      - actions/image-release-notes/**
       - images/kairos-fedora/**
       - justfile
     tags:
@@ -18,6 +19,7 @@ on: # yamllint disable-line rule:truthy
     paths:
       - .devcontainer/Dockerfile
       - .github/workflows/image-kairos-fedora.yml
+      - actions/image-release-notes/**
       - images/kairos-fedora/**
       - justfile
 
@@ -87,4 +89,43 @@ jobs:
           if-no-files-found: ignore
       - name: Push Image
         if: github.ref_type == 'tag'
-        run: docker push ghcr.io/${{ github.repository_owner }}/kairos-fedora:${{ steps.version_tag.outputs.tag }}
+        env:
+          IMAGE: ghcr.io/${{ github.repository_owner }}/kairos-fedora:${{ steps.version_tag.outputs.tag }}
+        run: docker push "$IMAGE"
+      # Generate the complete notes for each build. A pull request then shows
+      # the notes and the package changes in the job summary and in an artifact.
+      - name: Generate Image Release Notes
+        uses: ./actions/image-release-notes
+        with:
+          artifact-name: kairos-fedora-release-notes
+          component: kairos-fedora
+          components-script: images/kairos-fedora/release-notes-components.sh
+          highlight-packages: kernel systemd
+          image: ghcr.io/${{ github.repository_owner }}/kairos-fedora:${{ steps.version_tag.outputs.tag }}
+          tag: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+
+  # Publish in a separate job. Only this job can write the release. This job
+  # reads the files that the build job made. This job runs no code from the
+  # image, and it does not run the end-to-end test.
+  publish-release-notes:
+    name: Publish Release Notes
+    needs: build-container
+    if: ${{ github.ref_type == 'tag' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Download Image Release Notes
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: kairos-fedora-release-notes
+          path: build/release
+      - name: Publish Image Release Notes
+        uses: ./actions/image-release-notes/publish
+        with:
+          component: kairos-fedora
+          tag: ${{ github.ref_name }}

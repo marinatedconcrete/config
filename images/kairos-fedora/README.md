@@ -40,3 +40,25 @@ Optional settings:
 The CI workflow builds the image in the local Docker daemon.
 Then the workflow runs the same test script.
 For release tags, the workflow publishes the image only after the end-to-end test passes.
+
+## Release Notes
+
+The [Image Release Notes action](../../actions/image-release-notes/README.md) writes the release notes for this image.
+The build workflow runs the action for each build and supplies the notes as an artifact.
+For release tags, a second job attaches the SBOM to the release and adds the notes to the end of the release body.
+
+The `release-notes-components.sh` script supplies the Kairos rows for the component table.
+The script reports the Kairos Agent, kairos-init, and Kubernetes versions.
+The script also reports the Kairos variant and model.
+
+Generate the notes and the SBOM from a local image:
+
+```sh
+just release-notes-kairos-fedora kairos-fedora:0.0.0-e2e
+```
+
+Supply the SBOM of an earlier release to add the package changes:
+
+```sh
+just release-notes-kairos-fedora kairos-fedora:0.0.0-e2e path/to/previous-sbom.cdx.json
+```
