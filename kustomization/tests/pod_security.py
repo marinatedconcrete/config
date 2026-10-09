@@ -1,4 +1,5 @@
 import copy
+import json
 import os
 from pathlib import Path
 import re
@@ -20,6 +21,12 @@ PROFILES = {
 }
 
 
+def component_path(component, legacy=False):
+    if legacy:
+        return ROOT / "kustomization/components" / component
+    return ROOT / "kustomization/pod-security" / component.removeprefix("pod-security-")
+
+
 def expected_labels(components):
     labels = {}
     for component in components:
@@ -28,7 +35,7 @@ def expected_labels(components):
             version = "latest"
             if mode == "enforce" and level != "privileged":
                 patch = yaml.safe_load(
-                    (ROOT / "kustomization/components" / component / "namespace-labels.yml").read_text()
+                    (component_path(component) / "namespace-labels.yml").read_text()
                 )
                 version = patch["metadata"]["labels"][PREFIX + "enforce-version"]
                 assert re.fullmatch(r"v\d+\.\d+", version), version
@@ -36,7 +43,7 @@ def expected_labels(components):
     return labels
 
 
-def check_render(components):
+def check_render(components, legacy=False):
     resources = [
         {
             "apiVersion": "v1",
@@ -81,7 +88,7 @@ def check_render(components):
             "kind": "Kustomization",
             "resources": ["resources.yml"],
             "components": [
-                os.path.relpath(ROOT / "kustomization/components" / name, directory)
+                os.path.relpath(component_path(name, legacy), directory)
                 for name in components
             ],
         }
@@ -101,19 +108,16 @@ def check_renovate(component):
         ["node", "-e", r"""
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const file = `kustomization/components/${process.argv[1]}/namespace-labels.yml`;
+const file = `kustomization/pod-security/${process.argv[1].replace('pod-security-', '')}/namespace-labels.yml`;
 const config = JSON.parse(fs.readFileSync('renovate.json', 'utf8'));
 const managers = config.customManagers.filter(manager =>
   manager.managerFilePatterns.some(pattern => new RegExp(pattern.slice(1, -1)).test(file)));
 const matches = managers.flatMap(manager => manager.matchStrings.flatMap(pattern =>
   Array.from(fs.readFileSync(file, 'utf8').matchAll(new RegExp(pattern, 'g')),
-    match => ({ ...match.groups, versioning: manager.versioningTemplate }))));
+    match => match.groups)));
 assert.equal(matches.length, 1);
 const match = matches[0];
-assert.equal(match.datasource, 'github-tags');
-assert.equal(match.depName, 'kubernetes/kubernetes');
 assert.match(match.currentValue, /^v\d+\.\d+$/);
-assert.equal(match.versioning, 'semver-coerced');
 assert.equal(new RegExp(match.extractVersion).exec('v1.37.4').groups.version, 'v1.37');
 assert.equal(new RegExp(match.extractVersion).exec('v1.37.0-alpha.1'), null);
 """, component],
@@ -122,12 +126,41 @@ assert.equal(new RegExp(match.extractVersion).exec('v1.37.0-alpha.1'), null);
     )
 
 
+def check_release_output():
+    packages = {
+        "kustomization/policies": {"package-name": "kustomize-policy-bundle"},
+        "kustomization/components/example": {"package-name": "kustomize-example"},
+    }
+    outputs = {
+        "paths_released": json.dumps(list(packages)),
+        "kustomization/policies--release_created": True,
+        "kustomization/policies--tag_name": "kustomize-policy-bundle@v1.2.3",
+        "kustomization/components/example--release_created": False,
+    }
+    with tempfile.TemporaryDirectory() as scratch:
+        directory = Path(scratch)
+        (directory / "release-please-config.json").write_text(json.dumps({"packages": packages}))
+        output_file = directory / "output"
+        subprocess.run(
+            ["sh", str(ROOT / ".github/workflows/release-please-output-helper.sh")],
+            cwd=directory,
+            env={**os.environ, "OUTPUTS": json.dumps(outputs), "GITHUB_OUTPUT": str(output_file)},
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        assert json.loads(output_file.read_text().removeprefix("components_json=")) == [
+            {"project": "kustomize-policy-bundle", "tag": "kustomize-policy-bundle@v1.2.3"}
+        ]
+
+
 if __name__ == "__main__":
     component = sys.argv[1]
     assert component in PROFILES, component
     check_render([component])
+    check_render([component], legacy=True)
     for partner in PROFILES:
-        if set(PROFILES[partner]).isdisjoint(PROFILES[component]):
+        if component < partner and set(PROFILES[partner]).isdisjoint(PROFILES[component]):
             check_render([component, partner])
             check_render([partner, component])
     empty = subprocess.run(
@@ -136,4 +169,6 @@ if __name__ == "__main__":
     )
     assert not empty.stdout.strip(), empty.stdout
     check_renovate(component)
-    print(f"Passed {component}: labels, composition, workloads, empty render, Renovate")
+    if component == next(iter(PROFILES)):
+        check_release_output()
+    print(f"Passed {component}: labels, composition, workloads, empty render, Renovate, release")

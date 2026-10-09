@@ -258,16 +258,27 @@ release-please-build project dest="":
     fi
 
     component="${project#kustomize-}"
-    component_path="kustomization/components/${component}"
-
-    if [[ ! -d "${component_path}" ]]; then
-        echo "Component path not found: ${component_path}" >&2
-        exit 1
-    fi
-
     dest_path="{{ dest }}"
     if [[ -z "${dest_path}" ]]; then
         dest_path="/tmp/${component}.yml"
+    fi
+
+    if [[ "${component}" == pod-security ]]; then
+        # Test all components in the shared release.
+        for component_path in kustomization/pod-security/*/; do
+            name="${component_path%/}"
+            just kustomization-test "pod-security-${name##*/}"
+        done
+        # These components produce no standalone resources.
+        : > "${dest_path}"
+        echo "${dest_path}"
+        exit 0
+    fi
+
+    component_path="kustomization/components/${component}"
+    if [[ ! -d "${component_path}" ]]; then
+        echo "Component path not found: ${component_path}" >&2
+        exit 1
     fi
 
     # Run component tests before the release build.
