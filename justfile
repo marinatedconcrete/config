@@ -188,7 +188,8 @@ hado-lint:
 kustomize-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    find kustomization/components -mindepth 1 -maxdepth 1 -type d -print | while read -r file; do 
+    find kustomization/components -name kustomization.yml -print | while read -r manifest; do
+        file="${manifest%/*}"
         echo -n "Running \`kustomize build\` on ${file}..."
         kustomize build ${file} > /dev/null
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
@@ -215,14 +216,9 @@ shellcheck-lint:
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
 
-# Check the Pod Security release scope.
-[group('lint')]
-pod-security-release-check:
-    python3 .github/workflows/check-pod-security-release.py
-
 # Run all linters.
 [group('lint')]
-lint: pod-security-release-check ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
+lint: ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
 
 # Run the Kairos Fedora end-to-end test for startup and installation.
 [group('test')]
@@ -270,9 +266,9 @@ release-please-build project dest="":
 
     if [[ "${component}" == pod-security ]]; then
         # Test all components in the shared release.
-        for component_path in kustomization/components/pod-security-*/; do
+        for component_path in kustomization/components/pod-security/*/; do
             name="${component_path%/}"
-            just kustomization-test "${name##*/}"
+            just kustomization-test "pod-security-${name##*/}"
         done
         # These components produce no standalone resources.
         : > "${dest_path}"

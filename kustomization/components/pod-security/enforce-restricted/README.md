@@ -1,10 +1,10 @@
-# pod-security-enforce-baseline
+# enforce-restricted
 
 This component sets Pod Security enforcement labels on every Namespace resource in the Kustomization.
 
-| Mode    | Policy   | Version |
-| ------- | -------- | ------- |
-| enforce | baseline | v1.36   |
+| Mode    | Policy     | Version |
+| ------- | ---------- | ------- |
+| enforce | restricted | v1.36   |
 
 The component does not create Namespace resources or change workload security contexts.
 Add each Namespace resource to the consumer Kustomization.
@@ -25,7 +25,7 @@ resources:
   - namespace.yml
 
 components:
-  - https://github.com/marinatedconcrete/config/kustomization/components/pod-security-enforce-baseline?ref=kustomize-pod-security@v{version}
+  - https://github.com/marinatedconcrete/config/kustomization/components/pod-security/enforce-restricted?ref=kustomize-pod-security@v{version}
 ```
 
 Create `namespace.yml` with the required namespace name.
@@ -37,7 +37,7 @@ metadata:
   name: application
 ```
 
-You can combine this component with `pod-security-audit-warn-restricted`.
+You can combine this component with `audit-warn-restricted`.
 Select one enforcement component and one audit and warning component.
 Their order does not affect the labels.
 Do not combine two components that set the same mode.

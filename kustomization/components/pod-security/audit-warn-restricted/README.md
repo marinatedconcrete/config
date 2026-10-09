@@ -1,11 +1,11 @@
-# pod-security-audit-warn-baseline
+# audit-warn-restricted
 
 This component sets Pod Security audit and warning labels on every Namespace resource in the Kustomization.
 
-| Mode  | Policy   | Version |
-| ----- | -------- | ------- |
-| audit | baseline | latest  |
-| warn  | baseline | latest  |
+| Mode  | Policy     | Version |
+| ----- | ---------- | ------- |
+| audit | restricted | latest  |
+| warn  | restricted | latest  |
 
 The component does not create Namespace resources or change workload security contexts.
 Add each Namespace resource to the consumer Kustomization.
@@ -26,7 +26,7 @@ resources:
   - namespace.yml
 
 components:
-  - https://github.com/marinatedconcrete/config/kustomization/components/pod-security-audit-warn-baseline?ref=kustomize-pod-security@v{version}
+  - https://github.com/marinatedconcrete/config/kustomization/components/pod-security/audit-warn-restricted?ref=kustomize-pod-security@v{version}
 ```
 
 Create `namespace.yml` with the required namespace name.
@@ -38,7 +38,7 @@ metadata:
   name: application
 ```
 
-You can combine this component with `pod-security-enforce-baseline`.
+You can combine this component with `enforce-baseline`.
 Select one enforcement component and one audit and warning component.
 Their order does not affect the labels.
 Do not combine two components that set the same mode.
