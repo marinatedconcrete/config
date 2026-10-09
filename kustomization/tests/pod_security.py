@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import re
+import runpy
 import subprocess
 import sys
 import tempfile
@@ -21,10 +22,8 @@ PROFILES = {
 }
 
 
-def component_path(component, legacy=False):
-    if legacy:
-        return ROOT / "kustomization/components" / component
-    return ROOT / "kustomization/pod-security" / component.removeprefix("pod-security-")
+def component_path(component):
+    return ROOT / "kustomization/components" / component
 
 
 def expected_labels(components):
@@ -43,7 +42,7 @@ def expected_labels(components):
     return labels
 
 
-def check_render(components, legacy=False):
+def check_render(components):
     resources = [
         {
             "apiVersion": "v1",
@@ -88,7 +87,7 @@ def check_render(components, legacy=False):
             "kind": "Kustomization",
             "resources": ["resources.yml"],
             "components": [
-                os.path.relpath(component_path(name, legacy), directory)
+                os.path.relpath(component_path(name), directory)
                 for name in components
             ],
         }
@@ -108,7 +107,7 @@ def check_renovate(component):
         ["node", "-e", r"""
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const file = `kustomization/pod-security/${process.argv[1].replace('pod-security-', '')}/namespace-labels.yml`;
+const file = `kustomization/components/${process.argv[1]}/namespace-labels.yml`;
 const config = JSON.parse(fs.readFileSync('renovate.json', 'utf8'));
 const managers = config.customManagers.filter(manager =>
   manager.managerFilePatterns.some(pattern => new RegExp(pattern.slice(1, -1)).test(file)));
@@ -124,6 +123,30 @@ assert.equal(new RegExp(match.extractVersion).exec('v1.37.0-alpha.1'), null);
         cwd=ROOT,
         check=True,
     )
+
+
+def check_release_scope():
+    check = runpy.run_path(str(ROOT / ".github/workflows/check-pod-security-release.py"))["check_scope"]
+    with tempfile.TemporaryDirectory() as scratch:
+        root = Path(scratch)
+        components = root / "kustomization/components"
+        (components / "pod-security-example").mkdir(parents=True)
+        config = {"packages": {"kustomization/components": {"exclude-paths": []}}}
+        config_file = root / "release-please-config.json"
+        config_file.write_text(json.dumps(config))
+        check(root)
+        (components / "new-application").mkdir()
+        try:
+            check(root)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("The release scope accepted an unrelated component.")
+        config["packages"]["kustomization/components"]["exclude-paths"].append(
+            "kustomization/components/new-application"
+        )
+        config_file.write_text(json.dumps(config))
+        check(root)
 
 
 def check_release_output():
@@ -158,7 +181,6 @@ if __name__ == "__main__":
     component = sys.argv[1]
     assert component in PROFILES, component
     check_render([component])
-    check_render([component], legacy=True)
     for partner in PROFILES:
         if component < partner and set(PROFILES[partner]).isdisjoint(PROFILES[component]):
             check_render([component, partner])
@@ -170,5 +192,6 @@ if __name__ == "__main__":
     assert not empty.stdout.strip(), empty.stdout
     check_renovate(component)
     if component == next(iter(PROFILES)):
+        check_release_scope()
         check_release_output()
     print(f"Passed {component}: labels, composition, workloads, empty render, Renovate, release")

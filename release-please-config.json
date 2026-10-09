@@ -96,10 +96,22 @@
       "release-type": "simple",
       "tag-separator": "-"
     },
-    "kustomization/pod-security": {
+    "kustomization/components": {
       "package-name": "kustomize-pod-security",
       "release-type": "simple",
-      "initial-version": "1.0.0"
+      "initial-version": "1.0.0",
+      "changelog-path": "POD_SECURITY_CHANGELOG.md",
+      "version-file": "pod-security-version.txt",
+      "exclude-paths": [
+        "kustomization/components/factorio",
+        "kustomization/components/gdp-coraltpu",
+        "kustomization/components/kube-vip",
+        "kustomization/components/mosquitto",
+        "kustomization/components/paperless",
+        "kustomization/components/priorityclass",
+        "kustomization/components/redis",
+        "kustomization/components/unifi-network-application"
+      ]
     }
   },
   "separate-pull-requests": true,

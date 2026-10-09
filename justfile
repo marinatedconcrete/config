@@ -215,9 +215,14 @@ shellcheck-lint:
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
 
+# Check the Pod Security release scope.
+[group('lint')]
+pod-security-release-check:
+    python3 .github/workflows/check-pod-security-release.py
+
 # Run all linters.
 [group('lint')]
-lint: ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
+lint: pod-security-release-check ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
 
 # Run the Kairos Fedora end-to-end test for startup and installation.
 [group('test')]
@@ -265,9 +270,9 @@ release-please-build project dest="":
 
     if [[ "${component}" == pod-security ]]; then
         # Test all components in the shared release.
-        for component_path in kustomization/pod-security/*/; do
+        for component_path in kustomization/components/pod-security-*/; do
             name="${component_path%/}"
-            just kustomization-test "pod-security-${name##*/}"
+            just kustomization-test "${name##*/}"
         done
         # These components produce no standalone resources.
         : > "${dest_path}"

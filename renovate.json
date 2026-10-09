@@ -215,7 +215,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^kustomization/pod-security/enforce-(baseline|restricted)/namespace-labels\\.yml$/"
+        "/^kustomization/components/pod-security-enforce-(baseline|restricted)/namespace-labels\\.yml$/"
       ],
       "matchStrings": [
         "#\\s*renovate:(?:\\s*datasource=(?<datasource>(\\w|-)+))(?:\\s*depName=(?<depName>(\\w|-|\\/|\\.)+))(?:\\s*extractVersion=(?<extractVersion>.+?))\\n\\s+pod-security\\.kubernetes\\.io/enforce-version:\\s+(?<currentValue>v\\d+\\.\\d+)"
