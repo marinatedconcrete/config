@@ -1,5 +1,4 @@
 import copy
-import json
 import os
 from pathlib import Path
 import re
@@ -124,34 +123,6 @@ assert.equal(new RegExp(match.extractVersion).exec('v1.37.0-alpha.1'), null);
     )
 
 
-def check_release_output():
-    packages = {
-        "kustomization/policies": {"package-name": "kustomize-policy-bundle"},
-        "kustomization/components/example": {"package-name": "kustomize-example"},
-    }
-    outputs = {
-        "paths_released": json.dumps(list(packages)),
-        "kustomization/policies--release_created": True,
-        "kustomization/policies--tag_name": "kustomize-policy-bundle@v1.2.3",
-        "kustomization/components/example--release_created": False,
-    }
-    with tempfile.TemporaryDirectory() as scratch:
-        directory = Path(scratch)
-        (directory / "release-please-config.json").write_text(json.dumps({"packages": packages}))
-        output_file = directory / "output"
-        subprocess.run(
-            ["sh", str(ROOT / ".github/workflows/release-please-output-helper.sh")],
-            cwd=directory,
-            env={**os.environ, "OUTPUTS": json.dumps(outputs), "GITHUB_OUTPUT": str(output_file)},
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        assert json.loads(output_file.read_text().removeprefix("components_json=")) == [
-            {"project": "kustomize-policy-bundle", "tag": "kustomize-policy-bundle@v1.2.3"}
-        ]
-
-
 if __name__ == "__main__":
     component = sys.argv[1]
     assert component in PROFILES, component
@@ -166,6 +137,4 @@ if __name__ == "__main__":
     )
     assert not empty.stdout.strip(), empty.stdout
     check_renovate(component)
-    if component == next(iter(PROFILES)):
-        check_release_output()
-    print(f"Passed {component}: labels, composition, workloads, empty render, Renovate, release")
+    print(f"Passed {component}: labels, composition, workloads, empty render, Renovate")

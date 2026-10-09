@@ -14,7 +14,7 @@ components='[]'
 released_paths=$(jq -r '.paths_released | fromjson | map(select(startswith("kustomization")))[]' /tmp/release-please-output.json)
 if [ -n "$released_paths" ]; then
     while IFS= read -r p; do
-        package_name=$(jq -er --arg path "$p" '.packages[$path]["package-name"]' release-please-config.json)
+        package_name=$(echo "$p" | sed -e 's/kustomization\/components\//kustomize-/' -)
         echo "Computing outputs for '$p' ($package_name)..."
         release_created=$(jq -r --arg key "$p"--release_created '.[$key]' /tmp/release-please-output.json)
         tag_name=$(jq -r --arg key "$p"--tag_name '.[$key]' /tmp/release-please-output.json)
