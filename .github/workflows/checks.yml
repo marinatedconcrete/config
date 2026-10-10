@@ -131,3 +131,13 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
           runCmd: just lint
+  release-automation-test:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Release Tools
+        run: npm ci --prefix .github/release --ignore-scripts
+      - name: Test Release Automation
+        run: npm test --prefix .github/release
