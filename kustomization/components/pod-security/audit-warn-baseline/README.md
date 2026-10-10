@@ -1,11 +1,11 @@
-# pod-security-audit-warn-baseline
+# audit-warn-baseline
 
 This component sets Pod Security audit and warning labels on every Namespace resource in the Kustomization.
 
-| Mode | Policy | Version |
-| --- | --- | --- |
-| audit | baseline | latest |
-| warn | baseline | latest |
+| Mode  | Policy   | Version |
+| ----- | -------- | ------- |
+| audit | baseline | latest  |
+| warn  | baseline | latest  |
 
 The component does not create Namespace resources or change workload security contexts.
 Add each Namespace resource to the consumer Kustomization.
@@ -14,7 +14,9 @@ Without Namespace resources, this component produces no resources.
 
 ## Usage
 
-Replace `{version}` with a released package version.
+All five Pod Security components share one package version and Git tag.
+Replace `{version}` with a released `kustomize-pod-security` package version.
+Use the same version for each Pod Security component in a Kustomization.
 
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -24,7 +26,7 @@ resources:
   - namespace.yml
 
 components:
-  - https://github.com/marinatedconcrete/config/kustomization/components/pod-security-audit-warn-baseline?ref=kustomize-pod-security-audit-warn-baseline@v{version}
+  - https://github.com/marinatedconcrete/config/kustomization/components/pod-security/audit-warn-baseline?ref=kustomize-pod-security@v{version}
 ```
 
 Create `namespace.yml` with the required namespace name.
@@ -36,7 +38,7 @@ metadata:
   name: application
 ```
 
-You can combine this component with `pod-security-enforce-baseline`.
+You can combine this component with `enforce-baseline`.
 Select one enforcement component and one audit and warning component.
 Their order does not affect the labels.
 Do not combine two components that set the same mode.
@@ -51,4 +53,6 @@ Check cluster compatibility before you select a new component release.
 A change to a policy version can change admission results.
 
 Use the versioned component URL to install this component.
+The shared tag has the form `kustomize-pod-security@v{version}`.
+Previous component tags remain available for existing installations.
 The release has no standalone resource manifest because this component contains only a patch.

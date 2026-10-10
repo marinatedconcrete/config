@@ -188,7 +188,8 @@ hado-lint:
 kustomize-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    find kustomization/components -mindepth 1 -maxdepth 1 -type d -print | while read -r file; do 
+    find kustomization/components -name kustomization.yml -print | while read -r manifest; do
+        file="${manifest%/*}"
         echo -n "Running \`kustomize build\` on ${file}..."
         kustomize build ${file} > /dev/null
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
@@ -259,7 +260,6 @@ release-please-build project dest="":
 
     component="${project#kustomize-}"
     component_path="kustomization/components/${component}"
-
     if [[ ! -d "${component_path}" ]]; then
         echo "Component path not found: ${component_path}" >&2
         exit 1
@@ -268,6 +268,18 @@ release-please-build project dest="":
     dest_path="{{ dest }}"
     if [[ -z "${dest_path}" ]]; then
         dest_path="/tmp/${component}.yml"
+    fi
+
+    if [[ ! -f "${component_path}/kustomization.yaml" && ! -f "${component_path}/kustomization.yml" && ! -f "${component_path}/Kustomization" ]]; then
+        # Test all components in the shared release.
+        for child_path in "${component_path}"/*/; do
+            name="${child_path%/}"
+            just kustomization-test "${component}-${name##*/}"
+        done
+        # The group has no combined resource manifest.
+        : > "${dest_path}"
+        echo "${dest_path}"
+        exit 0
     fi
 
     # Run component tests before the release build.
