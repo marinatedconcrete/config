@@ -11,5 +11,5 @@
   "kustomization/components/unifi-network-application": "1.2.0",
   "renovate": "2.6.1",
   "images/buildah-action-runner": "1.0.1",
-  "kustomization/components/pod-security": "0.0.0"
+  "kustomization/components/pod-security": "1.0.0"
 }
