@@ -1,0 +1,40 @@
+---
+name: Publish Image Release Notes
+description: Attach the SBOM to a release and add the notes to the end of the release body.
+
+inputs:
+  component:
+    description: The prefix of the output files of the Image Release Notes action.
+    required: true
+  directory:
+    description: The directory that contains the notes and the SBOM.
+    required: false
+    default: build/release
+  tag:
+    description: The release tag.
+    required: true
+  token:
+    description: The token that the action uses to write the release.
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    # The work is in `publish.sh`, so `shellcheck` reads it. This action reads
+    # two files and calls the GitHub API. This action runs no code from the
+    # image, so a job with write access to the release does not run the image.
+    - name: Publish Image Release Notes
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        COMPONENT: ${{ inputs.component }}
+        DIRECTORY: ${{ inputs.directory }}
+        GH_TOKEN: ${{ inputs.token }}
+        TAG: ${{ inputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        bash "${ACTION_PATH}/publish.sh" \
+          --component "$COMPONENT" \
+          --directory "$DIRECTORY" \
+          --tag "$TAG"
