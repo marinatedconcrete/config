@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "prettier": "3.9.6",
+    "prettier": "3.9.10",
     "renovate": "43.204.1"
   },
   "packageManager": "yarn@4.18.0",
@@ -9,7 +9,7 @@
     "check-format": "prettier --no-error-on-unmatched-pattern --check '**/*.yml' '**/*.json' '**/*.md'"
   },
   "dependenciesMeta": {
-    "prettier@3.9.6": {
+    "prettier@3.9.10": {
       "unplugged": true
     }
   }
