@@ -43,7 +43,7 @@
       // Disable unused node-gyp dependencies to save space.
       "nodeGypDependencies": "false",
       // renovate: datasource=github-releases depName=nvm-sh/nvm
-      "nvmVersion": "0.40.7",
+      "nvmVersion": "0.40.8",
       "pnpmVersion": "none",
       // renovate: datasource=node-version depName=node
       "version": "24.20.0"
