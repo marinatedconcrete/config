@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.3](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.2.2...github-runner-ci-1.2.3) (2026-10-16)
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
+
+### Other Changes
+
+* **package:** update ghcr.io/marinatedconcrete/devcontainer-base:latest docker digest to 6d5fc79 ([#888](https://github.com/marinatedconcrete/config/issues/888)) ([40fe726](https://github.com/marinatedconcrete/config/commit/40fe726514cffd6429c9eecb2ba6069298e9a20b))
+
 ## [1.2.2](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.2.1...github-runner-ci-1.2.2) (2026-09-06)
 
 
