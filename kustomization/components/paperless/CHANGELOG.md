@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.4](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.2.3...kustomize-paperless@v1.2.4) (2026-10-16)
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
+
+### Other Changes
+
+* **package:** update ghcr.io/servercontainers/samba:smbd-only-latest docker digest to 31b90ea ([#862](https://github.com/marinatedconcrete/config/issues/862)) ([e67013f](https://github.com/marinatedconcrete/config/commit/e67013fe7ffb9d9da2c3eb49bf4c1dd8704dc5ac))
+
 ## [1.2.3](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.2.2...kustomize-paperless@v1.2.3) (2026-09-06)
 
 
