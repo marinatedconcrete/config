@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/marinatedconcrete/config/compare/buildah-action-runner-1.0.1...buildah-action-runner-1.0.2) (2026-10-16)
+
+
+### Other Changes
+
+* **package:** update quay.io/containers/buildah docker tag to v1.43.4 ([#908](https://github.com/marinatedconcrete/config/issues/908)) ([195bbe9](https://github.com/marinatedconcrete/config/commit/195bbe9776a3b879a1203527909aad86b7574b98))
+
 ## [1.0.1](https://github.com/marinatedconcrete/config/compare/buildah-action-runner-1.0.0...buildah-action-runner-1.0.1) (2026-09-06)
 
 
