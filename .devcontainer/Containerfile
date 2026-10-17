@@ -1,7 +1,7 @@
 ARG DEVCONTAINER_BASE_TAG=latest
 
 FROM ghcr.io/hadolint/hadolint:v2.15.1@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d AS hadolint
-FROM registry.k8s.io/kustomize/kustomize:v5.8.1@sha256:899fcd3bc898160e62bcaf82932b0cb29ba38d16272353db2e7acbba82129429 AS kustomize
+FROM registry.k8s.io/kustomize/kustomize:v5.8.3@sha256:429eda4a1c76a7de458d0c4ca3ded9b5d764899ff6bdaeccc1d98b1b6ee873e4 AS kustomize
 
 FROM scratch AS ctx
 COPY .devcontainer/build_files /
