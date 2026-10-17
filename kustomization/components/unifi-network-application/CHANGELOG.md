@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.1](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.2.0...kustomize-unifi-network-application@v1.2.1) (2026-10-17)
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
+
+### Other Changes
+
+* **package:** update lscr.io/linuxserver/unifi-network-application docker tag to v10.6.106 ([#913](https://github.com/marinatedconcrete/config/issues/913)) ([7d89a6b](https://github.com/marinatedconcrete/config/commit/7d89a6b24ed36c272390417f35a43f2c6900d772))
+* **package:** update unifi ([#906](https://github.com/marinatedconcrete/config/issues/906)) ([c73403c](https://github.com/marinatedconcrete/config/commit/c73403cd4242918617c53cdf1e0e09be37cc0985))
+
 ## [1.2.0](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.31...kustomize-unifi-network-application@v1.2.0) (2026-06-20)
 
 
