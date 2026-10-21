@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.10.0...kairos-fedora-0.10.1) (2026-10-20)
+
+
+### Other Changes
+
+* **package:** update AuroraBoot to v0.28.0 ([#920](https://github.com/marinatedconcrete/config/issues/920)) ([8823678](https://github.com/marinatedconcrete/config/commit/8823678e7f2ef9d709ba9dacd42f8757ad4cb3e4))
+
 ## [0.10.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.9.0...kairos-fedora-0.10.0) (2026-10-08)
 
 

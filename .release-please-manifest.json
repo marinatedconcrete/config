@@ -1,7 +1,7 @@
 {
   "ansible": "1.5.0",
   "images/github-runner-ci": "1.2.4",
-  "images/kairos-fedora": "0.10.0",
+  "images/kairos-fedora": "0.10.1",
   "images/vscode-ssh-server": "0.1.6",
   "kustomization/components/factorio": "0.1.5",
   "kustomization/components/kube-vip": "4.0.7",
