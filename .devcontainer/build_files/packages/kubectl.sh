@@ -3,7 +3,7 @@
 set -eoux pipefail
 
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
-KUBECTL_VERSION=v1.37.0
+KUBECTL_VERSION=v1.37.1
 
 kubectl="$(mktemp --tmpdir kubectl.XXXXXX)"
 trap 'rm -f "${kubectl}"' EXIT
