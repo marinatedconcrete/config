@@ -4,7 +4,8 @@
     ":semanticCommitScope(package)",
     "github>marinatedconcrete/config//renovate/marinatedconcrete#renovate-config-2.6.1",
     "github>marinatedconcrete/config//renovate/devcontainer#renovate-config-2.6.1",
-    "github>marinatedconcrete/config//renovate/recommended#renovate-config-2.6.1"
+    "github>marinatedconcrete/config//renovate/recommended#renovate-config-2.6.1",
+    "helpers:pinGitHubActionDigestsToSemver"
   ],
   "timezone": "America/Los_Angeles",
   "configMigration": true,
