@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.5.0...ansible-collection@v1.5.1) (2026-10-24)
+
+
+### Other Changes
+
+* **package:** update dependency kubernetes to v37 ([#925](https://github.com/marinatedconcrete/config/issues/925)) ([e9a45e4](https://github.com/marinatedconcrete/config/commit/e9a45e404f139e30557e4c801e94d3b659430733))
+
 ## [1.5.0](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.4.7...ansible-collection@v1.5.0) (2026-10-17)
 
 
