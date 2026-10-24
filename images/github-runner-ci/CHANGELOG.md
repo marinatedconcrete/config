@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.5](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.2.4...github-runner-ci-1.2.5) (2026-10-24)
+
+
+### Other Changes
+
+* **package:** update ghcr.io/marinatedconcrete/devcontainer-base:latest docker digest to 78fa1a1 ([#950](https://github.com/marinatedconcrete/config/issues/950)) ([454dd3f](https://github.com/marinatedconcrete/config/commit/454dd3fd94673ea7412cd47082bfad7e013c09b7))
+
 ## [1.2.4](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.2.3...github-runner-ci-1.2.4) (2026-10-18)
 
 
