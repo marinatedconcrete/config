@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.7...kustomize-kube-vip@v5.0.0) (2026-10-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **kube-vip:** kube-vip-svc-ds now supplies metrics on port 2113. Change a scrape or a firewall rule for this DaemonSet from port 2112 to port 2113.
+
+### Bug Fixes
+
+* **kube-vip:** give each DaemonSet its own metrics port ([#958](https://github.com/marinatedconcrete/config/issues/958)) ([909bcc1](https://github.com/marinatedconcrete/config/commit/909bcc133b77412ffcc297da5689e3c055429ed7))
+
+
+### Other Changes
+
+* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1.3.1 ([#918](https://github.com/marinatedconcrete/config/issues/918)) ([3c6b1cb](https://github.com/marinatedconcrete/config/commit/3c6b1cbcb0f71a2de6bfe26d54aa1aac8cface8e))
+
 ## [4.0.7](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.6...kustomize-kube-vip@v4.0.7) (2026-10-15)
 
 
