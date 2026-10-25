@@ -4,7 +4,7 @@
   "images/kairos-fedora": "0.10.1",
   "images/vscode-ssh-server": "0.1.6",
   "kustomization/components/factorio": "0.1.5",
-  "kustomization/components/kube-vip": "4.0.7",
+  "kustomization/components/kube-vip": "5.0.0",
   "kustomization/components/mosquitto": "2.0.7",
   "kustomization/components/paperless": "1.2.7",
   "kustomization/components/priorityclass": "1.0.4",
