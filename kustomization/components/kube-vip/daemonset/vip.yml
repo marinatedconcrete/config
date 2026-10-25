@@ -44,6 +44,8 @@ spec:
               value: first
             - name: port
               value: "6443"
+            - name: prometheus_server
+              value: :2112
             - name: vip_arp
               value: "true"
             - name: vip_leaderelection

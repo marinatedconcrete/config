@@ -32,6 +32,7 @@ codegen-kube-vip:
             --controlplane \
             --inCluster \
             --leaderElection \
+            --prometheusHTTPServer=:2112 \
             --taint \
         > ${SCRATCH}
 
@@ -52,9 +53,6 @@ codegen-kube-vip:
     # Remove the VIP address. The user must set this address with a patch.
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "address"))' ${SCRATCH}
 
-    # Remove prometheus_server.
-    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "prometheus_server"))' ${SCRATCH}
-
     # Set cp_namespace with a field reference.
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "cp_namespace") | .value)' ${SCRATCH}
     yq -i '(.spec.template.spec.containers[0].env[] | select(.name == "cp_namespace") | .valueFrom.fieldRef.fieldPath) = "metadata.namespace"' ${SCRATCH}
@@ -74,13 +72,16 @@ codegen-kube-vip:
         >> ${DEST}
 
 
-    # Generate the services DaemonSet manifest.
+    # Generate the services DaemonSet manifest.  Use a metrics port that is
+    # different from the control plane DaemonSet port.  Both DaemonSets use the
+    # host network, and a control plane node runs both.
     DEST=kustomization/components/kube-vip/daemonset/services.yml
     SCRATCH=$(mktemp --tmpdir daemonset-XXX.yml)
     docker run --network host --rm ${KUBE_VIP_IMAGE} \
         manifest daemonset \
             --arp \
             --inCluster \
+            --prometheusHTTPServer=:2113 \
             --services \
             --servicesElection \
         > ${SCRATCH}
@@ -107,7 +108,6 @@ codegen-kube-vip:
     # Remove unused environment settings.
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "dns_mode"))' ${SCRATCH}
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "port"))' ${SCRATCH}
-    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "prometheus_server"))' ${SCRATCH}
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "vip_address"))' ${SCRATCH}
 
     # Set cp_namespace with a field reference.
