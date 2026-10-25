@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.5.1...ansible-collection@v1.6.0) (2026-10-25)
+
+
+### Features
+
+* **package:** Update dependency kubernetes/kubernetes ([#940](https://github.com/marinatedconcrete/config/issues/940)) ([527db27](https://github.com/marinatedconcrete/config/commit/527db27714977f705ef6b186be947c158051fb74))
+
 ## [1.5.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.5.0...ansible-collection@v1.5.1) (2026-10-25)
 
 
