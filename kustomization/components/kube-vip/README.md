@@ -7,6 +7,15 @@ This component installs [kube-vip](https://kube-vip.io/) as two `DaemonSet` reso
 1) One for the control plane.
 2) One for the ingress IP addresses of all services.
 
+# Metrics
+
+Each `DaemonSet` supplies Prometheus metrics on a different port.  Both `DaemonSet` resources use the host network, and a control plane node runs both.
+
+| `DaemonSet`       | Port   |
+| ----------------- | ------ |
+| `kube-vip-ds`     | `2112` |
+| `kube-vip-svc-ds` | `2113` |
+
 # Examples
 
 Replace `{version}` with the version that you want to use.

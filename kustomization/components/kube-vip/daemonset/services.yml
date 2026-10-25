@@ -28,6 +28,8 @@ spec:
                   fieldPath: metadata.namespace
             - name: dhcp_mode
               value: ipv4
+            - name: prometheus_server
+              value: :2113
             - name: svc_election
               value: "true"
             - name: svc_enable
