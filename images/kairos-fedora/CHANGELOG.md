@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.10.1...kairos-fedora-0.11.0) (2026-10-25)
+
+
+### Features
+
+* **package:** Update dependency k3s-io/k3s to v1.37.1+k3s1 ([#939](https://github.com/marinatedconcrete/config/issues/939)) ([7eb733e](https://github.com/marinatedconcrete/config/commit/7eb733e283d6d2eccb8209de659338245485932f))
+
 ## [0.10.1](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.10.0...kairos-fedora-0.10.1) (2026-10-20)
 
 
