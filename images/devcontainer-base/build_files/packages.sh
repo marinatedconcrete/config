@@ -23,6 +23,7 @@ COMMON_PACKAGES=(
     # Install version control tools.
     "diffutils"
     "git"
+    "gh"
     # Install the text editor.
     "vim"
 )
