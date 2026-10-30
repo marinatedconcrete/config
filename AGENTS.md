@@ -19,7 +19,7 @@
 
 ## Development Environment
 - This repository uses a devcontainer. See `.devcontainer/` for its configuration. Use the devcontainer CLI to run commands in the devcontainer when possible. If the CLI is not available, run commands on the host. Report missing tools, such as `just`.
-- After you open the devcontainer, run `yarn --immutable` to install dependencies and configure Prettier. See `.devcontainer/post-create-command.sh` for the setup commands.
+- After you open the devcontainer, run `pnpm install --frozen-lockfile` to install dependencies and configure Prettier. See `.devcontainer/post-create-command.sh` for the setup commands.
 - Use the `build_files` pattern for container images. See `devcontainer-base` and `kairos-fedora` for examples. Keep stages, arguments, mounts, labels, and final image settings in the Containerfile. Put package installation and setup commands in executable scripts under `images/<name>/build_files/`.
 
 ## Formatting and Lint Checks

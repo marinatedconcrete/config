@@ -12,8 +12,6 @@
     "vscode": {
       "extensions": [
         "esbenp.prettier-vscode",
-        // Let VS Code find the Prettier package for formatting.
-        "arcanis.vscode-zipfs",
         "github.vscode-github-actions",
         "ms-kubernetes-tools.vscode-kubernetes-tools",
         "nefrob.vscode-just-syntax",
@@ -27,10 +25,9 @@
       "settings": {
         "prettier.useEditorConfig": false,
         "search.exclude": {
-          "**/.yarn": true,
-          "**/.pnp.*": true
+          "**/node_modules": true
         },
-        "prettier.prettierPath": ".yarn/sdks/prettier/index.js"
+        "prettier.prettierPath": "node_modules/prettier/index.cjs"
       }
     }
   },
