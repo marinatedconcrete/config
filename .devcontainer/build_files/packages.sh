@@ -4,6 +4,7 @@ set -eoux pipefail
 
 PACKAGES=(
     "edk2-ovmf"
+    "libatomic"
     "libssh-devel"
     "openssh-clients"
     "openssl"
