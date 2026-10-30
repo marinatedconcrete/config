@@ -1,6 +1,6 @@
 {
   "ansible": "1.6.0",
-  "images/github-runner-ci": "1.2.5",
+  "images/github-runner-ci": "1.2.6",
   "images/kairos-fedora": "0.11.0",
   "images/vscode-ssh-server": "0.1.6",
   "kustomization/components/factorio": "0.1.5",
