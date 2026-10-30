@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.11.0...kairos-fedora-0.11.1) (2026-10-30)
+
+
+### Other Changes
+
+* **package:** update quay.io/kairos/auroraboot docker tag to v0.29.0 ([#965](https://github.com/marinatedconcrete/config/issues/965)) ([026c238](https://github.com/marinatedconcrete/config/commit/026c2385ea7ac14ef8823c2dfc1b8dd0705843e6))
+
 ## [0.11.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.10.1...kairos-fedora-0.11.0) (2026-10-25)
 
 
