@@ -13,6 +13,11 @@
   "rollbackPrs": true,
   "packageRules": [
     {
+      "description": "Keep pnpm compatible with the current Renovate lockfile parser",
+      "matchPackageNames": ["pnpm"],
+      "allowedVersions": "<11"
+    },
+    {
       "description": "Do not pin Fedora image digests because old digests disappear",
       "matchDatasources": ["docker"],
       "matchPackageNames": [
@@ -35,7 +40,7 @@
     },
     {
       "description": "Automerge all js infra, and gh-cli changes",
-      "matchPackageNames": ["prettier", "@yarnpkg/cli", "cli/cli", "node"],
+      "matchPackageNames": ["prettier", "pnpm", "cli/cli", "node"],
       "automerge": true,
       "automergeSchedule": ["every day"]
     },

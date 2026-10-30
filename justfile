@@ -9,7 +9,7 @@ check-format:
     #!/usr/bin/env bash
     set -euo pipefail
     just --unstable --fmt --check -f justfile
-    yarn prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md
+    pnpm exec prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md pnpm-workspace.yaml
 
 # Generate the kube-vip manifests.
 [group('codegen')]
@@ -159,7 +159,7 @@ format:
     #!/usr/bin/env bash
     set -euo pipefail
     just --unstable --fmt -f justfile
-    yarn prettier --no-error-on-unmatched-pattern --log-level warn --write **/*.yml **/*.json **/*.md
+    pnpm exec prettier --no-error-on-unmatched-pattern --log-level warn --write **/*.yml **/*.json **/*.md pnpm-workspace.yaml
 
 # Check Ansible plays, roles, and configuration.
 [group('lint')]
@@ -177,7 +177,7 @@ ansible-lint:
 hado-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    find . -name "*erfile*" -print | while read -r file; do 
+    find . -type d -name node_modules -prune -o -name "*erfile*" -print | while read -r file; do
         echo -n "Running \`hadolint\` on ${file}..."
         hadolint ${file}
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
@@ -200,9 +200,9 @@ kustomize-lint:
 renovate-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    yarn renovate-config-validator renovate.json
+    pnpm exec renovate-config-validator renovate.json
     find renovate -name "*.json" -print | while read -r file; do
-        yarn renovate-config-validator ${file}
+        pnpm exec renovate-config-validator ${file}
     done
 
 # Check shell scripts with ShellCheck.
@@ -210,7 +210,7 @@ renovate-lint:
 shellcheck-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    find . -path "./.yarn" -prune -o -name "*.sh" -print | while read -r file; do
+    find . -type d -name node_modules -prune -o -name "*.sh" -print | while read -r file; do
         echo -n "Running \`shellcheck\` on ${file}..."
         shellcheck ${file}
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
@@ -286,9 +286,3 @@ release-please-build project dest="":
     just kustomization-test "${component}"
     kustomize build "${component_path}/" -o "${dest_path}"
     echo "${dest_path}"
-
-# Generate the Yarn integration files for tools such as VS Code.
-regen-yarn-sdks:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    yarn dlx @yarnpkg/sdks

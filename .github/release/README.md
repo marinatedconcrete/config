@@ -137,7 +137,7 @@ The workflow does not guarantee reproducible builds.
 Run these commands in the repository devcontainer:
 
 ```sh
-yarn --immutable
+pnpm install --frozen-lockfile
 npm ci --prefix .github/release --ignore-scripts
 npm test --prefix .github/release
 just format

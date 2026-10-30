@@ -66,7 +66,7 @@ jobs:
             RELEASE_TAG=${{ fromJson(inputs.candidate).tag }}
           runCmd: |
             set -euo pipefail
-            yarn --immutable
+            pnpm install --frozen-lockfile
             mkdir -p release-artifacts
             just release-please-build "$PROJECT" "$PWD/release-artifacts/$PROJECT.yml"
             manifest=false
@@ -96,7 +96,7 @@ jobs:
           push: never
           env: |
             CI=1
-          runCmd: yarn --immutable && just check-format && just lint && just test
+          runCmd: pnpm install --frozen-lockfile && just check-format && just lint && just test
 
   kairos-fedora:
     needs: recover
