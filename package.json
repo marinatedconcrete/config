@@ -1,7 +1,7 @@
 {
   "devDependencies": {
     "prettier": "3.9.10",
-    "renovate": "43.204.1"
+    "renovate": "43.288.0"
   },
   "packageManager": "pnpm@10.34.9",
   "scripts": {
