@@ -2,7 +2,7 @@ FROM scratch AS ctx
 COPY build_files /
 
 # hadolint ignore=DL3007
-FROM ghcr.io/marinatedconcrete/devcontainer-base:latest@sha256:230d334ecf87acd2f685751935cca7196ed6a9a4c29265da4879f805f3b73a53
+FROM ghcr.io/marinatedconcrete/devcontainer-base:latest@sha256:6cc3339d24312786026abc5f634e4c5e13760b29ed794bd2b907ee09a80aab92
 
 LABEL org.opencontainers.image.title="github-runner-ci"
 LABEL org.opencontainers.image.description="A CI job image for ARC kubernetes-novolume runners."
