@@ -363,3 +363,63 @@ test("unknown draft asset states are preserved for inspection", async () => {
     !state.operations.some((operation) => operation.startsWith("DELETE ")),
   );
 });
+
+test("image notes and SBOM are in the draft before publication", async () => {
+  const { state, api } = server();
+  const image = { ...candidate, kind: "image", project: "kairos-fedora" };
+  const sbom = [{ name: "kairos-fedora-sbom.cdx.json", data: Buffer.from("1") }];
+  await publishRelease({
+    api,
+    candidate: image,
+    assets: sbom,
+    notes: "### Image Components",
+    imageDigest: `sha256:${"1".repeat(64)}`,
+    promote: async () => {},
+  });
+  assert.match(
+    state.release.body,
+    /^Release notes\.\n\n### Image Components\n\n<!-- config-release: [A-Za-z0-9+/=]+ -->$/,
+  );
+  assert.equal(state.assets.length, 1);
+  assert(
+    state.operations.indexOf(
+      "POST https://uploads.github.com/test?name=kairos-fedora-sbom.cdx.json",
+    ) < state.operations.indexOf("PATCH releases/1"),
+  );
+});
+
+test("image recovery uploads the validated SBOM again but not a rebuilt one", async () => {
+  const image = { ...candidate, kind: "image", project: "kairos-fedora" };
+  const first = [{ name: "kairos-fedora-sbom.cdx.json", data: Buffer.from("1") }];
+  const rebuilt = [{ name: "kairos-fedora-sbom.cdx.json", data: Buffer.from("2") }];
+  const publish = (api, assets, promote = async () => {}) =>
+    publishRelease({
+      api,
+      candidate: image,
+      assets,
+      imageDigest: `sha256:${"1".repeat(64)}`,
+      promote,
+    });
+
+  const failedPromotion = server();
+  await assert.rejects(
+    publish(failedPromotion.api, first, async () => {
+      throw new Error("Registry unavailable");
+    }),
+    /Registry unavailable/,
+  );
+  await publish(failedPromotion.api, rebuilt);
+  assert.equal(failedPromotion.state.release.draft, false);
+  assert.equal(failedPromotion.state.assets[0].data.toString(), "1");
+
+  const failedUpload = server();
+  failedUpload.state.failAfter = "POST releases";
+  await assert.rejects(publish(failedUpload.api, first), /Interrupted/);
+  await assert.rejects(
+    publish(failedUpload.api, rebuilt),
+    /Validated asset is unavailable/,
+  );
+  assert.equal(failedUpload.state.assets.length, 0);
+  await publish(failedUpload.api, first);
+  assert.equal(failedUpload.state.release.draft, false);
+});

@@ -45,7 +45,7 @@ For release tags, the workflow publishes the image only after the end-to-end tes
 
 The [Image Release Notes action](../../actions/image-release-notes/README.md) writes the release notes for this image.
 The build workflow runs the action for each build and supplies the notes as an artifact.
-After the release workflow creates a release, its publish job attaches the SBOM and adds the notes to the release body.
+The release workflow adds the notes and the SBOM to the draft release before publication.
 
 The `release-notes-components.sh` script supplies the Kairos rows for the component table.
 The script reports the Kairos Agent, kairos-init, and Kubernetes versions.

@@ -39,11 +39,9 @@ The publisher assigns the release version to the tested digest without a rebuild
 PR and branch image checks keep their existing publication rules.
 Image tag pushes do not start another build.
 
-The Kairos Fedora build also generates image release notes and an SBOM.
-After publication, the publisher adds them to the release.
-They are not part of the validation record.
-If this step fails, run the failed publish job again.
-A new recovery run finds the published release and does not add the notes.
+The Kairos Fedora build also generates image release notes and an SBOM for the tested image.
+The publisher adds the notes to the draft body and uploads the SBOM before publication.
+The validation record contains the SBOM size and hash.
 
 ## Concurrency
 
@@ -107,8 +105,11 @@ Existing release assets must match the validated bytes.
 A difference stops publication; the workflow does not replace the existing artifact.
 Incomplete `starter` and `open` assets can be removed from a draft before another upload.
 Unknown asset states stop publication without deletion.
-A draft still requires rebuilt assets to match its validation record.
+A component draft still requires rebuilt assets to match its validation record.
 If those bytes cannot be reproduced, restore the original validated artifacts before recovery.
+An image draft uses its saved digest, so it ignores rebuilt assets with different bytes.
+A rerun of the original workflow can upload the original SBOM again.
+If a new run cannot upload the saved SBOM, restore the original SBOM before recovery.
 
 The draft body contains a validation record in an HTML comment.
 Keep this record unchanged.

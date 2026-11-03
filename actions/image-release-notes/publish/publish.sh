@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Attach the SBOM to a release. Add the notes to the end of the release body,
-# above the HTML comments at the end of the body.
+# Attach the SBOM to a release. Add the notes to the end of the release body.
 # This script reads two files and calls the GitHub API. This script runs no code
 # from the image, so a job with write access to the release does not run the
 # image.
@@ -45,46 +44,32 @@ need_value() {
     (($# >= 2)) || die "the $1 option needs a value"
 }
 
-# Print one part of the release body in FILE. The `above` part is the text
-# above the section that an earlier run added. The `trailer` part is the HTML
-# comment lines at the end of the body. Other tools keep records in these
-# comments, and a record can have to stay at the end. The marker must be alone
-# on its line. A marker in a commit message is therefore not a match, and the
-# text of the release stays complete. Use the last marker in the body. Ignore a
-# carriage return, because the GitHub web editor writes one at the end of each
-# line.
-body_part() {
-    local part="$1"
-    local marker="$2"
-    local file="$3"
+# Print the release body without the section that an earlier run added. The
+# marker must be alone on its line. A marker in a commit message is therefore
+# not a match, and the text of the release stays complete. Use the last marker
+# in the body. Ignore a carriage return, because the GitHub web editor writes
+# one at the end of each line.
+body_above_marker() {
+    local marker="$1"
 
-    PART="$part" MARKER="$marker" awk '
-        { sub(/\r$/, ""); lines[NR] = $0 }
-        $0 == ENVIRON["MARKER"] { found = NR }
-        END {
-            start = NR + 1
-            while (start > 1 && lines[start - 1] != ENVIRON["MARKER"] &&
-                lines[start - 1] ~ /^(<!--.*-->)?[[:space:]]*$/) start--
-            if (ENVIRON["PART"] == "trailer") {
-                for (i = start; i <= NR; i++)
-                    if (lines[i] !~ /^[[:space:]]*$/) print lines[i]
-            } else {
-                last = found ? found - 1 : start - 1
+    gh release view "$tag" --json body --jq .body |
+        MARKER="$marker" awk '
+            { sub(/\r$/, "") }
+            { lines[NR] = $0; if ($0 == ENVIRON["MARKER"]) found = NR }
+            END {
+                last = found ? found - 1 : NR
                 for (i = 1; i <= last; i++) print lines[i]
             }
-        }
-    ' "$file"
+        '
 }
 
 main() {
     local body
-    local current_body
     local file
     local marker
     local notes
     local release_body
     local sbom
-    local trailer
 
     while (($# > 0)); do
         case "$1" in
@@ -131,7 +116,6 @@ main() {
 
     marker="<!-- ${component}-image-details -->"
     notes="${directory}/${component}-notes.md"
-    current_body="${directory}/release-body-current.md"
     release_body="${directory}/release-body.md"
     sbom="${directory}/${component}-sbom.cdx.json"
 
@@ -145,9 +129,7 @@ main() {
     log "Attaching the SBOM to ${tag}"
     gh release upload "$tag" "$sbom" --clobber
 
-    gh release view "$tag" --json body --jq .body >"$current_body"
-    body="$(body_part above "$marker" "$current_body")"
-    trailer="$(body_part trailer "$marker" "$current_body")"
+    body="$(body_above_marker "$marker")"
 
     # Remove the space characters at the end. The spacing then stays the same
     # when the job runs again.
@@ -161,9 +143,6 @@ main() {
         fi
         printf '%s\n\n' "$marker"
         cat "$notes"
-        if [[ -n "$trailer" ]]; then
-            printf '\n%s\n' "$trailer"
-        fi
     } >"$release_body"
 
     log "Writing the release body of ${tag}"

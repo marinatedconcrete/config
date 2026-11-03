@@ -76,12 +76,11 @@ publish-release-notes:
 
 This repository creates its releases after validation, not on tag pushes.
 `.github/workflows/image-kairos-fedora.yml` generates the notes.
-The `publish` job in `.github/workflows/release-package.yml` publishes them after it creates the release.
+The `publish` job in `.github/workflows/release-package.yml` adds them to the draft release before publication.
+That job does not use the publish action.
 
 The publish action needs a release at the tag.
 Create the release before the job runs.
-The publish action adds the notes above the HTML comment lines at the end of the release body.
-Other tools can keep a record in these comments.
 
 ## Renovate
 
