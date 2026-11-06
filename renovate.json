@@ -52,6 +52,14 @@
       "automergeType": "branch"
     },
     {
+      "description": "Auto-merge GitHub's own actions. Do not auto-merge third-party actions, because the image workflows give them write tokens.",
+      "automerge": true,
+      "automergeType": "branch",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["actions/*"],
+      "matchUpdateTypes": ["digest", "minor", "patch"]
+    },
+    {
       "description": "Auto-merge all Factorio updates",
       "automerge": true,
       "automergeType": "branch",
