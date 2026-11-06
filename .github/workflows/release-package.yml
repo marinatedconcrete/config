@@ -96,6 +96,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ fromJson(inputs.candidate).sha }}
+      # The runner can load an AppArmor profile for a program that a test
+      # runs. The profile then applies in the privileged test containers and
+      # blocks the program. Remove these profiles.
+      - name: Remove Host AppArmor Profiles
+        run: |
+          if [[ -f /etc/apparmor.d/mosquitto ]]; then
+            sudo apparmor_parser --remove /etc/apparmor.d/mosquitto
+          fi
       - name: Validate Source Release
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
