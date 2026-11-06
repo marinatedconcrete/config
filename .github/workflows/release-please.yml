@@ -87,7 +87,23 @@ jobs:
         with:
           app-id: ${{ vars.FORMWORK_REMOVER_APP_ID }}
           private-key: ${{ secrets.FORMWORK_REMOVER_PRIVATE_KEY }}
+      # A release PR can merge while this run is in progress. Then release-please
+      # can open the release PR again with old contents. The run for the newer
+      # commit updates the release PRs, so this run stops.
+      - name: Check Branch HEAD
+        id: head
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          head=$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)
+          if [ "$head" = "$GITHUB_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "main moved to $head. The run for that commit updates the release PRs." >> "$GITHUB_STEP_SUMMARY"
+            echo "current=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Update Release PRs
+        if: steps.head.outputs.current == 'true'
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
         with:
           token: ${{ steps.app-token.outputs.token }}
