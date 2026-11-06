@@ -257,7 +257,7 @@ wait_for_webui() {
         fi
 
         if curl --fail --silent --show-error --max-time 5 "$url" >"${logs_dir}/webui-index.html"; then
-            grep -q 'install-form' "${logs_dir}/webui-index.html" || die "WebUI responded but install form was not found"
+            grep -q 'wizard.js' "${logs_dir}/webui-index.html" || die "WebUI responded but the installer wizard was not found"
             return
         fi
         sleep 5
