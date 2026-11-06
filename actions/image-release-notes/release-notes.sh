@@ -79,6 +79,19 @@ remove_temp_files() {
         "$components" "$diff_json" "$image_tar" 2>/dev/null || true
 }
 
+# Print the Syft options that name the image, one on each line. A registry host
+# can contain a port, so read the tag only after the last slash. A digest is
+# not a version, so a reference without a tag gives no version.
+source_options() {
+    local name="${1%%@*}"
+
+    if [[ "${name##*/}" == *:* ]]; then
+        printf '%s\n' --source-name "${name%:*}" --source-version "${name##*:}"
+    else
+        printf '%s\n' --source-name "$name"
+    fi
+}
+
 # Run Syft on the image. Write the image to a tar file first. Syft then needs
 # no access to the Docker socket and no network. Access to the Docker socket
 # gives a container the same control as the root user on the host.
@@ -87,7 +100,9 @@ remove_temp_files() {
 # user that starts the script.
 extract_sbom() {
     local dest="$1"
+    local -a options
 
+    mapfile -t options < <(source_options "$image")
     image_tar="$(mktemp --tmpdir image-XXXXXX.tar)"
 
     log "Writing ${image} to a tar file"
@@ -104,8 +119,7 @@ extract_sbom() {
         "$SYFT_IMAGE" scan "docker-archive:/image.tar" \
         --output cyclonedx-json \
         --quiet \
-        --source-name "${image%%:*}" \
-        --source-version "${image##*:}" >"$dest" ||
+        "${options[@]}" >"$dest" ||
         die "Syft could not read ${image}"
 
     rm -f -- "$image_tar"

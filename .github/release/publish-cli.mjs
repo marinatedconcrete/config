@@ -8,15 +8,18 @@ const repository = process.env.GITHUB_REPOSITORY;
 const api = githubApi(repository, process.env.GH_TOKEN);
 const assets = [];
 let notes = "";
-// The image build can supply release notes and an SBOM for the tested image.
+// The release workflow downloads the notes artifact for these images.
+const noteImages = ["kairos-fedora"];
 if (candidate.kind === "image") {
-  const sbom = `${candidate.project}-sbom.cdx.json`;
-  if (existsSync(`artifacts/${sbom}`))
-    assets.push({ name: sbom, data: readFileSync(`artifacts/${sbom}`) });
-  if (existsSync(`artifacts/${candidate.project}-notes.md`))
+  if (noteImages.includes(candidate.project)) {
+    const name = `${candidate.project}-sbom.cdx.json`;
+    const data = readFileSync(`artifacts/${name}`);
     notes = readFileSync(`artifacts/${candidate.project}-notes.md`, "utf8").trim();
-}
-if (candidate.kind === "component") {
+    if (!data.length || !notes)
+      throw new Error("Image release notes or SBOM is empty");
+    assets.push({ name, data });
+  }
+} else if (candidate.kind === "component") {
   const name = `${candidate.project}.yml`;
   if (existsSync(`artifacts/${name}`)) {
     const data = readFileSync(`artifacts/${name}`);

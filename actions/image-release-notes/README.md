@@ -26,6 +26,8 @@ The notes contain these sections:
    The action omits this section when the image has no `dnf` command.
 3. The package changes since the previous release.
    The action omits this section for the first release.
+   The action also omits this section when the previous release has no SBOM.
+   If the action cannot download the previous SBOM, the action fails.
 
 The SBOM contains every package type that Syft finds.
 The tables show only the type in `package-type`, which is `rpm` by default.

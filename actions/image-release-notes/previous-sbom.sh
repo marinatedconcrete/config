@@ -86,7 +86,10 @@ find_previous_tag() {
 }
 
 main() {
+    local asset
+    local download_dir
     local previous_tag
+    local target
 
     while (($# > 0)); do
         case "$1" in
@@ -124,7 +127,13 @@ main() {
         die "--component is required"
     }
 
+    asset="${component}-sbom.cdx.json"
+    target="${directory}/previous/${asset}"
+
+    # Remove the SBOM of an earlier run. The notes would then compare with the
+    # wrong release.
     mkdir -p "${directory}/previous"
+    rm -f -- "$target"
 
     previous_tag="$(find_previous_tag)"
     printf '%s\n' "$previous_tag"
@@ -135,10 +144,20 @@ main() {
     fi
 
     log "Using ${previous_tag} as the previous release."
-    gh release download "$previous_tag" \
-        --dir "${directory}/previous" \
-        --pattern "${component}-sbom.cdx.json" ||
+    if ! gh release view "$previous_tag" --json assets |
+        jq -e --arg name "$asset" 'any(.assets[]; .name == $name)' >/dev/null; then
         log "Release ${previous_tag} has no SBOM."
+        return 0
+    fi
+
+    # Download to an empty directory. A failed download then leaves no file.
+    download_dir="$(mktemp -d)"
+    gh release download "$previous_tag" \
+        --dir "$download_dir" \
+        --pattern "$asset" ||
+        die "could not download the SBOM of ${previous_tag}"
+    mv -- "${download_dir}/${asset}" "$target"
+    rmdir -- "$download_dir"
 }
 
 main "$@"
