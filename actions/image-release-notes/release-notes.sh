@@ -45,6 +45,8 @@ Options:
   --previous-tag TAG        The tag name of the previous release.
   --sbom PATH               The output path for the CycloneDX SBOM.
   --syft-image REF          The Syft image.
+  --version VERSION         The image version for the SBOM. The default is
+                            the tag in the image reference.
 EOF
 }
 
@@ -55,6 +57,7 @@ notes_path=""
 package_type="rpm"
 previous_sbom=""
 previous_tag=""
+version=""
 sbom_path=""
 
 # The text that shows an empty list of added or removed packages.
@@ -81,14 +84,19 @@ remove_temp_files() {
 
 # Print the Syft options that name the image, one on each line. A registry host
 # can contain a port, so read the tag only after the last slash. A digest is
-# not a version, so a reference without a tag gives no version.
+# not a version, so a reference without a tag gives no version. A version from
+# the caller replaces the tag, because a build tag can be temporary.
 source_options() {
     local name="${1%%@*}"
+    local source_version="$2"
 
     if [[ "${name##*/}" == *:* ]]; then
-        printf '%s\n' --source-name "${name%:*}" --source-version "${name##*:}"
-    else
-        printf '%s\n' --source-name "$name"
+        source_version="${source_version:-${name##*:}}"
+        name="${name%:*}"
+    fi
+    printf '%s\n' --source-name "$name"
+    if [[ -n "$source_version" ]]; then
+        printf '%s\n' --source-version "$source_version"
     fi
 }
 
@@ -102,7 +110,7 @@ extract_sbom() {
     local dest="$1"
     local -a options
 
-    mapfile -t options < <(source_options "$image")
+    mapfile -t options < <(source_options "$image" "$version")
     image_tar="$(mktemp --tmpdir image-XXXXXX.tar)"
 
     log "Writing ${image} to a tar file"
@@ -165,16 +173,16 @@ package_version() {
 }
 
 # Read the packages that the image build installs by name. This list does not
-# include the packages that the package manager installs as dependencies. Syft does not
-# record this difference, so the script asks `dnf`. The
-# `--cacheonly` option stops the query from using the network.
+# include the packages that the package manager installs as dependencies. Syft
+# does not record this difference, so the script asks `dnf`. The `--cacheonly`
+# option stops the query from using the network.
 extract_installed() {
     local dest="$1"
     local status=0
 
     log "Reading the requested packages"
-    # Sort on the host. The container status is then the status of dnf. A shell
-    # in the image can be dash or ash, which have no pipefail option.
+    # Sort on the host. The container status is then the status of dnf, and the
+    # command does not need the pipefail option of the shell in the image.
     docker run \
         --entrypoint /bin/sh \
         --network none \
@@ -284,8 +292,7 @@ write_package_table() {
     } >>"$notes"
 }
 
-# Compare the two SBOMs with the CycloneDX CLI. The CLI groups each component
-# name into added, removed, and unchanged versions.
+# Compare the two SBOMs with the CycloneDX CLI.
 write_change_table() {
     local notes="$1"
     local current="$2"
@@ -297,7 +304,6 @@ write_change_table() {
     local removed
     local work
 
-    # Name the previous release in the heading when the caller supplies the tag.
     label="## Package Changes"
     [[ -n "$tag" ]] && label="## Package Changes Since ${tag}"
 
@@ -329,9 +335,6 @@ write_change_table() {
         | "| \(.key) | \($old | join(", ")) | \($new | join(", ")) |"
     ' "$diff_json")"
 
-    # A package counts as added or removed only when no version of it stays.
-    # A package that keeps one version and loses another version is a changed
-    # package.
     added="$(format_change "$diff_json" added removed)"
     removed="$(format_change "$diff_json" removed added)"
 
@@ -419,12 +422,7 @@ main() {
             ;;
         --highlights)
             need_value "$@"
-            # Split the names on the spaces. Stop the shell from expanding a
-            # name that contains a wildcard character.
-            set -f
-            # shellcheck disable=SC2206
-            highlights=($2)
-            set +f
+            read -r -a highlights <<<"$2"
             shift 2
             ;;
         --image)
@@ -455,6 +453,11 @@ main() {
         --sbom)
             need_value "$@"
             sbom_path="$2"
+            shift 2
+            ;;
+        --version)
+            need_value "$@"
+            version="$2"
             shift 2
             ;;
         --syft-image)

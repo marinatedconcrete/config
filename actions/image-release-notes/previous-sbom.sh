@@ -87,6 +87,7 @@ find_previous_tag() {
 
 main() {
     local asset
+    local assets
     local download_dir
     local previous_tag
     local target
@@ -144,8 +145,10 @@ main() {
     fi
 
     log "Using ${previous_tag} as the previous release."
-    if ! gh release view "$previous_tag" --json assets |
-        jq -e --arg name "$asset" 'any(.assets[]; .name == $name)' >/dev/null; then
+    assets="$(gh release view "$previous_tag" --json assets)" ||
+        die "could not read the assets of ${previous_tag}"
+    if ! jq -e --arg name "$asset" 'any(.assets[]; .name == $name)' \
+        <<<"$assets" >/dev/null; then
         log "Release ${previous_tag} has no SBOM."
         return 0
     fi

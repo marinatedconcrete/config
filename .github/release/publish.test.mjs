@@ -367,12 +367,14 @@ test("unknown draft asset states are preserved for inspection", async () => {
 test("image notes and SBOM are in the draft before publication", async () => {
   const { state, api } = server();
   const image = { ...candidate, kind: "image", project: "kairos-fedora" };
-  const sbom = [{ name: "kairos-fedora-sbom.cdx.json", data: Buffer.from("1") }];
+  const sbom = [
+    { name: "kairos-fedora-sbom.cdx.json", data: Buffer.from("1") },
+  ];
   await publishRelease({
     api,
     candidate: image,
     assets: sbom,
-    notes: "### Image Components",
+    imageNotes: "### Image Components",
     imageDigest: `sha256:${"1".repeat(64)}`,
     promote: async () => {},
   });
@@ -388,38 +390,56 @@ test("image notes and SBOM are in the draft before publication", async () => {
   );
 });
 
-test("image recovery uploads the validated SBOM again but not a rebuilt one", async () => {
-  const image = { ...candidate, kind: "image", project: "kairos-fedora" };
-  const first = [{ name: "kairos-fedora-sbom.cdx.json", data: Buffer.from("1") }];
-  const rebuilt = [{ name: "kairos-fedora-sbom.cdx.json", data: Buffer.from("2") }];
-  const publish = (api, assets, promote = async () => {}) =>
-    publishRelease({
-      api,
-      candidate: image,
-      assets,
-      imageDigest: `sha256:${"1".repeat(64)}`,
-      promote,
-    });
+const image = { ...candidate, kind: "image", project: "kairos-fedora" };
+const sbom = (data) => [
+  { name: "kairos-fedora-sbom.cdx.json", data: Buffer.from(data) },
+];
+const publishImage = (api, assets, promote = async () => {}) =>
+  publishRelease({
+    api,
+    candidate: image,
+    assets,
+    imageDigest: `sha256:${"1".repeat(64)}`,
+    promote,
+  });
 
-  const failedPromotion = server();
+test("image recovery after a failed promotion keeps the validated SBOM", async () => {
+  const { state, api } = server();
   await assert.rejects(
-    publish(failedPromotion.api, first, async () => {
+    publishImage(api, sbom("1"), async () => {
       throw new Error("Registry unavailable");
     }),
     /Registry unavailable/,
   );
-  await publish(failedPromotion.api, rebuilt);
-  assert.equal(failedPromotion.state.release.draft, false);
-  assert.equal(failedPromotion.state.assets[0].data.toString(), "1");
+  await publishImage(api, sbom("2"));
+  assert.equal(state.release.draft, false);
+  assert.equal(state.assets[0].data.toString(), "1");
+});
 
-  const failedUpload = server();
-  failedUpload.state.failAfter = "POST releases";
-  await assert.rejects(publish(failedUpload.api, first), /Interrupted/);
+test("image recovery does not upload a rebuilt SBOM", async () => {
+  const { state, api } = server();
+  state.failAfter = "POST releases";
+  await assert.rejects(publishImage(api, sbom("1")), /Interrupted/);
   await assert.rejects(
-    publish(failedUpload.api, rebuilt),
+    publishImage(api, sbom("2")),
     /Validated asset is unavailable/,
   );
-  assert.equal(failedUpload.state.assets.length, 0);
-  await publish(failedUpload.api, first);
-  assert.equal(failedUpload.state.release.draft, false);
+  assert.equal(state.assets.length, 0);
+  await publishImage(api, sbom("1"));
+  assert.equal(state.release.draft, false);
+});
+
+test("a failed SBOM upload does not promote the image", async () => {
+  const { state, api } = server();
+  state.failAfter =
+    "POST https://uploads.github.com/test?name=kairos-fedora-sbom.cdx.json";
+  let promoted = false;
+  await assert.rejects(
+    publishImage(api, sbom("1"), async () => {
+      promoted = true;
+    }),
+    /Interrupted/,
+  );
+  assert.equal(promoted, false);
+  assert.equal(state.release.draft, true);
 });

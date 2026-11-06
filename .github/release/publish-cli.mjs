@@ -7,15 +7,16 @@ const candidate = JSON.parse(process.env.CANDIDATE);
 const repository = process.env.GITHUB_REPOSITORY;
 const api = githubApi(repository, process.env.GH_TOKEN);
 const assets = [];
-let notes = "";
-// The release workflow downloads the notes artifact for these images.
-const noteImages = ["kairos-fedora"];
+let imageNotes = "";
 if (candidate.kind === "image") {
-  if (noteImages.includes(candidate.project)) {
+  if (process.env.IMAGE_NOTES === "true") {
     const name = `${candidate.project}-sbom.cdx.json`;
     const data = readFileSync(`artifacts/${name}`);
-    notes = readFileSync(`artifacts/${candidate.project}-notes.md`, "utf8").trim();
-    if (!data.length || !notes)
+    imageNotes = readFileSync(
+      `artifacts/${candidate.project}-notes.md`,
+      "utf8",
+    ).trim();
+    if (!data.length || !imageNotes)
       throw new Error("Image release notes or SBOM is empty");
     assets.push({ name, data });
   }
@@ -35,7 +36,7 @@ const receipt = await publishRelease({
   api,
   candidate,
   assets,
-  notes,
+  imageNotes,
   imageDigest: process.env.IMAGE_DIGEST || "",
   promote: async (release, imageDigest) => {
     const image =

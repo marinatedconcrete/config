@@ -122,13 +122,15 @@ Add that directory to the `.gitignore` file, or set the `directory` input.
 | `highlight-packages` | no       |                       | The packages to show in the component table. Separate the names with spaces.                                          |
 | `image`              | yes      |                       | The OCI image reference to examine. The image must be in the local Docker daemon.                                     |
 | `package-type`       | no       | `rpm`                 | The package type for the tables. The SBOM keeps all package types.                                                    |
-| `tag`                | no       |                       | The tag of this release. The action names this tag in the change table, and does not compare the release with itself. |
+| `tag` | no | | The tag of this release. The action compares the release with the release before this tag. |
 | `token`              | no       | `${{ github.token }}` | The token that the action uses to read releases.                                                                      |
+| `version` | no | | The image version for the SBOM. The default is the tag in `image`. |
 
 ## Outputs
 
 | Output         | Description                                                 |
 | -------------- | ----------------------------------------------------------- |
+| `artifact-name` | The name of the uploaded workflow artifact. The value is empty when the action does not upload an artifact. |
 | `notes-path`   | The path of the Markdown release notes.                     |
 | `previous-tag` | The tag of the release that the change table compares with. |
 | `sbom-path`    | The path of the CycloneDX SBOM.                             |

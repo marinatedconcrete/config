@@ -16,7 +16,7 @@ export async function publishRelease({
   api,
   candidate,
   assets = [],
-  notes = "",
+  imageNotes = "",
   imageDigest = "",
   promote,
 }) {
@@ -55,7 +55,8 @@ export async function publishRelease({
     ) {
       throw new Error("Existing release identifies a different candidate");
     }
-    // An image rebuild has new bytes. Its record keeps the first image.
+    // An image rebuild can make different bytes. The receipt keeps the first
+    // image digest and assets.
     if (
       candidate.kind !== "image" &&
       JSON.stringify(receipt.assets) !== JSON.stringify(built.assets)
@@ -83,7 +84,7 @@ export async function publishRelease({
         tag_name: tag,
         target_commitish: sha,
         name: candidate.name || tag,
-        body: `${[candidate.notes, notes].filter(Boolean).join("\n\n")}\n\n<!-- config-release: ${record} -->`,
+        body: `${[candidate.notes, imageNotes].filter(Boolean).join("\n\n")}\n\n<!-- config-release: ${record} -->`,
         draft: true,
         prerelease: candidate.prerelease,
       },
@@ -108,10 +109,13 @@ export async function publishRelease({
           "Validated asset is unavailable; restore it before recovery",
         );
       const upload = release.upload_url.split("{")[0];
-      remote = await api(`${upload}?name=${encodeURIComponent(expected.name)}`, {
-        method: "POST",
-        body: data,
-      });
+      remote = await api(
+        `${upload}?name=${encodeURIComponent(expected.name)}`,
+        {
+          method: "POST",
+          body: data,
+        },
+      );
     }
     if (remote.state !== "uploaded" || remote.size !== expected.size)
       throw new Error("Incomplete release asset");

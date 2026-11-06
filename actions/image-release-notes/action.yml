@@ -30,7 +30,11 @@ inputs:
     required: false
     default: rpm
   tag:
-    description: The tag of this release. The action names this tag in the change table, and does not compare the release with itself.
+    description: The tag of this release. The action compares the release with the release before this tag.
+    required: false
+    default: ""
+  version:
+    description: The image version for the SBOM. The default is the tag in `image`.
     required: false
     default: ""
   token:
@@ -39,6 +43,9 @@ inputs:
     default: ${{ github.token }}
 
 outputs:
+  artifact-name:
+    description: The name of the uploaded workflow artifact. The value is empty when the action does not upload an artifact.
+    value: ${{ inputs.artifact-name }}
   notes-path:
     description: The path of the Markdown release notes.
     value: ${{ steps.generate.outputs.notes-path }}
@@ -60,6 +67,7 @@ runs:
         ACTION_PATH: ${{ github.action_path }}
         COMPONENT: ${{ inputs.component }}
         DIRECTORY: ${{ inputs.directory }}
+        GH_REPO: ${{ github.repository }}
         GH_TOKEN: ${{ inputs.token }}
         TAG: ${{ inputs.tag }}
       id: previous_release
@@ -83,6 +91,7 @@ runs:
         IMAGE: ${{ inputs.image }}
         PACKAGE_TYPE: ${{ inputs.package-type }}
         PREVIOUS_TAG: ${{ steps.previous_release.outputs.tag }}
+        VERSION: ${{ inputs.version }}
       id: generate
       shell: bash
       run: |
@@ -98,7 +107,8 @@ runs:
           --package-type "$PACKAGE_TYPE" \
           --previous-sbom "${DIRECTORY}/previous/${COMPONENT}-sbom.cdx.json" \
           --previous-tag "$PREVIOUS_TAG" \
-          --sbom "$sbom"
+          --sbom "$sbom" \
+          --version "$VERSION"
 
         echo "notes-path=${notes}" >> "$GITHUB_OUTPUT"
         echo "sbom-path=${sbom}" >> "$GITHUB_OUTPUT"

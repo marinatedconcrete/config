@@ -108,7 +108,8 @@ Unknown asset states stop publication without deletion.
 A component draft still requires rebuilt assets to match its validation record.
 If those bytes cannot be reproduced, restore the original validated artifacts before recovery.
 An image draft uses its saved digest, so it ignores rebuilt assets with different bytes.
-A rerun of the original workflow can upload the original SBOM again.
+Use "Re-run failed jobs" on the original workflow run to upload the original SBOM again.
+"Re-run all jobs" builds the image again and makes an SBOM with different bytes.
 If a new run cannot upload the saved SBOM, restore the original SBOM before recovery.
 
 The draft body contains a validation record in an HTML comment.

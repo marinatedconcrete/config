@@ -9,7 +9,7 @@ check-format:
     #!/usr/bin/env bash
     set -euo pipefail
     just --unstable --fmt --check -f justfile
-    pnpm exec prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md pnpm-workspace.yaml
+    pnpm exec prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md .github/release/*.mjs pnpm-workspace.yaml
 
 # Generate the kube-vip manifests.
 [group('codegen')]
@@ -159,7 +159,7 @@ format:
     #!/usr/bin/env bash
     set -euo pipefail
     just --unstable --fmt -f justfile
-    pnpm exec prettier --no-error-on-unmatched-pattern --log-level warn --write **/*.yml **/*.json **/*.md pnpm-workspace.yaml
+    pnpm exec prettier --no-error-on-unmatched-pattern --log-level warn --write **/*.yml **/*.json **/*.md .github/release/*.mjs pnpm-workspace.yaml
 
 # Check Ansible plays, roles, and configuration.
 [group('lint')]
