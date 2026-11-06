@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.11.0...kairos-fedora-1.0.0) (2026-11-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* **package:** Kairos v4.4.0 stops the boot when a persistent state mount fails. It does not persist `/usr/libexec`. It enables CIS Level 1 hardening by default and mounts `/tmp` `noexec`. It changes the `sshd` values in `/etc/ssh/sshd_config.d/05-kairos-hardening.conf`. `PermitRootLogin` changes from `no` to `prohibit-password`. To override a value, add a drop-in that sorts before `05-`.
+* **deps:** upgrade to fedora 45
+
+### Features
+
+* add reusable image release notes action ([#893](https://github.com/marinatedconcrete/config/issues/893)) ([47de9f2](https://github.com/marinatedconcrete/config/commit/47de9f213b055950c4174189279c9ccb102fbc70))
+* **deps:** upgrade to fedora 45 ([242d244](https://github.com/marinatedconcrete/config/commit/242d244ff132dc689c960b78c7530de8d1fb106a))
+* **package:** update kairos-init to v4.4.0 ([#927](https://github.com/marinatedconcrete/config/issues/927)) ([58814a3](https://github.com/marinatedconcrete/config/commit/58814a381e9584aaf7769d67237a2d59409404d3))
+
+
+### Other Changes
+
+* **package:** update dependency k3s-io/k3s to v1.37.2+k3s1 ([#994](https://github.com/marinatedconcrete/config/issues/994)) ([7f0ea4f](https://github.com/marinatedconcrete/config/commit/7f0ea4fe85612f387f82cce8bee13fc527c457f7))
+* **package:** update quay.io/kairos/auroraboot docker tag to v0.29.0 ([#965](https://github.com/marinatedconcrete/config/issues/965)) ([026c238](https://github.com/marinatedconcrete/config/commit/026c2385ea7ac14ef8823c2dfc1b8dd0705843e6))
+
 ## [0.11.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.10.1...kairos-fedora-0.11.0) (2026-10-25)
 
 
