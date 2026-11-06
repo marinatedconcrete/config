@@ -309,3 +309,27 @@ release-please-build project dest="":
     just kustomization-test "${component}"
     kustomize build "${component_path}/" -o "${dest_path}"
     echo "${dest_path}"
+
+# Validate a source release.
+[group('release')]
+release-please-validate path:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    path="{{ path }}"
+    case "${path}" in
+        ansible)
+            # The Kustomize component tests use the roles in this collection.
+            just ansible-lint test
+            ;;
+        renovate)
+            just renovate-lint
+            ;;
+        actions/*)
+            find "${path}" -name "*.sh" -exec shellcheck {} +
+            ;;
+        *)
+            echo "Unsupported source release path: ${path}" >&2
+            exit 1
+            ;;
+    esac

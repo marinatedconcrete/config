@@ -112,7 +112,8 @@ jobs:
           push: never
           env: |
             CI=1
-          runCmd: pnpm install --frozen-lockfile && just check-format && just lint && just test
+            RELEASE_PATH=${{ fromJson(inputs.candidate).path }}
+          runCmd: pnpm install --frozen-lockfile && just release-please-validate "$RELEASE_PATH"
 
   kairos-fedora:
     needs: recover
