@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.6.1...renovate-config-2.7.0) (2026-11-06)
+
+
+### Features
+
+* add reusable image release notes action ([#893](https://github.com/marinatedconcrete/config/issues/893)) ([47de9f2](https://github.com/marinatedconcrete/config/commit/47de9f213b055950c4174189279c9ccb102fbc70))
+
 ## [2.6.1](https://github.com/marinatedconcrete/config/compare/renovate-config-2.6.0...renovate-config-2.6.1) (2026-09-26)
 
 
