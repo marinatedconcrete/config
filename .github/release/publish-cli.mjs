@@ -7,7 +7,20 @@ const candidate = JSON.parse(process.env.CANDIDATE);
 const repository = process.env.GITHUB_REPOSITORY;
 const api = githubApi(repository, process.env.GH_TOKEN);
 const assets = [];
-if (candidate.kind === "component") {
+let imageNotes = "";
+if (candidate.kind === "image") {
+  if (process.env.IMAGE_NOTES === "true") {
+    const name = `${candidate.project}-sbom.cdx.json`;
+    const data = readFileSync(`artifacts/${name}`);
+    imageNotes = readFileSync(
+      `artifacts/${candidate.project}-notes.md`,
+      "utf8",
+    ).trim();
+    if (!data.length || !imageNotes)
+      throw new Error("Image release notes or SBOM is empty");
+    assets.push({ name, data });
+  }
+} else if (candidate.kind === "component") {
   const name = `${candidate.project}.yml`;
   if (existsSync(`artifacts/${name}`)) {
     const data = readFileSync(`artifacts/${name}`);
@@ -23,6 +36,7 @@ const receipt = await publishRelease({
   api,
   candidate,
   assets,
+  imageNotes,
   imageDigest: process.env.IMAGE_DIGEST || "",
   promote: async (release, imageDigest) => {
     const image =

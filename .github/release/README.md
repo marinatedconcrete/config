@@ -28,7 +28,7 @@ GitHub and GHCR do not support one transaction for all publication operations.
 | Buildah Action Runner | Image build and smoke test | Tested image digest in GHCR |
 | GitHub Runner CI | Image build, smoke test, and Actions job-container test | Tested image digest in GHCR |
 | VSCode SSH Server | Image build and smoke test | Tested image digest in GHCR |
-| Ansible and Renovate | Format, lint, and component tests | Git tag and GitHub release |
+| Ansible, Renovate, and actions | Format, lint, and component tests | Git tag and GitHub release |
 
 Patch-only components must pass their tests.
 They do not upload an empty manifest.
@@ -38,6 +38,10 @@ This tag is not a release version.
 The publisher assigns the release version to the tested digest without a rebuild.
 PR and branch image checks keep their existing publication rules.
 Image tag pushes do not start another build.
+
+The Kairos Fedora build also generates image release notes and an SBOM for the tested image.
+The publisher adds the notes to the draft body and uploads the SBOM before publication.
+The validation record contains the SBOM size and hash.
 
 ## Concurrency
 
@@ -101,8 +105,12 @@ Existing release assets must match the validated bytes.
 A difference stops publication; the workflow does not replace the existing artifact.
 Incomplete `starter` and `open` assets can be removed from a draft before another upload.
 Unknown asset states stop publication without deletion.
-A draft still requires rebuilt assets to match its validation record.
+A component draft still requires rebuilt assets to match its validation record.
 If those bytes cannot be reproduced, restore the original validated artifacts before recovery.
+An image draft uses its saved digest, so it ignores rebuilt assets with different bytes.
+Use "Re-run failed jobs" on the original workflow run to upload the original SBOM again.
+"Re-run all jobs" builds the image again and makes an SBOM with different bytes.
+If a new run cannot upload the saved SBOM, restore the original SBOM before recovery.
 
 The draft body contains a validation record in an HTML comment.
 Keep this record unchanged.

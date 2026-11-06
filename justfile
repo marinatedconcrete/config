@@ -9,7 +9,7 @@ check-format:
     #!/usr/bin/env bash
     set -euo pipefail
     just --unstable --fmt --check -f justfile
-    pnpm exec prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md pnpm-workspace.yaml
+    pnpm exec prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md .github/release/*.mjs pnpm-workspace.yaml
 
 # Generate the kube-vip manifests.
 [group('codegen')]
@@ -159,7 +159,7 @@ format:
     #!/usr/bin/env bash
     set -euo pipefail
     just --unstable --fmt -f justfile
-    pnpm exec prettier --no-error-on-unmatched-pattern --log-level warn --write **/*.yml **/*.json **/*.md pnpm-workspace.yaml
+    pnpm exec prettier --no-error-on-unmatched-pattern --log-level warn --write **/*.yml **/*.json **/*.md .github/release/*.mjs pnpm-workspace.yaml
 
 # Check Ansible plays, roles, and configuration.
 [group('lint')]
@@ -246,6 +246,29 @@ kustomization-tests:
 # Run all tests..
 [group('test')]
 test: kustomization-tests
+
+# Generate the release notes and the SBOM for an image.
+[group('release')]
+release-notes component image highlights="" components="" previous="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    # The script ignores an empty components script and an absent previous SBOM.
+    bash actions/image-release-notes/release-notes.sh \
+        --components-script "{{ components }}" \
+        --highlights "{{ highlights }}" \
+        --image "{{ image }}" \
+        --notes "build/release/{{ component }}-notes.md" \
+        --previous-sbom "{{ previous }}" \
+        --sbom "build/release/{{ component }}-sbom.cdx.json"
+
+# Generate the Kairos Fedora release notes and SBOM from an image.
+[group('release')]
+release-notes-kairos-fedora image previous="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    just release-notes kairos-fedora "{{ image }}" "kernel systemd" \
+        images/kairos-fedora/release-notes-components.sh "{{ previous }}"
 
 [group('release')]
 release-please-build project dest="":

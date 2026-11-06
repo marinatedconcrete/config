@@ -16,6 +16,7 @@ export async function publishRelease({
   api,
   candidate,
   assets = [],
+  imageNotes = "",
   imageDigest = "",
   promote,
 }) {
@@ -54,7 +55,12 @@ export async function publishRelease({
     ) {
       throw new Error("Existing release identifies a different candidate");
     }
-    if (JSON.stringify(receipt.assets) !== JSON.stringify(built.assets)) {
+    // An image rebuild can make different bytes. The receipt keeps the first
+    // image digest and assets.
+    if (
+      candidate.kind !== "image" &&
+      JSON.stringify(receipt.assets) !== JSON.stringify(built.assets)
+    ) {
       throw new Error("Rebuilt assets differ from the validated assets");
     }
     if (
@@ -78,17 +84,19 @@ export async function publishRelease({
         tag_name: tag,
         target_commitish: sha,
         name: candidate.name || tag,
-        body: `${candidate.notes}\n\n<!-- config-release: ${record} -->`,
+        body: `${[candidate.notes, imageNotes].filter(Boolean).join("\n\n")}\n\n<!-- config-release: ${record} -->`,
         draft: true,
         prerelease: candidate.prerelease,
       },
     });
   }
-  // Reuse the first validated image after an interrupted publication.
-  if (candidate.kind === "image") await promote(candidate, receipt.imageDigest);
   const remoteAssets = await allPages(api, `releases/${release.id}/assets`);
-  for (const asset of assets) {
-    let remote = remoteAssets.find((item) => item.name === asset.name);
+  for (const expected of receipt.assets) {
+    const data = assets.find(
+      (asset) =>
+        asset.name === expected.name && digest(asset.data) === expected.digest,
+    )?.data;
+    let remote = remoteAssets.find((item) => item.name === expected.name);
     if (["starter", "open"].includes(remote?.state) && release.draft) {
       await api(`releases/assets/${remote.id}`, { method: "DELETE" });
       remote = null;
@@ -96,20 +104,29 @@ export async function publishRelease({
     if (!remote) {
       if (!release.draft)
         throw new Error("Published release is missing an asset");
+      if (!data)
+        throw new Error(
+          "Validated asset is unavailable; restore it before recovery",
+        );
       const upload = release.upload_url.split("{")[0];
-      remote = await api(`${upload}?name=${encodeURIComponent(asset.name)}`, {
-        method: "POST",
-        body: asset.data,
-      });
+      remote = await api(
+        `${upload}?name=${encodeURIComponent(expected.name)}`,
+        {
+          method: "POST",
+          body: data,
+        },
+      );
     }
-    if (remote.state !== "uploaded" || remote.size !== asset.data.length)
+    if (remote.state !== "uploaded" || remote.size !== expected.size)
       throw new Error("Incomplete release asset");
     const downloaded = await api(`releases/assets/${remote.id}`, {
       binary: true,
     });
-    if (digest(downloaded) !== digest(asset.data))
+    if (digest(downloaded) !== expected.digest)
       throw new Error("Release asset content differs");
   }
+  // Reuse the first validated image after an interrupted publication.
+  if (candidate.kind === "image") await promote(candidate, receipt.imageDigest);
   if ((await tagCommit(api, tag)) !== sha)
     throw new Error("Release tag changed during publication");
   if (release.draft)

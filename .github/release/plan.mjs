@@ -56,7 +56,8 @@ export async function planReleases({
         throw new Error("Release version does not match the selected commit");
       const project = release.path.startsWith("kustomization/components/")
         ? `kustomize-${release.path.split("/").at(-1)}`
-        : release.path.startsWith("images/")
+        : release.path.startsWith("images/") ||
+            release.path.startsWith("actions/")
           ? release.path.split("/").at(-1)
           : release.path;
       const kind = project.startsWith("kustomize-")
@@ -68,7 +69,8 @@ export async function planReleases({
               "vscode-ssh-server",
             ].includes(project)
           ? "image"
-          : ["ansible", "renovate"].includes(project)
+          : release.path.startsWith("actions/") ||
+              ["ansible", "renovate"].includes(project)
             ? "source"
             : null;
       if (!kind || !/^[a-z0-9-]+$/.test(project))

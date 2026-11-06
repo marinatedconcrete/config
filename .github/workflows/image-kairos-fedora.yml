@@ -8,6 +8,7 @@ on: # yamllint disable-line rule:truthy
     paths:
       - .devcontainer/Dockerfile
       - .github/workflows/image-kairos-fedora.yml
+      - actions/image-release-notes/**
       - images/kairos-fedora/**
       - justfile
   pull_request:
@@ -16,6 +17,7 @@ on: # yamllint disable-line rule:truthy
     paths:
       - .devcontainer/Dockerfile
       - .github/workflows/image-kairos-fedora.yml
+      - actions/image-release-notes/**
       - images/kairos-fedora/**
       - justfile
   workflow_call:
@@ -29,6 +31,8 @@ on: # yamllint disable-line rule:truthy
     outputs:
       digest:
         value: ${{ jobs.build-container.outputs.digest }}
+      release-notes-artifact:
+        value: ${{ jobs.build-container.outputs.release-notes-artifact }}
 
 
 jobs:
@@ -36,6 +40,7 @@ jobs:
     runs-on: ubuntu-26.04
     outputs:
       digest: ${{ steps.publish.outputs.digest }}
+      release-notes-artifact: ${{ steps.release_notes.outputs.artifact-name }}
     timeout-minutes: 90
     permissions:
       contents: read
@@ -111,3 +116,17 @@ jobs:
           docker push "$IMAGE"
           digest=$(docker image inspect "$IMAGE" --format '{{index .RepoDigests 0}}')
           echo "digest=${digest##*@}" >> "$GITHUB_OUTPUT"
+      # Generate the complete notes for each build. A pull request then shows
+      # the notes and the package changes in the job summary and in an artifact.
+      # A release run publishes the artifact after it creates the release.
+      - name: Generate Image Release Notes
+        id: release_notes
+        uses: ./actions/image-release-notes
+        with:
+          artifact-name: kairos-fedora-release-notes${{ inputs.version && format('-{0}', inputs.version) || '' }}
+          component: kairos-fedora
+          components-script: images/kairos-fedora/release-notes-components.sh
+          highlight-packages: kernel systemd
+          image: ghcr.io/${{ github.repository_owner }}/kairos-fedora:${{ steps.version_tag.outputs.tag }}
+          tag: ${{ inputs.version && format('kairos-fedora-{0}', inputs.version) || '' }}
+          version: ${{ inputs.version }}
