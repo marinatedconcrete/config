@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.6.0...ansible-collection@v1.6.1) (2026-11-07)
+
+
+### Other Changes
+
+* **package:** update dependency ansible to v14.6.0 ([#981](https://github.com/marinatedconcrete/config/issues/981)) ([e8cf421](https://github.com/marinatedconcrete/config/commit/e8cf421dd3071c937b826c7be943bf58bf4fbc08))
+* **package:** update dependency ansible-lint to v26.11.0 ([#985](https://github.com/marinatedconcrete/config/issues/985)) ([8ee8c1e](https://github.com/marinatedconcrete/config/commit/8ee8c1eca7c78803579aa214982ba823c7f10c78))
+
 ## [1.6.0](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.5.1...ansible-collection@v1.6.0) (2026-10-25)
 
 
