@@ -32,3 +32,15 @@ firewall-offline-cmd --add-port=10250/tcp
 # Disable the firewall to let users access services that use a load balancer.
 # Before you enable the firewall, add rules for each service that needs external access.
 systemctl mask firewalld
+
+# An upgrade replaces GRUB on the ESP. It keeps the grub.cfg from install time.
+# A grub.cfg from an older install does not unload the tpm module.
+# With tpm loaded, a loopback of a /cOS image fills the GRUB heap. No entry boots.
+# See https://github.com/kairos-io/kairos/issues/6018.
+# The upgrade copies grubmenu.cfg to /grubmenu on COS_STATE. Each grub.cfg sources /grubmenu.
+cat >>/etc/kairos/branding/grubmenu.cfg <<'GRUB'
+
+if [ "${grub_platform}" = "efi" ]; then
+  rmmod tpm
+fi
+GRUB
