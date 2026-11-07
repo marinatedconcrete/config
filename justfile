@@ -272,6 +272,15 @@ release-notes-kairos-fedora image previous="":
     just release-notes kairos-fedora "{{ image }}" "kernel systemd" \
         images/kairos-fedora/release-notes-components.sh "{{ previous }}"
 
+# Generate the Devcontainer Base release notes and SBOM from an image.
+[group('release')]
+release-notes-devcontainer-base image previous="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    just release-notes devcontainer-base "{{ image }}" "" \
+        images/devcontainer-base/release-notes-components.sh "{{ previous }}" \
+        images/devcontainer-base/Containerfile
+
 [group('release')]
 release-please-build project dest="":
     #!/usr/bin/env bash
