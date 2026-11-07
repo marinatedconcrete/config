@@ -9,7 +9,7 @@ check-format:
     #!/usr/bin/env bash
     set -euo pipefail
     just --unstable --fmt --check -f justfile
-    pnpm exec prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md .github/release/*.mjs pnpm-workspace.yaml
+    pnpm exec prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md .github/release/*.mjs actions/image-release-notes/*.mjs pnpm-workspace.yaml
 
 # Generate the kube-vip manifests.
 [group('codegen')]
@@ -159,7 +159,7 @@ format:
     #!/usr/bin/env bash
     set -euo pipefail
     just --unstable --fmt -f justfile
-    pnpm exec prettier --no-error-on-unmatched-pattern --log-level warn --write **/*.yml **/*.json **/*.md .github/release/*.mjs pnpm-workspace.yaml
+    pnpm exec prettier --no-error-on-unmatched-pattern --log-level warn --write **/*.yml **/*.json **/*.md .github/release/*.mjs actions/image-release-notes/*.mjs pnpm-workspace.yaml
 
 # Check Ansible plays, roles, and configuration.
 [group('lint')]
@@ -177,7 +177,7 @@ ansible-lint:
 hado-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    find . -type d -name node_modules -prune -o -name "*erfile*" -print | while read -r file; do
+    find . \( -name .git -o -name node_modules \) -prune -o -type f -name "*erfile*" -print | while read -r file; do
         echo -n "Running \`hadolint\` on ${file}..."
         hadolint ${file}
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
@@ -249,13 +249,15 @@ test: kustomization-tests
 
 # Generate the release notes and the SBOM for an image.
 [group('release')]
-release-notes component image highlights="" components="" previous="":
+release-notes component image highlights="" components="" previous="" containerfile="":
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # The script ignores an empty components script and an absent previous SBOM.
+    # The script ignores an empty components script, an empty Containerfile, and an
+    # absent previous SBOM.
     bash actions/image-release-notes/release-notes.sh \
         --components-script "{{ components }}" \
+        --containerfile "{{ containerfile }}" \
         --highlights "{{ highlights }}" \
         --image "{{ image }}" \
         --notes "build/release/{{ component }}-notes.md" \
@@ -327,6 +329,10 @@ release-please-validate path:
             ;;
         actions/*)
             find "${path}" -name "*.sh" -exec shellcheck {} +
+            if [[ -f "${path}/package.json" ]]; then
+                npm ci --ignore-scripts --prefix "${path}"
+                npm test --prefix "${path}"
+            fi
             ;;
         *)
             echo "Unsupported source release path: ${path}" >&2

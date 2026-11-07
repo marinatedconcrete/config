@@ -1,0 +1,7 @@
+{
+  "name": "config-image-release-notes",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test *.test.mjs" },
+  "dependencies": { "dockerfile-ast": "0.7.1" }
+}
