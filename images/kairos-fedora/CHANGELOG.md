@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/marinatedconcrete/config/compare/kairos-fedora-1.0.0...kairos-fedora-1.0.1) (2026-11-07)
+
+
+### Bug Fixes
+
+* **kairos-fedora:** read the Kairos Agent version from kairos-agent 4 ([f55b89f](https://github.com/marinatedconcrete/config/commit/f55b89f057de8e34e9c27da961003af528c1bc4a))
+* **kairos-fedora:** unload the GRUB tpm module for an old grub.cfg ([#1000](https://github.com/marinatedconcrete/config/issues/1000)) ([5256abb](https://github.com/marinatedconcrete/config/commit/5256abb6bdff289f887eca4e973c7515a5045ac3))
+
 ## [1.0.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.11.0...kairos-fedora-1.0.0) (2026-11-06)
 
 
