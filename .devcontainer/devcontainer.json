@@ -20,7 +20,8 @@
       "files.readonlyInclude": {
         "kustomization/components/kube-vip/daemonset/services.yml": true,
         "kustomization/components/kube-vip/daemonset/vip.yml": true,
-        "kustomization/components/kube-vip/rbac.yml": true
+        "kustomization/components/kube-vip/rbac.yml": true,
+        "kustomization/components/kube-vip-wireguard/daemonset/wireguard.yml": true
       },
       "settings": {
         "prettier.useEditorConfig": false,

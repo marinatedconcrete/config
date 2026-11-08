@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app.kubernetes.io/name: backend
+  name: backend
+spec:
+  containers:
+    - command:
+        - httpd
+        - -f
+        - -p
+        - "8080"
+      image: busybox:1.38.0@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d3463db586e5fa4
+      name: backend
+      ports:
+        - containerPort: 8080
+          name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kube-vip.io/loadbalancerIPs: 192.0.2.10
+  name: backend
+spec:
+  externalTrafficPolicy: Local
+  loadBalancerClass: kube-vip.io/wireguard
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/name: backend
+  type: LoadBalancer

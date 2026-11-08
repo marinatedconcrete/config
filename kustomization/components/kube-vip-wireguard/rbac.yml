@@ -1,0 +1,28 @@
+---
+# The kube-vip manifest rbac command has a fixed rule set.  It gives no rule for
+# Secrets.  For this reason, this file is written by hand.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kube-vip-wireguard-secret
+rules:
+  - apiGroups:
+      - ""
+    resourceNames:
+      - wireguard
+    resources:
+      - secrets
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kube-vip-wireguard-secret
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kube-vip-wireguard-secret
+subjects:
+  - kind: ServiceAccount
+    name: kube-vip

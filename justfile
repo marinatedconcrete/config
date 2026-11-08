@@ -129,6 +129,82 @@ codegen-kube-vip:
         >> ${DEST}
 
 
+    # Generate the WireGuard DaemonSet manifest.  Use a metrics port that is
+    # different from the other DaemonSet ports, because all DaemonSets use the
+    # host network.
+    DEST=kustomization/components/kube-vip-wireguard/daemonset/wireguard.yml
+    SCRATCH=$(mktemp --tmpdir daemonset-XXX.yml)
+    docker run --network host --rm ${KUBE_VIP_IMAGE} \
+        manifest daemonset \
+            --inCluster \
+            --instanceName wg \
+            --lbClassName kube-vip.io/wireguard \
+            --lbClassOnly \
+            --prometheusHTTPServer :2114 \
+            --services \
+            --servicesElection \
+            --servicesLeaseName plndr-wg-svcs-lock \
+            --wireguard \
+        > ${SCRATCH}
+
+    # Set a name that differs from the other DaemonSet names.
+    yq -i '.metadata.name = "kube-vip-wg-ds"' ${SCRATCH}
+    yq -i '.metadata.labels."app.kubernetes.io/name" = "kube-vip-wg-ds"' ${SCRATCH}
+    yq -i '.spec.selector.matchLabels."app.kubernetes.io/name" = "kube-vip-wg-ds"' ${SCRATCH}
+    yq -i '.spec.template.metadata.labels."app.kubernetes.io/name" = "kube-vip-wg-ds"' ${SCRATCH}
+
+    # Remove the namespace so the user can configure it.
+    yq -i 'del(.metadata.namespace)' ${SCRATCH}
+
+    # Remove the unused creationTimestamp fields.
+    yq -i 'del(.metadata.creationTimestamp)' ${SCRATCH}
+    yq -i 'del(.spec.template.metadata.creationTimestamp)' ${SCRATCH}
+
+    # Remove empty objects from the generated manifest.
+    yq -i 'del(.spec.template.spec.containers[0].resources)' ${SCRATCH}
+    yq -i 'del(.spec.updateStrategy)' ${SCRATCH}
+
+    # Remove the image tag. The `kustomization.yml` file controls this tag.
+    yq -i '.spec.template.spec.containers[0].image = "ghcr.io/kube-vip/kube-vip"' ${SCRATCH}
+
+    # Remove unused environment settings.
+    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "dhcp_mode"))' ${SCRATCH}
+    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "dns_mode"))' ${SCRATCH}
+    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "port"))' ${SCRATCH}
+    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "vip_address"))' ${SCRATCH}
+    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "vip_arp"))' ${SCRATCH}
+
+    # The generator drops the class name and the namespace.
+    yq -i '.spec.template.spec.containers[0].env += [{"name": "lb_class_name", "value": "kube-vip.io/wireguard"}]' ${SCRATCH}
+    yq -i '.spec.template.spec.containers[0].env += [{"name": "cp_namespace", "valueFrom": { "fieldRef": { "fieldPath": "metadata.namespace"}}}]' ${SCRATCH}
+
+    # Set priorityClassName in the manifest.
+    yq -i '.spec.template.spec.priorityClassName = "critical-application-infra"' ${SCRATCH}
+
+    # Kube-vip needs two node settings and cannot write them without privilege.
+    # This check stops the pod early with a clear message.
+    CHECK_SCRIPT='for name in src_valid_mark route_localnet; do
+      value=$(cat "/proc/sys/net/ipv4/conf/all/${name}")
+      if [ "${value}" != 1 ]; then
+        echo "net.ipv4.conf.all.${name} is ${value}.  The node must set it to 1."
+        exit 1
+      fi
+    done'
+    export CHECK_SCRIPT
+    yq -i '.spec.template.spec.initContainers = [{"name": "check-node-sysctls", "image": "busybox", "command": ["sh", "-c", strenv(CHECK_SCRIPT)], "securityContext": {"allowPrivilegeEscalation": false, "capabilities": {"drop": ["ALL"]}, "readOnlyRootFilesystem": true, "runAsNonRoot": true, "runAsUser": 65534}}]' ${SCRATCH}
+
+    # Sort the environment variables by name.
+    yq -i '.spec.template.spec.containers[0].env |= sort_by(.name)' ${SCRATCH}
+
+    # Write the final manifest.
+    echo '# @codegen-command: just codegen-kube-vip' > ${DEST}
+    echo '# @generated' >> ${DEST}
+    echo '---' >> ${DEST}
+    yq '.' ${SCRATCH} \
+        | sed -e "s/'/\"/g" \
+        >> ${DEST}
+
+
     # Generate the RBAC manifest.
     DEST=kustomization/components/kube-vip/rbac.yml
     SCRATCH=$(mktemp --tmpdir rbac-XXX.yml)
