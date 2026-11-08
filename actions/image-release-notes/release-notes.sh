@@ -175,7 +175,9 @@ package_version() {
 # Read the packages that the image build installs by name. This list does not
 # include the packages that the package manager installs as dependencies. Syft
 # does not record this difference, so the script asks `dnf`. The `--cacheonly`
-# option stops the query from using the network.
+# option stops the query from using the network. The command runs as the root
+# user, because `dnf` must create its state directory. An image can delete that
+# directory and set a user that is not root.
 extract_installed() {
     local dest="$1"
     local status=0
@@ -187,6 +189,7 @@ extract_installed() {
         --entrypoint /bin/sh \
         --network none \
         --rm \
+        --user root \
         "$image" -c \
         'command -v dnf >/dev/null 2>&1 || exit 3
          dnf repoquery --cacheonly --userinstalled --qf "%{name}\n"' |
