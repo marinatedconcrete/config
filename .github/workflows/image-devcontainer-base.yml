@@ -6,33 +6,84 @@ on: # yamllint disable-line rule:truthy
     branches:
       - main
     paths:
+      - .github/scripts/next-calver-version.sh
       - .github/workflows/image-devcontainer-base.yml
+      - actions/image-release-notes/**
       - images/devcontainer-base/**
   push:
     branches:
       - main
     paths:
+      - .github/scripts/next-calver-version.sh
       - .github/workflows/image-devcontainer-base.yml
+      - actions/image-release-notes/**
       - images/devcontainer-base/**
   schedule:
-    - cron: "0 0 * * 0" # Run each Sunday at midnight UTC.
+    - cron: "0 12 * * 4" # Run each Thursday at 12:00 UTC.
+  workflow_dispatch:
 
+# All release runs share one group until publication is complete. An older run
+# then cannot replace `latest` after a newer run. A release run must not cancel
+# another release run after it creates its tag.
 concurrency:
-  cancel-in-progress: true
-  group: devcontainer-base-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+  group: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && 'devcontainer-base-release' || format('devcontainer-base-{0}-{1}', github.event_name, github.ref) }}
 
 jobs:
-  build-container:
-    runs-on: ubuntu-latest
+  version:
+    name: Reserve Release Version
+    # Only the schedule and manual runs on main release an image. Later steps
+    # check the result of this job, not the event.
+    if: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
     permissions:
-      contents: read
-      packages: write
-    env:
-      DEVCONTAINER_BASE_TAG: candidate-${{ github.sha }}
+      contents: write
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: .github/scripts
+      # The tag reserves the version number. A failed run leaves its tag, so
+      # the next run takes the next number and never reuses an image tag.
+      - name: Create Version Tag
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        id: version
+        run: |
+          prefix=$(date -u +%Y.%-m)
+          version=$(
+            gh api --paginate "repos/${GH_REPO}/git/matching-refs/tags/devcontainer-base-${prefix}." --jq '.[].ref' |
+              sed 's|^refs/tags/||' |
+              .github/scripts/next-calver-version.sh "devcontainer-base-${prefix}"
+          )
+          gh api "repos/${GH_REPO}/git/refs" -f ref="refs/tags/devcontainer-base-${version}" -f sha="${GITHUB_SHA}"
+          echo "tag=devcontainer-base-${version}" >> "${GITHUB_OUTPUT}"
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
+  build:
+    name: Build Devcontainer Base Image
+    needs: version
+    if: ${{ !cancelled() && (needs.version.result == 'success' || needs.version.result == 'skipped') }}
+    env:
+      DEVCONTAINER_BASE_TAG: candidate-${{ github.sha }}
+    outputs:
+      previous-tag: ${{ steps.release_notes.outputs.previous-tag }}
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
@@ -47,6 +98,14 @@ jobs:
           load: true
           push: false
           tags: ghcr.io/${{ github.repository_owner }}/devcontainer-base:${{ env.DEVCONTAINER_BASE_TAG }}
+      # The runner can load an AppArmor profile for a program that a test
+      # runs. The profile then applies in the privileged test containers and
+      # blocks the program. Remove these profiles.
+      - name: Remove Host AppArmor Profiles
+        run: |
+          if [[ -f /etc/apparmor.d/mosquitto ]]; then
+            sudo apparmor_parser --remove /etc/apparmor.d/mosquitto
+          fi
       - name: Validate Full CI Pipeline
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
@@ -56,10 +115,73 @@ jobs:
           imageName: config-devcontainer-candidate
           push: never
           runCmd: just check-format && just lint && just test
+      # Generate the notes for each build. A pull request then shows the notes
+      # in the job summary and in an artifact. A release run publishes the
+      # artifact in the release job.
+      - name: Generate Image Release Notes
+        id: release_notes
+        uses: ./actions/image-release-notes
+        with:
+          artifact-name: devcontainer-base-release-notes
+          component: devcontainer-base
+          components-script: images/devcontainer-base/release-notes-components.sh
+          containerfile: images/devcontainer-base/Containerfile
+          image: ghcr.io/${{ github.repository_owner }}/devcontainer-base:${{ env.DEVCONTAINER_BASE_TAG }}
+          tag: ${{ needs.version.outputs.tag }}
+          version: ${{ needs.version.outputs.version || github.sha }}
+      # Push the tested candidate. A rebuild could give a different image.
       - name: Push Tested Image
-        if: github.event_name != 'pull_request'
+        if: ${{ needs.version.result == 'success' }}
+        env:
+          IMAGE: ghcr.io/${{ github.repository_owner }}/devcontainer-base
+          VERSION: ${{ needs.version.outputs.version }}
         run: |
-          docker tag \
-            "ghcr.io/${{ github.repository_owner }}/devcontainer-base:${DEVCONTAINER_BASE_TAG}" \
-            ghcr.io/${{ github.repository_owner }}/devcontainer-base:latest
-          docker push ghcr.io/${{ github.repository_owner }}/devcontainer-base:latest
+          docker tag "${IMAGE}:${DEVCONTAINER_BASE_TAG}" "${IMAGE}:latest"
+          docker tag "${IMAGE}:${DEVCONTAINER_BASE_TAG}" "${IMAGE}:${VERSION}"
+          docker push "${IMAGE}:latest"
+          docker push "${IMAGE}:${VERSION}"
+
+  release:
+    name: Create GitHub Release
+    needs:
+      - version
+      - build
+    if: ${{ needs.version.result == 'success' && needs.build.result == 'success' }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - name: Download Release Notes
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: devcontainer-base-release-notes
+          path: build/release
+      - name: Create Release
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+          PREVIOUS_TAG: ${{ needs.build.outputs.previous-tag }}
+          TAG: ${{ needs.version.outputs.tag }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          if gh release view "${TAG}" > /dev/null 2>&1; then
+            exit 0
+          fi
+          if [[ -n "${PREVIOUS_TAG}" ]]; then
+            body=$(git log --format='- %s (%h)' "${PREVIOUS_TAG}..${TAG}" -- images/devcontainer-base .github/workflows/image-devcontainer-base.yml)
+            body=${body:-No changes to the image build files.}
+          else
+            body="First versioned release."
+          fi
+          gh release create "${TAG}" --title "devcontainer-base ${VERSION}" --verify-tag --notes "${body}"
+      - name: Publish Image Release Notes
+        uses: ./actions/image-release-notes/publish
+        with:
+          component: devcontainer-base
+          tag: ${{ needs.version.outputs.tag }}
