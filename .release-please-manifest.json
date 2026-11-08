@@ -11,7 +11,7 @@
   "kustomization/components/paperless": "1.2.9",
   "kustomization/components/priorityclass": "1.0.4",
   "kustomization/components/unifi-network-application": "1.2.4",
-  "renovate": "2.8.0",
+  "renovate": "2.9.0",
   "images/buildah-action-runner": "1.0.3",
   "kustomization/components/pod-security": "1.1.0"
 }
