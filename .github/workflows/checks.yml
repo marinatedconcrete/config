@@ -107,6 +107,7 @@ jobs:
         kustomization-test:
           - factorio
           - kube-vip
+          - kube-vip-wireguard
           - mosquitto
           - paperless
           - pod-security-audit-warn-baseline

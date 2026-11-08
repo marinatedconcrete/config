@@ -1,0 +1,147 @@
+---
+- name: Kube-vip WireGuard Tests
+  gather_facts: false
+  hosts: localhost
+  roles:
+    - role: marinatedconcrete.config.minikube_test
+      vars:
+        minikube_test__test_dir: kustomization/tests/kube-vip-wireguard
+  tasks:
+    # WireGuard accepts any 32 bytes, in base64, as a key.
+    - name: Generate throwaway keys
+      ansible.builtin.set_fact:
+        peer_public_key: "{{ lookup('ansible.builtin.password', '/dev/null length=32 chars=ascii_letters,digits') | b64encode }}"
+        private_key: "{{ lookup('ansible.builtin.password', '/dev/null length=32 chars=ascii_letters,digits') | b64encode }}"
+      no_log: true
+    - name: Create the tunnel Secret
+      kubernetes.core.k8s:
+        context: "{{ kubernetes_core_k8s__context }}"
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: wireguard
+            namespace: "{{ test_namespace }}"
+          stringData:
+            tunnels: "{{ tunnels | to_nice_yaml }}"
+        state: present
+      no_log: true
+      vars:
+        tunnels:
+          kv0:
+            allowedIPs:
+              - 0.0.0.0/0
+            listenPort: 51820
+            peerEndpoint: 192.0.2.1:51820
+            peerPublicKey: "{{ peer_public_key }}"
+            privateKey: "{{ private_key }}"
+            vip: 192.0.2.10/32
+    # The pod cannot start before its namespace has a default ServiceAccount, so
+    # the test creates the backend after kustomize applies the namespace.
+    - name: Create the backend
+      kubernetes.core.k8s:
+        context: "{{ kubernetes_core_k8s__context }}"
+        definition: "{{ lookup('file', 'backend.yml') | from_yaml_all }}"
+        namespace: "{{ test_namespace }}"
+        state: present
+      delay: 2
+      register: backend
+      retries: 15
+      until: backend is succeeded
+    # The init container reads the node values when the pod starts, so the test
+    # replaces the pod after each change.
+    - name: Check that the init container stops the pod when a node sysctl is 0
+      ansible.builtin.include_tasks: check_node_sysctl.yml
+      loop: "{{ node_sysctls }}"
+      loop_control:
+        loop_var: sysctl_under_test
+    - name: Set the node sysctls to 1
+      ansible.builtin.command:
+        argv: "{{ minikube_ssh_sysctl_argv + ['net.ipv4.conf.all.' ~ item ~ '=1'] }}"
+      changed_when: true
+      loop: "{{ node_sysctls }}"
+    - name: Replace the pod that waits in back-off
+      kubernetes.core.k8s:
+        api_version: v1
+        context: "{{ kubernetes_core_k8s__context }}"
+        delete_all: true
+        kind: Pod
+        label_selectors:
+          - app.kubernetes.io/name=kube-vip-wg-ds
+        namespace: "{{ test_namespace }}"
+        state: absent
+        wait: true
+    - name: Wait for DaemonSet
+      kubernetes.core.k8s:
+        api_version: apps/v1
+        context: "{{ kubernetes_core_k8s__context }}"
+        kind: DaemonSet
+        name: "{{ item }}"
+        namespace: "{{ test_namespace }}"
+        state: present
+        wait: true
+        wait_timeout: 600
+      changed_when: false
+      loop: "{{ daemonsets }}"
+    - name: Wait for kube-vip to start
+      kubernetes.core.k8s_log:
+        context: "{{ kubernetes_core_k8s__context }}"
+        label_selectors:
+          - "app.kubernetes.io/name={{ item }}"
+        namespace: "{{ test_namespace }}"
+      changed_when: false
+      delay: 5
+      loop: "{{ daemonsets }}"
+      register: kube_vip_logs
+      retries: 24
+      until: kube_vip_logs.log | default('') is search('starting Kube-vip Manager')
+    - name: Check that each metrics server has a port
+      ansible.builtin.assert:
+        fail_msg: "{{ item.item }} did not start a metrics server on its port: {{ item.log_lines | select('search', 'prometheus HTTP server') }}"
+        quiet: true
+        that:
+          - item.log is search('prometheus HTTP server started')
+          - item.log is not search('prometheus HTTP server err')
+      loop: "{{ kube_vip_logs.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+    - name: Wait for the WireGuard tunnel
+      kubernetes.core.k8s_log:
+        context: "{{ kubernetes_core_k8s__context }}"
+        label_selectors:
+          - app.kubernetes.io/name=kube-vip-wg-ds
+        namespace: "{{ test_namespace }}"
+      changed_when: false
+      delay: 5
+      register: wireguard_log
+      retries: 24
+      until: wireguard_log.log | default('') is search('brought up WireGuard tunnel.*192.0.2.10')
+    - name: Wait for the services instance to skip the WireGuard Service
+      kubernetes.core.k8s_log:
+        context: "{{ kubernetes_core_k8s__context }}"
+        label_selectors:
+          - app.kubernetes.io/name=kube-vip-svc-ds
+        namespace: "{{ test_namespace }}"
+      changed_when: false
+      delay: 5
+      register: services_log
+      retries: 24
+      until: services_log.log | default('') is search('specified (the )?wrong loadBalancer class.*backend')
+  vars:
+    daemonsets:
+      - kube-vip-ds
+      - kube-vip-svc-ds
+      - kube-vip-wg-ds
+    kubernetes_core_k8s__context: kube-vip-wireguard
+    minikube_ssh_sysctl_argv:
+      - minikube
+      - "--profile={{ kubernetes_core_k8s__context }}"
+      - ssh
+      - --
+      - sudo
+      - sysctl
+      - -w
+    node_sysctls:
+      - src_valid_mark
+      - route_localnet
+    test_namespace: "{{ (lookup('file', 'kustomization.yml') | from_yaml).namespace }}"

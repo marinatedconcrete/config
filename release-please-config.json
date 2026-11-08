@@ -80,6 +80,11 @@
       "package-name": "kustomize-kube-vip",
       "release-type": "simple"
     },
+    "kustomization/components/kube-vip-wireguard": {
+      "initial-version": "1.0.0",
+      "package-name": "kustomize-kube-vip-wireguard",
+      "release-type": "simple"
+    },
     "kustomization/components/mosquitto": {
       "package-name": "kustomize-mosquitto",
       "release-type": "simple"

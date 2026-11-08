@@ -1,0 +1,50 @@
+---
+# Set one node sysctl to 0 and the other to 1.  Replace the pod, then check what
+# the init container does.
+- name: Set the node sysctls
+  ansible.builtin.command:
+    argv: "{{ minikube_ssh_sysctl_argv + ['net.ipv4.conf.all.' ~ item ~ '=' ~ ('0' if item == sysctl_under_test else '1')] }}"
+  changed_when: true
+  loop: "{{ node_sysctls }}"
+- name: Replace the pod
+  kubernetes.core.k8s:
+    api_version: v1
+    context: "{{ kubernetes_core_k8s__context }}"
+    delete_all: true
+    kind: Pod
+    label_selectors:
+      - app.kubernetes.io/name=kube-vip-wg-ds
+    namespace: "{{ test_namespace }}"
+    state: absent
+    wait: true
+- name: Wait for the message of the init container
+  kubernetes.core.k8s_log:
+    container: check-node-sysctls
+    context: "{{ kubernetes_core_k8s__context }}"
+    label_selectors:
+      - app.kubernetes.io/name=kube-vip-wg-ds
+    namespace: "{{ test_namespace }}"
+  changed_when: false
+  delay: 5
+  register: init_log
+  retries: 24
+  until: init_log.log | default('') is search('net\.ipv4\.conf\.all\.' ~ sysctl_under_test ~ ' is 0\.  The node must set it to 1\.')
+- name: Get the pod
+  kubernetes.core.k8s_info:
+    context: "{{ kubernetes_core_k8s__context }}"
+    kind: Pod
+    label_selectors:
+      - app.kubernetes.io/name=kube-vip-wg-ds
+    namespace: "{{ test_namespace }}"
+  register: wg_pods
+- name: Check that the init container failed and kube-vip did not start
+  ansible.builtin.assert:
+    fail_msg: "The init container did not stop the pod: {{ wg_pods.resources[0].status }}"
+    quiet: true
+    that:
+      - wg_pods.resources | length == 1
+      - init_status.exitCode == 1
+      - wg_pods.resources[0].status.containerStatuses[0].state.running is not defined
+  vars:
+    init_container: "{{ wg_pods.resources[0].status.initContainerStatuses[0] }}"
+    init_status: "{{ init_container.state.terminated | default(init_container.lastState.terminated) }}"
