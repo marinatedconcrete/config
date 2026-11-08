@@ -184,36 +184,14 @@
       "automerge": false
     },
     {
-      "description": "Use a breaking commit type for major updates to shipped files",
+      "description": "Use a breaking commit type for major updates",
       "commitMessageAction": "update",
       "commitMessagePrefix": "feat(package)!:",
-      "matchFileNames": [
-        "images/*/Containerfile",
-        "images/*/Dockerfile",
-        "images/*/build_files/**",
-        "actions/*/action.yml",
-        "actions/*/*.sh",
-        "kustomization/components/**",
-        "ansible/galaxy.yml",
-        "ansible/meta/runtime.yml",
-        "ansible/roles/**"
-      ],
       "matchUpdateTypes": ["major"]
     },
     {
-      "description": "Use a feature commit type for minor updates to shipped files",
+      "description": "Use a feature commit type for minor updates",
       "semanticCommitType": "feat",
-      "matchFileNames": [
-        "images/*/Containerfile",
-        "images/*/Dockerfile",
-        "images/*/build_files/**",
-        "actions/*/action.yml",
-        "actions/*/*.sh",
-        "kustomization/components/**",
-        "ansible/galaxy.yml",
-        "ansible/meta/runtime.yml",
-        "ansible/roles/**"
-      ],
       "matchUpdateTypes": ["minor"]
     }
   ],
