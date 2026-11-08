@@ -22,10 +22,12 @@ on: # yamllint disable-line rule:truthy
     - cron: "0 12 * * 4" # Run each Thursday at 12:00 UTC.
   workflow_dispatch:
 
-# A release run must not cancel another release run after it creates its tag.
+# All release runs share one group until publication is complete. An older run
+# then cannot replace `latest` after a newer run. A release run must not cancel
+# another release run after it creates its tag.
 concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
-  group: devcontainer-base-${{ github.event_name }}-${{ github.ref }}
+  group: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && 'devcontainer-base-release' || format('devcontainer-base-{0}-{1}', github.event_name, github.ref) }}
 
 jobs:
   version:
@@ -33,9 +35,6 @@ jobs:
     # Only the schedule and manual runs on main release an image. Later steps
     # check the result of this job, not the event.
     if: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
-    concurrency:
-      cancel-in-progress: false
-      group: devcontainer-base-release
     outputs:
       tag: ${{ steps.version.outputs.tag }}
       version: ${{ steps.version.outputs.version }}
