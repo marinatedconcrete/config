@@ -81,6 +81,7 @@ codegen-kube-vip:
         manifest daemonset \
             --arp \
             --inCluster \
+            --instanceName=arp \
             --prometheusHTTPServer=:2113 \
             --services \
             --servicesElection \

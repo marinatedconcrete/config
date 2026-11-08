@@ -28,6 +28,8 @@ spec:
                   fieldPath: metadata.namespace
             - name: dhcp_mode
               value: ipv4
+            - name: instance_name
+              value: arp
             - name: prometheus_server
               value: :2113
             - name: svc_election
