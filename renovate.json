@@ -215,22 +215,6 @@
         "ansible/roles/**"
       ],
       "matchUpdateTypes": ["minor"]
-    },
-    {
-      "description": "Use a fix commit type for patch updates to shipped files",
-      "semanticCommitType": "fix",
-      "matchFileNames": [
-        "images/*/Containerfile",
-        "images/*/Dockerfile",
-        "images/*/build_files/**",
-        "actions/*/action.yml",
-        "actions/*/*.sh",
-        "kustomization/components/**",
-        "ansible/galaxy.yml",
-        "ansible/meta/runtime.yml",
-        "ansible/roles/**"
-      ],
-      "matchUpdateTypes": ["patch"]
     }
   ],
   "customManagers": [
