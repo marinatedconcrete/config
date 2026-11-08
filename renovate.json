@@ -151,7 +151,6 @@
     },
     {
       "description": "Minor k3s updates every two weeks",
-      "commitMessagePrefix": "feat(package): ",
       "matchUpdateTypes": ["minor"],
       "matchDepNames": [
         "k3s-io/k3s",
@@ -183,6 +182,17 @@
       ],
       "minimumReleaseAgeBehaviour": "timestamp-optional",
       "automerge": false
+    },
+    {
+      "description": "Use a breaking commit type for major updates",
+      "semanticCommitType": "feat(package)!",
+      "semanticCommitScope": null,
+      "matchUpdateTypes": ["major"]
+    },
+    {
+      "description": "Use a feature commit type for minor updates",
+      "semanticCommitType": "feat",
+      "matchUpdateTypes": ["minor"]
     }
   ],
   "customManagers": [
