@@ -19,6 +19,22 @@ Each release has these image tags:
 Each release also has a Git tag and a GitHub release.
 Both use the name `devcontainer-base-YYYY.M.N`.
 
+## Use in Another Repository
+
+Use a version tag with a digest in the `FROM` line:
+
+```Dockerfile
+FROM ghcr.io/marinatedconcrete/devcontainer-base:2026.11.0@sha256:...
+```
+
+Renovate then sends an update for each new release.
+Renovate does not change the `latest` tag to a version tag.
+With `latest`, Renovate sends only digest updates.
+
+Add the `renovate/marinatedconcrete` preset to your Renovate configuration.
+With this preset, the Renovate pull request shows the release notes of the image.
+See [`renovate/README.md`](../../renovate/README.md).
+
 ## Releases
 
 The build workflow publishes a release each Thursday at 12:00 UTC.
