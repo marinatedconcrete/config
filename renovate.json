@@ -75,7 +75,8 @@
       "groupName": "kube-vip",
       "matchFileNames": [
         "justfile",
-        "kustomization/components/kube-vip/kustomization.yml"
+        "kustomization/components/kube-vip/kustomization.yml",
+        "kustomization/components/kube-vip-wireguard/kustomization.yml"
       ],
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "matchPackageNames": ["ghcr.io/kube-vip/kube-vip"],

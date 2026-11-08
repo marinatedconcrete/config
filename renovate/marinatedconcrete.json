@@ -117,6 +117,12 @@
       "matchPackageNames": ["marinatedconcrete/config"]
     },
     {
+      "groupName": "marinatedconcrete kube-vip Kustomize Component",
+      "groupSlug": "marinatedconcrete-kustomize-kube-vip",
+      "matchCurrentValue": "kustomize-kube-vip-wireguard@**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
       "groupName": "marinatedconcrete Mosquitto Kustomize Component",
       "groupSlug": "marinatedconcrete-kustomize-mosquitto",
       "matchCurrentValue": "kustomize-mosquitto@**",

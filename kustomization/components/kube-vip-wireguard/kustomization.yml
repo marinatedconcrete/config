@@ -1,0 +1,12 @@
+---
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+images:
+  - name: busybox
+    newTag: 1.38.0@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d3463db586e5fa4
+  - name: ghcr.io/kube-vip/kube-vip
+    newTag: v1.3.1@sha256:1962f9daf226503f7e6b107f595cb28b7917fd2d0113957075e19a3e5a6c1e33
+resources:
+  - rbac.yml
+  - daemonset/wireguard.yml
