@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.8.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.7.0...renovate-config-2.8.0) (2026-11-08)
+
+
+### Features
+
+* release devcontainer-base with CalVer versions ([#1004](https://github.com/marinatedconcrete/config/issues/1004)) ([ec99ec3](https://github.com/marinatedconcrete/config/commit/ec99ec3b0fd71252d374dbf86f211626eeb899b5))
+
 ## [2.7.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.6.1...renovate-config-2.7.0) (2026-11-06)
 
 
