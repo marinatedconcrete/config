@@ -32,6 +32,10 @@ Usage: release-notes.sh --image REF [options]
 Options:
   --components-script PATH  A script that runs in the image. The script prints
                             one `label<TAB>version` line for each component.
+  --containerfile PATH      A Containerfile on the host. The component table
+                            lists each image that a COPY instruction uses with
+                            --from. This option needs the node and npm
+                            commands. The default is to skip this step.
   --cyclonedx-image REF     The CycloneDX CLI image.
   --help                    Show this message.
   --highlights NAMES        Show these packages in the component table. Separate
@@ -51,6 +55,7 @@ EOF
 }
 
 components_script=""
+containerfile=""
 highlights=()
 image=""
 notes_path=""
@@ -75,11 +80,13 @@ image_tar=""
 installed=""
 components=""
 diff_json=""
+node_dir=""
 
 remove_temp_files() {
     rm -f -- \
         "$current_packages" "$previous_packages" "$installed" \
         "$components" "$diff_json" "$image_tar" 2>/dev/null || true
+    [[ -z "$node_dir" ]] || rm -rf -- "$node_dir" 2>/dev/null || true
 }
 
 # Print the Syft options that name the image, one on each line. A registry host
@@ -228,6 +235,32 @@ extract_components() {
         --volume "${script_dir}/${script_name}:/tmp/components.sh:ro" \
         "$image" /tmp/components.sh >"$dest" ||
         die "the components script failed"
+}
+
+# Add one row for each image that the Containerfile copies with COPY --from.
+# Install the parser in a temporary directory, so that a local run adds no
+# files to the repository.
+extract_containerfile() {
+    local dest="$1"
+    local script_dir
+
+    [[ -n "$containerfile" ]] || return 0
+    [[ -f "$containerfile" ]] || die "Containerfile not found: ${containerfile}"
+
+    require_cmd node
+    require_cmd npm
+
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    node_dir="$(mktemp --directory --tmpdir image-node-XXXXXX)"
+    cp -- "${script_dir}/package.json" "${script_dir}/package-lock.json" \
+        "${script_dir}/copied-images.mjs" "$node_dir"
+
+    log "Installing the Containerfile parser"
+    npm ci --ignore-scripts --no-audit --no-fund --prefix "$node_dir" >&2 ||
+        die "could not install the Containerfile parser"
+
+    log "Reading the images in $(basename "$containerfile")"
+    node "${node_dir}/copied-images.mjs" "$containerfile" >>"$dest"
 }
 
 write_component_table() {
@@ -414,6 +447,11 @@ main() {
             components_script="$2"
             shift 2
             ;;
+        --containerfile)
+            need_value "$@"
+            containerfile="$2"
+            shift 2
+            ;;
         --cyclonedx-image)
             need_value "$@"
             CYCLONEDX_IMAGE="$2"
@@ -502,6 +540,7 @@ main() {
 
     extract_installed "$installed"
     extract_components "$components"
+    extract_containerfile "$components"
 
     : >"$notes_path"
     write_component_table "$notes_path" "$sbom_path" "$current_packages"

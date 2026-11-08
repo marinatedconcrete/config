@@ -14,6 +14,10 @@ inputs:
     description: The path to a script that runs in the image and prints more component rows.
     required: false
     default: ""
+  containerfile:
+    description: The path to a Containerfile. The component table lists each image that a COPY instruction copies from with --from. Leave this input empty to skip this step.
+    required: false
+    default: ""
   directory:
     description: The directory for the output files.
     required: false
@@ -86,6 +90,7 @@ runs:
         ACTION_PATH: ${{ github.action_path }}
         COMPONENT: ${{ inputs.component }}
         COMPONENTS_SCRIPT: ${{ inputs.components-script }}
+        CONTAINERFILE: ${{ inputs.containerfile }}
         DIRECTORY: ${{ inputs.directory }}
         HIGHLIGHT_PACKAGES: ${{ inputs.highlight-packages }}
         IMAGE: ${{ inputs.image }}
@@ -101,6 +106,7 @@ runs:
 
         bash "${ACTION_PATH}/release-notes.sh" \
           --components-script "$COMPONENTS_SCRIPT" \
+          --containerfile "$CONTAINERFILE" \
           --highlights "$HIGHLIGHT_PACKAGES" \
           --image "$IMAGE" \
           --notes "$notes" \
