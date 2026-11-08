@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v5.0.0...kustomize-kube-vip@v5.1.0) (2026-11-08)
+
+
+### Features
+
+* **kube-vip:** name the services instance ([#1009](https://github.com/marinatedconcrete/config/issues/1009)) ([17d9439](https://github.com/marinatedconcrete/config/commit/17d9439a899eb06a9a7358f4e2bb936362a83b4c))
+
 ## [5.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.7...kustomize-kube-vip@v5.0.0) (2026-10-25)
 
 
