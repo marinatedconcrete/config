@@ -185,8 +185,8 @@
     },
     {
       "description": "Use a breaking commit type for major updates",
-      "commitMessageAction": "update",
-      "commitMessagePrefix": "feat(package)!:",
+      "semanticCommitType": "feat(package)!",
+      "semanticCommitScope": null,
       "matchUpdateTypes": ["major"]
     },
     {
