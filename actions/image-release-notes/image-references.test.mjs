@@ -18,7 +18,7 @@ FROM fedora:44
 COPY --chmod=0755 --from=hadolint /bin/hadolint /usr/local/bin/hadolint
 `;
   assert.deepEqual(copiedImages(text), [
-    row("ghcr.io/hadolint/hadolint", "v2.15.1"),
+    row("ghcr.io/hadolint/hadolint", `v2.15.1@${DIGEST}`),
   ]);
 });
 
@@ -70,13 +70,13 @@ COPY --from=docker.io/library/alpine /a /b
   ]);
 });
 
-test("a reference with a digest and no tag uses 12 characters of the digest", () => {
+test("a reference with a digest and no tag uses the digest", () => {
   const text = `
 FROM busybox@${DIGEST} AS bb
 FROM fedora:44
 COPY --from=bb /bin/x /x
 `;
-  assert.deepEqual(copiedImages(text), [row("busybox", "1234567890ab")]);
+  assert.deepEqual(copiedImages(text), [row("busybox", DIGEST)]);
 });
 
 test("a registry port is part of the label and not the tag", () => {
@@ -233,8 +233,8 @@ COPY --chmod=0755 --from=kustomize /app/kustomize /usr/local/bin/kustomize
 RUN --mount=type=bind,from=ctx,source=/,target=/ctx /ctx/build.sh
 `;
   assert.deepEqual(copiedImages(text), [
-    row("ghcr.io/hadolint/hadolint", "v2.15.1"),
-    row("registry.k8s.io/kustomize/kustomize", "v5.8.3"),
+    row("ghcr.io/hadolint/hadolint", `v2.15.1@${DIGEST}`),
+    row("registry.k8s.io/kustomize/kustomize", `v5.8.3@${DIGEST}`),
   ]);
 });
 
@@ -244,7 +244,10 @@ FROM scratch AS ctx
 FROM ghcr.io/team/base:2026.11.0@${DIGEST}
 RUN true
 `;
-  assert.deepEqual(baseImage(text), row("ghcr.io/team/base", "2026.11.0"));
+  assert.deepEqual(
+    baseImage(text),
+    row("ghcr.io/team/base", `2026.11.0@${DIGEST}`),
+  );
 });
 
 test("an ARG that holds a tag and a digest expands in the final FROM", () => {
@@ -257,7 +260,7 @@ FROM ghcr.io/marinatedconcrete/devcontainer-base:\${DEVCONTAINER_BASE_TAG}
 `;
   assert.deepEqual(
     baseImage(text),
-    row("ghcr.io/marinatedconcrete/devcontainer-base", "2026.11.0"),
+    row("ghcr.io/marinatedconcrete/devcontainer-base", `2026.11.0@${DIGEST}`),
   );
 });
 
@@ -290,10 +293,10 @@ test("a Containerfile with no FROM gives no base image", () => {
   assert.equal(baseImage("# nothing\n"), null);
 });
 
-test("a final FROM with a digest and no tag uses 12 characters of the digest", () => {
+test("a final FROM with a digest and no tag uses the digest", () => {
   assert.deepEqual(
     baseImage(`FROM busybox@${DIGEST}\n`),
-    row("busybox", "1234567890ab"),
+    row("busybox", DIGEST),
   );
 });
 
@@ -366,7 +369,7 @@ FROM ghcr.io/marinatedconcrete/devcontainer-base:\${DEVCONTAINER_BASE_TAG}
 COPY --chmod=0755 --from=hadolint /bin/hadolint /usr/local/bin/hadolint
 `;
   assert.deepEqual(containerfileImages(text), [
-    row("ghcr.io/marinatedconcrete/devcontainer-base", "2026.11.0"),
-    row("ghcr.io/hadolint/hadolint", "v2.15.1"),
+    row("ghcr.io/marinatedconcrete/devcontainer-base", `2026.11.0@${DIGEST}`),
+    row("ghcr.io/hadolint/hadolint", `v2.15.1@${DIGEST}`),
   ]);
 });

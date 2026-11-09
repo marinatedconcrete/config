@@ -193,7 +193,9 @@ A `COPY` line uses the `ARG` instructions of its stage, as in a build.
 The action does not use build arguments from the build command.
 
 The version is the tag of the reference.
-If the reference has no tag, the version is the first 12 characters of the digest.
+If the reference also has a digest, the version is the tag, an `@`, and the full digest.
+A tag can change to point at a different image, but a digest identifies one image.
+If the reference has no tag, the version is the full digest.
 If the reference has no tag and no digest, the version is `latest`.
 If a base image reference or a reference that `COPY` uses contains an `ARG` with no default value, the action fails.
 The error message gives the line number.

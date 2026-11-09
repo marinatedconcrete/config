@@ -10,8 +10,6 @@ export class UnresolvedReferenceError extends Error {
   }
 }
 
-const shortDigest = (digest) => digest.split(":")[1].slice(0, 12);
-
 // Replace $NAME and ${NAME} with the ARG value that applies at the line, or
 // return null when an ARG has no value there.
 function expand(dockerfile, reference, line) {
@@ -34,10 +32,11 @@ function row(dockerfile, reference, line) {
   if (!from?.getImageName()) {
     throw new UnresolvedReferenceError(line, reference);
   }
-  const digest = from.getImageDigest();
   return {
     label: [from.getRegistry(), from.getImageName()].filter(Boolean).join("/"),
-    version: from.getImageTag() ?? (digest && shortDigest(digest)) ?? "latest",
+    version:
+      [from.getImageTag(), from.getImageDigest()].filter(Boolean).join("@") ||
+      "latest",
   };
 }
 
