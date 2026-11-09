@@ -193,6 +193,12 @@
       "description": "Use a feature commit type for minor updates",
       "semanticCommitType": "feat",
       "matchUpdateTypes": ["minor"]
+    },
+    {
+      "description": "Use the test commit type for updates to test files, so that release-please does not make a release",
+      "matchFileNames": ["**/e2e.sh", "**/tests/**", "**/*.test.*"],
+      "semanticCommitType": "test",
+      "semanticCommitScope": "package"
     }
   ],
   "customManagers": [
