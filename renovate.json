@@ -189,6 +189,22 @@
       "matchUpdateTypes": ["minor"]
     },
     {
+      "description": "Auto-merge devcontainer-base releases after all pull request checks pass. GitHub native auto-merge waits only for the required checks.",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/marinatedconcrete/devcontainer-base"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": false,
+      "minimumReleaseAge": null
+    },
+    {
+      "description": "Use a fix commit type for devcontainer-base updates. A CalVer update type does not show the size of a change.",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/marinatedconcrete/devcontainer-base"],
+      "semanticCommitType": "fix",
+      "semanticCommitScope": "package"
+    },
+    {
       "description": "Use the test commit type for updates to test files, so that release-please does not make a release",
       "matchFileNames": ["**/e2e.sh", "**/tests/**", "**/*.test.*"],
       "semanticCommitType": "test",
