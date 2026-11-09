@@ -80,7 +80,7 @@ publish-release-notes:
 ```
 
 This repository creates its releases after validation, not on tag pushes.
-`.github/workflows/image-kairos-fedora.yml` generates the notes.
+`.github/workflows/image-kairos-fedora.yml` and `.github/workflows/image-github-runner-ci.yml` generate the notes.
 The `publish` job in `.github/workflows/release-package.yml` adds them to the draft release before publication.
 That job does not use the publish action.
 

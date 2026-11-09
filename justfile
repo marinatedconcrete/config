@@ -358,6 +358,14 @@ release-notes-devcontainer-base image previous="":
         images/devcontainer-base/release-notes-components.sh "{{ previous }}" \
         images/devcontainer-base/Containerfile
 
+# Generate the GitHub Runner CI release notes and SBOM from an image.
+[group('release')]
+release-notes-github-runner-ci image previous="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    just release-notes github-runner-ci "{{ image }}" "git jq ripgrep ShellCheck yq" \
+        images/github-runner-ci/release-notes-components.sh "{{ previous }}"
+
 [group('release')]
 release-please-build project dest="":
     #!/usr/bin/env bash

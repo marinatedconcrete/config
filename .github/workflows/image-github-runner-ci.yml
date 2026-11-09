@@ -7,12 +7,14 @@ on: # yamllint disable-line rule:truthy
       - main
     paths:
       - .github/workflows/image-github-runner-ci.yml
+      - actions/image-release-notes/**
       - images/github-runner-ci/**
   pull_request:
     branches:
       - main
     paths:
       - .github/workflows/image-github-runner-ci.yml
+      - actions/image-release-notes/**
       - images/github-runner-ci/**
   workflow_call:
     inputs:
@@ -25,6 +27,8 @@ on: # yamllint disable-line rule:truthy
     outputs:
       digest:
         value: ${{ jobs.build-github-runner-ci.outputs.digest }}
+      release-notes-artifact:
+        value: ${{ jobs.build-github-runner-ci.outputs.release-notes-artifact }}
 
 
 jobs:
@@ -36,6 +40,7 @@ jobs:
       packages: write
     outputs:
       digest: ${{ steps.build.outputs.digest }}
+      release-notes-artifact: ${{ steps.release_notes.outputs.artifact-name }}
       run_job_container_test: ${{ steps.image_export.outputs.push }}
       tag: ${{ steps.version_tag.outputs.tag }}
 
@@ -105,6 +110,17 @@ jobs:
             shellcheck --version
             yq --version
           '
+      - name: Generate Image Release Notes
+        id: release_notes
+        uses: ./actions/image-release-notes
+        with:
+          artifact-name: github-runner-ci-release-notes${{ inputs.version && format('-{0}', inputs.version) || '' }}
+          component: github-runner-ci
+          components-script: images/github-runner-ci/release-notes-components.sh
+          highlight-packages: git jq ripgrep ShellCheck yq
+          image: ghcr.io/${{ github.repository_owner }}/github-runner-ci:${{ steps.version_tag.outputs.tag }}
+          tag: ${{ inputs.version && format('github-runner-ci-{0}', inputs.version) || '' }}
+          version: ${{ inputs.version }}
 
   test-github-actions-job-container:
     name: Test GitHub Actions Job Container
