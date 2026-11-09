@@ -364,7 +364,8 @@ release-notes-github-runner-ci image previous="":
     #!/usr/bin/env bash
     set -euo pipefail
     just release-notes github-runner-ci "{{ image }}" "git jq ripgrep ShellCheck yq" \
-        images/github-runner-ci/release-notes-components.sh "{{ previous }}"
+        images/github-runner-ci/release-notes-components.sh "{{ previous }}" \
+        images/github-runner-ci/Containerfile
 
 [group('release')]
 release-please-build project dest="":

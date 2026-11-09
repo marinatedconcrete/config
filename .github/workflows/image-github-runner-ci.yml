@@ -117,6 +117,7 @@ jobs:
           artifact-name: github-runner-ci-release-notes${{ inputs.version && format('-{0}', inputs.version) || '' }}
           component: github-runner-ci
           components-script: images/github-runner-ci/release-notes-components.sh
+          containerfile: images/github-runner-ci/Containerfile
           highlight-packages: git jq ripgrep ShellCheck yq
           image: ghcr.io/${{ github.repository_owner }}/github-runner-ci:${{ steps.version_tag.outputs.tag }}
           tag: ${{ inputs.version && format('github-runner-ci-{0}', inputs.version) || '' }}
