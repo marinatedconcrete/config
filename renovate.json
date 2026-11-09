@@ -198,10 +198,10 @@
       "minimumReleaseAge": null
     },
     {
-      "description": "Use a fix commit type for devcontainer-base updates. A CalVer update type does not show the size of a change.",
+      "description": "Use a chore commit type for devcontainer-base updates. A CalVer update type does not show the size of a change. A chore commit makes a patch release of github-runner-ci.",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/marinatedconcrete/devcontainer-base"],
-      "semanticCommitType": "fix",
+      "semanticCommitType": "chore",
       "semanticCommitScope": "package"
     },
     {
