@@ -15,7 +15,7 @@ inputs:
     required: false
     default: ""
   containerfile:
-    description: The path to a Containerfile. The component table lists each image that a COPY instruction copies from with --from. Leave this input empty to skip this step.
+    description: The path to a Containerfile. The component table lists the base image of the final stage and each image that a COPY instruction copies from with --from. Leave this input empty to skip this step.
     required: false
     default: ""
   directory:
