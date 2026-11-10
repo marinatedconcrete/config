@@ -12,6 +12,19 @@
       - --force
   changed_when: true
   notify: stop minikube
+- name: Remove the file mounts over /sys
+  when: minikube_test__enable_user_namespaces | bool
+  ansible.builtin.command:
+    argv:
+      - minikube
+      - "--profile={{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+      - ssh
+      - --
+      - >-
+        sudo sh -c 'while m=$(grep -o " /sys/devices/virtual/dmi/id/[a-z_]*"
+        /proc/self/mountinfo | head -n 1); [ -n "$m" ]; do umount $m || exit 1;
+        done'
+  changed_when: true
 - name: Setup local path provisioner
   when: minikube_test__enable_local_path_storage | bool
   block:
@@ -33,6 +46,54 @@
         namespace: local-path-storage
         state: present
         wait: true
+    # The node keeps /var on its own volume.  A pod with `hostUsers: false`
+    # cannot mount a directory on the root filesystem of the node, because
+    # that filesystem does not support idmapped mounts.
+    - name: Store local path volumes under /var
+      when: minikube_test__enable_user_namespaces | bool
+      block:
+        - name: Set the local path to /var/local-path-provisioner
+          kubernetes.core.k8s:
+            api_version: v1
+            context: "{{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+            definition:
+              data:
+                config.json: >-
+                  {"nodePathMap":[{"node":"DEFAULT_PATH_FOR_NON_LISTED_NODES","paths":["/var/local-path-provisioner"]}]}
+            kind: ConfigMap
+            name: local-path-config
+            namespace: local-path-storage
+            state: patched
+        # The old pod still provisions volumes while it stops, so stop it
+        # completely before the new one starts.
+        - name: Stop the local path provisioner
+          kubernetes.core.k8s_scale:
+            api_version: apps/v1
+            context: "{{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+            kind: Deployment
+            name: local-path-provisioner
+            namespace: local-path-storage
+            replicas: 0
+            wait: true
+        - name: Wait for the local path provisioner pods to stop
+          kubernetes.core.k8s:
+            api_version: v1
+            context: "{{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+            kind: Pod
+            label_selectors:
+              - app=local-path-provisioner
+            namespace: local-path-storage
+            state: absent
+            wait: true
+        - name: Start the local path provisioner
+          kubernetes.core.k8s_scale:
+            api_version: apps/v1
+            context: "{{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+            kind: Deployment
+            name: local-path-provisioner
+            namespace: local-path-storage
+            replicas: 1
+            wait: true
 - name: Apply kustomization
   kubernetes.core.k8s:
     apply: true

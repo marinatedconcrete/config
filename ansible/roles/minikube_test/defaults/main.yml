@@ -5,6 +5,11 @@
 # https://minikube.sigs.k8s.io/docs/tutorials/local_path_provisioner/
 minikube_test__enable_local_path_storage: false
 
+# Prepare the node for a `Pod` with `hostUsers: false` when true.  The role removes
+# the files that the node mounts over `/sys`, and it stores local path volumes
+# under `/var`.
+minikube_test__enable_user_namespaces: false
+
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
 minikube_test__kubernetes_version: v1.37.1
 
