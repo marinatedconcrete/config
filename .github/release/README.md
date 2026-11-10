@@ -44,7 +44,7 @@ The publisher assigns the release version to the tested digest without a rebuild
 PR and branch image checks keep their existing publication rules.
 Image tag pushes do not start another build.
 
-The Kairos Fedora build also generates image release notes and an SBOM for the tested image.
+The Kairos Fedora and GitHub Runner CI builds also generate image release notes and an SBOM for the tested image.
 The publisher adds the notes to the draft body and uploads the SBOM before publication.
 The validation record contains the SBOM size and hash.
 

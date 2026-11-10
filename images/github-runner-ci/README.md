@@ -11,3 +11,8 @@ The `runner` user can write to its home directory, `/home/runner`.
 Select language runtimes and tools for each CI image or workflow that uses this base image.
 Examples include Node.js, Python, the GitHub CLI, Kubernetes tools, and container linters.
 Workflows can use `brew` to install more packages when a job runs.
+
+## Releases
+
+Each release has image release notes and a CycloneDX SBOM.
+The notes list the components, the requested packages, and the package changes since the previous release.
