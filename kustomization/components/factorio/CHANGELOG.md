@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-factorio@v0.1.5...kustomize-factorio@v1.0.0) (2026-11-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **factorio:** the pod runs in a user namespace.  Each node must support user namespaces, or the pod does not start.  A consumer that sets `hostUsers: false` in a patch can remove that patch.
+
+### Features
+
+* **factorio:** meet the restricted pod security standard ([#1027](https://github.com/marinatedconcrete/config/issues/1027)) ([ac44fe3](https://github.com/marinatedconcrete/config/commit/ac44fe39ee1319d68de18534af8a6b74c0666231))
+
 ## [0.1.5](https://github.com/marinatedconcrete/config/compare/kustomize-factorio@v0.1.4...kustomize-factorio@v0.1.5) (2026-10-17)
 
 
