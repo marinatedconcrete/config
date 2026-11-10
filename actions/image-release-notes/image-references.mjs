@@ -10,8 +10,6 @@ export class UnresolvedReferenceError extends Error {
   }
 }
 
-const shortDigest = (digest) => digest.split(":")[1].slice(0, 12);
-
 // Replace $NAME and ${NAME} with the ARG value that applies at the line, or
 // return null when an ARG has no value there.
 function expand(dockerfile, reference, line) {
@@ -34,12 +32,15 @@ function row(dockerfile, reference, line) {
   if (!from?.getImageName()) {
     throw new UnresolvedReferenceError(line, reference);
   }
-  const digest = from.getImageDigest();
   return {
     label: [from.getRegistry(), from.getImageName()].filter(Boolean).join("/"),
-    version: from.getImageTag() ?? (digest && shortDigest(digest)) ?? "latest",
+    version:
+      [from.getImageTag(), from.getImageDigest()].filter(Boolean).join("@") ||
+      "latest",
   };
 }
+
+const rowKey = ({ label, version }) => `${label}\t${version}`;
 
 const lineOf = (instruction) => instruction.getRange().start.line + 1;
 
@@ -50,20 +51,42 @@ const fromFlag = (copy) =>
     .find((flag) => flag.getName().toLowerCase() === "from")
     ?.getValue();
 
-export function copiedImages(text) {
-  const dockerfile = DockerfileParser.parse(text);
-
-  // A stage that starts from an earlier stage is not a pinned tool.
+// Find the stages of the file. A stage that starts from an earlier stage is
+// not a pinned tool, and it has a parent.
+function readStages(dockerfile) {
   const stages = new Map();
+  const parents = new Map();
   const derived = new Set();
   dockerfile.getFROMs().forEach((from, index) => {
     const keys = [String(index), from.getBuildStage()?.toLowerCase()];
-    const isDerived = stages.has(from.getImage()?.toLowerCase());
+    const parent = stages.get(from.getImage()?.toLowerCase());
+    if (parent) parents.set(from, parent);
     for (const key of keys.filter(Boolean)) {
       stages.set(key, from);
-      if (isDerived) derived.add(key);
+      if (parent) derived.add(key);
     }
   });
+  return { stages, parents, derived };
+}
+
+// Return the row of the image that the last stage starts from, or null when
+// that image is scratch. A final stage that starts from an earlier stage has
+// the base image of that stage.
+export function baseImage(text) {
+  const dockerfile = DockerfileParser.parse(text);
+  const { parents } = readStages(dockerfile);
+
+  let stage = dockerfile.getFROMs().at(-1);
+  while (parents.has(stage)) stage = parents.get(stage);
+  if (!stage?.getImage() || stage.getImage().toLowerCase() === "scratch") {
+    return null;
+  }
+  return row(dockerfile, stage.getImage(), lineOf(stage));
+}
+
+export function copiedImages(text) {
+  const dockerfile = DockerfileParser.parse(text);
+  const { stages, derived } = readStages(dockerfile);
 
   const rows = new Map();
   const seen = new Set();
@@ -79,7 +102,17 @@ export function copiedImages(text) {
     if (reference.toLowerCase() === "scratch") continue;
 
     const image = row(dockerfile, reference, lineOf(stage ?? copy));
-    rows.set(`${image.label}\t${image.version}`, image);
+    rows.set(rowKey(image), image);
+  }
+  return [...rows.values()];
+}
+
+// Return the base image row first, then the copied image rows. A row that
+// the base image and a copied image share shows one time.
+export function containerfileImages(text) {
+  const rows = new Map();
+  for (const image of [baseImage(text), ...copiedImages(text)]) {
+    if (image) rows.set(rowKey(image), image);
   }
   return [...rows.values()];
 }
@@ -90,7 +123,9 @@ if (
 ) {
   const path = process.argv[2];
   try {
-    for (const { label, version } of copiedImages(readFileSync(path, "utf8"))) {
+    for (const { label, version } of containerfileImages(
+      readFileSync(path, "utf8"),
+    )) {
       console.log(`${label}\t${version}`);
     }
   } catch (error) {

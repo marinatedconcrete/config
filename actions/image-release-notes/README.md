@@ -19,7 +19,8 @@ The notes contain these sections:
    This section shows the operating system that Syft reports.
    The section also shows the packages in `highlight-packages`.
    The optional components script adds more rows.
-   The optional Containerfile adds a row for each image that a `COPY` instruction copies from with `--from`.
+   The optional Containerfile adds a row for the base image of the final stage.
+   The Containerfile also adds a row for each image that a `COPY` instruction copies from with `--from`.
    The row shows the image name without the tag and the digest.
    The row shows the tag, or the short digest if the image has no tag.
 2. The requested packages.
@@ -121,7 +122,7 @@ Add that directory to the `.gitignore` file, or set the `directory` input.
 | `artifact-name`      | no       |                       | The name of the workflow artifact. Leave this input empty to skip the upload.                                                                                |
 | `component`          | yes      |                       | The prefix for the output files and for the release tags of this image.                                                                                      |
 | `components-script`  | no       |                       | The path to a script that runs in the image and prints more component rows.                                                                                  |
-| `containerfile`      | no       |                       | The path to a Containerfile. The component table lists each image that a COPY instruction copies from with --from. Leave this input empty to skip this step. |
+| `containerfile`      | no       |                       | The path to a Containerfile. The component table lists the base image of the final stage and each image that a COPY instruction copies from with --from. Leave this input empty to skip this step. |
 | `directory`          | no       | `build/release`       | The directory for the output files.                                                                                                                          |
 | `highlight-packages` | no       |                       | The packages to show in the component table. Separate the names with spaces.                                                                                 |
 | `image`              | yes      |                       | The OCI image reference to examine. The image must be in the local Docker daemon.                                                                            |
@@ -163,8 +164,8 @@ The script also reports the Kairos variant and model.
 
 ## Containerfile
 
-Supply a Containerfile to list the tools that the image copies from pinned images.
-A new `COPY --from` stage then shows in the component table with no script change.
+Supply a Containerfile to list the base image and the tools that the image copies from pinned images.
+A new base image or `COPY --from` stage then shows in the component table with no script change.
 The action reads the Containerfile on the host.
 The action does not run it.
 
@@ -173,6 +174,13 @@ This option needs Node.js and npm on the host.
 GitHub-hosted runners have both.
 The action installs the package from `package-lock.json` in a temporary directory.
 The install needs network access to the npm registry.
+
+The base image is the image that the final stage starts `FROM`.
+The final stage is the last `FROM` line in the file.
+If the final stage starts from an earlier stage, the action follows the stages to the first stage that starts from an image.
+If that image is `scratch`, the action adds no base image row.
+The base image row shows first.
+If a copied image has the same name and version, the table shows that row one time.
 
 The value of `--from` can be a stage name, a stage number, or an image reference.
 The action finds the image of a stage in the `FROM` line of that stage.
@@ -185,14 +193,18 @@ A `COPY` line uses the `ARG` instructions of its stage, as in a build.
 The action does not use build arguments from the build command.
 
 The version is the tag of the reference.
-If the reference has no tag, the version is the first 12 characters of the digest.
+If the reference also has a digest, the version is the tag, an `@`, and the full digest.
+A tag can change to point at a different image, but a digest identifies one image.
+If the reference has no tag, the version is the full digest.
 If the reference has no tag and no digest, the version is `latest`.
-If a reference that `COPY` uses contains an `ARG` with no default value, the action fails.
+If a base image reference or a reference that `COPY` uses contains an `ARG` with no default value, the action fails.
 The error message gives the line number.
 
 See `.devcontainer/Containerfile` for an example.
 The stage `hadolint` starts from `ghcr.io/hadolint/hadolint:v2.15.1@sha256:...`.
 A `COPY --from=hadolint` line then adds the row `ghcr.io/hadolint/hadolint` with the version `v2.15.1`.
+The final stage starts from `ghcr.io/marinatedconcrete/devcontainer-base`.
+The action adds this base image row first.
 
 ## Local Use
 
@@ -203,4 +215,4 @@ just release-notes kairos-fedora kairos-fedora:0.0.0-e2e "kernel systemd" images
 ```
 
 Supply the SBOM of an earlier release as the fifth argument to add the package changes.
-Supply a Containerfile as the sixth argument to add the rows of its `COPY --from` images.
+Supply a Containerfile as the sixth argument to add the row of its base image and the rows of its `COPY --from` images.

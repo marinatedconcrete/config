@@ -237,7 +237,8 @@ extract_components() {
         die "the components script failed"
 }
 
-# Add one row for each image that the Containerfile copies with COPY --from.
+# Add one row for the base image of the Containerfile. Add one row for each
+# image that the Containerfile copies with COPY --from.
 # Install the parser in a temporary directory, so that a local run adds no
 # files to the repository.
 extract_containerfile() {
@@ -253,14 +254,14 @@ extract_containerfile() {
     script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     node_dir="$(mktemp --directory --tmpdir image-node-XXXXXX)"
     cp -- "${script_dir}/package.json" "${script_dir}/package-lock.json" \
-        "${script_dir}/copied-images.mjs" "$node_dir"
+        "${script_dir}/image-references.mjs" "$node_dir"
 
     log "Installing the Containerfile parser"
     npm ci --ignore-scripts --no-audit --no-fund --prefix "$node_dir" >&2 ||
         die "could not install the Containerfile parser"
 
     log "Reading the images in $(basename "$containerfile")"
-    node "${node_dir}/copied-images.mjs" "$containerfile" >>"$dest"
+    node "${node_dir}/image-references.mjs" "$containerfile" >>"$dest"
 }
 
 write_component_table() {
