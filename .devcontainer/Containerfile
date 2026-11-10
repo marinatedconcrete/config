@@ -1,4 +1,4 @@
-ARG DEVCONTAINER_BASE_TAG=latest
+ARG DEVCONTAINER_BASE_TAG=2026.11.0@sha256:03050970a9d0313d4331b74c9224e21ab5a61ef5e0335dad70222033702e2817
 
 FROM ghcr.io/hadolint/hadolint:v2.15.1@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d AS hadolint
 FROM registry.k8s.io/kustomize/kustomize:v5.8.3@sha256:429eda4a1c76a7de458d0c4ca3ded9b5d764899ff6bdaeccc1d98b1b6ee873e4 AS kustomize
@@ -7,7 +7,6 @@ FROM scratch AS ctx
 COPY .devcontainer/build_files /
 COPY ansible/requirements.txt /requirements.txt
 
-# hadolint ignore=DL3007
 FROM ghcr.io/marinatedconcrete/devcontainer-base:${DEVCONTAINER_BASE_TAG}
 
 USER root

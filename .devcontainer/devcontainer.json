@@ -1,9 +1,6 @@
 {
   "name": "config",
   "build": {
-    "args": {
-      "DEVCONTAINER_BASE_TAG": "${localEnv:DEVCONTAINER_BASE_TAG:latest}"
-    },
     "cacheFrom": "ghcr.io/marinatedconcrete/config-devcontainer",
     "context": "..",
     "dockerfile": "Containerfile"

@@ -106,6 +106,12 @@ jobs:
           if [[ -f /etc/apparmor.d/mosquitto ]]; then
             sudo apparmor_parser --remove /etc/apparmor.d/mosquitto
           fi
+      # The devcontainers/ci action cannot set a build argument, and a devcontainer.json
+      # default cannot hold a digest. Write the candidate tag to the Containerfile.
+      - name: Pin Candidate Image in Devcontainer
+        run: |
+          sed -i "s|^ARG DEVCONTAINER_BASE_TAG=.*|ARG DEVCONTAINER_BASE_TAG=${DEVCONTAINER_BASE_TAG}|" .devcontainer/Containerfile
+          grep -qxF "ARG DEVCONTAINER_BASE_TAG=${DEVCONTAINER_BASE_TAG}" .devcontainer/Containerfile
       - name: Validate Full CI Pipeline
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
