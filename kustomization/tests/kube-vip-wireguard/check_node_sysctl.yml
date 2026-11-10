@@ -29,14 +29,20 @@
   register: init_log
   retries: 24
   until: init_log.log | default('') is search('net\.ipv4\.conf\.all\.' ~ sysctl_under_test ~ ' is 0\.  The node must set it to 1\.')
-- name: Get the pod
+- name: Wait for the init container to stop
   kubernetes.core.k8s_info:
     context: "{{ kubernetes_core_k8s__context }}"
     kind: Pod
     label_selectors:
       - app.kubernetes.io/name=kube-vip-wg-ds
     namespace: "{{ test_namespace }}"
+  delay: 5
   register: wg_pods
+  retries: 24
+  until: >-
+    wg_pods.resources | length == 1
+    and (wg_pods.resources[0].status.initContainerStatuses[0].state.terminated is defined
+    or wg_pods.resources[0].status.initContainerStatuses[0].lastState.terminated is defined)
 - name: Check that the init container failed and kube-vip did not start
   ansible.builtin.assert:
     fail_msg: "The init container did not stop the pod: {{ wg_pods.resources[0].status }}"
