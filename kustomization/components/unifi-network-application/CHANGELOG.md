@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.2.4...kustomize-unifi-network-application@v2.0.0) (2026-11-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **unifi-network-application:** the pod runs in a user namespace.  Each node must support user namespaces, or the pod does not start.  The volumes of the pod must support idmapped mounts.  A consumer that sets
+
+### Features
+
+* **unifi-network-application:** run in a user namespace with fewer capabilities ([#1033](https://github.com/marinatedconcrete/config/issues/1033)) ([bd34725](https://github.com/marinatedconcrete/config/commit/bd3472583c88ec60d9a69262b31e94c3cb62047b))
+
+
+### Other Changes
+
+* **package:** update lscr.io/linuxserver/unifi-network-application:10.6.109 docker digest to f782b39 ([#1032](https://github.com/marinatedconcrete/config/issues/1032)) ([1b50b82](https://github.com/marinatedconcrete/config/commit/1b50b82a35380480d15bdbfc8268ebbfcc4136f5))
+
 ## [1.2.4](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.2.3...kustomize-unifi-network-application@v1.2.4) (2026-11-06)
 
 
