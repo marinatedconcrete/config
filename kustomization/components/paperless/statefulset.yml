@@ -9,9 +9,13 @@ spec:
   serviceName: paperless
   template:
     metadata:
+      annotations:
+        # Patches can change the order of the containers.
+        kubectl.kubernetes.io/default-container: paperless
       labels:
         app.kubernetes.io/name: paperless
     spec:
+      hostUsers: false
       priorityClassName: critical-application
       volumes:
         - name: paperless-data
@@ -20,9 +24,9 @@ spec:
         - name: paperless-media
           persistentVolumeClaim:
             claimName: paperless-media
-        - name: paperless-scans
+        - name: paperless-consume
           persistentVolumeClaim:
-            claimName: paperless-scans
+            claimName: paperless-consume
         - name: paperless-export
           persistentVolumeClaim:
             claimName: paperless-export
@@ -40,6 +44,13 @@ spec:
           volumeMounts:
             - mountPath: "/usr/src/paperless/media"
               name: paperless-media
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
       containers:
         - name: paperless
           image: ghcr.io/paperless-ngx/paperless-ngx
@@ -102,6 +113,19 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            # The image starts as root.  It changes file owners and then runs
+            # Paperless as UID 1000.
+            capabilities:
+              add:
+                - CHOWN
+                - SETGID
+                - SETUID
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           volumeMounts:
             - mountPath: "/usr/src/paperless/data"
               name: paperless-data
@@ -110,4 +134,45 @@ spec:
             - mountPath: "/usr/src/paperless/export"
               name: paperless-export
             - mountPath: "/usr/src/paperless/consume"
-              name: paperless-scans
+              name: paperless-consume
+        - name: samba
+          image: ghcr.io/servercontainers/samba:smbd-only-latest
+          ports:
+            - containerPort: 4450
+              name: smb
+          env:
+            - name: ACCOUNT_printer
+              valueFrom:
+                secretKeyRef:
+                  name: paperless-secrets
+                  key: printer_samba_password
+            # Paperless runs as UID 1000 and owns the consume directory.  The
+            # printer account must use the same UID to write there.
+            - name: UID_printer
+              value: "1000"
+            # Port 4450 is above 1023, so smbd needs no NET_BIND_SERVICE.
+            - name: SAMBA_GLOBAL_CONFIG_smb_SPACE_ports
+              value: "4450"
+            - name: SAMBA_VOLUME_CONFIG_scans
+              value: "[Scans]; path=/shares/scans; valid users = printer; guest ok = no; read only = no; browseable = no"
+          resources:
+            limits:
+              cpu: 100m
+              memory: 1Gi
+            requests:
+              cpu: 25m
+              memory: 100Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            # smbd starts as root and changes to the user of each connection.
+            capabilities:
+              add:
+                - SETGID
+                - SETUID
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: "/shares/scans"
+              name: paperless-consume

@@ -6,6 +6,7 @@
     - role: marinatedconcrete.config.minikube_test
       vars:
         minikube_test__enable_local_path_storage: true
+        minikube_test__enable_user_namespaces: true
         minikube_test__test_dir: kustomization/tests/paperless
   tasks:
     - name: Wait for Paperless StatefulSet
@@ -32,6 +33,45 @@
         that:
           - endpoints.resources | length | bool # Check that an endpoint exists.
           - (endpoints.resources | first).subsets | length | bool
+    - name: Upload a scan through Samba
+      kubernetes.core.k8s_exec:
+        command: >-
+          sh -c 'echo "Samba upload test" > /tmp/samba-upload-test.txt &&
+          smbclient //samba-svc/Scans -U "printer%$ACCOUNT_printer"
+          -c "put /tmp/samba-upload-test.txt samba-upload-test.txt"'
+        container: samba
+        context: "{{ kubernetes_core_k8s__context }}"
+        namespace: "{{ test_namespace }}"
+        pod: paperless-0
+      changed_when: false
+      failed_when: upload.rc != 0
+      register: upload
+    - name: Wait for Paperless to consume the scan
+      kubernetes.core.k8s_exec:
+        command: >-
+          sh -c 'curl -sf -u "admin:$PAPERLESS_ADMIN_PASSWORD"
+          "http://localhost:8000/api/documents/?title__icontains=samba-upload-test"
+          | grep -q "\"count\":1,"'
+        container: paperless
+        context: "{{ kubernetes_core_k8s__context }}"
+        namespace: "{{ test_namespace }}"
+        pod: paperless-0
+      changed_when: false
+      delay: 10
+      failed_when: document.rc != 0
+      register: document
+      retries: 30
+      until: document.rc == 0
+    - name: Ensure Paperless removed the scan from the consume directory
+      kubernetes.core.k8s_exec:
+        command: sh -c 'test -z "$(find /usr/src/paperless/consume -mindepth 1)"'
+        container: paperless
+        context: "{{ kubernetes_core_k8s__context }}"
+        namespace: "{{ test_namespace }}"
+        pod: paperless-0
+      changed_when: false
+      failed_when: consume.rc != 0
+      register: consume
   vars:
     kubernetes_core_k8s__context: paperless
     test_namespace: "{{ (lookup('file', 'kustomization.yml') | from_yaml).namespace }}"
