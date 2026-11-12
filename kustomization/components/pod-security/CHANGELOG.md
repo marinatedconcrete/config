@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/marinatedconcrete/config/compare/kustomize-pod-security@v1.1.0...kustomize-pod-security@v1.1.1) (2026-11-06)
+
+
+### Other Changes
+
+* **main:** release kustomize-pod-security 1.1.0 ([#963](https://github.com/marinatedconcrete/config/issues/963)) ([6a486b5](https://github.com/marinatedconcrete/config/commit/6a486b5122b2bc74dfec3395f725435501867d1d))
+
 ## [1.1.0](https://github.com/marinatedconcrete/config/compare/kustomize-pod-security@v1.0.0...kustomize-pod-security@v1.1.0) (2026-10-27)
 
 
