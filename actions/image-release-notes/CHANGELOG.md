@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0](https://github.com/marinatedconcrete/config/compare/image-release-notes-1.1.0...image-release-notes-1.2.0) (2026-11-13)
+
+
+### Features
+
+* **github-runner-ci:** add image release notes ([#1019](https://github.com/marinatedconcrete/config/issues/1019)) ([ff10e8a](https://github.com/marinatedconcrete/config/commit/ff10e8a1526ae888a7d765af420d3e1c9dc9bfbd))
+* **image-release-notes:** list the base image in the component table ([#1020](https://github.com/marinatedconcrete/config/issues/1020)) ([38efe97](https://github.com/marinatedconcrete/config/commit/38efe97016bca996a36d4e96a3bc85d8b70fa274))
+
+
+### Other Changes
+
+* **package:** update anchore/syft docker tag to v1.57.1 ([b6a8dba](https://github.com/marinatedconcrete/config/commit/b6a8dba8f69e72ef07e396303a619a03506d31e7))
+
 ## [1.1.0](https://github.com/marinatedconcrete/config/compare/image-release-notes-1.0.0...image-release-notes-1.1.0) (2026-11-09)
 
 
