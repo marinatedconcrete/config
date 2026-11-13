@@ -2,6 +2,20 @@
 
 [Kairos Factory](https://kairos.io/docs/reference/kairos-factory/) builds this custom image.
 
+## Cloud Datasources
+
+At startup, Kairos tries to get userdata from cloud datasources.
+`/system/oem/00_datasource.yaml` lists the datasources, which include AWS, Azure, and GCP.
+Most of these datasources read a metadata service at `169.254.169.254` on the local network.
+If a datasource supplies userdata, Kairos runs the stages in the userdata as root.
+These stages can run commands.
+Until a datasource supplies userdata, Kairos tries again at each startup.
+In UKI boot mode, Kairos does not try, unless the kernel command line contains `kairos.pull_datasources`.
+
+Physical hardware has no metadata service, so a node usually gets no userdata.
+But a different device on the same network segment can answer at `169.254.169.254`.
+Put each node on a network segment where you control all of the devices.
+
 ## End-to-End Boot Test
 
 Run the end-to-end test in the devcontainer:
