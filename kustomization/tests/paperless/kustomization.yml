@@ -8,12 +8,12 @@ components:
   - ../../components/redis
 namespace: paperless-test
 patches:
-  # Use ReadWriteOnce for tests. The local-path provisioner does not support ReadWriteMany.
+  # Use the local-path provisioner for tests.
   - patch: |-
       apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
-        name: paperless-scans
+        name: paperless-consume
       spec:
         accessModes:
           - ReadWriteOnce

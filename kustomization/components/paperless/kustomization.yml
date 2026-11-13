@@ -10,5 +10,4 @@ resources:
   - pvc.yml
   - statefulset.yml
   - service.yml
-  - samba-deployment.yml
   - samba-service.yml
