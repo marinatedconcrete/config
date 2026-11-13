@@ -401,6 +401,10 @@ run_guest_checks() {
     ssh_cmd 'sudo -n systemctl is-enabled sshd.socket | grep -qx masked'
     ssh_cmd '! sudo -n systemctl is-active --quiet sshd.socket'
 
+    log "PROOF: datasource lines in the guest journal"
+    ssh_cmd "sudo -n journalctl -b --no-pager | grep -i -E 'Pull data from provider|azure|Hostname set|hostname changed' || true"
+    ssh_cmd "! sudo -n journalctl -b --no-pager | grep -q 'Azure: Saved hostname'"
+
     log "Checking the hostname command"
     ssh_cmd 'command -v hostname >/dev/null'
     ssh_cmd "test \"\$(hostname)\" = '${guest_hostname}'"
