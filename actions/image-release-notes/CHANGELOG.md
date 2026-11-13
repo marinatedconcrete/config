@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/marinatedconcrete/config/compare/image-release-notes-1.2.0...image-release-notes-1.3.0) (2026-11-13)
+
+
+### Features
+
+* **image-release-notes:** add a target input to select the Containerfile stage ([#1040](https://github.com/marinatedconcrete/config/issues/1040)) ([7b5b644](https://github.com/marinatedconcrete/config/commit/7b5b644df12f057d74f3b53c5d36718052c42356))
+
 ## [1.2.0](https://github.com/marinatedconcrete/config/compare/image-release-notes-1.1.0...image-release-notes-1.2.0) (2026-11-13)
 
 
