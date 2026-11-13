@@ -93,6 +93,11 @@ jobs:
           test -r /dev/kvm
           test -w /dev/kvm
           ls -l /dev/kvm
+      # The runner is an Azure VM, and QEMU user networking connects as the
+      # runner user. Without this rule, the Kairos Azure datasource reads the
+      # runner metadata and changes the guest hostname.
+      - name: Block the Instance Metadata Service for the E2E VM
+        run: sudo iptables -I OUTPUT -d 169.254.169.254 -m owner --uid-owner "$(id -u)" -j REJECT
       - name: Run Kairos Fedora E2E
         env:
           KAIROS_IMAGE: ghcr.io/${{ github.repository_owner }}/kairos-fedora:${{ steps.version_tag.outputs.tag }}
