@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.2.6...github-runner-ci-1.3.0) (2026-11-13)
+
+
+### Features
+
+* **github-runner-ci:** add image release notes ([#1019](https://github.com/marinatedconcrete/config/issues/1019)) ([ff10e8a](https://github.com/marinatedconcrete/config/commit/ff10e8a1526ae888a7d765af420d3e1c9dc9bfbd))
+* pin devcontainer-base to CalVer releases and auto-merge updates ([#1018](https://github.com/marinatedconcrete/config/issues/1018)) ([8a53ac5](https://github.com/marinatedconcrete/config/commit/8a53ac5ddc254207d4cd12c43693f7a2f11e5016))
+
+
+### Other Changes
+
+* **package:** update ghcr.io/marinatedconcrete/devcontainer-base docker tag to v2026.11.1 ([#1037](https://github.com/marinatedconcrete/config/issues/1037)) ([9b903ce](https://github.com/marinatedconcrete/config/commit/9b903ce3433b8892c320b36ae45eb006c61e0ca6))
+
 ## [1.2.6](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.2.5...github-runner-ci-1.2.6) (2026-11-02)
 
 
