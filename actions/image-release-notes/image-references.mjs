@@ -10,6 +10,13 @@ export class UnresolvedReferenceError extends Error {
   }
 }
 
+export class UnknownStageError extends Error {
+  constructor(stage) {
+    super(`no stage named ${stage}`);
+    this.stage = stage;
+  }
+}
+
 // Replace $NAME and ${NAME} with the ARG value that applies at the line, or
 // return null when an ARG has no value there.
 function expand(dockerfile, reference, line) {
@@ -52,12 +59,15 @@ const fromFlag = (copy) =>
     ?.getValue();
 
 // Find the stages of the file. A stage that starts from an earlier stage is
-// not a pinned tool, and it has a parent.
-function readStages(dockerfile) {
+// not a pinned tool, and it has a parent. The image is the target stage, the
+// stages that it starts from, and the stages that a COPY in those stages
+// copies from. No target means the last stage.
+function readStages(dockerfile, target) {
+  const froms = dockerfile.getFROMs();
   const stages = new Map();
   const parents = new Map();
   const derived = new Set();
-  dockerfile.getFROMs().forEach((from, index) => {
+  froms.forEach((from, index) => {
     const keys = [String(index), from.getBuildStage()?.toLowerCase()];
     const parent = stages.get(from.getImage()?.toLowerCase());
     if (parent) parents.set(from, parent);
@@ -66,17 +76,41 @@ function readStages(dockerfile) {
       if (parent) derived.add(key);
     }
   });
-  return { stages, parents, derived };
+
+  const start =
+    target == null ? froms.at(-1) : stages.get(target.toLowerCase());
+  if (target != null && !start) throw new UnknownStageError(target);
+
+  const copies = new Map(froms.map((from) => [from, []]));
+  for (const copy of dockerfile.getCOPYs()) {
+    copies
+      .get(froms.findLast((from) => lineOf(from) <= lineOf(copy)))
+      ?.push(copy);
+  }
+  const included = new Set();
+  const pending = [start];
+  for (const stage of pending) {
+    if (!stage || included.has(stage)) continue;
+    included.add(stage);
+    pending.push(parents.get(stage));
+    for (const copy of copies.get(stage)) {
+      pending.push(stages.get(fromFlag(copy)?.toLowerCase()));
+    }
+  }
+  const imageCopies = froms
+    .filter((from) => included.has(from))
+    .flatMap((from) => copies.get(from));
+  return { stages, parents, derived, start, imageCopies };
 }
 
-// Return the row of the image that the last stage starts from, or null when
-// that image is scratch. A final stage that starts from an earlier stage has
-// the base image of that stage.
-export function baseImage(text) {
+// Return the row of the image that the target stage starts from, or null when
+// that image is scratch. A target that starts from an earlier stage has the
+// base image of that stage.
+export function baseImage(text, target) {
   const dockerfile = DockerfileParser.parse(text);
-  const { parents } = readStages(dockerfile);
+  const { parents, start } = readStages(dockerfile, target);
 
-  let stage = dockerfile.getFROMs().at(-1);
+  let stage = start;
   while (parents.has(stage)) stage = parents.get(stage);
   if (!stage?.getImage() || stage.getImage().toLowerCase() === "scratch") {
     return null;
@@ -84,13 +118,13 @@ export function baseImage(text) {
   return row(dockerfile, stage.getImage(), lineOf(stage));
 }
 
-export function copiedImages(text) {
+export function copiedImages(text, target) {
   const dockerfile = DockerfileParser.parse(text);
-  const { stages, derived } = readStages(dockerfile);
+  const { stages, derived, imageCopies } = readStages(dockerfile, target);
 
   const rows = new Map();
   const seen = new Set();
-  for (const copy of dockerfile.getCOPYs()) {
+  for (const copy of imageCopies) {
     const value = fromFlag(copy);
     if (!value || seen.has(value)) continue;
     seen.add(value);
@@ -109,9 +143,12 @@ export function copiedImages(text) {
 
 // Return the base image row first, then the copied image rows. A row that
 // the base image and a copied image share shows one time.
-export function containerfileImages(text) {
+export function containerfileImages(text, target) {
   const rows = new Map();
-  for (const image of [baseImage(text), ...copiedImages(text)]) {
+  for (const image of [
+    baseImage(text, target),
+    ...copiedImages(text, target),
+  ]) {
     if (image) rows.set(rowKey(image), image);
   }
   return [...rows.values()];
@@ -121,18 +158,24 @@ if (
   process.argv[1] &&
   import.meta.url === pathToFileURL(process.argv[1]).href
 ) {
-  const path = process.argv[2];
+  const [path, target] = process.argv.slice(2);
   try {
     for (const { label, version } of containerfileImages(
       readFileSync(path, "utf8"),
+      target || undefined,
     )) {
       console.log(`${label}\t${version}`);
     }
   } catch (error) {
-    if (!(error instanceof UnresolvedReferenceError)) throw error;
-    console.error(
-      `ERROR: line ${error.line} of ${path}: the reference ${error.reference} has an unresolved ARG`,
-    );
+    if (error instanceof UnknownStageError) {
+      console.error(`ERROR: ${path}: no stage named ${error.stage}`);
+    } else if (error instanceof UnresolvedReferenceError) {
+      console.error(
+        `ERROR: line ${error.line} of ${path}: the reference ${error.reference} has an unresolved ARG`,
+      );
+    } else {
+      throw error;
+    }
     process.exit(1);
   }
 }

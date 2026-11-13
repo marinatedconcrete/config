@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  UnknownStageError,
   baseImage,
   containerfileImages,
   copiedImages,
@@ -372,4 +373,115 @@ COPY --chmod=0755 --from=hadolint /bin/hadolint /usr/local/bin/hadolint
     row("ghcr.io/marinatedconcrete/devcontainer-base", `2026.11.0@${DIGEST}`),
     row("ghcr.io/hadolint/hadolint", `v2.15.1@${DIGEST}`),
   ]);
+});
+
+const MACK = `
+FROM scratch AS ctx
+COPY build_files /
+
+FROM ghcr.io/team/kairos:1.0.1@${DIGEST} AS mack-kairos
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx /ctx/kairos.sh
+
+FROM quay.io/fedora/fedora-bootc:44 AS mack
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx /ctx/build.sh
+`;
+
+test("a target selects the base image of a stage that is not the last", () => {
+  assert.deepEqual(
+    baseImage(MACK, "mack-kairos"),
+    row("ghcr.io/team/kairos", `1.0.1@${DIGEST}`),
+  );
+  assert.deepEqual(
+    baseImage(MACK, "mack"),
+    row("quay.io/fedora/fedora-bootc", "44"),
+  );
+  assert.deepEqual(containerfileImages(MACK, "mack-kairos"), [
+    row("ghcr.io/team/kairos", `1.0.1@${DIGEST}`),
+  ]);
+});
+
+test("a target leaves out a COPY in a stage that the image does not use", () => {
+  const text = `
+FROM ghcr.io/team/one:1.0.0 AS one
+FROM ghcr.io/team/two:2.0.0 AS two
+FROM fedora:44 AS first
+COPY --from=one /a /b
+FROM fedora:45 AS second
+COPY --from=two /c /d
+`;
+  assert.deepEqual(copiedImages(text, "first"), [
+    row("ghcr.io/team/one", "1.0.0"),
+  ]);
+  assert.deepEqual(copiedImages(text, "second"), [
+    row("ghcr.io/team/two", "2.0.0"),
+  ]);
+  assert.deepEqual(copiedImages(text), [row("ghcr.io/team/two", "2.0.0")]);
+});
+
+test("a COPY in a stage that the target copies from shows", () => {
+  const text = `
+FROM ghcr.io/team/tool:1.2.3 AS tool
+FROM fedora:44 AS builder
+COPY --from=tool /a /b
+FROM scratch AS artifacts
+COPY --from=builder /b /b
+FROM fedora:45 AS final
+COPY --from=artifacts /b /b
+`;
+  assert.deepEqual(copiedImages(text, "final"), [
+    row("ghcr.io/team/tool", "1.2.3"),
+    row("fedora", "44"),
+  ]);
+});
+
+test("a COPY in a stage that the target starts from shows", () => {
+  const text = `
+FROM ghcr.io/team/tool:1.2.3 AS tool
+FROM ghcr.io/team/base:2.0.0 AS base
+COPY --from=tool /a /b
+FROM base AS final
+`;
+  assert.deepEqual(copiedImages(text, "final"), [
+    row("ghcr.io/team/tool", "1.2.3"),
+  ]);
+  assert.deepEqual(containerfileImages(text, "final"), [
+    row("ghcr.io/team/base", "2.0.0"),
+    row("ghcr.io/team/tool", "1.2.3"),
+  ]);
+});
+
+test("a target name is not case sensitive", () => {
+  assert.deepEqual(
+    baseImage(MACK, "MACK-Kairos"),
+    row("ghcr.io/team/kairos", `1.0.1@${DIGEST}`),
+  );
+});
+
+test("an unknown target stops with the name", () => {
+  for (const run of [baseImage, copiedImages, containerfileImages]) {
+    assert.throws(
+      () => run(MACK, "nope"),
+      (error) => error instanceof UnknownStageError && error.stage === "nope",
+    );
+  }
+});
+
+test("no target uses the last stage", () => {
+  assert.deepEqual(baseImage(MACK), baseImage(MACK, "mack"));
+  assert.deepEqual(
+    containerfileImages(MACK),
+    containerfileImages(MACK, "mack"),
+  );
+});
+
+test("an ARG with no default in an unused stage does not stop the target", () => {
+  const text = `
+ARG TOOL_TAG
+FROM ghcr.io/team/tool:\${TOOL_TAG} AS tool
+FROM fedora:44 AS broken
+COPY --from=tool /a /b
+FROM fedora:45 AS fine
+`;
+  assert.deepEqual(containerfileImages(text, "fine"), [row("fedora", "45")]);
+  assert.throws(() => containerfileImages(text, "broken"));
 });

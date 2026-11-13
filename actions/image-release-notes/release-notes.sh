@@ -33,9 +33,10 @@ Options:
   --components-script PATH  A script that runs in the image. The script prints
                             one `label<TAB>version` line for each component.
   --containerfile PATH      A Containerfile on the host. The component table
-                            lists each image that a COPY instruction uses with
-                            --from. This option needs the node and npm
-                            commands. The default is to skip this step.
+                            lists the base image and each image that a COPY
+                            instruction uses with --from. This option needs
+                            the node and npm commands. The default is to skip
+                            this step.
   --cyclonedx-image REF     The CycloneDX CLI image.
   --help                    Show this message.
   --highlights NAMES        Show these packages in the component table. Separate
@@ -49,6 +50,11 @@ Options:
   --previous-tag TAG        The tag name of the previous release.
   --sbom PATH               The output path for the CycloneDX SBOM.
   --syft-image REF          The Syft image.
+  --target STAGE            The Containerfile stage that the image builds. The
+                            component table uses this stage and the stages
+                            that it starts from or copies from. This option
+                            needs --containerfile. The default is the final
+                            stage.
   --version VERSION         The image version for the SBOM. The default is
                             the tag in the image reference.
 EOF
@@ -62,6 +68,7 @@ notes_path=""
 package_type="rpm"
 previous_sbom=""
 previous_tag=""
+target=""
 version=""
 sbom_path=""
 
@@ -237,8 +244,9 @@ extract_components() {
         die "the components script failed"
 }
 
-# Add one row for the base image of the Containerfile. Add one row for each
-# image that the Containerfile copies with COPY --from.
+# Add one row for the base image of the target stage of the Containerfile. Add
+# one row for each image that the target stage, and the stages that it starts
+# from or copies from, copy with COPY --from.
 # Install the parser in a temporary directory, so that a local run adds no
 # files to the repository.
 extract_containerfile() {
@@ -261,7 +269,7 @@ extract_containerfile() {
         die "could not install the Containerfile parser"
 
     log "Reading the images in $(basename "$containerfile")"
-    node "${node_dir}/image-references.mjs" "$containerfile" >>"$dest"
+    node "${node_dir}/image-references.mjs" "$containerfile" "$target" >>"$dest"
 }
 
 write_component_table() {
@@ -497,14 +505,19 @@ main() {
             sbom_path="$2"
             shift 2
             ;;
-        --version)
-            need_value "$@"
-            version="$2"
-            shift 2
-            ;;
         --syft-image)
             need_value "$@"
             SYFT_IMAGE="$2"
+            shift 2
+            ;;
+        --target)
+            need_value "$@"
+            target="$2"
+            shift 2
+            ;;
+        --version)
+            need_value "$@"
+            version="$2"
             shift 2
             ;;
         *)
@@ -518,6 +531,8 @@ main() {
         usage >&2
         die "--image is required"
     }
+    [[ -z "$target" || -n "$containerfile" ]] ||
+        die "the --target option needs the --containerfile option"
 
     require_cmd awk
     require_cmd docker

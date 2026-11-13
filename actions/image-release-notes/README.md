@@ -19,7 +19,7 @@ The notes contain these sections:
    This section shows the operating system that Syft reports.
    The section also shows the packages in `highlight-packages`.
    The optional components script adds more rows.
-   The optional Containerfile adds a row for the base image of the final stage.
+   The optional Containerfile adds a row for the base image of the target stage.
    The Containerfile also adds a row for each image that a `COPY` instruction copies from with `--from`.
    The row shows the image name without the tag and the digest.
    The row shows the tag, or the short digest if the image has no tag.
@@ -117,19 +117,20 @@ Add that directory to the `.gitignore` file, or set the `directory` input.
 
 ## Inputs
 
-| Input                | Required | Default               | Description                                                                                                                                                  |
-| -------------------- | -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `artifact-name`      | no       |                       | The name of the workflow artifact. Leave this input empty to skip the upload.                                                                                |
-| `component`          | yes      |                       | The prefix for the output files and for the release tags of this image.                                                                                      |
-| `components-script`  | no       |                       | The path to a script that runs in the image and prints more component rows.                                                                                  |
-| `containerfile`      | no       |                       | The path to a Containerfile. The component table lists the base image of the final stage and each image that a COPY instruction copies from with --from. Leave this input empty to skip this step. |
-| `directory`          | no       | `build/release`       | The directory for the output files.                                                                                                                          |
-| `highlight-packages` | no       |                       | The packages to show in the component table. Separate the names with spaces.                                                                                 |
-| `image`              | yes      |                       | The OCI image reference to examine. The image must be in the local Docker daemon.                                                                            |
-| `package-type`       | no       | `rpm`                 | The package type for the tables. The SBOM keeps all package types.                                                                                           |
-| `tag`                | no       |                       | The tag of this release. The action compares the release with the release before this tag.                                                                   |
-| `token`              | no       | `${{ github.token }}` | The token that the action uses to read releases.                                                                                                             |
-| `version`            | no       |                       | The image version for the SBOM. The default is the tag in `image`.                                                                                           |
+| Input                | Required | Default               | Description                                                                                                                                                                                         |
+| -------------------- | -------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `artifact-name`      | no       |                       | The name of the workflow artifact. Leave this input empty to skip the upload.                                                                                                                       |
+| `component`          | yes      |                       | The prefix for the output files and for the release tags of this image.                                                                                                                             |
+| `components-script`  | no       |                       | The path to a script that runs in the image and prints more component rows.                                                                                                                         |
+| `containerfile`      | no       |                       | The path to a Containerfile. The component table lists the base image of the target stage and each image that a COPY instruction copies from with --from. Leave this input empty to skip this step. |
+| `directory`          | no       | `build/release`       | The directory for the output files.                                                                                                                                                                 |
+| `highlight-packages` | no       |                       | The packages to show in the component table. Separate the names with spaces.                                                                                                                        |
+| `image`              | yes      |                       | The OCI image reference to examine. The image must be in the local Docker daemon.                                                                                                                   |
+| `package-type`       | no       | `rpm`                 | The package type for the tables. The SBOM keeps all package types.                                                                                                                                  |
+| `tag`                | no       |                       | The tag of this release. The action compares the release with the release before this tag.                                                                                                          |
+| `target`             | no       |                       | The Containerfile stage that the image builds. The component table uses this stage and the stages that it starts from or copies from. Leave this input empty to use the final stage.                |
+| `token`              | no       | `${{ github.token }}` | The token that the action uses to read releases.                                                                                                                                                    |
+| `version`            | no       |                       | The image version for the SBOM. The default is the tag in `image`.                                                                                                                                  |
 
 ## Outputs
 
@@ -175,12 +176,26 @@ GitHub-hosted runners have both.
 The action installs the package from `package-lock.json` in a temporary directory.
 The install needs network access to the npm registry.
 
-The base image is the image that the final stage starts `FROM`.
+A Containerfile can have more than one build target.
+Set `target` to the stage that the image builds.
+If `target` is empty, the action uses the final stage.
 The final stage is the last `FROM` line in the file.
-If the final stage starts from an earlier stage, the action follows the stages to the first stage that starts from an image.
+The stage name is not case sensitive.
+If the file has no stage with that name, the action fails.
+
+The base image is the image that the target stage starts `FROM`.
+If the target stage starts from an earlier stage, the action follows the stages to the first stage that starts from an image.
 If that image is `scratch`, the action adds no base image row.
 The base image row shows first.
 If a copied image has the same name and version, the table shows that row one time.
+
+The action reads the `COPY` instructions of these stages:
+
+- The target stage.
+- The stages that the target stage starts from.
+- The stages that a `COPY --from` in these stages names.
+
+The action ignores the `COPY` instructions of all other stages.
 
 The value of `--from` can be a stage name, a stage number, or an image reference.
 The action finds the image of a stage in the `FROM` line of that stage.
@@ -216,3 +231,4 @@ just release-notes kairos-fedora kairos-fedora:0.0.0-e2e "kernel systemd" images
 
 Supply the SBOM of an earlier release as the fifth argument to add the package changes.
 Supply a Containerfile as the sixth argument to add the row of its base image and the rows of its `COPY --from` images.
+Supply a stage name as the seventh argument to use that stage instead of the final stage.
