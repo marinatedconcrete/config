@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.2.9...kustomize-paperless@v2.0.0) (2026-11-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **paperless:** Each node must support user namespaces, and each volume must support idmapped mounts.  Move patches for the samba Deployment to the samba container of the paperless StatefulSet, and use a strategic merge patch that names the container.  Change patches for the paperless-scans PVC to paperless-consume.  Add printer_samba_password to paperless-secrets if it is missing.  If a NetworkPolicy selects the paperless pod for ingress, allow the port named smb.  A NetworkPolicy matches the port of the pod, so a rule for TCP port 445 does not match.  The README shows the upgrade steps.
+
+### Features
+
+* **paperless:** run samba in the paperless pod in a user namespace ([#1035](https://github.com/marinatedconcrete/config/issues/1035)) ([50fff92](https://github.com/marinatedconcrete/config/commit/50fff92393395c69cb96d9bc16b9e0a132f4df94))
+
 ## [1.2.9](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.2.8...kustomize-paperless@v1.2.9) (2026-11-06)
 
 
