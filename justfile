@@ -326,12 +326,12 @@ test: kustomization-tests
 
 # Generate the release notes and the SBOM for an image.
 [group('release')]
-release-notes component image highlights="" components="" previous="" containerfile="":
+release-notes component image highlights="" components="" previous="" containerfile="" target="":
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # The script ignores an empty components script, an empty Containerfile, and an
-    # absent previous SBOM.
+    # The script ignores an empty components script, an empty Containerfile, an
+    # empty target, and an absent previous SBOM.
     bash actions/image-release-notes/release-notes.sh \
         --components-script "{{ components }}" \
         --containerfile "{{ containerfile }}" \
@@ -339,7 +339,8 @@ release-notes component image highlights="" components="" previous="" containerf
         --image "{{ image }}" \
         --notes "build/release/{{ component }}-notes.md" \
         --previous-sbom "{{ previous }}" \
-        --sbom "build/release/{{ component }}-sbom.cdx.json"
+        --sbom "build/release/{{ component }}-sbom.cdx.json" \
+        --target "{{ target }}"
 
 # Generate the Kairos Fedora release notes and SBOM from an image.
 [group('release')]

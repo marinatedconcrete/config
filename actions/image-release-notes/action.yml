@@ -15,7 +15,7 @@ inputs:
     required: false
     default: ""
   containerfile:
-    description: The path to a Containerfile. The component table lists the base image of the final stage and each image that a COPY instruction copies from with --from. Leave this input empty to skip this step.
+    description: The path to a Containerfile. The component table lists the base image of the target stage and each image that a COPY instruction copies from with --from. Leave this input empty to skip this step.
     required: false
     default: ""
   directory:
@@ -35,6 +35,10 @@ inputs:
     default: rpm
   tag:
     description: The tag of this release. The action compares the release with the release before this tag.
+    required: false
+    default: ""
+  target:
+    description: The Containerfile stage that the image builds. The component table uses this stage and the stages that it starts from or copies from. Leave this input empty to use the final stage.
     required: false
     default: ""
   version:
@@ -96,6 +100,7 @@ runs:
         IMAGE: ${{ inputs.image }}
         PACKAGE_TYPE: ${{ inputs.package-type }}
         PREVIOUS_TAG: ${{ steps.previous_release.outputs.tag }}
+        TARGET: ${{ inputs.target }}
         VERSION: ${{ inputs.version }}
       id: generate
       shell: bash
@@ -114,6 +119,7 @@ runs:
           --previous-sbom "${DIRECTORY}/previous/${COMPONENT}-sbom.cdx.json" \
           --previous-tag "$PREVIOUS_TAG" \
           --sbom "$sbom" \
+          --target "$TARGET" \
           --version "$VERSION"
 
         echo "notes-path=${notes}" >> "$GITHUB_OUTPUT"
