@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "prettier": "3.9.10",
+    "prettier": "3.10.0",
     "renovate": "44.198.0"
   },
   "packageManager": "pnpm@10.34.9",
