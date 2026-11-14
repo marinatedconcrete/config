@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-1.0.1...kairos-fedora-1.1.0) (2026-11-14)
+
+
+### Features
+
+* **package:** update quay.io/kairos/kairos-init docker tag to v4.5.0 ([#1034](https://github.com/marinatedconcrete/config/issues/1034)) ([a481e48](https://github.com/marinatedconcrete/config/commit/a481e48bcbed775ee36b326fb651ac52c194e581))
+
+
+### Documentation Updates
+
+* **kairos-fedora:** describe the cloud datasource probe ([#1044](https://github.com/marinatedconcrete/config/issues/1044)) ([642056f](https://github.com/marinatedconcrete/config/commit/642056f464dbf7f799f431c09837b475247c8312))
+
 ## [1.0.1](https://github.com/marinatedconcrete/config/compare/kairos-fedora-1.0.0...kairos-fedora-1.0.1) (2026-11-07)
 
 
