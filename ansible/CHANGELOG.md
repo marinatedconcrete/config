@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.0.0](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.6.1...ansible-collection@v2.0.0) (2026-11-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* **factorio:** the pod runs in a user namespace.  Each node must support user namespaces, or the pod does not start.  A consumer that sets `hostUsers: false` in a patch can remove that patch.
+
+### Features
+
+* **factorio:** meet the restricted pod security standard ([#1027](https://github.com/marinatedconcrete/config/issues/1027)) ([ac44fe3](https://github.com/marinatedconcrete/config/commit/ac44fe39ee1319d68de18534af8a6b74c0666231))
+
+
+### Other Changes
+
+* **package:** update dependency kubernetes to v37.0.2 ([#1021](https://github.com/marinatedconcrete/config/issues/1021)) ([5952766](https://github.com/marinatedconcrete/config/commit/5952766d4d7d5b663f975add2f7737461def870c))
+* **package:** update dependency kubernetes/kubernetes to v1.37.2 ([de0581c](https://github.com/marinatedconcrete/config/commit/de0581ce346a5662e0e590c2ff408440ffce0b0b))
+
 ## [1.6.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.6.0...ansible-collection@v1.6.1) (2026-11-07)
 
 
