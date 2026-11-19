@@ -1,7 +1,7 @@
 FROM scratch AS ctx
 COPY build_files /
 
-FROM quay.io/containers/buildah:v1.45.1-immutable@sha256:9f6a454307b7981bd4611bba8c4a523e8213f395765126e2a079bfabd2884d89
+FROM quay.io/containers/buildah:v1.46.1-immutable@sha256:96c40cc69c7aace7b48514e114be3c8438649cb25b61a00834910e753d546882
 
 LABEL org.opencontainers.image.title="buildah-action-runner"
 LABEL org.opencontainers.image.description="Tools needed for a minimal buildah environment in CI."
