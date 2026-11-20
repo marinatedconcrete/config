@@ -76,7 +76,7 @@ sbom_path=""
 none_text=" _none_"
 
 # renovate: datasource=docker depName=anchore/syft
-SYFT_IMAGE="${SYFT_IMAGE:-anchore/syft:v1.57.1@sha256:03215d0e98b661d0ecbc8575dbc14d65be1743b5de5df6410aecb7e80f95b060}"
+SYFT_IMAGE="${SYFT_IMAGE:-anchore/syft:v1.57.2@sha256:e97e20b6e6d1699c60296b66ab337941724f9bd06ac279d893eda89601fc4b2a}"
 # renovate: datasource=docker depName=cyclonedx/cyclonedx-cli
 CYCLONEDX_IMAGE="${CYCLONEDX_IMAGE:-cyclonedx/cyclonedx-cli:0.33.1@sha256:252c2e26f468c25fea1e63ecde1bc3198ad6e9dbb57f5ed3236bddcb2281b3a7}"
 
