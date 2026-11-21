@@ -104,11 +104,17 @@ spec:
               path: /
               port: 8000
               scheme: HTTP
+              httpHeaders:
+                - name: Host
+                  value: localhost
           startupProbe:
             httpGet:
               path: /
               port: 8000
               scheme: HTTP
+              httpHeaders:
+                - name: Host
+                  value: localhost
             initialDelaySeconds: 20
             periodSeconds: 10
             timeoutSeconds: 5
