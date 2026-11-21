@@ -6,7 +6,7 @@ kind: DaemonSet
 metadata:
   labels:
     app.kubernetes.io/name: kube-vip-wg-ds
-    app.kubernetes.io/version: v1.3.1
+    app.kubernetes.io/version: v1.3.2
   name: kube-vip-wg-ds
 spec:
   selector:
@@ -16,7 +16,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: kube-vip-wg-ds
-        app.kubernetes.io/version: v1.3.1
+        app.kubernetes.io/version: v1.3.2
     spec:
       containers:
         - args:
@@ -28,6 +28,8 @@ spec:
                   fieldPath: metadata.namespace
             - name: instance_name
               value: wg
+            - name: lb_class_name
+              value: kube-vip.io/wireguard
             - name: lb_class_name
               value: kube-vip.io/wireguard
             - name: lb_class_only
