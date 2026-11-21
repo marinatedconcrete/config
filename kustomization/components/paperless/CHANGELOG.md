@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.1.1...kustomize-paperless@v2.1.2) (2026-11-21)
+
+
+### Bug Fixes
+
+* **paperless:** use localhost for HTTP probe host validation ([#1064](https://github.com/marinatedconcrete/config/issues/1064)) ([50dbdfd](https://github.com/marinatedconcrete/config/commit/50dbdfdba19a722831399cb4f3cae9a95e1d261c))
+
 ## [2.1.1](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.1.0...kustomize-paperless@v2.1.1) (2026-11-19)
 
 
