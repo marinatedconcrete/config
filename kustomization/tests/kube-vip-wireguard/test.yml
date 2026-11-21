@@ -2,6 +2,16 @@
 - name: Kube-vip WireGuard Tests
   gather_facts: false
   hosts: localhost
+  pre_tasks:
+    - name: Check the WireGuard load balancer class settings
+      ansible.builtin.assert:
+        that:
+          - env | selectattr('name', 'equalto', 'lb_class_name') | map(attribute='value') | list == ['kube-vip.io/wireguard']
+          - env | selectattr('name', 'equalto', 'lb_class_only') | map(attribute='value') | list == ['true']
+      vars:
+        resources: "{{ lookup('kubernetes.core.kustomize', dir=playbook_dir) | from_yaml_all }}"
+        daemonset: "{{ resources | selectattr('kind', 'equalto', 'DaemonSet') | selectattr('metadata.name', 'equalto', 'kube-vip-wg-ds') | first }}"
+        env: "{{ (daemonset.spec.template.spec.containers | selectattr('name', 'equalto', 'kube-vip') | first).env }}"
   roles:
     - role: marinatedconcrete.config.minikube_test
       vars:

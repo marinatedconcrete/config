@@ -30,8 +30,6 @@ spec:
               value: wg
             - name: lb_class_name
               value: kube-vip.io/wireguard
-            - name: lb_class_name
-              value: kube-vip.io/wireguard
             - name: lb_class_only
               value: "true"
             - name: prometheus_server

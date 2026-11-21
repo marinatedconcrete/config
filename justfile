@@ -174,8 +174,7 @@ codegen-kube-vip:
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "vip_address"))' ${SCRATCH}
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "vip_arp"))' ${SCRATCH}
 
-    # The generator drops the class name and the namespace.
-    yq -i '.spec.template.spec.containers[0].env += [{"name": "lb_class_name", "value": "kube-vip.io/wireguard"}]' ${SCRATCH}
+    # Set cp_namespace with a field reference.
     yq -i '.spec.template.spec.containers[0].env += [{"name": "cp_namespace", "valueFrom": { "fieldRef": { "fieldPath": "metadata.namespace"}}}]' ${SCRATCH}
 
     # Set priorityClassName in the manifest.
