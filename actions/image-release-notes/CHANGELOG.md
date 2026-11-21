@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/marinatedconcrete/config/compare/image-release-notes-1.3.0...image-release-notes-1.3.1) (2026-11-20)
+
+
+### Other Changes
+
+* **package:** update anchore/syft docker tag to v1.57.2 ([110002d](https://github.com/marinatedconcrete/config/commit/110002df81df5f6052517e303501a3baa38551f7))
+
 ## [1.3.0](https://github.com/marinatedconcrete/config/compare/image-release-notes-1.2.0...image-release-notes-1.3.0) (2026-11-13)
 
 
