@@ -1,4 +1,4 @@
 # pip requirements
 ansible==15.0.0
 ansible-lint==26.11.0
-kubernetes==37.0.2
+kubernetes==37.0.3
