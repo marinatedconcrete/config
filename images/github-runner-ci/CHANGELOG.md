@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.3.0...github-runner-ci-1.3.1) (2026-11-20)
+
+
+### Other Changes
+
+* **package:** update ghcr.io/marinatedconcrete/devcontainer-base docker tag to v2026.11.2 ([#1060](https://github.com/marinatedconcrete/config/issues/1060)) ([2337aae](https://github.com/marinatedconcrete/config/commit/2337aaeb1db1780621c78e1eff2f4d63798c29ae))
+
 ## [1.3.0](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.2.6...github-runner-ci-1.3.0) (2026-11-13)
 
 
