@@ -98,6 +98,8 @@ spec:
               value: "2"
             - name: PAPERLESS_THREADS_PER_WORKER
               value: "1"
+            - name: PYTHONPYCACHEPREFIX
+              value: /run/paperless-pycache
           resources:
             requests:
               cpu: 250m
