@@ -59,6 +59,12 @@ spec:
           env:
             - name: PAPERLESS_PORT
               value: "8000"
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: PAPERLESS_ALLOWED_HOSTS
+              value: paperless-svc.$(POD_NAMESPACE)
             - name: PAPERLESS_REDIS
               value: "redis://redis-svc:6379"
             - name: PAPERLESS_TIME_ZONE

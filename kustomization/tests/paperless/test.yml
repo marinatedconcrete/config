@@ -46,11 +46,11 @@
       changed_when: false
       failed_when: upload.rc != 0
       register: upload
-    - name: Wait for Paperless to consume the scan
+    - name: Find the scan through the Service and public hostnames
       kubernetes.core.k8s_exec:
         command: >-
-          sh -c 'curl -sf -u "admin:$PAPERLESS_ADMIN_PASSWORD"
-          "http://localhost:8000/api/documents/?title__icontains=samba-upload-test"
+          sh -c 'curl -sf -H "Host: {{ item }}" -u "admin:$PAPERLESS_ADMIN_PASSWORD"
+          "http://paperless-svc.{{ test_namespace }}:8000/api/documents/?title__icontains=samba-upload-test"
           | grep -q "\"count\":1,"'
         container: paperless
         context: "{{ kubernetes_core_k8s__context }}"
@@ -59,6 +59,9 @@
       changed_when: false
       delay: 10
       failed_when: document.rc != 0
+      loop:
+        - "paperless-svc.{{ test_namespace }}"
+        - paperless.example.org
       register: document
       retries: 30
       until: document.rc == 0

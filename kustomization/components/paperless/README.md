@@ -134,10 +134,18 @@ The Samba container can mount the other volumes of the `Pod`, for example `paper
 
 # Optional Patches
 
-## Set the paperless hostname
+## HTTP Hostnames
 
-Use [PAPERLESS_URL](https://docs.paperless-ngx.com/configuration/#PAPERLESS_URL) to configure the service URL for security checks.
-This setting is very important when users can access the service from the internet.
+By default, Paperless accepts `localhost` and `paperless-svc.<namespace>`.
+Clients in other namespaces can use the Service hostname to connect to the API.
+Previously, Paperless accepted any hostname if you omitted both `PAPERLESS_URL` and `PAPERLESS_ALLOWED_HOSTS`.
+Set [PAPERLESS_URL](https://docs.paperless-ngx.com/configuration/#PAPERLESS_URL) to the public URL when you use an Ingress.
+Paperless also accepts the hostname from this URL.
+
+To allow other hostnames, set `PAPERLESS_ALLOWED_HOSTS` in your overlay.
+This setting replaces the list from the component.
+If clients use the Service hostname, include its full value in the list.
+For example, use `paperless-svc.archive` for the `archive` namespace.
 
 ```yaml
 patches:
