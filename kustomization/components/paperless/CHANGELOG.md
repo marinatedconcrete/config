@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.2.0...kustomize-paperless@v2.2.1) (2026-11-22)
+
+
+### Bug Fixes
+
+* **paperless:** use a writable Python bytecode cache ([#1070](https://github.com/marinatedconcrete/config/issues/1070)) ([bc5008e](https://github.com/marinatedconcrete/config/commit/bc5008ede9be4c65e7f6dd16b29261512c8766ca))
+
 ## [2.2.0](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.1.2...kustomize-paperless@v2.2.0) (2026-11-22)
 
 
