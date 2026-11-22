@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.1](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v5.1.0...kustomize-kube-vip@v5.1.1) (2026-11-22)
+
+
+### Other Changes
+
+* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1.3.2 ([#1062](https://github.com/marinatedconcrete/config/issues/1062)) ([26350e5](https://github.com/marinatedconcrete/config/commit/26350e559a0c0eac844b5fa9f8fcbb562343c98c))
+
 ## [5.1.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v5.0.0...kustomize-kube-vip@v5.1.0) (2026-11-08)
 
 
