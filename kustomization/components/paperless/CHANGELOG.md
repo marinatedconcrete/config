@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.1.2...kustomize-paperless@v2.2.0) (2026-11-22)
+
+
+### Features
+
+* **paperless:** accept the namespace-qualified Service hostname ([#1066](https://github.com/marinatedconcrete/config/issues/1066)) ([69286d7](https://github.com/marinatedconcrete/config/commit/69286d7edaf083cd0fa938d42b88bf342f0ac4e1))
+
 ## [2.1.2](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.1.1...kustomize-paperless@v2.1.2) (2026-11-21)
 
 
