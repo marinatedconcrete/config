@@ -117,7 +117,7 @@ Do these checks when a change touches the release sequence, `plan.mjs`, or `publ
    Both lists must be empty.
 
 4. For a change to the publisher or the workflows, start a recovery run for a recent merged release PR. Do this after the change is on `main`. Use the command in `.github/release/README.md`. The run must find the existing release and make no change to it. Check the workflow result and the published release.
-5. For a change that adds a package, check the next release PR. The PR must list the new package with the expected tag. Merge it only when the `rejected-candidates` job does not report an error.
+5. Before merge, check the package and expected tag in the release PR. After merge, check the Release Please run on `main` for rejected candidates.
 6. Read the workflow `permissions` and the secrets use in the diff. Automation does not check them.
 
 ## Known gaps
