@@ -1,0 +1,35 @@
+---
+name: PR Metrics
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      window_days:
+        description: Number of trailing days for the window metrics.
+        type: string
+        default: "30"
+
+concurrency:
+  group: pr-metrics
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: read
+
+jobs:
+  pr-metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts
+      - name: Report Hive PR acceptance
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          WINDOW_DAYS: ${{ inputs.window_days || '30' }}
+        run: node scripts/pr-metrics.mjs --window-days "$WINDOW_DAYS" --summary-file "$GITHUB_STEP_SUMMARY"
