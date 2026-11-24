@@ -1,0 +1,40 @@
+---
+name: Bug report
+description: Report a defect in a component, image, role, or workflow.
+labels:
+  - bug
+body:
+  - type: input
+    id: area
+    attributes:
+      label: Affected area
+      description: Name the component, image, Ansible role, or workflow.
+      placeholder: kustomization/components/paperless
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: Describe the incorrect behavior. Include error messages or logs.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: Describe the correct behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: Give the steps or commands that show the defect.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add versions, links, or other details that help.
