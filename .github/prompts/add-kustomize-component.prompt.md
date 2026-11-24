@@ -82,8 +82,10 @@ Justify each exception in these three places:
 
 ## Step 2. Add the end-to-end test
 
-Create `kustomization/tests/{name}/`. The directory name must equal the component name.
-The release build runs `just kustomization-test {name}`, so a different name breaks the release.
+For a standalone component, create `kustomization/tests/{name}/`.
+For a shared release, create `kustomization/tests/{group}-{child}/` for each child.
+The release build runs `just kustomization-test` with these directory names, so a different name breaks the release.
+Use each test directory name for `{name}` in the test commands and the CI matrix entries below.
 Start from `kustomization/tests/mosquitto`.
 
 | File                | Content                                                                                                                                       |
@@ -129,7 +131,7 @@ Run `just test` to run every component test.
 
 ## Step 3. Add the CI matrix entry
 
-Add `{name}` to `jobs.kustomization-test.strategy.matrix.kustomization-test` in `.github/workflows/checks.yml`.
+Add `{name}` to `jobs.kustomization-test.strategy.matrix.kustomization-test` in `.github/workflows/ci.yml`.
 Keep the list in alphabetical order.
 The `.github/workflows/release-package.yml` workflow runs the same test before it publishes a release.
 
@@ -271,7 +273,7 @@ just lint
 
 - `kustomization/components/{name}/` with `kustomization.yml`, the manifests, and `README.md`.
 - `kustomization/tests/{name}/` with `test.yml`, `kustomization.yml`, and `namespace.yml`.
-- One new line in the matrix of `.github/workflows/checks.yml`.
+- One new line in the matrix of `.github/workflows/ci.yml`.
 - One new package in `release-please-config.json` and one new line in `.release-please-manifest.json`.
 - One new group rule in `renovate/marinatedconcrete.json`.
 - A Renovate auto-merge rule in `renovate.json`, if the component needs one.
