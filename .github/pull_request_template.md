@@ -1,7 +1,8 @@
 <!--
 Use a Conventional Commit title for this pull request.
 Example: `feat(kustomize-paperless): add a backup job`.
-Add `!` after the type for a breaking change.
+Put `!` immediately before the colon for a breaking change.
+Example: `feat(kustomize-paperless)!: change the backup format`.
 -->
 
 ## Summary
