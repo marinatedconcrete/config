@@ -62,7 +62,10 @@ Apply each item that matches the change.
 
 - [ ] A change to a role option or to role behavior updates the role `README.md` and the comments in `defaults/main.yml`.
 - [ ] A change that forces a consumer to act is a breaking change.
-      The commit uses `!` or a `BREAKING CHANGE:` footer.
+      Put `!` immediately before the colon of the PR title, for example `feat(factorio)!: ...`.
+      For a hand-written PR, also add a `BREAKING CHANGE:` footer as the last paragraph of the PR description.
+      The PR description becomes the squash commit message. Text in branch commits is discarded.
+      Renovate major updates get `!` from `renovate.json` and carry no footer.
       Commit `ac44fe3` (`feat(factorio)!`) is an example.
 
 ### Versioning and release
@@ -74,9 +77,11 @@ Apply each item that matches the change.
 - [ ] The commit type matches the effect on consumers.
       `feat` makes a minor release.
       `fix` makes a patch release.
-      `feat!`, `fix!`, or a `BREAKING CHANGE:` footer makes a major release.
-      `chore`, `docs`, and `build` appear in the changelog but make no release by themselves.
-      `test` does not appear in the changelog.
+      A `!` in the PR title, such as `feat!`, or a `BREAKING CHANGE:` footer in the PR description makes a major release.
+      `chore`, `docs`, and `build` are visible changelog sections.
+      Each of them makes a release when the change touches the collection path.
+      The `ansible-collection` 1.6.1 release has only `chore` changes.
+      Types that the release configuration does not list, such as `test` and `ci`, make no release.
 - [ ] The scope names the thing that changed.
       Examples are `fix(ansible): ...`, `feat(factorio)!: ...`, and `fix(longhorn_allow_encrypted_trim): ...`.
       Renovate uses the scope `package` for dependency updates.
@@ -93,7 +98,11 @@ Apply each item that matches the change.
 - [ ] A Renovate update of a dependency in `ansible/requirements.txt` uses `chore(package)` for a patch.
       A minor update uses `feat(package)`.
       A major update uses `feat(package)!`.
-      Release Please excludes `ansible/requirements.txt` from the path list, so check that the release effect is correct.
+      The release configuration lists `ansible/requirements.txt` in `exclude-paths`.
+      The exclusion has no effect in practice.
+      Commit `9cc8e0f` (#1052) changed only this file.
+      It appears in the `ansible-collection` 2.0.0 changelog as a breaking change.
+      Check that the release effect is correct.
 - [ ] The `requires_ansible` value in `ansible/meta/runtime.yml` keeps the form `">=X.Y.Z"`.
       A custom manager in `renovate.json` reads it.
 - [ ] A change to the Renovate rules for the collection edits `renovate/marinatedconcrete.json`.
@@ -110,7 +119,7 @@ The `rulesets` API lists one ruleset, and its enforcement is `disabled`.
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `ansible-lint` (`production` profile) | The role YAML follows the lint rules. This includes fully qualified module names, task names, and role `meta` data. | `just ansible-lint`. In CI, the `lint` job runs `just lint`.                                   | Yes (`lint`)                                       | The rules `galaxy[no-changelog]` and `galaxy[version-incorrect]` are skipped. The lint passes with `documentation: lol` in `galaxy.yml` and with an empty `ansible/README.md`. |
 | Format check                          | Prettier accepts the `*.yml`, `*.json`, and `*.md` files.                                                           | `just check-format`. In CI, the `check-format` job.                                            | Yes (`check-format`)                               | `ansible/galaxy.yml` and `**/CHANGELOG.md` are in `.prettierignore`. The check does not test wording.                                                                          |
-| Devcontainer image build              | The pinned packages in `ansible/requirements.txt` install in the devcontainer image.                                | The `build` job in `checks.yml`.                                                               | Yes (`build`)                                      | The job does not run the collection code.                                                                                                                                      |
+| Devcontainer image build              | The pinned packages in `ansible/requirements.txt` install in the devcontainer image.                                | The `build` job in `ci.yml`.                                                                   | Yes (`build`)                                      | The job does not run the collection code.                                                                                                                                      |
 | Kustomize component tests             | The `minikube_test` role starts Minikube and applies a kustomization. Each test then checks its own component.      | `just kustomization-test <component>` and `just test`. In CI, the `kustomization-test` matrix. | Partly. Six of twelve matrix entries are required. | The entries `kube-vip-wireguard` and the five `pod-security-*` entries run but are not required. A failure in them does not block a merge.                                     |
 | `minikube_test` options               | The `factorio` test uses `enable_user_namespaces` and `enable_local_path_storage`.                                  | The `factorio` test. In CI, the `kustomization-test (factorio)` job.                           | Yes                                                | No test uses `minikube_test__minikube_nodes`, and the role ignores it. No test uses `enable_user_namespaces` without `enable_local_path_storage`.                              |
 | `longhorn_allow_encrypted_trim`       | Only the lint and the format check read this role. Nothing proves its behavior.                                     | None                                                                                           | No                                                 | No job runs this role. It needs a Longhorn cluster, encrypted volumes, SSH access to the nodes, and `cryptsetup`. A broken task shows only when a consumer runs it.            |
@@ -136,7 +145,6 @@ just ansible-lint
 
 Outside the devcontainer, install the pinned tools in a virtual environment.
 Then run the lint from `ansible/`.
-This run passed without Minikube when the author tested it.
 
 ```sh
 python3 -m venv /tmp/ansible-venv
@@ -154,6 +162,10 @@ Run each test that uses the changed role.
 Use the devcontainer.
 The `kustomization-test` recipe needs Docker, Minikube, and the installed collection.
 
+Warning: the role handlers run `minikube stop` and `minikube delete` on a Minikube profile.
+The profile name is the component directory name, or the value of `kubernetes_core_k8s__context` when it is set.
+Do not use a profile name that you need to keep.
+
 ```sh
 just kustomization-test factorio
 just test
@@ -167,6 +179,8 @@ Run `just test` for a change to `minikube_test`.
 
 Do this check for any change to `longhorn_allow_encrypted_trim`.
 No automation covers this role.
+Run it only against a disposable test cluster.
+Never run it against a production cluster.
 
 1. Use a test cluster that has Longhorn and at least one encrypted volume. Use a `StorageClass` with `parameters.encrypted` set to `"true"`.
 2. Install `pexpect` on the target nodes.
@@ -212,4 +226,6 @@ Check that each `BREAKING CHANGE` text tells a consumer what to change.
   The `build_ignore` list in `galaxy.yml` is empty, so a local `ansible/.ansible` directory goes into the archive.
 - The `just ansible-lint` recipe does not stop the `ansible-lint` Minikube profile when the lint fails.
   The `set -e` setting ends the script before `minikube stop`.
+- The `exclude-paths` entry for `ansible/requirements.txt` in `release-please-config.json` has no effect.
+  Commit `9cc8e0f` (#1052) changed only this file and made the `ansible-collection` 2.0.0 release.
 - The skip list in `ansible/.config/ansible-lint.yml` has no comment that gives the reason for each skip.
