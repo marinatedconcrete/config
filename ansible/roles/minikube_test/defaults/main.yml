@@ -22,6 +22,6 @@ minikube_test__kustomization_dir: "{{ minikube_test__test_dir }}"
 # The name of the test.
 minikube_test__test_name: "{{ minikube_test__kustomization_dir.split('/')[-1] }}"
 
-# The Minikube profile and the Kubernetes context for the test.  The tasks start
+# The Minikube profile and the Kubernetes context for the test. The tasks start
 # this profile, and the handlers stop and delete it.
 minikube_test__profile: "{{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
