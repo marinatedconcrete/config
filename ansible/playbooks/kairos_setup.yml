@@ -1,0 +1,16 @@
+---
+- name: Set up installed Kairos nodes
+  hosts: kairos
+  become: true
+  gather_facts: false
+  serial: 1
+  any_errors_fatal: true
+  tasks:
+    - name: Copy the Kairos cloud configuration
+      ansible.builtin.import_tasks: tasks/kairos_config.yml
+      notify: Start the node with its initial configuration
+
+  handlers:
+    - name: Start the node with its initial configuration
+      ansible.builtin.reboot:
+        reboot_timeout: 600

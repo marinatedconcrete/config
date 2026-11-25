@@ -1,0 +1,105 @@
+---
+- name: Maintain Kairos Kubernetes nodes
+  hosts: kairos
+  become: true
+  gather_facts: false
+  serial: 1
+  any_errors_fatal: true
+  vars:
+    kairos_node: "{{ kairos_kubernetes_node | default(inventory_hostname) }}"
+    kairos_kubectl:
+      - kubectl
+      - "--context={{ kairos_kube_context | mandatory }}"
+      - --request-timeout=15s
+    kairos_image: ghcr.io/marinatedconcrete/kairos-fedora:1.1.1
+  tasks:
+    - name: Check for changes to the cloud configuration
+      check_mode: true
+      when: kairos_operation == 'reconfigure'
+      block:
+        - name: Compare the cloud configuration with the file on the node
+          ansible.builtin.import_tasks: tasks/kairos_config.yml
+
+    - name: Record whether the configuration needs an update
+      ansible.builtin.set_fact:
+        kairos_needs_config: '{{ kairos_operation == "reconfigure" and kairos_config_copy.changed }}'
+
+    - name: Take the node out of service and restart it
+      when:
+        - not ansible_check_mode
+        - kairos_operation != 'reconfigure' or kairos_needs_config
+      block:
+        - name: Read the Kubernetes node
+          ansible.builtin.command:
+            argv: '{{ kairos_kubectl + ["get", "node", kairos_node, "-o", "json"] }}'
+          delegate_to: localhost
+          become: false
+          changed_when: false
+          register: kairos_node_before
+
+        - name: Read the current boot ID
+          ansible.builtin.command:
+            argv: [cat, /proc/sys/kernel/random/boot_id]
+          changed_when: false
+          register: kairos_boot_before
+
+        - name: Check that the target is the correct schedulable node
+          ansible.builtin.assert:
+            that:
+              - not (kairos_node_data.spec.unschedulable | default(false))
+              - kairos_node_data.status.nodeInfo.bootID == kairos_boot_before.stdout
+              - kairos_node_data.status.conditions | selectattr('type', 'equalto', 'Ready') | selectattr('status', 'equalto', 'True') | list | length == 1
+          vars:
+            kairos_node_data: "{{ kairos_node_before.stdout | from_json }}"
+
+        - name: Drain the node
+          ansible.builtin.command:
+            argv: '{{ kairos_kubectl + ["drain", kairos_node, "--ignore-daemonsets", "--timeout=5m", "--request-timeout=6m"] }}'
+          delegate_to: localhost
+          become: false
+          changed_when: true
+
+        - name: Apply the new cloud configuration
+          ansible.builtin.import_tasks: tasks/kairos_config.yml
+          when: kairos_needs_config
+
+        - name: Upgrade the Kairos image
+          ansible.builtin.command:
+            argv: [kairos-agent, upgrade, --source, "oci:{{ kairos_image }}"]
+          changed_when: true
+          when: kairos_operation == 'upgrade'
+
+        - name: Reboot the node
+          ansible.builtin.reboot:
+            reboot_timeout: 600
+
+        - name: Read the new boot ID
+          ansible.builtin.command:
+            argv: [cat, /proc/sys/kernel/random/boot_id]
+          changed_when: false
+          register: kairos_boot_after
+
+        - name: Wait for Kubernetes to report the new boot
+          ansible.builtin.command:
+            argv: '{{ kairos_kubectl + ["get", "node", kairos_node, "-o", "jsonpath={.status.nodeInfo.bootID}"] }}'
+          delegate_to: localhost
+          become: false
+          changed_when: false
+          register: kairos_node_boot
+          until: kairos_node_boot.rc == 0 and kairos_node_boot.stdout == kairos_boot_after.stdout
+          retries: 60
+          delay: 5
+
+        - name: Wait for the node to be Ready
+          ansible.builtin.command:
+            argv: '{{ kairos_kubectl + ["wait", "--for=condition=Ready", "node/" ~ kairos_node, "--timeout=5m", "--request-timeout=6m"] }}'
+          delegate_to: localhost
+          become: false
+          changed_when: false
+
+        - name: Make the node schedulable
+          ansible.builtin.command:
+            argv: '{{ kairos_kubectl + ["uncordon", kairos_node] }}'
+          delegate_to: localhost
+          become: false
+          changed_when: true

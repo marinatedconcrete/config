@@ -1,6 +1,6 @@
 # Ansible collection `marinatedconcrete.config`
 
-This collection holds Ansible roles for the Marinated Concrete home infrastructure.
+This collection holds Ansible roles and playbooks for the Marinated Concrete home infrastructure.
 
 ## Requirements
 
@@ -27,6 +27,47 @@ collections:
   - name: https://github.com/marinatedconcrete/config.git#/ansible/
     type: git
     version: ansible-collection@vX.Y.Z
+```
+
+## Kairos playbooks
+
+Add the nodes to the `kairos` inventory group. Use an SSH account with privilege escalation.
+Use `--limit` to select the nodes for each operation.
+
+| Playbook             | Operation                                                                                                                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `kairos_setup`       | Copy the initial cloud configuration to a newly installed node and reboot if the file changes. Run this before the node serves workloads. |
+| `kairos_reconfigure` | Check for a configuration change. If the file changes, drain the node, copy the file, and reboot.                                         |
+| `kairos_reboot`      | Drain and reboot the node.                                                                                                                |
+| `kairos_upgrade`     | Drain the node, apply an image to the active system, and reboot.                                                                          |
+
+Set `kairos_config_src` to an absolute path to a Kairos cloud configuration file on the Ansible control host.
+Setup and reconfiguration manage `/oem/100_ansible.yaml`.
+Use a configuration that preserves Ansible SSH access.
+See the [Kairos configuration documentation](https://kairos.io/docs/advanced/after-install/).
+
+For maintenance of Kubernetes nodes, install `kubectl` on the Ansible control host.
+Set `kairos_kube_context` to the kubeconfig context for the cluster.
+Set `kairos_kubernetes_node` per host if the inventory name differs from the Kubernetes node name.
+Make sure the Kubernetes API stays available while a node reboots.
+Run one maintenance playbook at a time for the cluster.
+
+The maintenance playbooks work on one node at a time.
+They stop if the node is already cordoned or if its drain fails.
+Drains respect PodDisruptionBudgets and refuse to delete pods with local data in emptyDir volumes.
+The playbooks uncordon a node after Kubernetes reports the new boot and the node is Ready.
+If maintenance fails after it cordons the node, examine the node before you uncordon it manually.
+
+The upgrade playbook defaults to `ghcr.io/marinatedconcrete/kairos-fedora:1.1.1`.
+Set `kairos_image` to a different tag or digest to select a different image.
+Make sure the Kairos upgrade configuration has automatic reboot disabled.
+See the [Kairos upgrade documentation](https://kairos.io/docs/upgrade/manual/).
+
+```sh
+ansible-playbook -i inventory.yml marinatedconcrete.config.kairos_setup --limit node1 -e kairos_config_src=/path/to/cloud-config.yaml
+ansible-playbook -i inventory.yml marinatedconcrete.config.kairos_reconfigure --limit node1 -e kairos_config_src=/path/to/cloud-config.yaml -e kairos_kube_context=home
+ansible-playbook -i inventory.yml marinatedconcrete.config.kairos_reboot --limit node1 -e kairos_kube_context=home
+ansible-playbook -i inventory.yml marinatedconcrete.config.kairos_upgrade --limit node1 -e kairos_kube_context=home
 ```
 
 ## Roles
