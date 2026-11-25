@@ -7,7 +7,7 @@ FROM scratch AS ctx
 COPY build_files /
 
 FROM fedora:45
-LABEL org.opencontainers.image.title="A custom Fedora-based Kairos image."
+LABEL org.opencontainers.image.description="A custom Fedora-based Kairos image."
 LABEL org.opencontainers.image.title="kairos-fedora"
 ARG MODEL=generic
 ARG TRUSTED_BOOT=false
