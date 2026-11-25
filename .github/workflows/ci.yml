@@ -115,6 +115,14 @@ jobs:
         run: npm ci --prefix .github/release --ignore-scripts
       - name: Test Release Automation
         run: npm test --prefix .github/release
+  pr-metrics-test:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Test PR Metrics
+        run: node --test scripts/*.test.mjs
   image-release-notes-test:
     permissions:
       contents: read
