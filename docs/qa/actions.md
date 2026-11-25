@@ -35,13 +35,14 @@ Apply each item to the diff.
 - A change to an input or an output updates `action.yml` and the `Inputs` or `Outputs` table in `README.md` in the same commit.
   The description text must be the same in both files.
 - The `just format` command changes nothing.
-  Prettier formats `actions/image-release-notes/*.mjs`, `**/*.yml`, `**/*.json`, and `**/*.md`.
+  Prettier formats every `.md`, `.yml`, `.yaml`, `.json`, and `.mjs` file in the repository.
 - Past entries in `CHANGELOG.md` stay unchanged.
   Release Please writes this file.
 
 ### Security posture
 
-- The `generate` action needs only `contents: read`.
+- The `Image Release Notes` action in `actions/image-release-notes/action.yml` needs only `contents: read`.
+  The three image workflows call it from jobs that have `contents: read`.
   A change must not add a permission requirement for this action.
 - The `publish` action must run no code from the image.
   The comment in `publish/action.yml` states this rule.
@@ -49,8 +50,8 @@ Apply each item to the diff.
 - Do not add a step that runs the image, or a script from the image, in a job that has write access.
 - A workflow expression, such as `${{ inputs.component }}`, must not appear inside a `run:` script.
   Pass the value through `env:`, as the current steps do.
-- Third-party actions in `action.yml` use a full commit SHA with a version comment.
-  The `actions/upload-artifact` step is an example.
+- Each external action in `action.yml` uses a full commit SHA with a version comment.
+  The `actions/upload-artifact` step is an example. GitHub publishes this action.
 - Tool images in `release-notes.sh` use a tag and a `sha256` digest.
   The `SYFT_IMAGE` and `CYCLONEDX_IMAGE` variables are examples.
   Each variable has a `# renovate: datasource=docker depName=...` comment on the line above it.
@@ -103,18 +104,19 @@ Apply each item to the diff.
 The required checks come from `gh api repos/marinatedconcrete/config/branches/main/protection`.
 They are `lint`, `check-format`, `build`, and six `kustomization-test (...)` jobs.
 The rule also requires one approving review and a linear history.
+An administrator can bypass the review rule, because `enforce_admins` is false.
 
 | Check                       | What it proves                                                                                                                                   | Where it runs                                                                                                                                                                                                                   | Required in branch protection | Gap                                                                                                 |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------- |
-| Image reference tests       | The 42 tests in `image-references.test.mjs` pass. They prove how the action reads a Containerfile: stages, `ARG` values, `--from`, and `target`. | `npm test --prefix actions/image-release-notes`. CI job `image-release-notes-test` in `.github/workflows/checks.yml`.                                                                                                           | no                            | A failing test does not block a merge.                                                              |
+| Image reference tests       | The 42 tests in `image-references.test.mjs` pass. They prove how the action reads a Containerfile: stages, `ARG` values, `--from`, and `target`. | `npm test --prefix actions/image-release-notes`. CI job `image-release-notes-test` in `.github/workflows/ci.yml`.                                                                                                               | no                            | A failing test does not block a merge.                                                              |
 | ShellCheck                  | The three scripts of the action have no ShellCheck findings.                                                                                     | `just shellcheck-lint`. CI job `lint` runs `just lint`.                                                                                                                                                                         | yes                           | ShellCheck does not find logic errors.                                                              |
 | Format check                | Prettier accepts the `.mjs`, `.yml`, `.json`, and `.md` files.                                                                                   | `just check-format`. CI job `check-format`.                                                                                                                                                                                     | yes                           | This does not check ASD-STE100 wording.                                                             |
 | Release validation          | The commit that Release Please selects passes ShellCheck and the unit tests before the release.                                                  | `just release-please-validate actions/image-release-notes`. CI job `source` in `.github/workflows/release-package.yml`.                                                                                                         | no                            | This runs after the merge, so it cannot block a merge.                                              |
-| PR title check              | The PR title is a Conventional Commit title.                                                                                                     | CI job `semantic-pull-request` in `.github/workflows/semantic-commits.yml`.                                                                                                                                                     | no                            | A failing title does not block a merge.                                                             |
+| PR title check              | The PR title is a Conventional Commit title.                                                                                                     | CI check `Validate PR title` in `.github/workflows/semantic-commits.yml`.                                                                                                                                                       | no                            | A failing title does not block a merge.                                                             |
 | Renovate config check       | `renovate.json` is valid.                                                                                                                        | `just renovate-lint`. CI job `lint`.                                                                                                                                                                                            | yes                           | The check does not prove that the regex manager finds the `SYFT_IMAGE` and `CYCLONEDX_IMAGE` lines. |
 | Image build with the action | The action runs end to end on a real image: Syft, the notes, and the artifact upload.                                                            | CI jobs `build-container` in `image-kairos-fedora.yml`, `build-github-runner-ci` in `image-github-runner-ci.yml`, and `build` in `image-devcontainer-base.yml`. They run on a PR that changes `actions/image-release-notes/**`. | no                            | The jobs do not assert the contents of the notes. They run only when the path filter matches.       |
 
-The required `build` check is the job `build` in `.github/workflows/checks.yml`.
+The required `build` check is the job `build` in `.github/workflows/ci.yml`.
 It builds the devcontainer and does not run the action.
 
 Behavior that no job covers:
@@ -166,6 +168,9 @@ Do these checks when automation cannot decide.
 5. If you change the change table, supply the SBOM of an earlier release as the `previous` argument of `just release-notes`.
    Check one added package, one removed package, and one changed package.
 6. If you change `previous-sbom.sh` or `publish/publish.sh`, test with a repository that has draft and published releases.
+   Use a scratch repository or a fork, and set `GH_REPO` to it.
+   Never run the script against `marinatedconcrete/config`.
+   The script runs `gh release upload --clobber` and `gh release edit` on the repository that `gh` selects.
    Run the script again with the same tag.
    The release body must hold one notes section and one SBOM asset.
 7. If you change `action.yml`, open a PR that matches a path filter of an image workflow.
@@ -181,3 +186,5 @@ Do these checks when automation cannot decide.
 - Add a check that the regex manager in `renovate.json` finds the tool image lines in `release-notes.sh`.
 - Add a check that the tables in `README.md` match `action.yml`.
 - Make the image workflows assert the notes, not only create them.
+- Renovate automerges patch updates of external GitHub Actions through the global patch rule, and the image workflows hold write tokens.
+  Review these updates after they merge.
