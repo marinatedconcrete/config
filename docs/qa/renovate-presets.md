@@ -46,9 +46,9 @@ The `marinatedconcrete` preset has a custom manager that updates these tags.
 ### Update behavior
 
 - Check the auto-merge rules. Auto-merge must stay limited to updates that the repository has found safe.
-  The description of one rule in `renovate.json` says that third-party GitHub Actions must not auto-merge, because the image workflows give them write tokens.
-  That text only describes the rule. The rule for `actions/*` is the only rule that names GitHub Actions.
-  See Known gaps for the global patch rule.
+  Third-party GitHub Actions must not auto-merge, because the image workflows give them write tokens.
+  A rule after the global patch rule in `renovate.json` sets `automerge` to `false` for them.
+  Check that a new auto-merge rule after that rule does not match third-party actions.
 - Check that an auto-merge rule has a `minimumReleaseAge`, unless the rule has a reason for no age.
   The devcontainer-base rule sets `minimumReleaseAge` to `null` and gives its reason.
 - Check that the default for a registry without release timestamps is `automerge` set to `false`.
@@ -122,9 +122,4 @@ A person must check the behavior of the configuration, because no job does.
 - No test checks what a rule or a custom manager does. A mistake in a regular expression passes the validator and has no effect.
   An issue can add a Renovate dry run or a fixture test.
 - The validator accepts a malformed preset name in `extends`. A check that the tags in `renovate.json` exist as releases is missing.
-- `renovate/marinatedconcrete.json` has a group for each released component, but none for `kustomize-pod-security`.
-  `kustomization/components/pod-security` is a release-please package. The preset does not group its releases.
-  This is a possible omission. It is not confirmed as a defect.
 - A major and a minor update in one branch can lose the `!` marker in the commit title. See Manual QA.
-- The global patch rule in `renovate.json` has no manager filter. It auto-merges patch updates of third-party GitHub Actions as a branch merge, with no pull request.
-  The text of the `actions/*` rule says that third-party actions must not auto-merge. The rule does not enforce this text. Commit `c0dadc7` is an example.
