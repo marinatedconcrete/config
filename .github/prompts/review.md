@@ -89,6 +89,73 @@ Write "not checked" for an item that you could not check.
   Write the concrete reason in the reply.
 - Do not change code only to remove a warning that has no effect.
 
+## Pull requests from automation
+
+Use this section when the author is an automation account and no person is behind the pull request.
+Examples are `renovate`, `formwork-remover` (the GitHub App that runs Release Please), and Hive bots.
+A review of these pull requests is correct and useful.
+The review decides if the change is safe and still wanted.
+Do this section in addition to the general checklist.
+
+### What to check
+
+- Check that the change is safe.
+  Read the diff and the upstream release notes for the new version.
+- Check that the change is still wanted.
+  Another pull request can replace it, or the base can be old.
+- Check that the pull request can merge.
+  Read `mergeable` and `mergeStateStatus` with `gh pr view <number> --json mergeable,mergeStateStatus`.
+- Check that all required checks pass on the head commit.
+- For a release pull request, check that the release has a real change.
+  Read the new section in `CHANGELOG.md`.
+  A section that lists only an earlier `chore(main)` release commit is not a real change.
+
+### What not to do
+
+- Do not comment on style in a generated file.
+  Release Please writes `CHANGELOG.md`, `version.txt`, and `.release-please-manifest.json`.
+  Renovate writes its own branch and title.
+- Do not ask the bot to change the code.
+  The bot cannot answer.
+  Ask a maintainer to act, or change the source of the generated file.
+
+### Who decides
+
+- A named maintainer makes each decision.
+  Do not address the bot.
+  Do not address only the organization handle, because it is not a person.
+- If the change is stale, say what tooling can regenerate it.
+
+### Stale or no-op release pull requests
+
+- Release Please skips a package when it finds no user-facing commits.
+  The old release pull request then stays open and does not update.
+  It can conflict with `main`.
+- A manual rebase of a generated branch is the wrong fix.
+  It copies tool output by hand and the tool can replace it.
+- Recommend `close`.
+  Give the reason: the pull request is stale, or its release has no real change.
+  State that Release Please opens a new release pull request when a new release commit exists.
+- Recommend a rebase only if the maintainer needs the exact version tag.
+  In that case, keep only the lines that the release pull request owns.
+- Before you recommend `close`, read the log of the last `Release Please` run on `main`.
+  Check if Release Please still plans this release.
+  Write "not checked" if you cannot read the log.
+
+### How to ask for a decision
+
+- Name one person.
+- Ask one question that has two answers.
+- Put your recommendation first, then the reason in one sentence.
+- Use this form:
+
+```text
+Decision needed: @<maintainer>, close this release PR so Release Please can regenerate it, or keep it for the 1.1.1 tag?
+Recommendation: close. The 1.1.1 section lists only the 1.1.0 release commit.
+```
+
+The maintainer can answer with `close` or `keep`.
+
 ## Upstream Kairos changes (mandatory)
 
 Do this section for every pull request that touches anything from the `kairos-io` organization.
