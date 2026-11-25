@@ -1,0 +1,79 @@
+# Risk tiers for changes
+
+Use this page to decide how closely to review a pull request.
+It maps each part of the repository to a risk tier and gives the reason.
+The QA pages in [docs/qa/](qa) own the checklists.
+This page does not repeat them. It tells you which page to read and what evidence to ask for.
+
+## How the tier is set
+
+A change gets the highest tier of the paths that it touches.
+The tier comes from what the repository does with the change:
+
+- **High.** The change can run with a write token or a secret before review.
+  Or the change can merge or publish with no person.
+  Or the change sets the release of every package, the admission level of a namespace, or a privileged workload.
+- **Medium.** The change gets to consumers through a release or a Git URL.
+  A pull request from a person needs an approving review before the merge.
+- **Low.** The change makes no release, holds no token, and changes no auto-merge rule.
+
+Branch protection on `main` requires one approving review.
+Renovate merges its auto-merge pull requests with no review. Pull request #1060 is an example.
+Branch protection requires no image check, and it does not require the tests for `kube-vip-wireguard` and the five Pod Security components.
+To see the current rules, run `gh api repos/marinatedconcrete/config/branches/main/protection/required_status_checks --jq .contexts`.
+
+## Map
+
+| Part                                                                                                                                         | Tier                                        | Why a mistake here is risky                                                                                                                                                                                                                                                                           | Read                                                                                               |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| [`.github/workflows/`](../.github/workflows) and the actions they pin                                                                        | High                                        | The checks workflow runs on a push to any branch with `packages: write`. The image workflows give `packages: write` to pull requests from branches in this repository. The release and codegen workflows use the GitHub App key. A push runs the workflow file from the pushed branch, before review. | [Release tooling](qa/release-tooling.md), Security                                                 |
+| Release tooling: [`.github/release/`](../.github/release), `.github/scripts/`, `release-please-config.json`, `.release-please-manifest.json` | High                                        | These files create the tags and publish every package. No check runs before the merge. A mistake shows only on a real release.                                                                                                                                                                        | [Release tooling](qa/release-tooling.md)                                                           |
+| Auto-merge rules in the root [`renovate.json`](../renovate.json)                                                                             | High                                        | A rule with `automergeType: branch` puts the update on `main` with no pull request. No person sees it. A later rule overrides an earlier rule.                                                                                                                                                        | [Renovate presets](qa/renovate-presets.md), Update behavior                                        |
+| [`kube-vip`](../kustomization/components/kube-vip) and [`kube-vip-wireguard`](../kustomization/components/kube-vip-wireguard)                | High                                        | They run at the privileged level on each node. Minikube has one node, so CI cannot test fail over.                                                                                                                                                                                                    | [Kustomize components](qa/kustomization-components.md), Manual QA                                  |
+| [`pod-security/*`](../kustomization/components/pod-security)                                                                                 | High                                        | They set the admission labels on each namespace of a consumer. A mistake changes what every workload in that namespace may do.                                                                                                                                                                        | [Kustomize components](qa/kustomization-components.md)                                             |
+| [`images/kairos-fedora/`](../images/kairos-fedora)                                                                                           | High                                        | Hosts boot and install this operating system image. Renovate cannot see if an upstream Kairos release is published.                                                                                                                                                                                   | [Images](qa/images.md) and the Kairos section of the [review prompt](../.github/prompts/review.md) |
+| [`images/devcontainer-base/`](../images/devcontainer-base)                                                                                   | High                                        | Its workflow publishes a release on a schedule, with no release pull request. Renovate then merges the new version into this repository. The devcontainer and `github-runner-ci` build on it.                                                                                                         | [Images](qa/images.md)                                                                             |
+| [`actions/image-release-notes/publish/`](../actions/image-release-notes/publish)                                                             | High                                        | It runs in a job that has `contents: write`. It must run no code from the image.                                                                                                                                                                                                                      | [Actions](qa/actions.md), Security posture                                                         |
+| Other images: `buildah-action-runner`, `github-runner-ci`, `vscode-ssh-server`                                                               | Medium                                      | A release publishes the image to GHCR. No image check is required, so a broken image can merge.                                                                                                                                                                                                       | [Images](qa/images.md)                                                                             |
+| Restricted and baseline components: `factorio`, `mosquitto`, `priorityclass`, `paperless`, `unifi-network-application`                       | Medium. High if the change lowers the level | A release goes to consumer clusters. The required tests enforce the level of each component.                                                                                                                                                                                                          | [Kustomize components](qa/kustomization-components.md)                                             |
+| The rest of [`actions/image-release-notes/`](../actions/image-release-notes)                                                                 | Medium                                      | Other repositories use the action by tag. It runs with `contents: read`.                                                                                                                                                                                                                              | [Actions](qa/actions.md)                                                                           |
+| Components with no release: `redis` and `gdp-coraltpu`                                                                                       | Medium                                      | A consumer can use them from a Git URL. They have no test of their own.                                                                                                                                                                                                                               | [Kustomize components](qa/kustomization-components.md), Known gaps                                 |
+| [`ansible/`](../ansible)                                                                                                                     | Medium                                      | Consumers run `longhorn_allow_encrypted_trim` on real clusters, and no test runs it. Every component test uses `minikube_test`.                                                                                                                                                                       | [Ansible collection](qa/ansible-collection.md)                                                     |
+| Shared presets in [`renovate/`](../renovate)                                                                                                 | Medium                                      | Other repositories extend them. This repository gets a change only after the release and a tag update.                                                                                                                                                                                                | [Renovate presets](qa/renovate-presets.md), Consumer impact                                        |
+| [`.github/pull_request_template.md`](../.github/pull_request_template.md)                                                                    | Medium                                      | Its text goes into each squash commit, and Release Please reads that text. A footer token in the template can mark each change as breaking.                                                                                                                                                           | The Pull request body section of the [review prompt](../.github/prompts/review.md)                 |
+| [`.claude/`](../.claude) hooks                                                                                                               | Medium                                      | The hook runs before each Bash command of an agent. If the hook cannot start, it blocks every command. No CI job runs its tests.                                                                                                                                                                      | The comments in [`check-format.sh`](../.claude/hooks/check-format.sh)                              |
+| Tests only: `kustomization/tests/`, `e2e.sh`, `*.test.*`                                                                                     | Low                                         | The `test` type makes no release. A weaker assertion can hide a defect.                                                                                                                                                                                                                               | The QA page of the part that the test covers                                                       |
+| Docs and prompts: `docs/`, `.github/prompts/`, root Markdown files                                                                           | Low                                         | No release. The review prompt sets what the automated reviewer checks.                                                                                                                                                                                                                                | [AGENTS.md](../AGENTS.md)                                                                          |
+
+A README in a component or image directory is in a release path.
+A `docs` change there makes a release of that part.
+
+## What merges with no review
+
+The root `renovate.json` lets Renovate merge these updates with no person.
+Most of these rules use a branch merge, which has no pull request.
+The image workflows then run only after the merge.
+When the update is in a release path, Release Please then opens a release pull request.
+
+- Patch updates of each dependency, three days after the release. Third-party actions and the images from the registries below are exceptions.
+- Minor and digest updates of the Docker Hub images in `factorio`, `mosquitto`, and `unifi-network-application`.
+- `k3s` patch updates in `images/kairos-fedora`.
+- Digest, minor, and patch updates of GitHub's own actions (`actions/*`).
+- All updates of `prettier`, `pnpm`, `node`, and `cli/cli`, and the monthly `renovate` update.
+- New `devcontainer-base` releases, after all pull request checks pass.
+
+Images from `ghcr.io`, `quay.io`, `registry.k8s.io`, and `lscr.io` never auto-merge. Third-party actions never auto-merge.
+The registry rule comes after the rules for `kube-vip`, the Unifi application image, and `samba`. Thus those rules do not cause an auto-merge.
+A change that adds an item to this list is a High change.
+
+## What to ask for in each tier
+
+These items are recommendations. The repository does not enforce them.
+
+- **High.** Ask a maintainer to review. Ask for the Manual QA results of the QA page in the `## Testing` section.
+  Examples are a Renovate dry run for a rule change, a two-node cluster test for `kube-vip`, and the `e2e.sh` result for `kairos-fedora`.
+  For a workflow change, read each `permissions` block and each use of a secret in the diff.
+- **Medium.** Ask for the test command of the part and its result, for example `just kustomization-test <component>` or the image smoke test.
+  Check the commit type against the release effect.
+- **Low.** Check the wording against [AGENTS.md](../AGENTS.md). Confirm that the change makes no release.
+  One approving review is enough.
