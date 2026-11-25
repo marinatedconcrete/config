@@ -188,8 +188,6 @@ Check that each `BREAKING CHANGE` text tells a consumer what to change.
   The comments in `defaults/main.yml` are the only description of its options.
 - No test runs `longhorn_allow_encrypted_trim`.
 - No automation builds the collection archive or installs it from a tag.
-- The `just ansible-lint` recipe does not stop the `ansible-lint` Minikube profile when the lint fails.
-  The `set -e` setting ends the script before `minikube stop`.
 - The `exclude-paths` entry for `ansible/requirements.txt` in `release-please-config.json` has no effect.
   Commit `9cc8e0f` changed only this file and made a breaking release.
 - The skip list in `ansible/.config/ansible-lint.yml` has no comment that gives the reason for each skip.
