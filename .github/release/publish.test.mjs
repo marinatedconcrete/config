@@ -443,3 +443,78 @@ test("a failed SBOM upload does not promote the image", async () => {
   assert.equal(promoted, false);
   assert.equal(state.release.draft, true);
 });
+
+test("an image candidate without a tested digest stops before any write", async () => {
+  const { state, api } = server();
+  await assert.rejects(
+    publishRelease({
+      api,
+      candidate: image,
+      assets: sbom("1"),
+      imageDigest: "",
+      promote: async () => {},
+    }),
+    /Missing tested image digest/,
+  );
+  assert.equal(state.tag, null);
+  assert.equal(state.release, null);
+  assert(state.operations.every((operation) => operation.startsWith("GET ")));
+});
+
+test("a receipt that names a different candidate stops recovery before any write", async () => {
+  const { state, api } = server();
+  await publishRelease({ api, candidate, assets });
+  state.operations = [];
+  const record = Buffer.from(
+    JSON.stringify({
+      tag: candidate.tag,
+      sha: "b".repeat(40),
+      project: candidate.project,
+      version: candidate.version,
+      pr: 99,
+      imageDigest: "",
+      assets: [],
+    }),
+  ).toString("base64");
+  state.release.body = `Notes\n\n<!-- config-release: ${record} -->`;
+  await assert.rejects(
+    publishRelease({ api, candidate, assets }),
+    /identifies a different candidate/,
+  );
+  assert(state.operations.every((operation) => operation.startsWith("GET ")));
+});
+
+test("an image receipt without a digest stops recovery before any write", async () => {
+  const { state, api } = server();
+  await publishRelease({
+    api,
+    candidate: image,
+    assets: sbom("1"),
+    imageDigest: `sha256:${"1".repeat(64)}`,
+    promote: async () => {},
+  });
+  state.operations = [];
+  const record = Buffer.from(
+    JSON.stringify({
+      tag: image.tag,
+      sha: image.sha,
+      project: image.project,
+      version: image.version,
+      pr: image.pr,
+      imageDigest: "",
+      assets: [],
+    }),
+  ).toString("base64");
+  state.release.body = `Notes\n\n<!-- config-release: ${record} -->`;
+  await assert.rejects(
+    publishRelease({
+      api,
+      candidate: image,
+      assets: sbom("1"),
+      imageDigest: `sha256:${"1".repeat(64)}`,
+      promote: async () => {},
+    }),
+    /no tested image digest/,
+  );
+  assert(state.operations.every((operation) => operation.startsWith("GET ")));
+});
