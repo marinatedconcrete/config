@@ -34,7 +34,7 @@ The `marinatedconcrete` preset has a custom manager that updates these tags.
 - Check that a custom manager reads a `# renovate:` comment only when the file to update has that comment.
   Check that the `managerFilePatterns` entry limits the manager to the intended files.
 - Check that a new regex custom manager matches a file in this repository. `just renovate-lint` fails when it matches no file.
-  A manager that only consumer repositories use needs an entry in `CONSUMER_ONLY_MANAGERS` in `scripts/renovate-checks.mjs`, with a reason.
+  A manager that only consumer repositories use needs an entry in `CONSUMER_ONLY_MANAGERS` in `scripts/renovate-checks.mjs`, with the `matchStrings` of the manager and a reason. A manager with other `matchStrings` is not skipped.
 - Check that an `extends` entry for this repository names a preset file that exists. `just renovate-lint` fails when the file is missing.
   The check does not read the tag after `#`.
 

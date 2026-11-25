@@ -80,7 +80,11 @@ test("a pattern that does not compile fails", () => {
 
 test("a manager on the consumer-only list is skipped", () => {
   const allowed = [
-    { file: "renovate.json", pattern: "/^a\\.yml$/", reason: "Test." },
+    {
+      file: "renovate.json",
+      matchStrings: ["version: (?<currentValue>.+)"],
+      reason: "Test.",
+    },
   ];
   const check = (file) =>
     findDeadManagers({
@@ -94,14 +98,38 @@ test("a manager on the consumer-only list is skipped", () => {
   assert.equal(check("renovate/other.json").length, 1);
 });
 
+test("a second manager that reads the same files is not skipped", () => {
+  const allowed = [
+    {
+      file: "renovate.json",
+      matchStrings: ["version: (?<currentValue>.+)"],
+      reason: "Test.",
+    },
+  ];
+  const failures = findDeadManagers({
+    file: "renovate.json",
+    config: {
+      customManagers: [manager({}), manager({ matchStrings: ["never"] })],
+    },
+    files: ["a.yml"],
+    readFile: () => "nothing",
+    allowed,
+  });
+  assert.equal(failures.length, 1);
+  assert.match(failures[0], /customManagers\[1\]/);
+  assert.match(failures[0], /no matchStrings entry matches/);
+});
+
 test("the real consumer-only list names real managers", () => {
-  for (const { file, pattern, reason } of CONSUMER_ONLY_MANAGERS) {
+  for (const { file, matchStrings, reason } of CONSUMER_ONLY_MANAGERS) {
     const config = JSON.parse(
       readFileSync(new URL(`../${file}`, import.meta.url), "utf8"),
     );
     assert.ok(
-      config.customManagers.some((m) => m.managerFilePatterns[0] === pattern),
-      `${file} has no manager that starts with ${pattern}`,
+      config.customManagers.some(
+        (m) => JSON.stringify(m.matchStrings) === JSON.stringify(matchStrings),
+      ),
+      `${file} has no manager with these matchStrings: ${matchStrings}`,
     );
     assert.ok(reason.length > 0);
   }

@@ -15,12 +15,16 @@ export const CONFIG_FILES_PATTERN = /^(renovate\.json|renovate\/[^/]+\.json)$/;
 export const REPOSITORY = "marinatedconcrete/config";
 
 // A shared preset can hold a manager for files that only other repositories have.
-// The check skips a manager that this list names. Each entry needs the file, the first
-// managerFilePatterns entry, and the reason.
+// The check skips a manager that this list names. Each entry needs the file, the
+// complete matchStrings of the manager, and the reason. A manager that has other
+// matchStrings is not skipped, also when it reads the same files.
 export const CONSUMER_ONLY_MANAGERS = [
   {
     file: "renovate/marinatedconcrete.json",
-    pattern: "/^(.+/)+kustomization\\.yml$/",
+    matchStrings: [
+      "- https://github\\.com/marinatedconcrete/config/releases/download/(?<currentValue>.*?)/",
+      "- https://github\\.com/marinatedconcrete/config/?\\?ref=(?<currentValue>.+?)$",
+    ],
     reason:
       "The manager reads release URLs in kustomization files of consumer repositories. This repository uses local component paths.",
   },
@@ -75,8 +79,12 @@ export function findDeadManagers({
   const failures = [];
   (config.customManagers ?? []).forEach((manager, index) => {
     if (manager.customType !== "regex") return;
-    const [firstPattern] = manager.managerFilePatterns ?? [];
-    if (allowed.some((a) => a.file === file && a.pattern === firstPattern))
+    const strings = JSON.stringify(manager.matchStrings ?? []);
+    if (
+      allowed.some(
+        (a) => a.file === file && JSON.stringify(a.matchStrings) === strings,
+      )
+    )
       return;
     const name = describeManager(file, index, manager);
     let patterns;
