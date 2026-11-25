@@ -56,7 +56,8 @@ The top-level response does not include the review rule. Use the second command 
 
 ## Third-party actions and auto-merge
 
-- Each `uses:` line in the workflows pins a full commit SHA with a version comment. The `helpers:pinGitHubActionDigestsToSemver` preset in [renovate.json](../../renovate.json) keeps the pins.
+- Each `uses:` line that names an external action pins a full commit SHA with a version comment. The `helpers:pinGitHubActionDigestsToSemver` preset in [renovate.json](../../renovate.json) keeps the pins.
+- A local action or a local reusable workflow, which starts with `./`, has no pin. It runs the code of the same revision as the workflow. Review its source in that revision.
 - A pin is a convention. GitHub does not require it (`sha_pinning_required` is `false`), and no lint checks it.
 - GitHub permits only GitHub-owned actions, actions from verified creators, and two named patterns. Read the list with `gh api repos/marinatedconcrete/config/actions/permissions/selected-actions`.
 - A third-party action update needs a person. A new version of an action can contain new code, and that code runs with the write tokens of the job. The rule in [renovate.json](../../renovate.json) that matches `!actions/*` sets `automerge` to `false`.
