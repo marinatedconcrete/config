@@ -10,7 +10,8 @@ import subprocess
 import tempfile
 import unittest
 
-HOOK = os.path.join(os.path.dirname(os.path.abspath(__file__)), "check-format.sh")
+HOOK_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+HOOK_FILES = ("check-format.sh", "check_format.py")
 HOST_TOOLS = ("bash", "env", "dirname", "grep", "git", "python3")
 
 JUST_STUB = """#!/bin/sh
@@ -27,11 +28,33 @@ def write_executable(path, text):
     os.chmod(path, 0o755)
 
 
+def git(*args):
+    subprocess.run(
+        ["git", "-c", "user.name=test", "-c", "user.email=test@example.com", *args],
+        check=True,
+        capture_output=True,
+    )
+
+
 def make_repo(path):
     os.makedirs(os.path.join(path, "sub"))
     os.makedirs(os.path.join(path, "a"))
-    subprocess.run(["git", "init", "-q", path], check=True)
+    git("init", "-q", path)
+    git("-C", path, "commit", "-q", "--allow-empty", "-m", "init")
+    add_prettier(path)
+
+
+def add_prettier(path):
     write_executable(os.path.join(path, "node_modules", ".bin", "prettier"), "")
+
+
+def install_hook(repo):
+    """Copy the hook into a repository. That repository is then the project of the hook."""
+    hooks = os.path.join(repo, ".claude", "hooks")
+    os.makedirs(hooks)
+    for name in HOOK_FILES:
+        shutil.copy2(os.path.join(HOOK_DIRECTORY, name), hooks)
+    return os.path.join(hooks, "check-format.sh")
 
 
 class HookTest(unittest.TestCase):
@@ -44,6 +67,7 @@ class HookTest(unittest.TestCase):
         os.makedirs(self.outside)
         make_repo(self.repo)
         make_repo(self.other_repo)
+        self.hook = install_hook(self.repo)
         self.tools = os.path.join(self.tmp, "tools")
         os.makedirs(self.tools)
         for tool in HOST_TOOLS:
@@ -74,7 +98,7 @@ class HookTest(unittest.TestCase):
                 }
             )
         return subprocess.run(
-            [HOOK], input=stdin, capture_output=True, text=True, env=env, timeout=60
+            [self.hook], input=stdin, capture_output=True, text=True, env=env, timeout=60
         )
 
     def test_blocks_commit_and_push_forms(self):
@@ -186,6 +210,63 @@ class HookTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2, result.stderr)
         with open(self.just_log) as log:
             self.assertEqual(log.read().strip(), os.path.realpath(self.repo))
+
+    def assert_outside_notice(self, result, root):
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(os.path.exists(self.just_log))
+        output = json.loads(result.stdout)
+        context = output["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("did not run", context)
+        self.assertIn(f"repository in {os.path.realpath(root)}, which is outside", context)
+        self.assertEqual(output["systemMessage"], context)
+
+    def test_skips_repository_outside_project(self):
+        for command_line, cwd in [
+            ("git commit -m x", self.other_repo),
+            (f"git -C {self.other_repo} commit -m x", self.repo),
+            (f"cd {self.other_repo} && git push", self.repo),
+            (f"jj -R {self.other_repo} commit", self.repo),
+        ]:
+            with self.subTest(command_line):
+                self.assert_outside_notice(
+                    self.run_hook(command_line, cwd=cwd), self.other_repo
+                )
+
+    def test_skips_clone_of_project(self):
+        clone = os.path.join(self.tmp, "clone")
+        git("clone", "-q", self.repo, clone)
+        add_prettier(clone)
+        self.assert_outside_notice(self.run_hook("git commit -m x", cwd=clone), clone)
+
+    def test_checks_linked_worktree(self):
+        worktree = os.path.join(self.tmp, "elsewhere", "worktree")
+        git("-C", self.repo, "worktree", "add", "-q", worktree)
+        add_prettier(worktree)
+        result = self.run_hook("git commit -m x", cwd=worktree)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        with open(self.just_log) as log:
+            self.assertEqual(log.read().strip(), os.path.realpath(worktree))
+
+    @unittest.skipUnless(shutil.which("jj"), "jj is missing")
+    def test_checks_jj_workspace(self):
+        os.symlink(shutil.which("jj"), os.path.join(self.tools, "jj"))
+        repo = os.path.join(self.tmp, "jj-repo")
+        workspace = os.path.join(self.tmp, "jj-workspace")
+        jj_commands = [
+            ["jj", "git", "init", "--no-colocate", repo],
+            ["jj", "-R", repo, "workspace", "add", workspace],
+        ]
+        for command in jj_commands:
+            subprocess.run(command, check=True, capture_output=True)
+        self.hook = install_hook(repo)
+        add_prettier(workspace)
+        result = self.run_hook("jj commit", cwd=workspace)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        with open(self.just_log) as log:
+            self.assertEqual(log.read().strip(), os.path.realpath(workspace))
+        self.assert_outside_notice(
+            self.run_hook("jj commit", cwd=self.other_repo), self.other_repo
+        )
 
 
 if __name__ == "__main__":

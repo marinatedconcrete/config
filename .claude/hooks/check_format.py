@@ -11,6 +11,10 @@ The hook ignores the text of here-document bodies (`<<` and `<<-`).
 When the delimiter has no quotes, the hook keeps the `$(...)` and backtick substitutions of the body.
 The hook does not find a command in the lines after a `<<` in arithmetic, such as `$((1 << 2))`,
 because it reads that `<<` as a here-document. It ignores here-documents inside backticks.
+
+The hook runs `just check-format` only in the repository that contains the hook,
+and in its linked git worktrees and jj workspaces. Each target repository supplies its own justfile.
+Thus, for a repository outside this project, the hook shows a notice and does not run the check.
 """
 
 import json
@@ -256,22 +260,54 @@ def find_targets(command_line, directory):
     return [target for target in targets if target is not None]
 
 
+def output(command, directory):
+    """Return the stripped stdout of a command, or None when it fails."""
+    try:
+        result = subprocess.run(
+            command, cwd=directory, capture_output=True, text=True
+        )
+    except OSError:
+        return None
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
 def repository_root(directory):
-    for root_command in (["git", "rev-parse", "--show-toplevel"], ["jj", "root"]):
-        try:
-            result = subprocess.run(
-                root_command, cwd=directory, capture_output=True, text=True
-            )
-        except OSError:
-            continue
-        if result.returncode == 0:
-            return result.stdout.strip()
-    return None
+    return output(["git", "rev-parse", "--show-toplevel"], directory) or output(
+        ["jj", "root", "--ignore-working-copy"], directory
+    )
 
 
-def skip_reason(root):
+def repository_identities(root):
+    """Return the stores that the repository at `root` uses, as ("git" or "jj", real path).
+
+    All linked git worktrees share one common directory.
+    All jj workspaces share one store. The `.jj/repo` of a secondary workspace is a file.
+    That file holds the path of the store, relative to the `.jj` directory.
+    """
+    identities = set()
+    common_dir = output(["git", "rev-parse", "--git-common-dir"], root)
+    if common_dir:
+        identities.add(("git", os.path.realpath(os.path.join(root, common_dir))))
+    if output(["jj", "root", "--ignore-working-copy"], root):
+        jj_dir = os.path.join(root, ".jj")
+        store = os.path.join(jj_dir, "repo")
+        if os.path.isfile(store):
+            with open(store) as file:
+                store = os.path.join(jj_dir, file.read().strip())
+        identities.add(("jj", os.path.realpath(store)))
+    return identities
+
+
+def skip_reason(root, project):
     if root is None:
         return "no git or jj repository was found"
+    if not project:
+        return "the hook could not find the repository that contains it"
+    identities = repository_identities(root)
+    if not identities:
+        return f"the hook could not identify the repository in {root}"
+    if not identities & project:
+        return f"the command targets the repository in {root}, which is outside this project"
     for tool in ("just", "pnpm"):
         if shutil.which(tool) is None:
             return f"`{tool}` is missing"
@@ -324,6 +360,8 @@ def main():
     except Exception:
         # Before a match, an error must not block an unrelated command.
         return 0
+    if not targets:
+        return 0
     try:
         roots = []
         for target in targets:
@@ -331,8 +369,10 @@ def main():
             if root not in roots:
                 roots.append(root)
         reasons = []
+        project_root = repository_root(os.path.dirname(os.path.realpath(__file__)))
+        project = repository_identities(project_root) if project_root else set()
         for root in roots:
-            reason = skip_reason(root)
+            reason = skip_reason(root, project)
             if reason is not None:
                 reasons.append(reason)
                 continue
