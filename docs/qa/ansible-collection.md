@@ -138,6 +138,7 @@ Use the devcontainer.
 The `kustomization-test` recipe needs Docker, Minikube, and the installed collection.
 
 Warning: the role handlers run `minikube stop` and `minikube delete` on a Minikube profile.
+The role variable `minikube_test__profile` gives the profile name to the tasks and to the handlers.
 The profile name is the component directory name, or the value of `kubernetes_core_k8s__context` when it is set.
 Do not use a profile name that you need to keep.
 
