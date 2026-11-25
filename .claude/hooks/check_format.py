@@ -15,6 +15,13 @@ because it reads that `<<` as a here-document. It ignores here-documents inside 
 The hook runs `just check-format` only in the repository that contains the hook,
 and in its linked git worktrees and jj workspaces. Each target repository supplies its own justfile.
 Thus, for a repository outside this project, the hook shows a notice and does not run the check.
+
+The hook runs the check on the host when the host has `just` and `pnpm`.
+If not, it runs the check in the running devcontainer of the main workspace.
+The devcontainer mounts only the main workspace directory.
+Thus, the devcontainer can check only a worktree in that directory.
+The hook does not start a devcontainer, because a build can take longer than the hook timeout.
+When the hook cannot run the check, it shows a notice and does not block the command.
 """
 
 import json
@@ -24,6 +31,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+from typing import NamedTuple
 
 SEPARATORS = set(";&|()\n")
 ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=")
@@ -34,7 +42,11 @@ GIT_OPTIONS_WITH_VALUE = {"-c", "--git-dir", "--work-tree"}
 JJ_FLAGS = {"--no-pager", "--ignore-working-copy"}
 JJ_OPTIONS_WITH_VALUE = {"--color", "--config", "--at-op", "--at-operation"}
 HEREDOC_WORD_END = set(" \t\n;&|()<>")
+# The hook timeout in settings.json is 120 seconds. The probe and the check must finish before it.
+PROBE_TIMEOUT_SECONDS = 10
 CHECK_TIMEOUT_SECONDS = 100
+# Positional argument 1 is the path of the target, relative to the workspace folder.
+CONTAINER_SCRIPT = 'cd "$1" && exec just check-format'
 ADVICE = "To check the format, run `just check-format` in the devcontainer."
 
 
@@ -298,7 +310,47 @@ def repository_identities(root):
     return identities
 
 
-def skip_reason(root, project):
+class Check(NamedTuple):
+    root: str
+    place: str
+    command: list
+
+
+def main_workspace(identities):
+    """Return the main git worktree or jj workspace of a store, or None."""
+    for kind, path in sorted(identities):
+        marker = os.sep + {"git": ".git", "jj": os.path.join(".jj", "repo")}[kind]
+        if path.endswith(marker):
+            return path[: -len(marker)]
+    return None
+
+
+def devcontainer_error(workspace):
+    """Return None when the devcontainer of `workspace` runs, or the error of `devcontainer exec`."""
+    try:
+        result = subprocess.run(
+            ["devcontainer", "exec", "--workspace-folder", workspace, "true"],
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            errors="replace",
+            timeout=PROBE_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        return f"no reply in {PROBE_TIMEOUT_SECONDS} seconds"
+    if result.returncode == 0:
+        return None
+    # The CLI writes "Error: Dev container not found." when no container has the label of the workspace.
+    # For a stopped container, Docker writes "Error response from daemon: container ... is not running".
+    for line in result.stderr.splitlines():
+        if "Error" in line:
+            error = line[line.index("Error") :].strip()
+            return error.removeprefix("Error: ")
+    return f"exit status {result.returncode}"
+
+
+def plan(root, project):
+    """Return the Check to run for `root`, or the reason why the check cannot run."""
     if root is None:
         return "no git or jj repository was found"
     if not project:
@@ -308,30 +360,58 @@ def skip_reason(root, project):
         return f"the hook could not identify the repository in {root}"
     if not identities & project:
         return f"the command targets the repository in {root}, which is outside this project"
-    for tool in ("just", "pnpm"):
-        if shutil.which(tool) is None:
-            return f"`{tool}` is missing"
     if not os.path.exists(os.path.join(root, "node_modules", ".bin", "prettier")):
         return f"`node_modules/.bin/prettier` is missing in {root}"
-    return None
+    missing = [tool for tool in ("just", "pnpm") if shutil.which(tool) is None]
+    if not missing:
+        return Check(root, "on the host", ["just", "check-format"])
+    host = f"{' and '.join(f'`{tool}`' for tool in missing)} is missing on the host"
+    if shutil.which("devcontainer") is None:
+        return f"{host} and the `devcontainer` CLI is missing"
+    workspace = main_workspace(identities)
+    if workspace is None:
+        return f"{host} and the hook could not find the main workspace of {root}"
+    relative = os.path.relpath(root, workspace)
+    if relative == os.pardir or relative.startswith(os.pardir + os.sep):
+        return (
+            f"{host} and the devcontainer of {workspace} does not mount {root}, "
+            "because it is outside that directory"
+        )
+    error = devcontainer_error(workspace)
+    if error is not None:
+        up = shlex.join(["devcontainer", "up", "--workspace-folder", workspace])
+        return (
+            f"{host} and no devcontainer runs for {workspace} "
+            f"(`devcontainer exec` reported: {error}). To start it, run `{up}`"
+        )
+    command = ["devcontainer", "exec", "--workspace-folder", workspace]
+    return Check(root, "in the devcontainer", [*command, "sh", "-c", CONTAINER_SCRIPT, "sh", relative])
 
 
-def check(root):
+def check(job):
     """Return a block message, or None when the format check passes."""
-    result = subprocess.run(
-        ["just", "check-format"],
-        cwd=root,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        errors="replace",
-        timeout=CHECK_TIMEOUT_SECONDS,
-    )
+    where = f"in {job.root} {job.place}"
+    try:
+        result = subprocess.run(
+            job.command,
+            cwd=job.root,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            errors="replace",
+            timeout=CHECK_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        return (
+            f"`just check-format` did not finish {where} in {CHECK_TIMEOUT_SECONDS} seconds.\n"
+            "Run `just check-format` in the devcontainer, then try again."
+        )
     if result.returncode == 0:
         return None
     tail = "\n".join(result.stdout.splitlines()[-20:])
     return (
-        f"`just check-format` failed in {root} with exit status {result.returncode}.\n"
+        f"`just check-format` failed {where} with exit status {result.returncode}.\n"
         f"The last 20 lines of its output follow.\n{tail}\n"
         "If the output shows a format error, run `just format`, then try again."
     )
@@ -372,11 +452,11 @@ def main():
         project_root = repository_root(os.path.dirname(os.path.realpath(__file__)))
         project = repository_identities(project_root) if project_root else set()
         for root in roots:
-            reason = skip_reason(root, project)
-            if reason is not None:
-                reasons.append(reason)
+            job = plan(root, project)
+            if isinstance(job, str):
+                reasons.append(job)
                 continue
-            message = check(root)
+            message = check(job)
             if message is not None:
                 print(message, file=sys.stderr)
                 return 2
