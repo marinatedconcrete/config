@@ -3,11 +3,9 @@
 // Only pull requests that carry HIVE_PR_LABEL count. Other agents and people are ignored.
 // Pull requests that EXCLUDED_AUTHOR opened never count, even with the label.
 //
-// UNVERIFIED: The label is a best guess. The repository label list describes author/hive as
-// "This repository's own hive (the App or one of its agent lanes) authored this PR".
-// The Hive documentation says only that a hive/<hive-id> label records provenance.
-// No Hive pull request exists in this repository yet, because Hive runs at ACMM L2.
-// Check the label against the first real Hive pull request. Change the constant if it differs.
+// The author/hive label marks pull requests from the Hive swarm.
+// The author/clanker label marks pull requests from contributors who lend their agent credits.
+// Only the swarm counts here, so the script ignores author/clanker.
 //
 // Usage: node scripts/pr-metrics.mjs [--window-days N] [--summary-file PATH]
 // The script needs the gh CLI with read access to pull requests.
@@ -76,7 +74,7 @@ export function renderSummary(
   return [
     "## Hive pull request acceptance",
     "",
-    `Pull requests with the \`${label}\` label. This label is unverified against a real Hive pull request.`,
+    `Pull requests with the \`${label}\` label.`,
     "",
     "| Period | Merged | Closed unmerged | Open | Acceptance rate |",
     "| --- | --- | --- | --- | --- |",
