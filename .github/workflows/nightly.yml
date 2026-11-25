@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
@@ -15,21 +15,24 @@ permissions:
 jobs:
   list-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       kustomization-tests: ${{ steps.list.outputs.tests }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # Each directory with a test.yml is one test. This list cannot differ
+      # Build the list from the test directories. A written list can differ
       # from the tests in the repository.
       - name: List component tests
         id: list
+        shell: bash
         run: |
           tests="$(find kustomization/tests -mindepth 2 -maxdepth 2 -name test.yml -printf '%h\n' | xargs -n1 basename | sort | jq -R . | jq -sc .)"
           echo "tests=${tests}" >> "${GITHUB_OUTPUT}"
-  kustomization-test:
+  nightly-kustomization-test:
     needs: list-tests
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
