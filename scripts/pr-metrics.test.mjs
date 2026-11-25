@@ -1,6 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { HIVE_PR_LABEL, renderSummary, summarize } from "./pr-metrics.mjs";
+import {
+  EXCLUDED_AUTHOR,
+  HIVE_PR_LABEL,
+  renderSummary,
+  summarize,
+} from "./pr-metrics.mjs";
 
 const now = new Date("2026-06-30T00:00:00Z");
 const pr = (state, closedAt, ...labels) => ({
@@ -87,4 +92,27 @@ test("the summary table shows the rate as a percentage", () => {
   );
   assert.match(markdown, /\| All time \| 2 \| 1 \| 0 \| 66\.7% \|/);
   assert.match(markdown, /\| Last 7 days \| 2 \| 1 \| 0 \| 66\.7% \|/);
+});
+
+test("ignores pull requests from the release app even with the Hive label", () => {
+  const { allTime } = summarize(
+    [
+      {
+        ...hive("MERGED", "2026-06-01T00:00:00Z"),
+        author: { login: EXCLUDED_AUTHOR },
+      },
+      { ...hive("OPEN", null), author: { login: EXCLUDED_AUTHOR } },
+      {
+        ...hive("MERGED", "2026-06-01T00:00:00Z"),
+        author: { login: "app/other" },
+      },
+    ],
+    { now, windowDays: 30 },
+  );
+  assert.deepEqual(allTime, {
+    merged: 1,
+    closedUnmerged: 0,
+    open: 0,
+    acceptanceRate: 1,
+  });
 });

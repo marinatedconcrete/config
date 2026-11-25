@@ -1,6 +1,7 @@
 // Report how many pull requests opened by Hive agents were accepted.
 //
 // Only pull requests that carry HIVE_PR_LABEL count. Other agents and people are ignored.
+// Pull requests that EXCLUDED_AUTHOR opened never count, even with the label.
 //
 // UNVERIFIED: The label is a best guess. The repository label list describes author/hive as
 // "This repository's own hive (the App or one of its agent lanes) authored this PR".
@@ -16,11 +17,13 @@ import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 export const HIVE_PR_LABEL = "author/hive";
+// Release pull requests come from this app. They follow from other work and need no review.
+export const EXCLUDED_AUTHOR = "app/formwork-remover";
 export const DEFAULT_WINDOW_DAYS = 30;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-// A pull request has this shape in the output of: gh pr list --json state,closedAt,labels
-// { state: "OPEN" | "CLOSED" | "MERGED", closedAt: string | null, labels: [{ name: string }] }
+// A pull request has this shape in the output of: gh pr list --json state,closedAt,labels,author
+// { state: "OPEN" | "CLOSED" | "MERGED", closedAt: string | null, labels: [{ name: string }], author: { login: string } }
 // A tally has this shape: { merged, closedUnmerged, open, acceptanceRate }
 // The acceptance rate is null when no pull request has finished.
 
@@ -45,8 +48,10 @@ export function summarize(
   pullRequests,
   { now, windowDays, label = HIVE_PR_LABEL },
 ) {
-  const hive = pullRequests.filter(({ labels }) =>
-    labels.some(({ name }) => name === label),
+  const hive = pullRequests.filter(
+    ({ labels, author }) =>
+      author?.login !== EXCLUDED_AUTHOR &&
+      labels.some(({ name }) => name === label),
   );
   const since = now.getTime() - windowDays * DAY_MS;
   const inWindow = hive.filter(({ state, closedAt }) => {
@@ -105,7 +110,7 @@ async function listPullRequests() {
       "--limit",
       "10000",
       "--json",
-      "state,closedAt,labels",
+      "state,closedAt,labels,author",
     ],
     { maxBuffer: 256 * 1024 * 1024 },
   );
