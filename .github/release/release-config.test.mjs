@@ -30,6 +30,7 @@ const annotations = new Set([
 // in a new release-please version cannot pass without a check.
 export function schemaErrors(schema, value, root, at = "$") {
   if (schema === true) return [];
+  if (schema === false) return [`${at}: no value is allowed`];
   if (schema.$ref) {
     const target = schema.$ref
       .replace("#/", "")
@@ -187,6 +188,14 @@ test("a config that breaks the release-please schema is reported", () => {
     "release-please-config.json: $: unknown property unknownOption (rule: schema)",
     "release-please-config.json: $.separate-pull-requests: expected boolean, found string (rule: schema)",
     "release-please-config.json: $.packages.ansible.release-type: expected string, found number (rule: schema)",
+  ]);
+});
+
+test("a property that the schema forbids is reported", () => {
+  const input = real();
+  input.config["component-no-space"] = true;
+  assert.deepEqual(configProblems(input), [
+    "release-please-config.json: $.component-no-space: no value is allowed (rule: schema)",
   ]);
 });
 
