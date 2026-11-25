@@ -6,7 +6,7 @@ on: # yamllint disable-line rule:truthy
     branches:
       - main
     paths:
-      - .devcontainer/Dockerfile
+      - .devcontainer/Containerfile
       - .github/workflows/image-kairos-fedora.yml
       - actions/image-release-notes/**
       - images/kairos-fedora/**
@@ -15,7 +15,7 @@ on: # yamllint disable-line rule:truthy
     branches:
       - main
     paths:
-      - .devcontainer/Dockerfile
+      - .devcontainer/Containerfile
       - .github/workflows/image-kairos-fedora.yml
       - actions/image-release-notes/**
       - images/kairos-fedora/**

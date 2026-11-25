@@ -139,7 +139,7 @@ Read `.github/workflows` to see which checks run on a pull request.
 | `buildah-action-runner` build       | manual                                          | The image builds. `buildah`, `curl`, `jq`, and `node` run.                                                                                   | The test does not run a `buildah build`. A fork pull request does not push the image.                                            |
 | `github-runner-ci` build            | manual                                          | The image builds. The user is `1001:1001`. The home directories are writable. `brew`, `git`, `just`, `jq`, `rg`, `shellcheck`, and `yq` run. | The test does not check the other installed packages.                                                                            |
 | `github-runner-ci` job container    | manual                                          | A GitHub Actions job runs in the pushed image. The workspace is writable and `brew install` works.                                           | It runs only when the workflow pushes the image. A fork pull request skips it. It does not use an ARC runner.                    |
-| `kairos-fedora` build               | manual                                          | The image builds and `kairos-init validate` passes                                                                                           | The path filter lists `.devcontainer/Dockerfile`. That file does not exist.                                                      |
+| `kairos-fedora` build               | manual                                          | The image builds and `kairos-init validate` passes                                                                                           | None known.                                                                                                                      |
 | `kairos-fedora` boot and install    | `just e2e-kairos-fedora`                        | The ISO installs through the WebUI. The installed system reboots. SSH works. The hostname is correct. The `k3s` node is `Ready`.             | It runs in one virtual machine setup. It does not cover real hardware, an upgrade, or Longhorn, `iscsid`, and firewall behavior. |
 | `vscode-ssh-server` build           | manual                                          | The image builds. `/init.sh` and `sshd` are executable. User `dev` exists.                                                                   | No test starts `sshd` or opens an SSH connection.                                                                                |
 | `devcontainer-base` full pipeline   | manual                                          | The image builds. `just check-format && just lint && just test` pass in a devcontainer that uses the candidate image.                        | The pipeline covers what this repository needs. Other consumers can need more.                                                   |
@@ -192,9 +192,6 @@ Each gap can become an issue.
 - No image check is required.
   A pull request that breaks an image can merge when the path-filtered check fails.
   An aggregate job that always runs and reads the path-filtered results can fix this.
-- The `kairos-fedora` workflow lists `.devcontainer/Dockerfile` in its path filters.
-  The repository has `.devcontainer/Containerfile`, not that file.
-  A change to the devcontainer file does not start the Kairos workflow.
 - `images/kairos-fedora/Containerfile` sets `org.opencontainers.image.title` two times.
   The second value, `kairos-fedora`, replaces the first value, `A custom Fedora-based Kairos image.`.
 - `buildah-action-runner` and `vscode-ssh-server` have no release notes or SBOM.
