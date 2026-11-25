@@ -57,6 +57,7 @@ When the update is in a release path, Release Please then opens a release pull r
 
 - Patch updates of each dependency, three days after the release. Third-party actions and the images from the registries below are exceptions.
 - Minor and digest updates of the Docker Hub images in `factorio`, `mosquitto`, and `unifi-network-application`.
+- Monthly Debian digest updates in `images/vscode-ssh-server/Dockerfile`.
 - `k3s` patch updates in `images/kairos-fedora`.
 - Digest, minor, and patch updates of GitHub's own actions (`actions/*`).
 - All updates of `prettier`, `pnpm`, `node`, and `cli/cli`, and the monthly `renovate` update.
@@ -64,6 +65,7 @@ When the update is in a release path, Release Please then opens a release pull r
 
 Images from `ghcr.io`, `quay.io`, `registry.k8s.io`, and `lscr.io` never auto-merge, except `devcontainer-base`. Its rule is the last item in the list above. Third-party actions never auto-merge.
 The registry rule comes after the rules for `kube-vip`, the Unifi application image, and `samba`. Thus those rules do not cause an auto-merge.
+The monthly Fedora digest rule for `images/kairos-fedora` does nothing now. Another rule stops Renovate from pinning Fedora digests, and the Containerfile has no Fedora digest.
 A change that adds an item to this list is a High change.
 
 ## What to ask for in each tier
