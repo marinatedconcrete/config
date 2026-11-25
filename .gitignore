@@ -7,3 +7,6 @@ node_modules/
 
 # The local builds write output to /build.
 /build
+
+# Python writes bytecode when the hook tests run.
+__pycache__/
