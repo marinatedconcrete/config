@@ -29,7 +29,7 @@ const MARKER = "<!-- app-image-details -->";
 const STUB = `#!/usr/bin/env bash
 case "$1 $2" in
 "release view")
-    [[ -d "$STUB_DIR/release" ]] || exit 1
+    [[ "$3" == "$STUB_TAG" && -d "$STUB_DIR/release" ]] || exit 1
     [[ "$*" == *"--json body"* ]] && cat "$STUB_DIR/release/body.md"
     exit 0
     ;;
