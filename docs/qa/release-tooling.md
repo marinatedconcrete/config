@@ -1,0 +1,126 @@
+# QA for release tooling
+
+## Scope
+
+This page covers the files that plan, validate, and publish releases.
+Use it to review a change to any of these files:
+
+- `.github/release/*`. This directory has the Node.js release scripts, their tests, `package.json`, and `package-lock.json`. Its `README.md` describes the release sequence and recovery.
+- `.github/scripts/next-calver-version.sh`. This script gives the next CalVer version for the `devcontainer-base` image.
+- `release-please-config.json` and `.release-please-manifest.json`. These files list each released package and its current version.
+
+The release workflows in `.github/workflows` call these files.
+Review a change to these workflows with this page also.
+
+## Review checklist
+
+### Release configuration
+
+- Each path in `packages` in `release-please-config.json` has an entry in `.release-please-manifest.json`. Each path exists in the repository.
+- Do not edit a version in `.release-please-manifest.json` by hand. Release Please changes it in a release PR. One exception applies. To register a new package, a person adds a line with the value `0.0.0` to this file and a matching entry to `release-please-config.json`.
+- A new image package sets `include-v-in-tag` to `false` and `tag-separator` to `-`. Compare it with `images/kairos-fedora`.
+- A new package path must also fit `plan.mjs`. That script accepts only `kustomization/components/*`, `actions/*`, `ansible`, `renovate`, and four named images. Other paths fail at release time with `Unsupported release path`. Update `plan.mjs`, its tests, and the release package workflow in the same PR.
+- A new image needs its own job in the release package workflow. A new component needs a test in `kustomization/tests/` and an entry in the CI test matrix.
+- A new source package needs a case in the `release-please-validate` recipe in `justfile`.
+- Keep past changelog entries unchanged. Do not change `changelog-sections` without a reason.
+
+### Release scripts
+
+- The scripts do not publish before validation succeeds. The Git tag must not exist before validation. Read the release sequence in `.github/release/README.md`.
+- A rerun gives the same end state. Publication must stop, with no write, when an existing tag, asset, or image digest differs from the validated value.
+- Publisher changes keep compatibility with existing validation records. An incompatible record must stop publication before any write.
+- A new behavior has a test in the matching `*.test.mjs` file. The tests use simulated GitHub API responses. Do not add a test that calls the real GitHub API or GHCR.
+- A change to the release sequence, recovery, or package validation updates `.github/release/README.md` in the same PR.
+- Keep release scripts as `.mjs` files in `.github/release/`.
+- A change to workflow concurrency keeps `cancel-in-progress: false` for release runs. An active release run must not be canceled.
+
+### Security
+
+- Keep `permissions` at the minimum. The release workflows use `contents: read` and `packages: write`.
+- The GitHub App token creates tags and publishes releases. Do not use it in a step that runs code from an image.
+- Pin each third-party action to a full commit SHA with a version comment. Renovate keeps these pins.
+- Do not put untrusted values in a `run:` script as `${{ }}` text. Pass them in `env:`, as the existing workflows do.
+- Install Node.js dependencies with `npm ci --ignore-scripts`.
+
+### Shell script
+
+- `.github/scripts/next-calver-version.sh` passes `shellcheck`.
+- The script reads tag names from standard input and prints one version. It does not call the network.
+- Update the comment at the top of the script when the version format changes. Check the caller workflow for the `devcontainer-base` image also.
+
+### Renovate behavior
+
+- Renovate rules and auto-merge behavior are in [renovate-presets.md](renovate-presets.md).
+- `release-please` in `.github/release/package.json` has an exact version. A minor or major update changes the release tool. Before it merges, a person must make sure that the release script tests pass.
+- Do not edit `package-lock.json` by hand. Use `npm install --prefix .github/release --package-lock-only --ignore-scripts`.
+
+### Commit type and scope
+
+- Commit and PR title rules are in [AGENTS.md](../../AGENTS.md). The way to mark a breaking change is in [pull_request_template.md](../../.github/pull_request_template.md).
+- These paths are not release packages, so a change to them does not make a release by itself. Past changes use `fix:` for a defect in the release flow and `feat:` for new release behavior, with no scope.
+- A breaking change is a change to a released package only.
+
+## Automated validation coverage
+
+| What is validated                       | How to run it                         | What it proves                                                                                                                         | What it does not prove                                                                                                                                                   |
+| --------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Release script tests                    | `npm test --prefix .github/release`   | Release planning, publication, recovery, and image digest checks work with simulated GitHub API responses.                             | `plan.test.mjs` tests `plan.mjs`. No test covers the command-line entry check in `plan.mjs` or the files `publish-cli.mjs` and `recover-cli.mjs`.                        |
+| ShellCheck on `next-calver-version.sh`  | `just shellcheck-lint`                | The script has no ShellCheck findings.                                                                                                 | Behavior of the script. See the next row.                                                                                                                                |
+| Behavior of `next-calver-version.sh`    | manual                                | Nothing.                                                                                                                               | No test for an empty list, a leading zero, a number above 9, or a different prefix.                                                                                      |
+| Prettier format                         | `just check-format`                   | The `.github/release/*.mjs` files, JSON files, and Markdown files follow the Prettier format. This includes both release-please files. | Content of the files.                                                                                                                                                    |
+| Renovate configuration                  | `just renovate-lint`                  | `renovate.json` and `renovate/*.json` are valid.                                                                                       | The check does not cover `release-please-config.json`.                                                                                                                   |
+| PR title                                | CI only                               | The PR title follows Conventional Commits.                                                                                             | A merge with a wrong title can give a wrong version bump or no release. The check applies to the PR title only.                                                          |
+| Source release validation               | `just release-please-validate <path>` | The `ansible`, `renovate`, and `actions/*` packages pass their own checks before release.                                              | No check runs before the merge. A failure shows only after the release PR merges.                                                                                        |
+| Component release build                 | `just release-please-build <project>` | A Kustomize component passes its test and builds before release.                                                                       | Same as above.                                                                                                                                                           |
+| Release config and manifest consistency | manual                                | Nothing.                                                                                                                               | No check compares `release-please-config.json` with `.release-please-manifest.json`. No schema check runs. No check compares package paths with the paths in `plan.mjs`. |
+| Workflow syntax and logic               | manual                                | Nothing.                                                                                                                               | No `actionlint` or `yamllint` run. A mistake in a release workflow shows only on a real release.                                                                         |
+| End-to-end release                      | manual                                | Nothing.                                                                                                                               | No test makes a tag, a draft release, or a GHCR tag. The README says that GitHub event delivery and GHCR publication need separate integration checks.                   |
+
+## Manual QA
+
+Automation cannot prove real publication.
+Do these checks when a change touches the release sequence, `plan.mjs`, or `publish.mjs`.
+
+1. Run the local checks:
+
+   ```sh
+   pnpm install --frozen-lockfile
+   npm ci --prefix .github/release --ignore-scripts
+   npm test --prefix .github/release
+   just shellcheck-lint
+   just renovate-lint
+   just check-format
+   ```
+
+2. Run the version script with sample tag names:
+
+   ```sh
+   printf 'devcontainer-base-2026.11.9\ndevcontainer-base-2026.11.1\n' \
+     | bash .github/scripts/next-calver-version.sh devcontainer-base-2026.11
+   ```
+
+   The output must be `2026.11.10`.
+   An empty input must give `2026.11.0`.
+
+3. Check that the config and the manifest list the same paths. Run this command from the repository root:
+
+   ```sh
+   node -e 'const c=require("./release-please-config.json"),m=require("./.release-please-manifest.json");const a=Object.keys(c.packages),b=Object.keys(m);console.log(a.filter(x=>!b.includes(x)),b.filter(x=>!a.includes(x)))'
+   ```
+
+   Both lists must be empty.
+
+4. For a change to the publisher or the workflows, inspect the release workflow result for a recent release PR after the change reaches `main`. Confirm that its release is published, not a draft. Check its tag and validation record. Use simulated recovery tests for routine QA. Do not start a production recovery run solely to test the change. A recovery run for a draft or a missing release starts a new validation and publication.
+5. Before merge, check the package and expected tag in the release PR. After merge, check the Release Please run on `main` for rejected candidates.
+6. Read the workflow `permissions` and the secrets use in the diff. Automation does not check them.
+
+## Known gaps
+
+- Add a test for `next-calver-version.sh`. Cover an empty list, a leading zero, a number above 9, and a different prefix.
+- Add a check that each package in `release-please-config.json` has a manifest entry, an existing path, and a supported path in `plan.mjs`.
+- Add a workflow linter, for example `actionlint`, to `just lint`.
+- Add tests for the command-line entry check in `plan.mjs` and for the files `publish-cli.mjs` and `recover-cli.mjs`.
+- Add a `just` recipe that runs the release script tests. The README lists `npm test` only.
+- Run source and component release validation on release PRs, before the merge.
+- Limit the write tokens of third-party actions. Auto-merge of third-party patch updates gives the code of these actions access to the write tokens of the workflows, with no human review. See [renovate-presets.md](renovate-presets.md).
+- Fix the exclusion of `ansible/requirements.txt`. The file is in `exclude-paths` for `ansible` in `release-please-config.json`. PR #1052 changed only this file, but the `ansible-collection` 2.0.0 changelog lists it.
