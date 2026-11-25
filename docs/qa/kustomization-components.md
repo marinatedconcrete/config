@@ -33,53 +33,53 @@ Apply each item to the files that the change touches.
 
 ### Commit and pull request
 
-- [ ] The title and commit follow [AGENTS.md](../../AGENTS.md). The scope is the component name, for example `fix(paperless)` or `feat(kube-vip-wireguard)`.
-- [ ] A change that a consumer must act on is a breaking change. This includes a new required patch, a new required Secret, and a change of the user namespace setup. Examples are `feat(paperless)!` in #1035 and `feat(unifi-network-application)!` in #1033. Annotate it as the [pull request template](../../.github/pull_request_template.md) describes.
-- [ ] A change that does not break a consumer does not use `!`.
-- [ ] A change only to `kustomization/tests/**` uses the `test` type. It makes no release.
-- [ ] Do not edit `CHANGELOG.md` files or `.release-please-manifest.json` by hand. See [release tooling](./release-tooling.md).
+- The title and commit follow [AGENTS.md](../../AGENTS.md). The scope is the component name, for example `fix(paperless)` or `feat(kube-vip-wireguard)`.
+- A change that a consumer must act on is a breaking change. This includes a new required patch, a new required Secret, and a change of the user namespace setup. Examples are `feat(paperless)!` in #1035 and `feat(unifi-network-application)!` in #1033. Annotate it as the [pull request template](../../.github/pull_request_template.md) describes.
+- A change that does not break a consumer does not use `!`.
+- A change only to `kustomization/tests/**` uses the `test` type. It makes no release.
+- Do not edit `CHANGELOG.md` files or `.release-please-manifest.json` by hand. See [release tooling](./release-tooling.md).
 
 ### Component files
 
-- [ ] Each released component has a `kustomization.yml`, a `README.md`, and an entry in `release-please-config.json` and `.release-please-manifest.json`.
-- [ ] The component is a `kind: Component` that a consumer can select. A directory that has only children, such as `pod-security`, is not selected itself.
-- [ ] Each container image uses a version and a digest in `newTag`, for example `2.0.22@sha256:...`. Renovate updates both values.
-- [ ] Each image update comment or custom manager still matches the file. The `customManagers` in `renovate.json` read `# renovate:` comments and `newTag` values.
-- [ ] The component does not set a namespace. The consumer sets it.
-- [ ] Each component that needs a Secret or a patch from the consumer documents it, and the test supplies it.
-- [ ] A new `kustomization.yml` builds. Run `just kustomize-lint`.
+- Each released component has a `kustomization.yml`, a `README.md`, and an entry in `release-please-config.json` and `.release-please-manifest.json`.
+- The component is a `kind: Component` that a consumer can select. A directory that has only children, such as `pod-security`, is not selected itself.
+- Each container image uses a version and a digest in `newTag`, for example `2.0.22@sha256:...`. Renovate updates both values.
+- Each image update comment or custom manager still matches the file. The `customManagers` in `renovate.json` read `# renovate:` comments and `newTag` values.
+- The component does not set a namespace. The consumer sets it.
+- Each component that needs a Secret or a patch from the consumer documents it, and the test supplies it.
+- A new `kustomization.yml` builds. Run `just kustomize-lint`.
 
 ### Security posture
 
-- [ ] The workload meets the Pod Security level in its README badge. The test namespace in `kustomization/tests/<name>/namespace.yml` enforces the same level, so the Pod must pass admission.
-- [ ] A change that lowers the level (for example restricted to baseline) is a deliberate decision. The reviewer must see the reason in the pull request, the badge, the test namespace label, and the README.
-- [ ] Only `kube-vip` and `kube-vip-wireguard` run at the privileged level. A new privileged component needs a reason in the pull request.
-- [ ] A workload that can use user namespaces sets `hostUsers: false`, and the README has a "Enable User Namespaces" section. `factorio`, `paperless`, and `unifi-network-application` do this. The test then sets `minikube_test__enable_user_namespaces: true`.
-- [ ] Containers drop capabilities and block privilege escalation where the application allows it. Apply the same hardening to all images that use the same framework.
-- [ ] A security claim in a pull request has a test or an explicit reason why no test is possible.
-- [ ] A Secret in a test file holds only throwaway values.
-- [ ] The Pod Security components keep the version rules in their READMEs. Baseline and restricted enforcement use a fixed Kubernetes minor version. The other modes use `latest`.
+- The workload meets the Pod Security level in its README badge. The test namespace in `kustomization/tests/<name>/namespace.yml` enforces the same level, so the Pod must pass admission.
+- A change that lowers the level (for example restricted to baseline) is a deliberate decision. The reviewer must see the reason in the pull request, the badge, the test namespace label, and the README.
+- Only `kube-vip` and `kube-vip-wireguard` run at the privileged level. A new privileged component needs a reason in the pull request.
+- A workload that can use user namespaces sets `hostUsers: false`, and the README has a "Enable User Namespaces" section. `factorio`, `paperless`, and `unifi-network-application` do this. The test then sets `minikube_test__enable_user_namespaces: true`.
+- Containers drop capabilities and block privilege escalation where the application allows it. Apply the same hardening to all images that use the same framework.
+- A security claim in a pull request has a test or an explicit reason why no test is possible.
+- A Secret in a test file holds only throwaway values.
+- The Pod Security components keep the version rules in their READMEs. Baseline and restricted enforcement use a fixed Kubernetes minor version. The other modes use `latest`.
 
 ### Documentation
 
-- [ ] The README has the version badge and the Pod Security badge. A component that sets a `priorityClassName` also has the priority class badge.
-- [ ] Each badge points at the right component. The version badge query uses the component path.
-- [ ] The README has an Examples section with a Component example and a Resource example. The Resource URL has the form `.../releases/download/kustomize-<name>@v{version}/<name>.yml`.
-- [ ] Setup sections use the same headings as the other READMEs: `Required Setup`, `Required Secrets`, `Required Patches`, and `Optional Patches`.
-- [ ] A change to a default value, a port, or a version also changes the README text that states it.
-- [ ] New prose follows ASD-STE100, as `AGENTS.md` requires. Past changelog entries stay unchanged.
+- The README has the version badge and the Pod Security badge. A component that sets a `priorityClassName` also has the priority class badge.
+- Each badge points at the right component. The version badge query uses the component path.
+- The README has an Examples section with a Component example and a Resource example. The Resource URL has the form `.../releases/download/kustomize-<name>@v{version}/<name>.yml`.
+- Setup sections use the same headings as the other READMEs: `Required Setup`, `Required Secrets`, `Required Patches`, and `Optional Patches`.
+- A change to a default value, a port, or a version also changes the README text that states it.
+- New prose follows ASD-STE100, as `AGENTS.md` requires. Past changelog entries stay unchanged.
 
 ### Generated files
 
-- [ ] Do not edit the files that have the `# @generated` header by hand. These are `kube-vip/daemonset/vip.yml`, `kube-vip/daemonset/services.yml`, `kube-vip/rbac.yml`, and `kube-vip-wireguard/daemonset/wireguard.yml`.
-- [ ] A change to these files comes from the `codegen-kube-vip` recipe in the `justfile`. Change the recipe, then regenerate.
-- [ ] A pushed change to `justfile` or to the two kube-vip `kustomization.yml` files can add a bot commit `chore(package): regenerate kube-vip manifests`. Pull it before you push again.
+- Do not edit the files that have the `# @generated` header by hand. These are `kube-vip/daemonset/vip.yml`, `kube-vip/daemonset/services.yml`, `kube-vip/rbac.yml`, and `kube-vip-wireguard/daemonset/wireguard.yml`.
+- A change to these files comes from the `codegen-kube-vip` recipe in the `justfile`. Change the recipe, then regenerate.
+- A pushed change to `justfile` or to the two kube-vip `kustomization.yml` files can add a bot commit `chore(package): regenerate kube-vip manifests`. Pull it before you push again.
 
 ### Renovate behavior
 
 Renovate rules and auto-merge behavior are in [Renovate presets](./renovate-presets.md).
 
-- [ ] Version limits stay in place. Unifi MongoDB stays below 8.1.0.
+- Version limits stay in place. Unifi MongoDB stays below 8.1.0.
 
 ## Automated validation coverage
 
