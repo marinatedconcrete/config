@@ -1,11 +1,11 @@
 // Report how many pull requests opened by Hive agents were accepted.
 //
-// Only pull requests that carry HIVE_PR_LABEL count. Other agents and people are ignored.
+// Only pull requests that carry one of HIVE_PR_LABELS count. People are ignored.
 // Pull requests that EXCLUDED_AUTHOR opened never count, even with the label.
 //
 // The author/hive label marks pull requests from the Hive swarm.
-// The author/clanker label marks pull requests from contributors who lend their agent credits.
-// Only the swarm counts here, so the script ignores author/clanker.
+// The author/clanker label marks pull requests from other people that use the Hive contribution flow.
+// Both are Hive work, so both count.
 //
 // Usage: node scripts/pr-metrics.mjs [--window-days N] [--summary-file PATH]
 // The script needs the gh CLI with read access to pull requests.
@@ -14,7 +14,7 @@ import { appendFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
-export const HIVE_PR_LABEL = "author/hive";
+export const HIVE_PR_LABELS = ["author/hive", "author/clanker"];
 // Release pull requests come from this app. They follow from other work and need no review.
 export const EXCLUDED_AUTHOR = "app/formwork-remover";
 export const DEFAULT_WINDOW_DAYS = 30;
@@ -44,12 +44,12 @@ function count(pullRequests) {
 // An open pull request has no outcome, so the window reports every open pull request.
 export function summarize(
   pullRequests,
-  { now, windowDays, label = HIVE_PR_LABEL },
+  { now, windowDays, labels: hiveLabels = HIVE_PR_LABELS },
 ) {
   const hive = pullRequests.filter(
     ({ labels, author }) =>
       author?.login !== EXCLUDED_AUTHOR &&
-      labels.some(({ name }) => name === label),
+      labels.some(({ name }) => hiveLabels.includes(name)),
   );
   const since = now.getTime() - windowDays * DAY_MS;
   const inWindow = hive.filter(({ state, closedAt }) => {
@@ -67,14 +67,14 @@ const percent = (rate) =>
 
 export function renderSummary(
   { allTime, window, windowDays },
-  label = HIVE_PR_LABEL,
+  hiveLabels = HIVE_PR_LABELS,
 ) {
   const row = (name, c) =>
     `| ${name} | ${c.merged} | ${c.closedUnmerged} | ${c.open} | ${percent(c.acceptanceRate)} |`;
   return [
     "## Hive pull request acceptance",
     "",
-    `Pull requests with the \`${label}\` label.`,
+    `Pull requests with one of these labels: ${hiveLabels.map((l) => `\`${l}\``).join(", ")}.`,
     "",
     "| Period | Merged | Closed unmerged | Open | Acceptance rate |",
     "| --- | --- | --- | --- | --- |",

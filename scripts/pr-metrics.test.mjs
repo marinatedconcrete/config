@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   EXCLUDED_AUTHOR,
-  HIVE_PR_LABEL,
+  HIVE_PR_LABELS,
   renderSummary,
   summarize,
 } from "./pr-metrics.mjs";
@@ -13,7 +13,7 @@ const pr = (state, closedAt, ...labels) => ({
   closedAt,
   labels: labels.map((name) => ({ name })),
 });
-const hive = (state, closedAt) => pr(state, closedAt, HIVE_PR_LABEL, "bug");
+const hive = (state, closedAt) => pr(state, closedAt, HIVE_PR_LABELS[0], "bug");
 
 test("no matching pull requests gives zero counts and no rate", () => {
   const result = summarize(
@@ -39,7 +39,7 @@ test("counts merged, closed unmerged, and open for Hive pull requests only", () 
       hive("MERGED", "2026-01-02T00:00:00Z"),
       hive("CLOSED", "2026-06-02T00:00:00Z"),
       hive("OPEN", null),
-      pr("MERGED", "2026-06-01T00:00:00Z", "author/clanker"),
+      pr("MERGED", "2026-06-01T00:00:00Z", "author/human"),
     ],
     { now, windowDays: 30 },
   );
@@ -115,4 +115,12 @@ test("ignores pull requests from the release app even with the Hive label", () =
     open: 0,
     acceptanceRate: 1,
   });
+});
+
+test("counts both Hive labels", () => {
+  const { allTime } = summarize(
+    HIVE_PR_LABELS.map((label) => pr("MERGED", "2026-06-01T00:00:00Z", label)),
+    { now, windowDays: 30 },
+  );
+  assert.equal(allTime.merged, 2);
 });
