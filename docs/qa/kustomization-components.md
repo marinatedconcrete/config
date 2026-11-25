@@ -113,7 +113,7 @@ Automation cannot check these items. A person must do them.
 4. For a change to `kube-vip` or `kube-vip-wireguard`, test on a real cluster with at least two nodes. Minikube cannot test fail over of a virtual IP address. Run `kubectl get pods -n <namespace>` and `kubectl logs` for each DaemonSet.
 5. For a new image major version, read the upstream release notes for data migration. The tests start a new instance only. They do not test an upgrade from stored data.
 6. For a change in a component that has a user namespace requirement, confirm that the target nodes support user namespaces.
-7. Run the tests that apply to the change before you ask for review. Use `just kustomization-test <name>` for one component, or `just test` for all. These need Minikube, Docker, and Ansible. `just` and `kustomize` also must exist. If a tool is missing, say so in the pull request. Warning: the `minikube_test` role runs `minikube stop` and `minikube delete --profile=<test directory name>` when a test ends. Do not give a Minikube profile that you want to keep the same name as a test directory.
+7. Run the tests that apply to the change before you ask for review. Use `just kustomization-test <name>` for one component, or `just test` for all. These need Minikube, Docker, and Ansible. `just` and `kustomize` also must exist. If a tool is missing, say so in the pull request. Warning: the `minikube_test` role runs `minikube stop` and `minikube delete` on the test profile when a test ends. The profile name is the test directory name, or the value of `kubernetes_core_k8s__context` when the test sets it. Do not give a Minikube profile that you want to keep one of these names.
 
 ## Known gaps
 

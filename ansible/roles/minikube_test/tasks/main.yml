@@ -6,7 +6,7 @@
       - minikube
       - start
       - --interactive=false
-      - "--profile={{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+      - "--profile={{ minikube_test__profile }}"
       - "--kubernetes-version={{ minikube_test__kubernetes_version }}"
       - "--nodes={{ minikube_test__minikube_nodes }}"
       - --cni=kindnet
@@ -18,7 +18,7 @@
   ansible.builtin.command:
     argv:
       - minikube
-      - "--profile={{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+      - "--profile={{ minikube_test__profile }}"
       - ssh
       - --
       - >-
@@ -33,7 +33,7 @@
       ansible.builtin.command:
         argv:
           - minikube
-          - "--profile={{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+          - "--profile={{ minikube_test__profile }}"
           - addons
           - enable
           - storage-provisioner-rancher
@@ -41,7 +41,7 @@
     - name: Wait for provisioner deployment
       kubernetes.core.k8s:
         api_version: apps/v1
-        context: "{{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+        context: "{{ minikube_test__profile }}"
         kind: Deployment
         name: local-path-provisioner
         namespace: local-path-storage
@@ -56,7 +56,7 @@
         - name: Set the local path to /var/local-path-provisioner
           kubernetes.core.k8s:
             api_version: v1
-            context: "{{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+            context: "{{ minikube_test__profile }}"
             definition:
               data:
                 config.json: >-
@@ -70,7 +70,7 @@
         - name: Stop the local path provisioner
           kubernetes.core.k8s_scale:
             api_version: apps/v1
-            context: "{{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+            context: "{{ minikube_test__profile }}"
             kind: Deployment
             name: local-path-provisioner
             namespace: local-path-storage
@@ -79,7 +79,7 @@
         - name: Wait for the local path provisioner pods to stop
           kubernetes.core.k8s:
             api_version: v1
-            context: "{{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+            context: "{{ minikube_test__profile }}"
             kind: Pod
             label_selectors:
               - app=local-path-provisioner
@@ -89,7 +89,7 @@
         - name: Start the local path provisioner
           kubernetes.core.k8s_scale:
             api_version: apps/v1
-            context: "{{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+            context: "{{ minikube_test__profile }}"
             kind: Deployment
             name: local-path-provisioner
             namespace: local-path-storage
@@ -98,5 +98,5 @@
 - name: Apply kustomization
   kubernetes.core.k8s:
     apply: true
-    context: "{{ kubernetes_core_k8s__context | default(minikube_test__test_name) }}"
+    context: "{{ minikube_test__profile }}"
     definition: "{{ lookup('kubernetes.core.kustomize', dir=minikube_test__test_dir) }}"

@@ -237,6 +237,17 @@ format:
     just --unstable --fmt -f justfile
     pnpm exec prettier --no-error-on-unmatched-pattern --log-level warn --write '**/*.md' '**/*.yml' '**/*.yaml' '**/*.json' '**/*.mjs'
 
+# Check GitHub workflow files with actionlint.
+[group('lint')]
+actionlint-lint:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    find .github/workflows -type f \( -name "*.yml" -o -name "*.yaml" \) -print | while read -r file; do
+        echo -n "Running \`actionlint\` on ${file}..."
+        actionlint ${file}
+        echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
+    done
+
 # Check Ansible plays, roles, and configuration.
 [group('lint')]
 ansible-lint:
@@ -296,7 +307,7 @@ shellcheck-lint:
 
 # Run all linters.
 [group('lint')]
-lint: ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
+lint: actionlint-lint ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
 
 # Run the Kairos Fedora end-to-end test for startup and installation.
 [group('test')]
