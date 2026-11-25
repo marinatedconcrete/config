@@ -36,10 +36,11 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # The runner can load an AppArmor profile for a program that a test
-      # runs. The profile then applies in the privileged test containers and
-      # blocks the program. Remove these profiles.
+      # The runner can load an AppArmor profile for Mosquitto. The profile
+      # then applies in the privileged test containers and blocks the
+      # program. Only the Mosquitto test needs this step.
       - name: Remove Host AppArmor Profiles
+        if: matrix.kustomization-test == 'mosquitto'
         run: |
           if [[ -f /etc/apparmor.d/mosquitto ]]; then
             sudo apparmor_parser --remove /etc/apparmor.d/mosquitto
