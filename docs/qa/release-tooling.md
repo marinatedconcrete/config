@@ -122,5 +122,4 @@ Do these checks when a change touches the release sequence, `plan.mjs`, or `publ
 - Add tests for the command-line entry check in `plan.mjs` and for the files `publish-cli.mjs` and `recover-cli.mjs`.
 - Add a `just` recipe that runs the release script tests. The README lists `npm test` only.
 - Run source and component release validation on release PRs, before the merge.
-- Limit the write tokens of third-party actions. Auto-merge of third-party patch updates gives the code of these actions access to the write tokens of the workflows, with no human review. See [renovate-presets.md](renovate-presets.md).
 - Fix the exclusion of `ansible/requirements.txt`. The file is in `exclude-paths` for `ansible` in `release-please-config.json`. PR #1052 changed only this file, but the `ansible-collection` 2.0.0 changelog lists it.
