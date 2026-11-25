@@ -74,7 +74,7 @@ Review a change to these workflows with this page also.
 | Source release validation               | `just release-please-validate <path>` | The `ansible`, `renovate`, and `actions/*` packages pass their own checks before release.                                                                                                   | No check runs before the merge. A failure shows only after the release PR merges.                                                                                                              |
 | Component release build                 | `just release-please-build <project>` | A Kustomize component passes its test and builds before release.                                                                                                                            | Same as above.                                                                                                                                                                                 |
 | Release config and manifest consistency | manual                                | Nothing.                                                                                                                                                                                    | No check compares `release-please-config.json` with `.release-please-manifest.json`. No schema check runs. No check compares package paths with the paths in `plan.mjs`.                       |
-| Workflow syntax and logic               | manual                                | Nothing.                                                                                                                                                                                    | No `actionlint` or `yamllint` run. A mistake in a release workflow shows only on a real release.                                                                                               |
+| Workflow syntax                         | `just actionlint-lint`                | The release workflows have no `actionlint` findings, such as a bad key, expression, action input, or `run:` script.                                                                         | The logic of the release sequence. A logic mistake shows only on a real release. `.github/actionlint.yaml` lists the ignored findings.                                                         |
 | End-to-end release                      | manual                                | Nothing.                                                                                                                                                                                    | No test makes a tag, a draft release, or a GHCR tag. The README says that GitHub event delivery and GHCR publication need separate integration checks.                                         |
 
 ## Manual QA
@@ -89,6 +89,7 @@ Do these checks when a change touches the release sequence, `plan.mjs`, or `publ
    npm ci --prefix .github/release --ignore-scripts
    npm test --prefix .github/release
    just shellcheck-lint
+   just actionlint-lint
    just renovate-lint
    just check-format
    ```
@@ -119,7 +120,6 @@ Do these checks when a change touches the release sequence, `plan.mjs`, or `publ
 
 - Add a test for `next-calver-version.sh`. Cover an empty list, a leading zero, a number above 9, and a different prefix.
 - Add a check that each package in `release-please-config.json` has a manifest entry, an existing path, and a supported path in `plan.mjs`.
-- Add a workflow linter, for example `actionlint`, to `just lint`.
 - Add tests for the command-line entry check in `plan.mjs` and for the files `publish-cli.mjs` and `recover-cli.mjs`.
 - Run source and component release validation on release PRs, before the merge.
 - Fix the exclusion of `ansible/requirements.txt`. The file is in `exclude-paths` for `ansible` in `release-please-config.json`. PR #1052 changed only this file, but the `ansible-collection` 2.0.0 changelog lists it.

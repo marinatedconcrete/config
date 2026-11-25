@@ -1,0 +1,16 @@
+# Configuration for actionlint. See
+# https://github.com/rhysd/actionlint/blob/main/docs/config.md.
+self-hosted-runner:
+  # GitHub supplies this hosted runner label, but actionlint 1.7.12 does not
+  # know it. See https://github.com/rhysd/actionlint/issues/682.
+  # Remove this entry when a new actionlint version knows the label.
+  labels:
+    - ubuntu-26.04
+paths:
+  .github/workflows/*.yml:
+    ignore:
+      # GitHub supports the "queue" key in the "concurrency" section, but
+      # actionlint 1.7.12 does not know it. See
+      # https://github.com/rhysd/actionlint/issues/657.
+      # Remove this pattern when a new actionlint version knows the key.
+      - 'unexpected key "queue" for "concurrency" section'
