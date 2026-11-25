@@ -186,8 +186,6 @@ Check that each `BREAKING CHANGE` text tells a consumer what to change.
 
 - `ansible/README.md` is empty, and `galaxy.yml` sets `documentation: lol`.
   The Galaxy page for the collection has no content.
-- The `min_ansible_version` values in the role `meta/main.yml` files disagree with `requires_ansible` in `ansible/meta/runtime.yml`.
-  No check finds this.
 - The `minikube_test` role has no `README.md`.
   The comments in `defaults/main.yml` are the only description of its options.
 - No test runs `longhorn_allow_encrypted_trim`.
