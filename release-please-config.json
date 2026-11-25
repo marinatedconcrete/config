@@ -72,6 +72,11 @@
       "release-type": "simple",
       "tag-separator": "-"
     },
+    "justfile-modules": {
+      "package-name": "justfile-modules",
+      "release-type": "simple",
+      "initial-version": "1.0.0"
+    },
     "kustomization/components/factorio": {
       "package-name": "kustomize-factorio",
       "release-type": "simple"
