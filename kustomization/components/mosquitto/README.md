@@ -2,7 +2,7 @@
 
 [![Current Version](https://img.shields.io/badge/dynamic/json?style=for-the-badge&label=version&query=%24.kustomization%2Fcomponents%2Fmosquitto&url=https%3A%2F%2Fraw.githubusercontent.com%2Fmarinatedconcrete%2Fconfig%2Frefs%2Fheads%2Fmain%2F.release-please-manifest.json)](https://github.com/marinatedconcrete/config/releases?q=%22kustomize-mosquitto%22)
 [![Pod Security Standard: Restricted](https://img.shields.io/badge/pod_security_standard-restricted-green?style=for-the-badge&logo=kubernetes&logoColor=%23326CE5)](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
-[![Priority Class](https://img.shields.io/badge/dynamic/yaml?style=for-the-badge&label=priorityclass&url=https%3A%2F%2Fgithub.com%2Fmarinatedconcrete%2Fconfig%2Fraw%2Frefs%2Fheads%2Fmain%2Fkustomization%2Fcomponents%2Fmosquitto%2Fdeployment.yml&query=%24.spec.template.spec.priorityClassName)](https://github.com/marinatedconcrete/config/tree/main/kustomization/components/priorityclass)
+[![Priority Class](https://img.shields.io/badge/dynamic/yaml?style=for-the-badge&label=priorityclass&url=https%3A%2F%2Fgithub.com%2Fmarinatedconcrete%2Fconfig%2Fraw%2Frefs%2Fheads%2Fmain%2Fkustomization%2Fcomponents%2Fmosquitto%2Fstatefulset.yml&query=%24.spec.template.spec.priorityClassName)](https://github.com/marinatedconcrete/config/tree/main/kustomization/components/priorityclass)
 
 This component installs [Mosquitto](https://mosquitto.org/).
 The container runs as the `mosquitto` user from the [`mosquitto` Docker image](https://github.com/eclipse/mosquitto/tree/master/docker/2.0).
@@ -35,6 +35,17 @@ kind: Kustomization
 resources:
   - https://github.com/marinatedconcrete/config/releases/download/kustomize-mosquitto@v{version}/mosquitto.yml
 ```
+
+# Upgrade from a Deployment
+
+1. Set the replica count of `mosquitto-deployment` to zero.
+2. Wait for the Deployment Pod to terminate.
+3. Keep the existing `mosquitto-data-pvc` claim.
+4. Change custom patches to target the `mosquitto-statefulset` StatefulSet.
+5. Apply the updated manifests.
+6. Remove the old Deployment if it still exists.
+
+Keep the StatefulSet replica count at one. Each replica mounts the same claim.
 
 # Required Secrets
 
@@ -70,8 +81,8 @@ configMapGenerator:
 patches:
   - path: patches/add_custom_config.yml
     target:
-      kind: Deployment
-      name: mosquitto-deployment
+      kind: StatefulSet
+      name: mosquitto-statefulset
 ```
 
 ### `configmap/logging.conf`
@@ -88,7 +99,7 @@ The patch mounts the `ConfigMap` defined above in its place.
 ```yaml
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: this-is-ignored-but-is-required
 spec:
