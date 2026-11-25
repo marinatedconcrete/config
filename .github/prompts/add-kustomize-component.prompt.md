@@ -26,10 +26,8 @@ Copy the structure of a current component. Do not copy from memory.
 - `kustomization/components/paperless`: a `baseline` component with documented exceptions.
 - `kustomization/components/kube-vip-wireguard`: a recent component with its own release package.
   Commit `de1dc7d` added it. Run `git show --stat de1dc7d` to see the files of a new component.
-  Some files in that commit are specific to kube-vip: `justfile`, `renovate.json`, `.devcontainer/devcontainer.json`, and `.github/workflows/codegen-kube-vip.yml`.
+  Some files in that commit are specific to kube-vip: `justfile`, `renovate.json`, `.devcontainer/devcontainer.json`, and its code generation workflow.
   Do not copy these changes for another component.
-  The generic files are the component directory, the test directory, the CI matrix in `.github/workflows/ci.yml`, `release-please-config.json`, `.release-please-manifest.json`, and `renovate/marinatedconcrete.json`.
-  That commit changed `.github/workflows/checks.yml`. This file is now `.github/workflows/ci.yml`.
 
 ## Step 1. Build the component
 
@@ -135,14 +133,8 @@ Run `just test` to run every component test.
 
 ## Step 3. Add the CI matrix entry
 
-Add `{name}` to `jobs.kustomization-test.strategy.matrix.kustomization-test` in `.github/workflows/ci.yml`.
+Add `{name}` to the `kustomization-test` matrix of the CI workflow under `.github/workflows`.
 Add the entry in the place that fits the list. The list is not in strict alphabetical order now.
-The `.github/workflows/release-package.yml` workflow runs the same test before it publishes a release.
-
-GitHub shows each matrix entry as a separate check named `kustomization-test (<entry>)`.
-If branch protection on `main` lists required checks by name, a maintainer must add `kustomization-test ({name})`.
-You cannot change branch protection from a PR.
-Say in the PR description that this manual update may be necessary.
 
 ## Step 4. Write the documentation
 
@@ -179,7 +171,6 @@ Keep the sort order that each file has now. In `.release-please-manifest.json`, 
    ```
 
    The key is the component path. The package name is `kustomize-` plus `{name}`.
-   The tag is then `kustomize-{name}@v<version>`.
 
 2. `.release-please-manifest.json`: add `"kustomization/components/{name}": "0.0.0"`.
    With `initial-version` set to `1.0.0`, the first `feat` commit makes release `1.0.0`.
@@ -194,17 +185,14 @@ Keep the sort order that each file has now. In `.release-please-manifest.json`, 
    }
    ```
 
-Do not edit `CHANGELOG.md` files or version numbers by hand.
-Release Please owns them.
+For the release mechanics, see [docs/qa/release-tooling.md](../../docs/qa/release-tooling.md).
 
 ## Step 6. Add the Renovate rules
 
 Renovate updates the `newTag` values in `images` of `kustomization.yml`.
-It reads `tag@sha256:digest`, so it updates the tag and the digest together.
-The rules in `renovate.json` decide how updates merge.
+For the rules and the auto-merge behavior, see [docs/qa/renovate-presets.md](../../docs/qa/renovate-presets.md).
 
-1. Patch updates already auto-merge after 3 days through the "Auto-merge all patch updates" rule.
-2. For a component whose minor updates are also safe, add a rule like the `mosquitto` rule:
+1. For a component whose minor updates are also safe, add a rule like the `mosquitto` rule to `renovate.json`:
 
    ```json
    {
@@ -221,14 +209,8 @@ The rules in `renovate.json` decide how updates merge.
    Add the rule next to the other component rules.
    Skip it if a person must review minor updates.
 
-3. To keep an image on one release line, add an `allowedVersions` rule, like the `mongo` rule for `unifi-network-application`.
-4. The rule "Require manual review for registries without release timestamps" disables auto-merge for `ghcr.io`, `quay.io`, `registry.k8s.io`, and `lscr.io` images.
-   This rule comes after the component rules, so it overrides them. Read the order of the rules in `renovate.json` before you expect an auto-merge for these registries.
-5. Renovate commits use the `package` scope, set by `:semanticCommitScope(package)`.
-   Do not add a different scope rule.
-   Renovate uses `feat` for minor updates and `feat(package)!` for major updates.
-   Files under `tests/` use the `test` type, so they do not make a release.
-6. If you add a `# renovate:` comment for a version outside `images`, check that a `customManagers` entry in `renovate.json` matches it.
+2. To keep an image on one release line, add an `allowedVersions` rule, like the `mongo` rule for `unifi-network-application`.
+3. If you add a `# renovate:` comment for a version outside `images`, check that a `customManagers` entry in `renovate.json` matches it.
    Do not add a second source of the same version.
 
 ## Step 7. Verify
@@ -247,44 +229,36 @@ just check-format
 just lint
 ```
 
-- `just kustomize-lint` builds every component. It needs `kustomize`.
-- `just renovate-lint` validates `renovate.json` and the files in `renovate/`. It needs `pnpm install --frozen-lockfile`.
 - `just kustomization-test {name}` needs `minikube` and Docker.
   `just kustomization-test` and `just test` start and delete minikube profiles. The handlers of the `minikube_test` role run `minikube stop` and `minikube delete`.
   Run them in the devcontainer or on a machine that has no profile with the same name.
 - `just lint` also runs `ansible-lint` and needs `minikube`. Run the parts that you can.
-- Check all new prose against ASD-STE100. `just check-format` does not check it.
+- Check all new prose against the writing rules in `AGENTS.md`. `just check-format` does not check them.
 - Check that `git status` shows no stray files, for example a built manifest.
 
 ## Step 8. Commit and open the PR
 
 1. Make a branch. Do not commit to `main`.
-2. Use Conventional Commits. Sign the commits when possible.
-   - A new component: `feat({name}): add the {name} component`.
-   - A breaking change to a released component: `feat({name})!: ...`. Put `!` immediately before the colon. Add a `BREAKING CHANGE:` footer as the last paragraph of the PR description.
-   - A fix: `fix({name}): ...`.
-   - Documentation only: `docs({name}): ...`.
-   - Test only: `test({name}): ...`. Renovate uses the same `test` type for test files.
-     Use the component name as the scope.
-     The changelog sections are `feat`, `fix`, `docs`, `build`, and `chore`.
-3. Put the reasons, and each Pod Security exception, in the PR description. The repository allows only squash merge. The PR title and the PR description become the commit on `main`, and the text in the branch commits is discarded.
-4. Run `just format` before each commit.
-5. Open the PR. Use a Conventional Commit title, because `.github/workflows/semantic-commits.yml` checks it.
-6. Add "Part of #1076" to the PR description only if the work is part of that issue.
+2. Follow the commit rules in `AGENTS.md`. Use the component name `{name}` as the scope.
+   A new component uses `feat({name}): add the {name} component`.
+   For a breaking change, follow `.github/pull_request_template.md`.
+3. Put the reasons, and each Pod Security exception, in the PR description. The PR title and the PR description become the commit on `main`.
+4. Open the PR with a title that follows `AGENTS.md`.
+5. Add "Part of #1076" to the PR description only if the work is part of that issue.
    Do not use "Fixes" or "Closes" for #1076.
-7. After review, add new commits. Do not squash or amend a reviewed commit.
-8. Do not edit a version number, a `CHANGELOG.md` file, or a tag. Release Please does that after the merge.
+6. After review, add new commits. Do not squash or amend a reviewed commit.
+7. Do not edit a version number, a `CHANGELOG.md` file, or a tag. Release Please does that after the merge.
 
 ### A finished PR contains
 
 - `kustomization/components/{name}/` with `kustomization.yml`, the manifests, and `README.md`.
 - `kustomization/tests/{name}/` with `test.yml`, `kustomization.yml`, and `namespace.yml`.
-- One new line in the matrix of `.github/workflows/ci.yml`.
+- One new entry in the `kustomization-test` matrix of the CI workflow.
 - One new package in `release-please-config.json` and one new line in `.release-please-manifest.json`.
 - One new group rule in `renovate/marinatedconcrete.json`.
 - A Renovate auto-merge rule in `renovate.json`, if the component needs one.
-- A PR description that lists the verification results, each exception to `restricted`, and the possible manual update of the required checks.
+- A PR description that lists the verification results, and each exception to `restricted`.
 
 Put all of these changes in one `feat({name})` commit. This is the established practice.
 A new component also causes a release of the Renovate preset, because `renovate/marinatedconcrete.json` changes.
-See `renovate/CHANGELOG.md` version 2.9.0 and `kube-vip-wireguard` in #1010.
+See `kube-vip-wireguard` in #1010.
