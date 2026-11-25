@@ -13,11 +13,10 @@ This page covers two groups of files.
 - `renovate.json` in the repository root. This file is the Renovate configuration for this repository.
   It is not a shared preset. It extends the three presets.
 
-The `renovate` path is one release-please package, `renovate-config`.
-The tag format is `renovate-config-<version>`.
+The `renovate` path is one release package, `renovate-config`. See [release tooling](release-tooling.md).
 A change in `renovate/` can make a release. A change in the root `renovate.json` does not make a release.
 
-The root `renovate.json` pins the three presets to a released tag, for example `renovate-config-2.9.0`.
+The root `renovate.json` pins the three presets to a released tag.
 A change in `renovate/` has no effect on this repository until the release is made.
 After the release, a Renovate pull request updates the tag.
 The `marinatedconcrete` preset has a custom manager that updates these tags.
@@ -49,7 +48,7 @@ The `marinatedconcrete` preset has a custom manager that updates these tags.
 - Check the auto-merge rules. Auto-merge must stay limited to updates that the repository has found safe.
   The description of one rule in `renovate.json` says that third-party GitHub Actions must not auto-merge, because the image workflows give them write tokens.
   That text only describes the rule. The rule for `actions/*` is the only rule that names GitHub Actions.
-  The global patch rule has no manager filter, so it auto-merges patch updates of third-party GitHub Actions. See Known gaps.
+  See Known gaps for the global patch rule.
 - Check that an auto-merge rule has a `minimumReleaseAge`, unless the rule has a reason for no age.
   The devcontainer-base rule sets `minimumReleaseAge` to `null` and gives its reason.
 - Check that the default for a registry without release timestamps is `automerge` set to `false`.
@@ -60,42 +59,38 @@ The `marinatedconcrete` preset has a custom manager that updates these tags.
 
 ### Commit type and scope
 
-- Renovate commit titles must pass the Conventional Commits check. Check the `semanticCommitType` and `semanticCommitScope` values.
-- Major updates use `feat(package)!`. Minor updates use `feat(package)`. Updates to test files use `test`, so that release-please does not make a release.
+Commit and pull request title rules are in [AGENTS.md](../../AGENTS.md).
+These points are specific to Renovate.
+
+- Check the `semanticCommitType` and `semanticCommitScope` values.
+- Major updates use `feat(package)!`. Minor updates use `feat(package)`. Updates to test files use `test`, so that no release is made.
   Renovate has no separate setting for the `!` marker. The major update rule in `renovate.json` adds it to the `semanticCommitType` string.
-- A repository change to Renovate behavior uses the `renovate` scope, for example `feat(renovate): ...` or `fix(renovate): ...`.
+- A repository change to Renovate behavior uses the `renovate` scope.
   Use `feat` or `fix` when the change must make a release of `renovate-config`.
   The types `docs`, `build`, and `chore` also make a release when they change a file in a package path.
-  The release-please changelog sections list `feat`, `fix`, `docs`, `build`, and `chore`.
-  A type that the sections do not list, such as `test` or `ci`, does not make a release.
-- A change that removes or renames a preset file, or removes behavior that a consumer uses, is a breaking change. Use `!` in the commit type.
+  The types `test` and `ci` do not make a release.
+- A change that removes or renames a preset file, or removes behavior that a consumer uses, is a breaking change.
+  See [the pull request template](../../.github/pull_request_template.md) for how to mark it.
 
 ### Documentation and prose
 
-- Check that the prose follows ASD-STE100, as `AGENTS.md` requires. This applies to the `description` fields and to the `README.md` file.
+- Check that the prose follows [AGENTS.md](../../AGENTS.md). This applies to the `description` fields and to the `README.md` file.
 - Check that a version tag in a `README.md` example is not far behind the latest release. See Known gaps.
 
 ### Evidence in the pull request
 
 - A change in update behavior needs more proof than the validator gives. See Manual QA.
-  The pull request that changed commit types (#1014) is a good example. It showed a dry run and the resulting titles.
+  Pull request #1014 is a good example. It showed a dry run and the resulting titles.
 
 ## Automated validation coverage
 
-The table lists each check that applies to this part.
-Required in branch protection comes from `gh api repos/marinatedconcrete/config/branches/main/protection`.
-The required checks are `lint`, `check-format`, `build`, and six `kustomization-test` jobs.
-Branch protection also requires one approving review. Admins can bypass it because `enforce_admins` is false.
-
-| Check                          | What it proves                                                                                                                                                           | Where it runs                                                                                                                                                                                          | Required in branch protection                            | Gap                                                                                                                                                                               |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Renovate configuration check   | Each file in `renovate/*.json` and `renovate.json` passes `renovate-config-validator`. It finds unknown options, wrong value types, and bad regular expression managers. | `just renovate-lint`, called by `just lint`. CI job `lint` in `.github/workflows/ci.yml`. Also `just release-please-validate renovate` in the `source` job of `.github/workflows/release-package.yml`. | Yes (`lint`)                                             | The check does not show that a rule matches a real dependency or that a custom manager finds a real version. The check accepts a malformed `extends` preset name. See Known gaps. |
-| Format check                   | Prettier accepts the format of the JSON and Markdown files.                                                                                                              | `just check-format`. CI job `check-format` in `.github/workflows/ci.yml`.                                                                                                                              | Yes (`check-format`)                                     | A format check does not show ASD-STE100 compliance, as `AGENTS.md` says. No check covers the wording.                                                                             |
-| Devcontainer image build       | The devcontainer image builds. The `lint` job runs in this image, so the validator runs with the locked Renovate version.                                                | CI job `build` in `.github/workflows/ci.yml`.                                                                                                                                                          | Yes (`build`)                                            | None for this part.                                                                                                                                                               |
-| Pull request title check       | The pull request title is a Conventional Commit title.                                                                                                                   | CI job `Validate PR title` in `.github/workflows/semantic-commits.yml`. No just recipe.                                                                                                                | No                                                       | The check is not required. The title controls the release type, so a bad title can make a wrong release.                                                                          |
-| Release validation             | The `renovate` package passes `just renovate-lint` before the tag and the release are made.                                                                              | `just release-please-validate renovate`. CI job `source` in `.github/workflows/release-package.yml`.                                                                                                   | Not applicable (runs after merge, not on a pull request) | The check repeats the validator. It adds no behavior test.                                                                                                                        |
-| Renovate on this repository    | Renovate reads the root `renovate.json` and the released presets and makes pull requests.                                                                                | The hosted Renovate app. No just recipe and no job in this repository.                                                                                                                                 | No                                                       | Renovate shows a problem only after merge, when it opens or fails to open a pull request. A configuration error can be silent.                                                    |
-| Behavior of rules and managers | Nothing.                                                                                                                                                                 | None.                                                                                                                                                                                                  | No                                                       | No test shows what Renovate does with a rule. No test shows that a custom manager matches a real file. No test shows the commit titles.                                           |
+| What is validated                            | How to run                               | What it proves                                                                                                                                                           | What it does not prove                                                                                                                    |
+| -------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Renovate configuration                       | `just renovate-lint`                     | Each file in `renovate/*.json` and `renovate.json` passes `renovate-config-validator`. It finds unknown options, wrong value types, and bad regular expression managers. | That a rule matches a real dependency. That a custom manager finds a real version. The check accepts a malformed `extends` preset name.   |
+| Format of JSON and Markdown files            | `just check-format`                      | Prettier accepts the format.                                                                                                                                             | ASD-STE100 compliance. No check covers the wording.                                                                                       |
+| Release validation of the `renovate` package | `just release-please-validate renovate`  | The package passes `just renovate-lint` before the tag and the release are made.                                                                                         | Any behavior. The check repeats the validator. It runs after merge, not on a pull request.                                                |
+| Renovate on this repository                  | Manual. The hosted Renovate app runs it. | Renovate reads the root `renovate.json` and the released presets and makes pull requests.                                                                                | A problem before merge. Renovate shows a problem only when it opens or fails to open a pull request. A configuration error can be silent. |
+| Behavior of rules and managers               | Manual. See Manual QA.                   | Nothing is automated.                                                                                                                                                    | What Renovate does with a rule. That a custom manager matches a real file. The commit titles.                                             |
 
 ## Manual QA
 
@@ -111,7 +106,6 @@ A person must check the behavior of the configuration, because no job does.
 3. For a rule or a manager change, run a real Renovate dry run against a fork or a branch.
    Use `--platform=github --dry-run=full` and compare the branches and titles before and after the change.
    Never omit `--dry-run=full`. Without it, Renovate creates real branches and pull requests.
-   The pull request for #1014 did this and listed the titles that changed.
 4. For a custom manager, check that its regular expression matches the target file.
    Search the file for the `# renovate:` comment form that the expression needs.
    Check the dry run output for the dependency the manager must find.
@@ -119,21 +113,19 @@ A person must check the behavior of the configuration, because no job does.
    Confirm that the preset file name and the `extends` string in the README are the same.
 6. For a release, check that the release pull request for `renovate-config` has the expected version.
    After the release, check that the Renovate pull request that updates the tag in `renovate.json` passes the checks.
-7. For a commit type change, read the new title that Renovate makes and run it through the Conventional Commits check.
+7. For a commit type change, read the new title that Renovate makes and compare it with the rules in [AGENTS.md](../../AGENTS.md).
    Renovate can pick the wrong type when one branch has a major update and a minor update.
-   The note in #1014 says the `!` marker can be lost in that case.
+   The `!` marker can be lost in that case.
 
 ## Known gaps
 
 - No test checks what a rule or a custom manager does. A mistake in a regular expression passes the validator and has no effect.
   An issue can add a Renovate dry run or a fixture test.
 - The validator accepts a malformed preset name in `extends`. A check that the tags in `renovate.json` exist as releases is missing.
-- The `Validate PR title` check is not a required check. A bad title can make a wrong release or no release.
-- `renovate/README.md` shows version `2.0.0` in its examples. The latest release is `2.9.0`.
-  The text says the examples include a version tag, but a reader can copy an old version.
+- `renovate/README.md` shows an old version in its examples. The text says the examples include a version tag, but a reader can copy an old version.
 - `renovate/marinatedconcrete.json` has a group for each released component, but none for `kustomize-pod-security`.
   `kustomization/components/pod-security` is a release-please package. The preset does not group its releases.
   This is a possible omission. It is not confirmed as a defect.
-- A major and a minor update in one branch can lose the `!` marker in the commit title. This is a known note from #1014.
+- A major and a minor update in one branch can lose the `!` marker in the commit title. See Manual QA.
 - The global patch rule in `renovate.json` has no manager filter. It auto-merges patch updates of third-party GitHub Actions as a branch merge, with no pull request.
   The text of the `actions/*` rule says that third-party actions must not auto-merge. The rule does not enforce this text. Commit `c0dadc7` is an example.
