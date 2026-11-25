@@ -5,6 +5,10 @@ Automated reviewers and human reviewers can use it.
 Read the pull request diff before you apply the checklist.
 Read [AGENTS.md](../../AGENTS.md) for the repository rules.
 
+Some pages in `docs/qa/` can be missing.
+If a linked page does not exist, read the configuration and the workflows in the repository.
+Write in the review that the page is missing.
+
 ## Output
 
 Write a review that a maintainer can act on.
@@ -84,6 +88,8 @@ Judge the effect on the consumer, not the size of the diff.
 Each part has its own version, tag, and consumers.
 The QA page for each part in [docs/qa/](../../docs/qa/) lists what is breaking and what is not for that part.
 Read the page for each part that the change touches.
+If the page does not exist, use the README of the part and its changelog to decide.
+Write in the review that you used them instead of the page.
 A change outside the paths that Release Please releases causes no release.
 A `!` on such a change has no release effect.
 
