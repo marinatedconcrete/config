@@ -6,6 +6,11 @@ The check reads the working tree. It does not read the index or the revisions th
 The hook does not find these command forms: `git merge`, `git rebase`, `git cherry-pick`,
 `gh pr merge`, git and jj aliases, commands that a variable or `eval` builds,
 backtick substitution, and a substitution inside double quotes.
+
+The hook ignores the text of here-document bodies (`<<` and `<<-`).
+When the delimiter has no quotes, the hook keeps the `$(...)` and backtick substitutions of the body.
+The hook does not find a command in the lines after a `<<` in arithmetic, such as `$((1 << 2))`,
+because it reads that `<<` as a here-document. It ignores here-documents inside backticks.
 """
 
 import json
@@ -24,14 +29,133 @@ GIT_FLAGS = {"--no-pager", "-P", "--no-optional-locks"}
 GIT_OPTIONS_WITH_VALUE = {"-c", "--git-dir", "--work-tree"}
 JJ_FLAGS = {"--no-pager", "--ignore-working-copy"}
 JJ_OPTIONS_WITH_VALUE = {"--color", "--config", "--at-op", "--at-operation"}
+HEREDOC_WORD_END = set(" \t\n;&|()<>")
 CHECK_TIMEOUT_SECONDS = 100
 ADVICE = "To check the format, run `just check-format` in the devcontainer."
+
+
+def read_heredoc_operator(text, i):
+    """Read the `<<` operator at `text[i]` and its delimiter word.
+
+    Return the here-document as (delimiter, strip_tabs, quoted), or None, and the index after the word.
+    """
+    j = i + 2
+    strip_tabs = text.startswith("-", j)
+    j += strip_tabs
+    while j < len(text) and text[j] in " \t":
+        j += 1
+    word, quoted = [], False
+    while j < len(text) and text[j] not in HEREDOC_WORD_END:
+        if text[j] == "\\":
+            quoted = True
+            word.append(text[j + 1 : j + 2])
+            j += 2
+        elif text[j] in "'\"":
+            end = text.find(text[j], j + 1)
+            end = len(text) if end < 0 else end
+            quoted = True
+            word.append(text[j + 1 : end])
+            j = end + 1
+        else:
+            word.append(text[j])
+            j += 1
+    if not word:
+        return None, j
+    return ("".join(word), strip_tabs, quoted), j
+
+
+def substitutions(body):
+    """Return the `$(...)` and backtick spans in a body, each in the `$(...)` form."""
+    spans = []
+    i = 0
+    while i < len(body):
+        if body.startswith("$(", i):
+            depth, j = 1, i + 2
+            while j < len(body) and depth:
+                depth += {"(": 1, ")": -1}.get(body[j], 0)
+                j += 1
+            spans.append(body[i:j])
+            i = j
+        elif body[i] == "`":
+            end = body.find("`", i + 1)
+            end = len(body) if end < 0 else end
+            spans.append(f"$({body[i + 1 : end]})")
+            i = end + 1
+        else:
+            i += 2 if body[i] == "\\" else 1
+    return spans
+
+
+def skip_bodies(text, i, heredocs, out):
+    """Skip the here-document bodies that start at `text[i]`. Return the index after them.
+
+    The shell expands substitutions in a body only when the delimiter has no quotes.
+    """
+    for delimiter, strip_tabs, quoted in heredocs:
+        body = []
+        while i < len(text):
+            end = text.find("\n", i)
+            end = len(text) if end < 0 else end
+            line = text[i:end]
+            i = end + 1
+            if (line.lstrip("\t") if strip_tabs else line) == delimiter:
+                break
+            body.append(line)
+        if not quoted:
+            out.extend(f"{span}\n" for span in substitutions("\n".join(body)))
+    return min(i, len(text))
+
+
+def strip_heredocs(text):
+    """Return the command line without the text of its here-document bodies."""
+    out = []
+    # Each item is "dq" (in double quotes), "sub" (in `$(`), or "paren" (in `(`).
+    stack = []
+    heredocs = []
+    i = 0
+    while i < len(text):
+        c = text[i]
+        step = 1
+        if c == "\\":
+            step = 2
+        elif text.startswith("$(", i):
+            stack.append("sub")
+            step = 2
+        elif stack[-1:] == ["dq"]:
+            if c == '"':
+                stack.pop()
+        elif c == "'":
+            end = text.find("'", i + 1)
+            step = (len(text) if end < 0 else end + 1) - i
+        elif c == '"':
+            stack.append("dq")
+        elif c == "(":
+            stack.append("paren")
+        elif c == ")" and stack:
+            stack.pop()
+        elif text.startswith("<<<", i):
+            step = 3
+        elif text.startswith("<<", i):
+            heredoc, end = read_heredoc_operator(text, i)
+            if heredoc is not None:
+                heredocs.append(heredoc)
+            step = end - i
+        elif c == "\n" and heredocs:
+            out.append(c)
+            i = skip_bodies(text, i + 1, heredocs, out)
+            heredocs = []
+            continue
+        out.append(text[i : i + step])
+        i += step
+    return "".join(out)
 
 
 def segments(command_line):
     """Split a shell command line into simple commands, as lists of words."""
     lexer = shlex.shlex(
-        command_line.replace("\\\n", " "), posix=True, punctuation_chars=";&|()\n"
+        strip_heredocs(command_line).replace("\\\n", " "),
+        posix=True,
+        punctuation_chars=";&|()\n",
     )
     lexer.whitespace = " \t\r"
     lexer.whitespace_split = True

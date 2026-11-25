@@ -162,6 +162,25 @@ class HookTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("The format hook failed", result.stderr)
 
+    def test_heredocs(self):
+        cases = [
+            ("cat <<'EOF'\ngit commit -m x\nEOF\n", 0),
+            ("cat <<'EOF'\ngit commit -m x\nEOF\ngit commit -m y", 2),
+            ("git commit -m \"$(cat <<'EOF'\nIt's a \"message\".\nEOF\n)\"", 2),
+            ("cat <<EOF\n$(git commit -m x)\nEOF\n", 2),
+            ("cat <<-\"EOF\"\n\tgit commit -m x\n\tEOF\ngit push", 2),
+            ("cat <<-\"EOF\"\n\tgit commit -m x\n\tEOF\n", 0),
+            ("cat <<A <<\\B\ngit push\nA\ngit push\nB\n", 0),
+            ("cat <<'EOF'\ngit commit -m x", 0),
+        ]
+        for command_line, status in cases:
+            with self.subTest(command_line):
+                result = self.run_hook(command_line)
+                self.assertEqual(result.returncode, status, result.stderr)
+                self.assertEqual(os.path.exists(self.just_log), status == 2)
+                if status == 0:
+                    self.assertEqual((result.stdout, result.stderr), ("", ""))
+
     def test_checks_repository_from_cwd(self):
         result = self.run_hook("git commit -m x", cwd=os.path.join(self.repo, "sub"))
         self.assertEqual(result.returncode, 2, result.stderr)
