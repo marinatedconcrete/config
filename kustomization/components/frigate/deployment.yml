@@ -1,0 +1,67 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frigate-deployment
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: frigate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: frigate
+    spec:
+      automountServiceAccountToken: false
+      priorityClassName: application
+      containers:
+        - name: frigate
+          image: ghcr.io/blakeblackshear/frigate
+          ports:
+            - name: https
+              containerPort: 8971
+          readinessProbe:
+            exec:
+              command:
+                - curl
+                - --fail
+                - --silent
+                - http://127.0.0.1:5000/api/version
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            # s6-overlay starts as root and sets the user IDs of its services.
+            runAsUser: 0
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: media
+              mountPath: /media/frigate
+            - name: shm
+              mountPath: /dev/shm
+            - name: cache
+              mountPath: /tmp/cache
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: frigate-config
+        - name: media
+          persistentVolumeClaim:
+            claimName: frigate-media
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 256Mi
+        - name: cache
+          emptyDir:
+            sizeLimit: 2Gi

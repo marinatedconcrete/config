@@ -76,6 +76,11 @@
       "package-name": "kustomize-factorio",
       "release-type": "simple"
     },
+    "kustomization/components/frigate": {
+      "initial-version": "1.0.0",
+      "package-name": "kustomize-frigate",
+      "release-type": "simple"
+    },
     "kustomization/components/kube-vip": {
       "package-name": "kustomize-kube-vip",
       "release-type": "simple"

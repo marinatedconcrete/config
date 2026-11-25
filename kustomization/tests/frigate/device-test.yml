@@ -1,0 +1,24 @@
+---
+- name: Check the device request in the Frigate Deployment
+  gather_facts: false
+  hosts: localhost
+  tasks:
+    - name: Build the Frigate device manifests
+      ansible.builtin.command:
+        argv:
+          - kustomize
+          - build
+          - "{{ playbook_dir }}/../frigate-{{ frigate_test_variant }}"
+      changed_when: false
+      register: frigate_build
+    - name: Check the device limit and VA-API driver
+      ansible.builtin.assert:
+        that:
+          - frigate_container.resources.limits[frigate_test_device] | int == 1
+          - frigate_drivers == ([frigate_test_driver] if frigate_test_driver else [])
+      vars:
+        frigate_deployment: "{{ frigate_build.stdout | from_yaml_all | selectattr('kind', 'equalto', 'Deployment') | first }}"
+        frigate_container: "{{ frigate_deployment.spec.template.spec.containers | first }}"
+        frigate_drivers: >-
+          {{ frigate_container.env | default([]) |
+          selectattr('name', 'equalto', 'LIBVA_DRIVER_NAME') | map(attribute='value') | list }}

@@ -1,0 +1,38 @@
+---
+- name: Frigate Tests
+  gather_facts: false
+  hosts: localhost
+  roles:
+    - role: marinatedconcrete.config.minikube_test
+      vars:
+        minikube_test__enable_local_path_storage: true
+        minikube_test__test_dir: kustomization/tests/frigate
+  tasks:
+    - name: Wait for deployment
+      kubernetes.core.k8s:
+        api_version: apps/v1
+        context: "{{ kubernetes_core_k8s__context }}"
+        kind: Deployment
+        name: frigate-deployment
+        namespace: "{{ test_namespace }}"
+        state: present
+        wait: true
+        wait_timeout: 300
+      changed_when: false
+    - name: Check that the Service routes to a ready Frigate pod
+      kubernetes.core.k8s_info:
+        api_version: discovery.k8s.io/v1
+        context: "{{ kubernetes_core_k8s__context }}"
+        kind: EndpointSlice
+        label_selectors:
+          - kubernetes.io/service-name=frigate-svc
+        namespace: "{{ test_namespace }}"
+      register: frigate_endpoints
+      until: >-
+        frigate_endpoints.resources | map(attribute='endpoints') | flatten |
+        selectattr('conditions.ready', 'equalto', true) | list | length > 0
+      retries: 10
+      delay: 3
+  vars:
+    kubernetes_core_k8s__context: frigate
+    test_namespace: "{{ (lookup('file', 'kustomization.yml') | from_yaml).namespace }}"
