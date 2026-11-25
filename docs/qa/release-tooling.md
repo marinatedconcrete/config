@@ -9,9 +9,8 @@ Use it to review a change to any of these files:
 - `.github/scripts/next-calver-version.sh`. This script gives the next CalVer version for the `devcontainer-base` image.
 - `release-please-config.json` and `.release-please-manifest.json`. These files list each released package and its current version.
 
-The release workflows call these files.
-Review a change to `.github/workflows/release-please.yml` and `.github/workflows/release-package.yml` with this page also.
-The `release-please-build` and `release-please-validate` recipes in `justfile` are part of the same flow.
+The release workflows in `.github/workflows` call these files.
+Review a change to these workflows with this page also.
 
 ## Review checklist
 
@@ -20,8 +19,8 @@ The `release-please-build` and `release-please-validate` recipes in `justfile` a
 - Each path in `packages` in `release-please-config.json` has an entry in `.release-please-manifest.json`. Each path exists in the repository.
 - Do not edit a version in `.release-please-manifest.json` by hand. Release Please changes it in a release PR. One exception applies. To register a new package, a person adds a line with the value `0.0.0` to this file and a matching entry to `release-please-config.json`.
 - A new image package sets `include-v-in-tag` to `false` and `tag-separator` to `-`. Compare it with `images/kairos-fedora`.
-- A new package path must also fit `plan.mjs`. That script accepts only `kustomization/components/*`, `actions/*`, `ansible`, `renovate`, and four named images. Other paths fail at release time with `Unsupported release path`. Update `plan.mjs`, its tests, and `release-package.yml` in the same PR.
-- A new image needs its own job in `.github/workflows/release-package.yml`. A new component needs a test in `kustomization/tests/` and an entry in the `kustomization-test` matrix in `.github/workflows/ci.yml`.
+- A new package path must also fit `plan.mjs`. That script accepts only `kustomization/components/*`, `actions/*`, `ansible`, `renovate`, and four named images. Other paths fail at release time with `Unsupported release path`. Update `plan.mjs`, its tests, and the release package workflow in the same PR.
+- A new image needs its own job in the release package workflow. A new component needs a test in `kustomization/tests/` and an entry in the CI test matrix.
 - A new source package needs a case in the `release-please-validate` recipe in `justfile`.
 - Keep past changelog entries unchanged. Do not change `changelog-sections` without a reason.
 
@@ -32,7 +31,7 @@ The `release-please-build` and `release-please-validate` recipes in `justfile` a
 - Publisher changes keep compatibility with existing validation records. An incompatible record must stop publication before any write.
 - A new behavior has a test in the matching `*.test.mjs` file. The tests use simulated GitHub API responses. Do not add a test that calls the real GitHub API or GHCR.
 - A change to the release sequence, recovery, or package validation updates `.github/release/README.md` in the same PR.
-- Keep release scripts as `.mjs` files in `.github/release/`. The Prettier globs in `justfile` cover every `.md`, `.yml`, `.yaml`, `.json`, and `.mjs` file, including nested files.
+- Keep release scripts as `.mjs` files in `.github/release/`.
 - A change to workflow concurrency keeps `cancel-in-progress: false` for release runs. An active release run must not be canceled.
 
 ### Security
@@ -47,40 +46,35 @@ The `release-please-build` and `release-please-validate` recipes in `justfile` a
 
 - `.github/scripts/next-calver-version.sh` passes `shellcheck`.
 - The script reads tag names from standard input and prints one version. It does not call the network.
-- Update the comment at the top of the script when the version format changes. Check the caller in `.github/workflows/image-devcontainer-base.yml` also.
+- Update the comment at the top of the script when the version format changes. Check the caller workflow for the `devcontainer-base` image also.
 
 ### Renovate behavior
 
-- `release-please` in `.github/release/package.json` has an exact version. Renovate updates it with a `fix(package)` commit for a patch update, a `feat(package)` commit for a minor update, and a `feat(package)!` commit for a major update. Renovate merges a patch update without a PR when its checks pass. A person must make sure that the release script tests pass before a minor or major update merges. The `release-automation-test` job is not a required check.
-- Renovate auto-merges digest, minor, and patch updates of `actions/*`. The global patch rule also auto-merges patch updates of third-party actions, as a branch merge with no PR. A person must merge a minor or major update of a third-party action.
+- Renovate rules and auto-merge behavior are in [renovate-presets.md](renovate-presets.md).
+- `release-please` in `.github/release/package.json` has an exact version. A minor or major update changes the release tool. Before it merges, a person must make sure that the release script tests pass.
 - Do not edit `package-lock.json` by hand. Use `npm install --prefix .github/release --package-lock-only --ignore-scripts`.
 
 ### Commit type and scope
 
-- The PR title uses a Conventional Commits header. The `Validate PR title` job checks it.
-- These paths are not release packages, so a change to them does not make a release by itself. Past changes use `fix:` for a defect in the release flow and `feat:` for new release behavior, with no scope. Example: `fix: validate source releases with only their own checks`.
-- Use the scope `package` only for Renovate dependency updates.
-- Add `!` only for a breaking change to a released package.
+- Commit and PR title rules are in [AGENTS.md](../../AGENTS.md). The way to mark a breaking change is in [pull_request_template.md](../../.github/pull_request_template.md).
+- These paths are not release packages, so a change to them does not make a release by itself. Past changes use `fix:` for a defect in the release flow and `feat:` for new release behavior, with no scope.
+- A breaking change is a change to a released package only.
 
 ## Automated validation coverage
 
-The "Required" column comes from `gh api repos/marinatedconcrete/config/branches/main/protection`, which is read-only.
-At the time of writing, the required checks are `lint`, `check-format`, `build`, and six `kustomization-test` entries.
-The `release-automation-test` job is not required.
-
-| Check                                           | What it proves                                                                                                                         | Where it runs                                                                       | Required in branch protection                      | Gap                                                                                                                                                                                                                  |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Release script tests (`node --test *.test.mjs`) | Release planning, publication, recovery, and image digest checks work with simulated GitHub API responses. 58 tests passed locally.    | `npm test --prefix .github/release`. CI job `release-automation-test` in `ci.yml`.  | No                                                 | A failure does not block a merge. `plan.test.mjs` tests `plan.mjs`. No test covers the command-line entry check in `plan.mjs` or the files `publish-cli.mjs` and `recover-cli.mjs`. No `just` recipe runs the tests. |
-| ShellCheck on `next-calver-version.sh`          | The script has no ShellCheck findings.                                                                                                 | `just shellcheck-lint`, run by `just lint`. CI job `lint`.                          | Yes                                                | None for syntax.                                                                                                                                                                                                     |
-| Behavior of `next-calver-version.sh`            | Nothing.                                                                                                                               | No check.                                                                           | Not applicable                                     | No test for an empty list, a leading zero, a number above 9, or a different prefix. The `devcontainer-base` workflow runs the script only for schedule and manual runs on `main`.                                    |
-| Prettier format                                 | The `.github/release/*.mjs` files, JSON files, and Markdown files follow the Prettier format. This includes both release-please files. | `just check-format`. CI job `check-format`.                                         | Yes                                                | None known.                                                                                                                                                                                                          |
-| Renovate configuration check                    | `renovate.json` and `renovate/*.json` are valid.                                                                                       | `just renovate-lint`. CI job `lint`.                                                | Yes                                                | The check does not cover `release-please-config.json`.                                                                                                                                                               |
-| PR title check                                  | The PR title follows Conventional Commits.                                                                                             | CI job `Validate PR title` in `semantic-commits.yml`.                               | No                                                 | A merge with a wrong title can give a wrong version bump or no release. The check applies to the PR title only.                                                                                                      |
-| Source release validation                       | The `ansible`, `renovate`, and `actions/*` packages pass their own checks before release.                                              | `just release-please-validate <path>`. CI job `source` in `release-package.yml`.    | Not applicable. It runs after a release PR merges. | No check runs before the merge. A failure shows only after the release PR merges.                                                                                                                                    |
-| Component release build                         | A Kustomize component passes its test and builds before release.                                                                       | `just release-please-build <project>`. CI job `component` in `release-package.yml`. | Not applicable. It runs after a release PR merges. | Same as above.                                                                                                                                                                                                       |
-| Release config and manifest consistency         | Nothing.                                                                                                                               | No check.                                                                           | Not applicable                                     | No check compares `release-please-config.json` with `.release-please-manifest.json`. No schema check runs. No check compares package paths with the paths in `plan.mjs`.                                             |
-| Workflow syntax and logic                       | Nothing.                                                                                                                               | No check.                                                                           | Not applicable                                     | No `actionlint` or `yamllint` run. A mistake in `release-package.yml` shows only on a real release.                                                                                                                  |
-| End-to-end release                              | Nothing.                                                                                                                               | No check.                                                                           | Not applicable                                     | No test makes a tag, a draft release, or a GHCR tag. The README says that GitHub event delivery and GHCR publication need separate integration checks.                                                               |
+| What is validated                       | How to run it                         | What it proves                                                                                                                         | What it does not prove                                                                                                                                                   |
+| --------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Release script tests                    | `npm test --prefix .github/release`   | Release planning, publication, recovery, and image digest checks work with simulated GitHub API responses.                             | `plan.test.mjs` tests `plan.mjs`. No test covers the command-line entry check in `plan.mjs` or the files `publish-cli.mjs` and `recover-cli.mjs`.                        |
+| ShellCheck on `next-calver-version.sh`  | `just shellcheck-lint`                | The script has no ShellCheck findings.                                                                                                 | Behavior of the script. See the next row.                                                                                                                                |
+| Behavior of `next-calver-version.sh`    | manual                                | Nothing.                                                                                                                               | No test for an empty list, a leading zero, a number above 9, or a different prefix.                                                                                      |
+| Prettier format                         | `just check-format`                   | The `.github/release/*.mjs` files, JSON files, and Markdown files follow the Prettier format. This includes both release-please files. | Content of the files.                                                                                                                                                    |
+| Renovate configuration                  | `just renovate-lint`                  | `renovate.json` and `renovate/*.json` are valid.                                                                                       | The check does not cover `release-please-config.json`.                                                                                                                   |
+| PR title                                | CI only                               | The PR title follows Conventional Commits.                                                                                             | A merge with a wrong title can give a wrong version bump or no release. The check applies to the PR title only.                                                          |
+| Source release validation               | `just release-please-validate <path>` | The `ansible`, `renovate`, and `actions/*` packages pass their own checks before release.                                              | No check runs before the merge. A failure shows only after the release PR merges.                                                                                        |
+| Component release build                 | `just release-please-build <project>` | A Kustomize component passes its test and builds before release.                                                                       | Same as above.                                                                                                                                                           |
+| Release config and manifest consistency | manual                                | Nothing.                                                                                                                               | No check compares `release-please-config.json` with `.release-please-manifest.json`. No schema check runs. No check compares package paths with the paths in `plan.mjs`. |
+| Workflow syntax and logic               | manual                                | Nothing.                                                                                                                               | No `actionlint` or `yamllint` run. A mistake in a release workflow shows only on a real release.                                                                         |
+| End-to-end release                      | manual                                | Nothing.                                                                                                                               | No test makes a tag, a draft release, or a GHCR tag. The README says that GitHub event delivery and GHCR publication need separate integration checks.                   |
 
 ## Manual QA
 
@@ -122,12 +116,11 @@ Do these checks when a change touches the release sequence, `plan.mjs`, or `publ
 
 ## Known gaps
 
-- Make `release-automation-test` a required check. It is the only check for the release scripts, and a failure does not block a merge.
 - Add a test for `next-calver-version.sh`. Cover an empty list, a leading zero, a number above 9, and a different prefix.
 - Add a check that each package in `release-please-config.json` has a manifest entry, an existing path, and a supported path in `plan.mjs`.
 - Add a workflow linter, for example `actionlint`, to `just lint`.
 - Add tests for the command-line entry check in `plan.mjs` and for the files `publish-cli.mjs` and `recover-cli.mjs`.
 - Add a `just` recipe that runs the release script tests. The README lists `npm test` only.
 - Run source and component release validation on release PRs, before the merge.
-- Limit the write tokens of third-party actions. The auto-merge of third-party patch updates gives the code of these actions access to the write tokens of the workflows, with no human review.
-- Fix the exclusion of `ansible/requirements.txt`. The file is in `exclude-paths` for `ansible` in `release-please-config.json`. Commit `9cc8e0f` (#1052) changed only this file, but the `ansible-collection` 2.0.0 changelog lists it.
+- Limit the write tokens of third-party actions. Auto-merge of third-party patch updates gives the code of these actions access to the write tokens of the workflows, with no human review. See [renovate-presets.md](renovate-presets.md).
+- Fix the exclusion of `ansible/requirements.txt`. The file is in `exclude-paths` for `ansible` in `release-please-config.json`. PR #1052 changed only this file, but the `ansible-collection` 2.0.0 changelog lists it.
