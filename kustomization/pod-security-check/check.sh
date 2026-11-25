@@ -103,7 +103,9 @@ measure() {
 # Print the problem, or nothing when the measured level is acceptable.
 verdict() {
   local name="$1" declared="$2" measured="$3"
-  if [[ "${measured}" == none || "${measured}" == "${declared}" ]]; then
+  if [[ "${measured}" == none && "${declared}" != restricted ]]; then
+    echo "${name} has no workload. Remove its entry from levels.yml."
+  elif [[ "${measured}" == none || "${measured}" == "${declared}" ]]; then
     return 0
   elif (($(rank "${measured}") < $(rank "${declared}"))); then
     echo "The entry for ${name} in levels.yml is stale. Remove it, or set its level to ${measured}."

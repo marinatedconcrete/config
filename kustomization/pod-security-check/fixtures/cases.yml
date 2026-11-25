@@ -64,7 +64,7 @@
   edit: '.spec.template.spec.volumes[0] = {"name": "data", "hostPath": {"path": "/tmp"}}'
 - rule: privileged container
   level: privileged
-  token: privileged
+  token: securityContext.privileged=true
   edit: "del(.spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation) | .spec.template.spec.containers[0].securityContext.privileged = true"
 - rule: deprecated master node affinity is not a violation
   level: restricted

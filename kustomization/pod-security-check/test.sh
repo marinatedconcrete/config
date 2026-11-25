@@ -38,8 +38,8 @@ run_case() {
   measured="${result%%$'\n'*}"
   if [[ "${measured}" != "${level}" ]]; then
     report "${rule}" "expected level ${level}, found ${measured}: ${result#"${measured}"}"
-  elif [[ -n "${token}" && "${result}" != *"${token}"* ]]; then
-    report "${rule}" "expected the text '${token}' in: ${result}"
+  elif [[ -n "${token}" && "${result#"${measured}"}" != *"${token}"* ]]; then
+    report "${rule}" "expected the text '${token}' in:${result#"${measured}"}"
   else
     report "${rule}" ok
   fi
@@ -47,7 +47,8 @@ run_case() {
 
 test_verdict() {
   expect_equal 'verdict: equal levels pass' '' "$(verdict a restricted restricted)"
-  expect_equal 'verdict: no Pod template passes' '' "$(verdict a baseline none)"
+  expect_equal 'verdict: no workload passes' '' "$(verdict a restricted none)"
+  expect_contains 'verdict: an entry for no workload is stale' 'no workload' "$(verdict a baseline none)"
   expect_contains 'verdict: stricter than declared is stale' stale "$(verdict a baseline restricted)"
   expect_contains 'verdict: weaker than declared fails' 'Fix the manifest' "$(verdict a restricted baseline)"
   expect_contains 'verdict: privileged above baseline fails' 'Fix the manifest' "$(verdict a baseline privileged)"
