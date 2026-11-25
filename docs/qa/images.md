@@ -52,8 +52,10 @@ Apply each item that fits the change.
 - [ ] `buildah-action-runner` runs no `dnf upgrade`.
       The base image pin must stay in effect.
 - [ ] The `Containerfile` has no duplicate `LABEL` keys.
-      Each image sets `org.opencontainers.image.title`.
-      The workflows add the other labels with `docker/metadata-action`.
+      `buildah-action-runner`, `github-runner-ci`, and `kairos-fedora` set `org.opencontainers.image.title` in the `Containerfile`.
+      `buildah-action-runner` and `github-runner-ci` also set `org.opencontainers.image.description`.
+      `devcontainer-base` and `vscode-ssh-server` set no `LABEL`.
+      The workflows of all images except `devcontainer-base` add labels with `docker/metadata-action`.
 
 ### Security posture
 
@@ -70,13 +72,16 @@ For an image, check these items.
       The `ARG USERNAME` in `devcontainer-base` has a `hadolint ignore=DL3064` comment, because it is a local account name.
 - [ ] The change does not widen privilege.
       Look for `sudo`, `wheel`, added capabilities, and open firewall ports.
-      `images/kairos-fedora/build_files/customization.sh` sets the services and the firewall ports.
+      `images/kairos-fedora/build_files/configure.sh` sets the services and the firewall ports.
 - [ ] A change to `kairos-fedora` keeps the cloud datasource warning in `images/kairos-fedora/README.md` accurate.
 - [ ] New workflow permissions are the least that the job needs.
-      Each image workflow sets `contents: read` and `packages: write`.
-      `test-github-actions-job-container` sets `packages: read`.
+      Each image build job sets `contents: read` and `packages: write`.
+      `test-github-actions-job-container` sets `contents: read` and `packages: read`.
+      The `version` and `release` jobs in `image-devcontainer-base.yml` set `contents: write`.
 - [ ] A new third-party GitHub Action is pinned to a commit SHA with a version comment.
-      `renovate.json` does not auto-merge third-party actions, because the image workflows give them write tokens.
+      `renovate.json` has no auto-merge rule for third-party actions.
+      The global patch rule has no manager filter, so a patch update of a third-party action auto-merges as a branch merge with no pull request (see commit `c0dadc7`).
+      See the known gaps.
 
 ### Tests
 
@@ -98,18 +103,26 @@ For an image, check these items.
 ### Versioning and commit type
 
 - [ ] The pull request title and each commit use Conventional Commits.
-      The `Validate PR title` check enforces the title.
+      The `Validate PR title` check reports a bad title, but branch protection does not require it.
+      The reviewer must check the title.
+      The repository allows only squash merges.
+      The pull request title becomes the commit title, and the pull request description becomes the commit message.
 - [ ] The scope is the image name, for example `fix(kairos-fedora): ...` or `feat(github-runner-ci): ...`.
       A change for more than one image can have no scope, as in `feat: pin devcontainer-base to CalVer releases and auto-merge updates` (#1018).
 - [ ] The type matches the effect on the version.
       `release-please-config.json` lists `feat`, `fix`, `docs`, `build`, and `chore` in the changelog.
       A `feat` makes a minor release. A `fix` makes a patch release. A `!` makes a major release.
-      The Fedora 45 upgrade (#988) and the `kairos-init` 4.4.0 update (#927) are `feat!` precedents.
+      Put the `!` immediately before the colon of the pull request title, as in `feat(paperless)!: ...`.
+      For a pull request that a person writes, add a `BREAKING CHANGE` footer as the last paragraph of the pull request description.
+      A footer in a branch commit is lost in the squash merge.
+      Renovate major updates get the `!` from `renovate.json` and have no footer.
+      The `kairos-init` 4.4.0 update (#927), the UniFi change (#1033), the Factorio change (#1027), and the Paperless change (#1035) are precedents.
 - [ ] A change that must not make a release uses the `test` type.
       The AuroraBoot update (#1029) is the precedent.
-- [ ] No pull request changes a release version, a `CHANGELOG.md`, or `.release-please-manifest.json`.
-      Only the release-please pull request changes these files.
-- [ ] A new image has an entry in `release-please-config.json`.
+- [ ] No pull request changes a release version or a `CHANGELOG.md`.
+      Only the release-please pull request changes these files and the versions in `.release-please-manifest.json`.
+      The one exception is a new package. A person adds its line to `.release-please-manifest.json` with the value `0.0.0`.
+- [ ] A new image has an entry in `release-please-config.json` and an entry with the value `0.0.0` in `.release-please-manifest.json`.
       It also needs a `groupName` rule and a changelog rule in `renovate/marinatedconcrete.json`, an image workflow, and a job in `release-package.yml`.
 
 ### Renovate behavior
@@ -122,7 +135,9 @@ For an image, check these items.
       Renovate merges this update after all pull request checks pass.
 - [ ] An automerge rule does not skip a check that matters.
       The Fedora digest rule and the `vscode-ssh-server` digest rule use `automergeType: branch`.
-      A branch automerge waits for the required checks only.
+      A branch automerge creates no pull request.
+      The image workflows run only on `pull_request` and on `push` to `main`.
+      They do not run on the Renovate branch before the merge. They run after the merge.
       The image workflow checks are not required. See the known gaps.
 
 ### Release workflow
@@ -144,10 +159,10 @@ A required check from such a workflow stays pending on a pull request that does 
 
 | Check                                        | What it proves                                                                                                                               | Where it runs                                                                                                                                                                           | Required in branch protection | Gap                                                                                                                              |
 | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Hadolint on each Containerfile               | The files follow the rules in `.hadolint.yaml`, with a failure threshold of `info`                                                           | `just hado-lint`, in the `lint` job of `checks.yml`                                                                                                                                     | yes (`lint`)                  | It checks static rules only. It does not build the image.                                                                        |
+| Hadolint on each Containerfile               | The files follow the rules in `.hadolint.yaml`, with a failure threshold of `info`                                                           | `just hado-lint`, in the `lint` job of `ci.yml`                                                                                                                                         | yes (`lint`)                  | It checks static rules only. It does not build the image.                                                                        |
 | ShellCheck on each `*.sh` file               | The scripts in `images/` and `actions/` have no ShellCheck findings                                                                          | `just shellcheck-lint`, in the `lint` job                                                                                                                                               | yes (`lint`)                  | It does not run the scripts.                                                                                                     |
 | Format check                                 | The README files and workflow files follow the Prettier rules                                                                                | `just check-format`, in the `check-format` job                                                                                                                                          | yes (`check-format`)          | It does not check ASD-STE100 wording.                                                                                            |
-| Devcontainer image build                     | The repository devcontainer builds with the pinned `devcontainer-base`                                                                       | The `build` job of `checks.yml`                                                                                                                                                         | yes (`build`)                 | It tests one consumer of `devcontainer-base`.                                                                                    |
+| Devcontainer image build                     | The repository devcontainer builds with the pinned `devcontainer-base`                                                                       | The `build` job of `ci.yml`                                                                                                                                                             | yes (`build`)                 | It tests one consumer of `devcontainer-base`.                                                                                    |
 | Pull request title check                     | The title uses Conventional Commits                                                                                                          | The `Validate PR title` job of `semantic-commits.yml`                                                                                                                                   | no                            | A bad title can merge.                                                                                                           |
 | `buildah-action-runner` build and smoke test | The image builds. `buildah`, `curl`, `jq`, and `node` run.                                                                                   | The `Build Buildah Action Runner Image` job                                                                                                                                             | no                            | The test does not run a `buildah build`. A fork pull request does not push the image.                                            |
 | `github-runner-ci` build and smoke test      | The image builds. The user is `1001:1001`. The home directories are writable. `brew`, `git`, `just`, `jq`, `rg`, `shellcheck`, and `yq` run. | The `Build GitHub Runner CI Image` job                                                                                                                                                  | no                            | The test does not check the other installed packages.                                                                            |
@@ -199,6 +214,9 @@ A person must check these items, because no job covers them.
 
 Each gap can become an issue.
 
+- A patch update of a third-party GitHub Action auto-merges as a branch merge with no pull request.
+  The image workflows do not run before the merge, and the actions get `packages: write` tokens.
+  A rule that matches the `github-actions` manager and sets `automerge: false` for third-party actions can fix this.
 - No image job is a required check.
   A pull request that breaks an image can merge when the path-filtered job fails.
   An aggregate job that always runs and reads the path-filtered results can fix this.
