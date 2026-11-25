@@ -6,3 +6,28 @@
     - role: marinatedconcrete.config.minikube_test
       vars:
         minikube_test__test_dir: kustomization/tests/priorityclass
+  tasks:
+    - name: Get the PriorityClass objects
+      kubernetes.core.k8s_info:
+        api_version: scheduling.k8s.io/v1
+        context: "{{ kubernetes_core_k8s__context }}"
+        kind: PriorityClass
+        name: "{{ item.key }}"
+      loop: "{{ expected_priority_classes | dict2items }}"
+      register: priority_classes
+    - name: Ensure each PriorityClass has the expected value
+      ansible.builtin.assert:
+        that:
+          - item.resources | length == 1 # Check that the object exists.
+          - (item.resources | first).value == expected_priority_classes[item.item.key]
+      loop: "{{ priority_classes.results }}"
+      loop_control:
+        label: "{{ item.item.key }}"
+  vars:
+    expected_priority_classes:
+      application: 1000000
+      application-infra: 1001000
+      critical-application: 10000000
+      critical-application-infra: 10001000
+      opportunistic: -1000000000
+    kubernetes_core_k8s__context: priorityclass
