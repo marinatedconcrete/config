@@ -1,4 +1,4 @@
-# QA: Renovate presets and configuration
+# QA for Renovate presets and configuration
 
 This page tells a reviewer what a good change looks like for the Renovate configuration.
 A reviewer can be a human or an agent.
