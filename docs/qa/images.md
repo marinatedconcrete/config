@@ -53,7 +53,7 @@ Apply each item that fits the change.
   The base image pin must stay in effect.
 - The `Containerfile` has no duplicate `LABEL` keys.
   `buildah-action-runner`, `github-runner-ci`, and `kairos-fedora` set `org.opencontainers.image.title` in the `Containerfile`.
-  `buildah-action-runner` and `github-runner-ci` also set `org.opencontainers.image.description`.
+  All three also set `org.opencontainers.image.description`.
   `devcontainer-base` and `vscode-ssh-server` set no `LABEL`.
   The workflows of all images except `devcontainer-base` add labels with `docker/metadata-action`.
 
@@ -192,8 +192,6 @@ Each gap can become an issue.
 - No image check is required.
   A pull request that breaks an image can merge when the path-filtered check fails.
   An aggregate job that always runs and reads the path-filtered results can fix this.
-- `images/kairos-fedora/Containerfile` sets `org.opencontainers.image.title` two times.
-  The second value, `kairos-fedora`, replaces the first value, `A custom Fedora-based Kairos image.`.
 - `buildah-action-runner` and `vscode-ssh-server` have no release notes or SBOM.
 - No test starts `sshd` in `vscode-ssh-server`.
   No test runs a `buildah build` in `buildah-action-runner`.
