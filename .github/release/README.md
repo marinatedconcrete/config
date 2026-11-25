@@ -30,7 +30,7 @@ GitHub and GHCR do not support one transaction for all publication operations.
 | VSCode SSH Server      | Image build and smoke test                              | Tested image digest in GHCR |
 | Ansible collection     | ansible-lint and component tests                        | Git tag and GitHub release  |
 | Renovate configuration | Renovate configuration check                            | Git tag and GitHub release  |
-| Action                 | ShellCheck on the action scripts                        | Git tag and GitHub release  |
+| Action                 | ShellCheck, `npm ci`, and `npm test` for the action     | Git tag and GitHub release  |
 
 The component tests use the roles in the Ansible collection.
 Release validation does not do a format check. The push checks do the format check.
@@ -45,6 +45,7 @@ PR and branch image checks keep their existing publication rules.
 Image tag pushes do not start another build.
 
 The Kairos Fedora and GitHub Runner CI builds also generate image release notes and an SBOM for the tested image.
+The devcontainer base image workflow also uses the image release notes action. It is not a release package.
 The publisher adds the notes to the draft body and uploads the SBOM before publication.
 The validation record contains the SBOM size and hash.
 
