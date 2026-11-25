@@ -30,7 +30,6 @@ on: # yamllint disable-line rule:truthy
       release-notes-artifact:
         value: ${{ jobs.build-github-runner-ci.outputs.release-notes-artifact }}
 
-
 jobs:
   build-github-runner-ci:
     name: Build GitHub Runner CI Image

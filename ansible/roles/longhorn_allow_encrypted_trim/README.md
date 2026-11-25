@@ -12,7 +12,6 @@ The target systems must have [`pexpect`](https://pypi.org/project/pexpect/) inst
 Role Variables
 --------------
 
-
 Dependencies
 ------------
 
