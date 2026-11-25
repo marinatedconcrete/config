@@ -31,14 +31,24 @@ NOT_FOUND = """[2026-11-25T06:42:56.055Z] Error: Dev container not found.
     at async cZ (/cli/dist/spec-node/devContainersSpecCLI.js:678:4001)
 """
 
+# For a stopped container, the real CLI writes this text to stderr and exits with status 1.
+STOPPED = """Shell server terminated (code: 1, signal: null)
+
+Error response from daemon: container 13770ca8025c is not running
+
+[2026-11-25T06:47:54.351Z] Shell server terminated (code: 1, signal: null)
+
+Error response from daemon: container 13770ca8025c is not running
+"""
+
 DEVCONTAINER_STUB = f"""#!/usr/bin/env python3
 import json, os, sys, time
 args = sys.argv[1:]
 with open(os.environ["DEVCONTAINER_LOG"], "a") as log:
     log.write(json.dumps(args) + "\\n")
 mode = os.environ["DEVCONTAINER_MODE"]
-if mode == "missing":
-    sys.stderr.write({NOT_FOUND!r})
+if mode in ("missing", "stopped"):
+    sys.stderr.write({NOT_FOUND!r} if mode == "missing" else {STOPPED!r})
     sys.exit(1)
 if args[-1:] == ["true"]:
     sys.exit(0)
@@ -353,6 +363,12 @@ class HookTest(unittest.TestCase):
         self.assertIn("reported: Dev container not found.", context)
         self.assertIn(f"run `devcontainer up --workspace-folder {root}`", context)
         self.assertEqual(len(self.devcontainer_calls()), 1)
+        context = self.notice_text(self.run_hook("git commit -m x", mode="stopped"))
+        self.assertIn(
+            "reported: Error response from daemon: container 13770ca8025c is not running",
+            context,
+        )
+        self.assertIn(f"run `devcontainer up --workspace-folder {root}`", context)
 
     def test_missing_devcontainer_cli_shows_notice(self):
         os.remove(os.path.join(self.stubs, "just"))

@@ -340,9 +340,12 @@ def devcontainer_error(workspace):
         return f"no reply in {PROBE_TIMEOUT_SECONDS} seconds"
     if result.returncode == 0:
         return None
+    # The CLI writes "Error: Dev container not found." when no container has the label of the workspace.
+    # For a stopped container, Docker writes "Error response from daemon: container ... is not running".
     for line in result.stderr.splitlines():
-        if "Error: " in line:
-            return line.split("Error: ", 1)[1].strip()
+        if "Error" in line:
+            error = line[line.index("Error") :].strip()
+            return error.removeprefix("Error: ")
     return f"exit status {result.returncode}"
 
 
