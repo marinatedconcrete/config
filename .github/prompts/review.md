@@ -24,7 +24,10 @@ Write "not checked" for an item that you could not check.
   The `Validate PR title` check enforces this rule.
 - The type must match the effect of the change.
   Release Please uses the type to select the release version.
-- A breaking change must use `!` in the type.
+- A breaking change must use `!` before the colon.
+  See "Breaking changes" below for the definition.
+- Read the pull request body.
+  See "Pull request body" below.
 - A change to a package must use a type that causes the correct release.
   A `feat` change in `images/kairos-fedora` causes a minor release of the image.
 - Renovate uses the `test` type for `e2e.sh`, `tests/`, and `*.test.*` files.
@@ -33,6 +36,225 @@ Write "not checked" for an item that you could not check.
 - Commits must not change files outside the stated scope.
 - Do not ask the author to squash or amend a commit that already has review comments.
   Ask for a new commit instead.
+
+### Pull request body
+
+The repository allows only squash merge.
+The squash commit message is the pull request title and the pull request body.
+GitHub copies the whole body into the commit, and this includes HTML comments.
+Release Please reads that commit message.
+Read the real body, not only the diff.
+
+```sh
+gh pr view <number> --json title,body --jq '.title, .body'
+gh pr view <number> --json body --jq '.body' | grep -n '<!--'
+gh pr view <number> --json body --jq '.body' | grep -niE 'breaking[ -]change'
+```
+
+The second command lists each line that starts an HTML comment.
+The third command lists each line that has a breaking change token.
+Write "not checked" if `gh` fails.
+
+Flag each of these items:
+
+- A leftover HTML comment from `.github/pull_request_template.md`.
+  The comment becomes noise in the commit.
+  Ask the author to delete it.
+- A placeholder that the author did not edit.
+  Examples are an empty `## Summary`, a `## Testing` list with no marked item, and example text from the template.
+- A title that is not a valid Conventional Commit.
+  The `Validate PR title` job in `.github/workflows/semantic-commits.yml` runs `amannn/action-semantic-pull-request`.
+  The job passes no `types` or `scopes` input.
+  The action therefore accepts its default types and any scope.
+  The repository uses the name of the component as the scope, for example `paperless` or `kube-vip`.
+  Renovate uses the scope `package`.
+  The job cannot check that the type fits the change.
+  Check the type yourself.
+- A breaking change footer in the wrong form.
+  The footer is a line that starts with `BREAKING CHANGE:` or `BREAKING-CHANGE:`.
+  The footer must be the last paragraph of the body.
+  A blank line must be before the footer.
+  A `## Breaking changes` heading is not a footer, because Release Please ignores it.
+  A footer token in an HTML comment is a defect.
+  Release Please can read it and mark the pull request as breaking.
+  Release Please reads the dash form `BREAKING-CHANGE` even in the middle of a line.
+  Report each such token.
+- Extra text that can change how Release Please reads the commit.
+  Text after the footer becomes part of the footer.
+  A `BEGIN_COMMIT_OVERRIDE` block replaces the commit message, as in #988.
+  A `Release-As:` footer sets the release version.
+  Accept these only if the maintainer wants the effect.
+  Ask the author to state the reason.
+
+The template tells the author to delete the breaking change comment when the change is not breaking.
+A body with no footer is correct for a change that is not breaking.
+
+Automation pull requests are exempt from the template checks.
+Renovate and Release Please write their own bodies.
+Do not ask them to follow the template.
+Still check the title and the breaking change annotation.
+
+### Breaking changes
+
+A change is breaking when a consumer must edit their own files, cluster, hosts, or workflows after they move to the new version.
+A change is also breaking when the consumer sees a new behavior with no edit of their own.
+Ask this question: "Can a consumer who changes only the version pin see a failure or a new behavior?"
+If the answer is yes, the change is breaking.
+Judge the effect on the consumer, not the size of the diff.
+
+Each part has its own version, tag, and consumers:
+
+| Part                                               | How a consumer pins it                                                                     |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Kustomize component in `kustomization/components/` | `?ref=kustomize-<name>@v<version>` or the release asset of that tag                        |
+| Image in `images/`                                 | The image tag, for example `kairos-fedora:1.1.1` for the Git tag `kairos-fedora-1.1.1`     |
+| Action in `actions/`                               | `uses: marinatedconcrete/config/actions/image-release-notes@image-release-notes-<version>` |
+| Ansible collection in `ansible/`                   | The Git tag of the collection                                                              |
+| Renovate presets in `renovate/`                    | `github>marinatedconcrete/config//renovate/<file>#renovate-config-<version>`               |
+
+`release-please-config.json` lists the released parts.
+A change outside these paths does not cause a release.
+A `!` on such a change has no release effect.
+
+#### What is breaking, by part
+
+Kustomize components:
+
+- A resource that a consumer can patch or select is renamed, removed, or replaced.
+  Examples are the Deployment that became a container in a StatefulSet and the renamed PVC in #1035.
+  Another example is the split of the kube-vip DaemonSets in #376.
+- A port, port name, Service name, label, selector, or namespace changes.
+  Consumers use these in scrape rules, firewall rules, NetworkPolicy objects, and patches.
+  Examples are #958 (metrics port) and #1035 (port name).
+- The component needs something new from the consumer or the cluster.
+  Examples are a new required component (#285), a new secret key (#1035), and node support for user namespaces (#1027, #1033, #1035).
+- The component path or the package changes, as in #904.
+- A component is removed.
+- A major version of a pinned workload image changes, such as kube-vip v1 (#453) and Paperless v3 (#839).
+  Read the upstream release notes to decide.
+
+Not breaking for a Kustomize component:
+
+- A patch or minor update of an image that needs no change in the consumer files.
+  Renovate merges these updates for the Factorio, kube-vip, Mosquitto, and UniFi components without a person.
+- A new optional resource or setting that does not change an existing selector, port, or name.
+- A change to a README, a test, or a comment.
+- A refactor that does not change the rendered output.
+
+To check the last item, compare the rendered output before and after the change.
+Run `kustomize build kustomization/components/<name>` on the base branch and on the head, then compare the results.
+
+Images:
+
+- The entrypoint, the user, a file path, or the tag scheme changes.
+- A package, command, or file that a consumer uses is removed or renamed.
+- The default behavior changes.
+  Examples are the Kairos v4.4.0 hardening (#927) and the Fedora major version (#988).
+- A major version of the base image or of the Kairos tools changes, as the Kairos section below says.
+
+Not breaking for an image: a patch update of a package, a rebuild, or a change to the release notes.
+
+Action (`actions/image-release-notes`):
+
+- An input is removed, renamed, or made required.
+- An output is removed or renamed.
+- The meaning of an input, the default of an input, or the name of an output file changes.
+- The action needs a new permission.
+
+`action.yml` and the README list the inputs and outputs.
+Not breaking for the action: a new optional input with a default that keeps the old behavior, as in #1040.
+Another example is a new row in the notes, as in #1020.
+
+Ansible collection:
+
+- A role is removed or renamed.
+- A role variable is removed, renamed, or has a new default that changes behavior.
+  The variables in `ansible/roles/minikube_test/defaults/main.yml` are an example.
+- A play is removed, as in the `kustomization_test` play.
+- The value of `requires_ansible` in `ansible/meta/runtime.yml` rises.
+- A new collection or tool is required.
+- A major update of `ansible` in `ansible/requirements.txt` is breaking, as in #1052.
+
+Not breaking for the collection: a new role, a new variable with a default that keeps the old behavior, or a fix to a task.
+
+Renovate presets:
+
+- A preset file is renamed or removed.
+  An example is the rename of `default.json` to `marinatedconcrete.json`.
+- A preset starts to extend another config or to set a time zone.
+- A change makes Renovate open a different set of pull requests for the consumer.
+  History does not show how the maintainers treat this case.
+  Recommend `!` and let the maintainer decide.
+
+Not breaking for the presets: a rule that affects only this repository, or a fix to a regular expression that keeps the same matches.
+
+#### Renovate major updates
+
+Renovate marks each major update as `feat(package)!`.
+The rule `Use a breaking commit type for major updates` in `renovate.json` does this.
+The `!` matters only when the update changes a released path.
+A major update of a development tool, for example in `.devcontainer/` or `justfile`, causes no release.
+Do not block such an update because of the `!`.
+
+For a major update of a released part, read the upstream release notes.
+Decide if the consumer must act.
+Do not assume that a major update is safe because Renovate wrote it.
+In history, #839 (Paperless v3) and #1052 (Ansible v15) have `!` and no footer.
+#927 (`kairos-init` v4.4.0) has a footer that lists the effects.
+History does not show a rule for this case.
+Recommend a footer when the release notes show a consumer action.
+Do not demand a footer when they show none.
+Renovate writes the body, so ask a maintainer to add the footer or a commit override, as #988 did.
+
+#### Kairos major versions
+
+Apply the Kairos section below in addition.
+A major update of `kairos-init` in `images/kairos-fedora/Containerfile` changes the image.
+It is breaking for `kairos-fedora` when the release notes show a changed default or a removed feature.
+In history, #927 is breaking and has a footer.
+A minor or patch update is not breaking, as in the `kairos-fedora` 1.1.0 and 1.1.1 releases.
+An `auroraboot` update in `e2e.sh` has the `test` type and causes no release.
+
+#### How to annotate
+
+History shows this practice:
+
+- Each change that the maintainers call breaking has `!` before the colon.
+  `git log origin/main -E --grep '^[a-z]+(\([^)]*\))?!:' --format='%h %s'` lists 18 commits.
+- The hand-written pull requests #958, #1027, #1033, #1035, and #927 have a footer.
+  The footer tells the consumer what to do, and it appears in the release notes.
+- Older breaking changes (#285, #376, #904) have `!` and no footer.
+  The Renovate majors (#453, #839, #1052) also have `!` and no footer.
+  Release Please then writes the title as the breaking entry, for example in `kustomize-kube-vip` 4.0.0.
+- The pull request #988 has `!` and no footer.
+  It uses a commit override.
+- No commit in `origin/main` has a footer and no `!`.
+
+Use these rules:
+
+- Require `!` before the colon for each breaking change.
+- Require a footer when a person writes the pull request and the consumer must act.
+  The footer has a short migration note.
+- Recommend a footer, but do not require it, for a Renovate update.
+- Do not require a footer on a change that is not breaking.
+
+What to write in the review:
+
+- The change looks breaking and has no annotation.
+  Request changes.
+  Name the part, the consumer-visible change, and the file.
+  Ask the author to add `!` to the title and a footer to the body.
+  A title or body edit makes no new commit.
+- The change has `!` or a footer, but it does not look breaking.
+  Ask the author to name the action that the consumer must take.
+  If there is no such action, ask the author to remove `!`, because `!` makes a major release of the part.
+  Make this blocking only when the part has a release.
+- The change has a footer and no `!`.
+  Request changes and ask for `!`.
+- You are not sure that the change is breaking.
+  Write "ask the maintainer".
+  Give a recommendation and the reason.
+  State that history does not show a rule.
 
 ### Documentation and comments
 
@@ -109,6 +331,9 @@ Do this section in addition to the general checklist.
 - For a release pull request, check that the release has a real change.
   Read the new section in `CHANGELOG.md`.
   A section that lists only an earlier `chore(main)` release commit is not a real change.
+
+- Check the title and the breaking change annotation, as the general checklist says.
+  Do not apply the pull request template checks to the body.
 
 ### What not to do
 
