@@ -72,7 +72,6 @@ stringData:
 
 The `Pod` runs in a user namespace, because the component sets `hostUsers: false`. Each node must support user namespaces. Read the [Kubernetes requirements for user namespaces](https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/#before-you-begin) for the versions of the kernel, the container runtime, and Kubernetes. On a node without this support, the `Pod` does not start. The volumes of the `Pod` must support idmapped mounts. NFS volumes do not. Longhorn `ReadWriteMany` volumes use NFS.
 
-
 # Samba Uploads
 
 Scanners with network access can upload documents to CIFS/SMB network shares.
