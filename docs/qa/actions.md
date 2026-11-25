@@ -17,10 +17,10 @@ The directory has one action: `actions/image-release-notes`.
 - `actions/image-release-notes/README.md` documents the inputs, the outputs, and the behavior.
 
 Other repositories can use the action by tag.
-This repository uses it as `./actions/image-release-notes` in `.github/workflows/image-kairos-fedora.yml`, `.github/workflows/image-github-runner-ci.yml`, and `.github/workflows/image-devcontainer-base.yml`.
-Only `.github/workflows/image-devcontainer-base.yml` uses the `publish` action.
-The `release-please-config.json` file releases the action as the package `image-release-notes`.
-The tag format is `image-release-notes-X.Y.Z`.
+This repository uses it as `./actions/image-release-notes` in the image workflows.
+Only one image workflow uses the `publish` action.
+Release Please releases the action as the package `image-release-notes`.
+See [Release tooling](release-tooling.md).
 
 The images that call the action and the Kustomize components are out of scope for this page.
 
@@ -30,19 +30,18 @@ Apply each item to the diff.
 
 ### Language and format
 
-- Prose follows ASD-STE100, as `AGENTS.md` requires.
+- Prose follows [AGENTS.md](../../AGENTS.md).
   This applies to `README.md`, to comments in scripts and in `action.yml`, and to input descriptions.
 - A change to an input or an output updates `action.yml` and the `Inputs` or `Outputs` table in `README.md` in the same commit.
   The description text must be the same in both files.
 - The `just format` command changes nothing.
-  Prettier formats every `.md`, `.yml`, `.yaml`, `.json`, and `.mjs` file in the repository.
 - Past entries in `CHANGELOG.md` stay unchanged.
   Release Please writes this file.
 
 ### Security posture
 
 - The `Image Release Notes` action in `actions/image-release-notes/action.yml` needs only `contents: read`.
-  The three image workflows call it from jobs that have `contents: read`.
+  The image workflows call it from jobs that have `contents: read`.
   A change must not add a permission requirement for this action.
 - The `publish` action must run no code from the image.
   The comment in `publish/action.yml` states this rule.
@@ -66,9 +65,7 @@ Apply each item to the diff.
   It must not compare dates or strings.
   It skips drafts and tags that are not `X.Y.Z`.
   It selects the highest version below `current-tag` when the caller supplies a tag.
-  A reviewer asked for this in pull request #893.
 - Name parsing in `release-notes.sh` must handle a registry with a port and a reference with a digest.
-  A reviewer found a defect in this area in pull request #893.
 - A new Containerfile rule has a test in `image-references.test.mjs`.
   Existing tests show the style: one `test(...)` for each rule, with a name that states the behavior.
 - A new behavior of the scripts is in `README.md`.
@@ -76,48 +73,38 @@ Apply each item to the diff.
 
 ### Versioning and commit type
 
-- The commit follows Conventional Commits.
-  Recent history uses `feat(image-release-notes): ...` for a new input, and `fix: ...` for a defect.
-- A breaking change to an input, an output, or a default uses `!`.
-- A change in `actions/image-release-notes/` makes a release for the package.
+- Follow [AGENTS.md](../../AGENTS.md) for the commit message and the PR title.
+  Use the scope `image-release-notes`.
+- A `feat` or `fix` commit in `actions/image-release-notes/` makes a release for the package.
+  A change that affects only tests uses the `test` type, so that no release happens.
   Do not edit `.release-please-manifest.json` or `CHANGELOG.md` by hand.
-  Release Please opens the release PR.
-- A change that affects only tests uses the `test` type, so that no release happens.
-  Renovate does this for files that match `**/*.test.*`.
-- Renovate sends tool image updates as `chore(package): update <image> docker tag to <version>`.
-  The `renovate.json` file gives minor updates the `feat` type.
-  Check that the type matches the effect on callers.
-- The PR title is a Conventional Commit title.
+  See [Release tooling](release-tooling.md).
+- Mark a breaking change as the [pull request template](../../.github/pull_request_template.md) describes.
+- A change is breaking when it does one of these things:
+  - It removes or renames an input or an output.
+  - It changes the default of an input.
+  - It changes the contents of an output, the notes, or the SBOM artifact in a way that breaks a caller that reads them.
+- Check that the commit type matches the effect on callers, also for a tool image update.
 
 ### Renovate behavior
 
 - A change to the script paths or to the `# renovate:` comment format must still match the regex manager for `^actions/.*\.sh$` in `renovate.json`.
   Otherwise Renovate stops sending updates for the tool images.
-- `anchore/syft` and `cyclonedx/cyclonedx-cli` are Docker Hub images.
-  The rule that automerges patch updates after three days applies to them.
-  Read a minor update before you merge it, because it can change the SBOM.
+- Read a minor update of a tool image before you merge it, because it can change the SBOM.
+  See [Renovate presets](renovate-presets.md) for the auto-merge rules.
 - The `package.json` file keeps `dockerfile-ast` at an exact version.
   The `release-please-validate` recipe installs it with `npm ci --ignore-scripts`.
 
 ## Automated validation coverage
 
-The required checks come from `gh api repos/marinatedconcrete/config/branches/main/protection`.
-They are `lint`, `check-format`, `build`, and six `kustomization-test (...)` jobs.
-The rule also requires one approving review and a linear history.
-An administrator can bypass the review rule, because `enforce_admins` is false.
-
-| Check                       | What it proves                                                                                                                                   | Where it runs                                                                                                                                                                                                                   | Required in branch protection | Gap                                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------- |
-| Image reference tests       | The 42 tests in `image-references.test.mjs` pass. They prove how the action reads a Containerfile: stages, `ARG` values, `--from`, and `target`. | `npm test --prefix actions/image-release-notes`. CI job `image-release-notes-test` in `.github/workflows/ci.yml`.                                                                                                               | no                            | A failing test does not block a merge.                                                              |
-| ShellCheck                  | The three scripts of the action have no ShellCheck findings.                                                                                     | `just shellcheck-lint`. CI job `lint` runs `just lint`.                                                                                                                                                                         | yes                           | ShellCheck does not find logic errors.                                                              |
-| Format check                | Prettier accepts the `.mjs`, `.yml`, `.json`, and `.md` files.                                                                                   | `just check-format`. CI job `check-format`.                                                                                                                                                                                     | yes                           | This does not check ASD-STE100 wording.                                                             |
-| Release validation          | The commit that Release Please selects passes ShellCheck and the unit tests before the release.                                                  | `just release-please-validate actions/image-release-notes`. CI job `source` in `.github/workflows/release-package.yml`.                                                                                                         | no                            | This runs after the merge, so it cannot block a merge.                                              |
-| PR title check              | The PR title is a Conventional Commit title.                                                                                                     | CI check `Validate PR title` in `.github/workflows/semantic-commits.yml`.                                                                                                                                                       | no                            | A failing title does not block a merge.                                                             |
-| Renovate config check       | `renovate.json` is valid.                                                                                                                        | `just renovate-lint`. CI job `lint`.                                                                                                                                                                                            | yes                           | The check does not prove that the regex manager finds the `SYFT_IMAGE` and `CYCLONEDX_IMAGE` lines. |
-| Image build with the action | The action runs end to end on a real image: Syft, the notes, and the artifact upload.                                                            | CI jobs `build-container` in `image-kairos-fedora.yml`, `build-github-runner-ci` in `image-github-runner-ci.yml`, and `build` in `image-devcontainer-base.yml`. They run on a PR that changes `actions/image-release-notes/**`. | no                            | The jobs do not assert the contents of the notes. They run only when the path filter matches.       |
-
-The required `build` check is the job `build` in `.github/workflows/ci.yml`.
-It builds the devcontainer and does not run the action.
+| What is validated          | How to run                                                       | What it proves                                                                            | What it does not prove                                                       |
+| -------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Image reference parsing    | `npm test --prefix actions/image-release-notes`                  | The action reads a Containerfile correctly: stages, `ARG` values, `--from`, and `target`. | The behavior of the shell scripts.                                           |
+| Shell scripts              | `just shellcheck-lint`                                           | The scripts have no ShellCheck findings.                                                  | ShellCheck does not find logic errors.                                       |
+| Formatting                 | `just check-format`                                              | Prettier accepts the files.                                                               | ASD-STE100 wording.                                                          |
+| Release readiness          | `just release-please-validate actions/image-release-notes`       | The commit that Release Please selects passes ShellCheck and the unit tests.              | A merge is safe. This check runs after the merge.                            |
+| Renovate configuration     | `just renovate-lint`                                             | `renovate.json` is valid.                                                                 | The regex manager finds the `SYFT_IMAGE` and `CYCLONEDX_IMAGE` lines.        |
+| The action on a real image | Manual. Open a PR that changes `actions/image-release-notes/**`. | The action runs end to end on a real image: Syft, the notes, and the artifact upload.     | The contents of the notes. The check runs only when the path filter matches. |
 
 Behavior that no job covers:
 
@@ -178,13 +165,12 @@ Do these checks when automation cannot decide.
 
 ## Known gaps
 
-- Add `image-release-notes-test` to the required checks in branch protection.
 - Add tests for `previous-sbom.sh`: version order, drafts, a rerun of an old tag, and a failed download.
-  Pull request #893 found defects in these cases by review.
 - Add tests for `release-notes.sh` with a fixed SBOM: the component table, the change table, and an image with no `dnf`.
 - Add a test for `publish/publish.sh` that runs it twice with the same tag.
 - Add a check that the regex manager in `renovate.json` finds the tool image lines in `release-notes.sh`.
 - Add a check that the tables in `README.md` match `action.yml`.
 - Make the image workflows assert the notes, not only create them.
-- Renovate automerges patch updates of external GitHub Actions through the global patch rule, and the image workflows hold write tokens.
-  Review these updates after they merge.
+- The image workflows hold write tokens.
+  Review updates of external GitHub Actions after they merge.
+  See [Renovate presets](renovate-presets.md).
