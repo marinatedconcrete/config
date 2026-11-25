@@ -14,5 +14,6 @@ images:
     newTag: 2.0.22@sha256:914f529386804c8278a4e581526b9be5e1604df44b30daabc70aa97dcefe5268
 resources:
   - persistentvolumeclaim.yml
-  - deployment.yml
+  - statefulset.yml
   - service.yml
+  - headless-service.yml

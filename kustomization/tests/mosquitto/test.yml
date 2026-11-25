@@ -8,17 +8,19 @@
         minikube_test__enable_local_path_storage: true
         minikube_test__test_dir: kustomization/tests/mosquitto
   tasks:
-    - name: Wait for deployment
-      kubernetes.core.k8s:
+    - name: Wait for the StatefulSet replica to become ready
+      kubernetes.core.k8s_info:
         api_version: apps/v1
         context: "{{ kubernetes_core_k8s__context }}"
-        kind: Deployment
-        name: mosquitto-deployment
+        kind: StatefulSet
+        name: mosquitto-statefulset
         namespace: "{{ test_namespace }}"
-        state: present
-        wait: true
-        wait_timeout: 300 # 5 minutes.
-      changed_when: false
+      register: mosquitto_statefulset
+      until:
+        - mosquitto_statefulset.resources | length == 1
+        - (mosquitto_statefulset.resources | first).status.readyReplicas | default(0) == 1
+      retries: 60
+      delay: 5
     - name: Get endpoints information
       kubernetes.core.k8s_info:
         api_version: v1

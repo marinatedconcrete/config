@@ -1,11 +1,11 @@
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: mosquitto-deployment
+  name: mosquitto-statefulset
 spec:
-  strategy:
-    type: Recreate
+  replicas: 1
+  serviceName: mosquitto-headless
   selector:
     matchLabels:
       app.kubernetes.io/name: mosquitto
