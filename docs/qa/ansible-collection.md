@@ -26,69 +26,69 @@ Apply each item that matches the change.
 ### Conventions
 
 - Variable names use the role prefix.
-      The `minikube_test` role uses `minikube_test__`.
-      The `longhorn_allow_encrypted_trim` role uses `longhorn_allow_encrypted_trim_`.
-      Do not mix the two styles in one role.
+  The `minikube_test` role uses `minikube_test__`.
+  The `longhorn_allow_encrypted_trim` role uses `longhorn_allow_encrypted_trim_`.
+  Do not mix the two styles in one role.
 - Each module name is fully qualified, for example `ansible.builtin.command`.
-      The `production` lint profile enforces this rule.
+  The `production` lint profile enforces this rule.
 - Each `command` task that always changes state sets `changed_when: true`.
-      Each task that only reads state sets `changed_when: false`.
+  Each task that only reads state sets `changed_when: false`.
 - Each task has a `name`.
-      A comment explains each non-obvious reason, such as the `/var` mount in `minikube_test`.
+  A comment explains each non-obvious reason, such as the `/var` mount in `minikube_test`.
 - A new role has `meta/main.yml` and a `README.md`.
-      The `longhorn_allow_encrypted_trim` role is the model.
-      The `minikube_test` role has no `README.md`.
+  The `longhorn_allow_encrypted_trim` role is the model.
+  The `minikube_test` role has no `README.md`.
 - Each new option or variable is used.
-      The variable `minikube_test__minikube_nodes` is set but no task reads it.
+  The variable `minikube_test__minikube_nodes` is set but no task reads it.
 
 ### Behavior and security
 
 - A change to `minikube_test` keeps every existing test working.
-      Run at least one test that uses the changed option.
-      The `factorio` test uses `minikube_test__enable_user_namespaces` and `minikube_test__enable_local_path_storage`.
+  Run at least one test that uses the changed option.
+  The `factorio` test uses `minikube_test__enable_user_namespaces` and `minikube_test__enable_local_path_storage`.
 - A new option in `minikube_test` has a default in `defaults/main.yml` and a comment.
-      The default keeps the old behavior.
+  The default keeps the old behavior.
 - A change to `minikube_test` does not weaken the pod security tests.
-      The role starts Minikube with `--force`.
-      Check that a new option does not hide a security failure.
+  The role starts Minikube with `--force`.
+  Check that a new option does not hide a security failure.
 - A task that handles a secret sets `no_log: true`.
-      See `process_volume.yml` in `longhorn_allow_encrypted_trim` for the pattern.
+  See `process_volume.yml` in `longhorn_allow_encrypted_trim` for the pattern.
 - A change to `longhorn_allow_encrypted_trim` does not print the encryption key.
-      The key comes from the Kubernetes `Secret` field `CRYPTO_KEY_VALUE`.
+  The key comes from the Kubernetes `Secret` field `CRYPTO_KEY_VALUE`.
 - The tasks stay safe to run again, or the change says why they cannot.
-      The `minikube_test` tasks use `changed_when: true` by design.
+  The `minikube_test` tasks use `changed_when: true` by design.
 
 ### Docs
 
 - A change to a role option or to role behavior updates the role `README.md` and the comments in `defaults/main.yml`.
 - A change that forces a consumer to act is a breaking change.
-      Annotate it as the [pull request template](../../.github/pull_request_template.md) describes.
-      Commit `ac44fe3` (`feat(factorio)!`) is an example.
+  Annotate it as the [pull request template](../../.github/pull_request_template.md) describes.
+  Commit `ac44fe3` (`feat(factorio)!`) is an example.
 
 ### Versioning and release
 
 - The change does not edit `version` in `ansible/galaxy.yml` or `ansible/CHANGELOG.md`.
-      Release Please sets them.
+  Release Please sets them.
 - The commit type matches the effect on consumers.
-      `feat`, `fix`, and a breaking change make a release.
-      `chore`, `docs`, and `build` also make a release when the change touches the collection path.
-      Types that the release configuration does not list, such as `test` and `ci`, make no release.
+  `feat`, `fix`, and a breaking change make a release.
+  `chore`, `docs`, and `build` also make a release when the change touches the collection path.
+  Types that the release configuration does not list, such as `test` and `ci`, make no release.
 - The scope names the thing that changed.
-      Use the role or component directory name, such as `factorio` or `longhorn_allow_encrypted_trim`, or `ansible`.
+  Use the role or component directory name, such as `factorio` or `longhorn_allow_encrypted_trim`, or `ansible`.
 - A change that adds or moves a file in the collection builds correctly.
-      See "Check the collection package" below.
-      Commit `c305050` fixed a missing license file in the collection.
+  See "Check the collection package" below.
+  Commit `c305050` fixed a missing license file in the collection.
 
 ### Renovate behavior
 
 - The `# renovate: datasource=... depName=...` comment stays directly above the version that it updates.
-      The `minikube_test__kubernetes_version` variable in `defaults/main.yml` uses this form.
+  The `minikube_test__kubernetes_version` variable in `defaults/main.yml` uses this form.
 - A Renovate update of a dependency in `ansible/requirements.txt` has the intended release effect.
-      The release configuration lists this file in `exclude-paths`, but the exclusion has no effect in practice.
-      Commit `9cc8e0f` changed only this file and made a breaking `ansible-collection` release.
-      See [Renovate presets](renovate-presets.md) for the update rules.
+  The release configuration lists this file in `exclude-paths`, but the exclusion has no effect in practice.
+  Commit `9cc8e0f` changed only this file and made a breaking `ansible-collection` release.
+  See [Renovate presets](renovate-presets.md) for the update rules.
 - The `requires_ansible` value in `ansible/meta/runtime.yml` keeps the form `">=X.Y.Z"`.
-      A custom manager in `renovate.json` reads it.
+  A custom manager in `renovate.json` reads it.
 - A change to the Renovate rules for the collection passes `just renovate-lint`.
 
 ## Automated validation coverage

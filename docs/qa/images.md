@@ -40,22 +40,22 @@ Apply each item that fits the change.
 ### Build files
 
 - The change follows the `build_files` pattern.
-      The `Containerfile` keeps the stages, arguments, mounts, labels, and final image settings.
-      Executable scripts in `images/<name>/build_files/` hold the package installation and setup commands.
+  The `Containerfile` keeps the stages, arguments, mounts, labels, and final image settings.
+  Executable scripts in `images/<name>/build_files/` hold the package installation and setup commands.
 - Each new script is executable (mode `0755`) and sets `set -e` and `pipefail`.
 - Each base image has a version tag and a digest.
-      `fedora:45` in `kairos-fedora` and `fedora-minimal:44` in `devcontainer-base` have no digest.
-      `renovate.json` sets `pinDigests: false` for these images, because old Fedora digests disappear.
+  `fedora:45` in `kairos-fedora` and `fedora-minimal:44` in `devcontainer-base` have no digest.
+  `renovate.json` sets `pinDigests: false` for these images, because old Fedora digests disappear.
 - A version that Renovate must update has a `# renovate: datasource=... depName=...` comment on the line before it.
-      `renovate.json` lists the file patterns in `customManagers`.
+  `renovate.json` lists the file patterns in `customManagers`.
 - Package installation uses `--setopt=install_weak_deps=False`.
 - `buildah-action-runner` runs no `dnf upgrade`.
-      The base image pin must stay in effect.
+  The base image pin must stay in effect.
 - The `Containerfile` has no duplicate `LABEL` keys.
-      `buildah-action-runner`, `github-runner-ci`, and `kairos-fedora` set `org.opencontainers.image.title` in the `Containerfile`.
-      `buildah-action-runner` and `github-runner-ci` also set `org.opencontainers.image.description`.
-      `devcontainer-base` and `vscode-ssh-server` set no `LABEL`.
-      The workflows of all images except `devcontainer-base` add labels with `docker/metadata-action`.
+  `buildah-action-runner`, `github-runner-ci`, and `kairos-fedora` set `org.opencontainers.image.title` in the `Containerfile`.
+  `buildah-action-runner` and `github-runner-ci` also set `org.opencontainers.image.description`.
+  `devcontainer-base` and `vscode-ssh-server` set no `LABEL`.
+  The workflows of all images except `devcontainer-base` add labels with `docker/metadata-action`.
 
 ### Security posture
 
@@ -64,65 +64,65 @@ The pod-security level applies where a consumer runs the image.
 For an image, check these items.
 
 - The final image does not run as root, unless the image needs root.
-      `github-runner-ci` ends as `1001:1001`, to match the ARC runner workspace.
-      `vscode-ssh-server` ends as user `dev` (UID 1000).
-      `devcontainer-base` ends as user `vscode`.
-      `kairos-fedora` is an operating system image, so it has no `USER` instruction.
+  `github-runner-ci` ends as `1001:1001`, to match the ARC runner workspace.
+  `vscode-ssh-server` ends as user `dev` (UID 1000).
+  `devcontainer-base` ends as user `vscode`.
+  `kairos-fedora` is an operating system image, so it has no `USER` instruction.
 - The change adds no secret, token, or key to an image layer, a build argument, or a script.
-      The `ARG USERNAME` in `devcontainer-base` has a `hadolint ignore=DL3064` comment, because it is a local account name.
+  The `ARG USERNAME` in `devcontainer-base` has a `hadolint ignore=DL3064` comment, because it is a local account name.
 - The change does not widen privilege.
-      Look for `sudo`, `wheel`, added capabilities, and open firewall ports.
-      `images/kairos-fedora/build_files/configure.sh` sets the services and the firewall ports.
+  Look for `sudo`, `wheel`, added capabilities, and open firewall ports.
+  `images/kairos-fedora/build_files/configure.sh` sets the services and the firewall ports.
 - A change to `kairos-fedora` keeps the cloud datasource warning in `images/kairos-fedora/README.md` accurate.
 - New workflow permissions are the least that the job needs.
 - A new third-party GitHub Action is pinned to a commit SHA with a version comment.
-      See the known gaps.
+  See the known gaps.
 
 ### Tests
 
 - A behavior change in an image comes with a change to its check.
-      The checks are the image smoke test, the `github-runner-ci` job container test, and `e2e.sh`.
+  The checks are the image smoke test, the `github-runner-ci` job container test, and `e2e.sh`.
 - A new tool in `buildah-action-runner`, `github-runner-ci`, or `vscode-ssh-server` has a version command in the smoke test.
 - A change to `kairos-fedora` passes `e2e.sh` in the pull request.
-      The workflow runs it when a changed path matches the workflow trigger.
+  The workflow runs it when a changed path matches the workflow trigger.
 - A change to `e2e.sh` does not lower a timeout or remove a check without a reason in the commit message.
 
 ### Documentation
 
 - The image README matches the change.
-      Update the README when the change affects users, for example tags, users, environment variables, volumes, or ports.
+  Update the README when the change affects users, for example tags, users, environment variables, volumes, or ports.
 - New prose follows [AGENTS.md](../../AGENTS.md).
 
 ### Versioning and commit type
 
 - The pull request title and each commit follow [AGENTS.md](../../AGENTS.md).
-      Mark a breaking change as [the pull request template](../../.github/pull_request_template.md) describes.
+  Mark a breaking change as [the pull request template](../../.github/pull_request_template.md) describes.
 - The scope is the image name, for example `fix(kairos-fedora): ...`.
-      A change for more than one image can have no scope.
+  A change for more than one image can have no scope.
 - The type matches the effect on the version.
-      A `feat` or `fix` releases the image. A `test` change does not.
+  A `feat` or `fix` releases the image. A `test` change does not.
 - No pull request changes a release version, a `CHANGELOG.md`, or `.release-please-manifest.json`.
-      See [release tooling](release-tooling.md).
+  See [release tooling](release-tooling.md).
 - A new image has an entry in `release-please-config.json` and an entry with the value `0.0.0` in `.release-please-manifest.json`.
-      It also needs a `groupName` rule and a changelog rule in `renovate/marinatedconcrete.json`, an image workflow, and a job in the release workflow.
+  It also needs a `groupName` rule and a changelog rule in `renovate/marinatedconcrete.json`, an image workflow, and a job in the release workflow.
 
 ### Renovate behavior
 
 - A `devcontainer-base` update is `chore(package)`.
-      The result is a patch release of `github-runner-ci`.
+  The result is a patch release of `github-runner-ci`.
 - An automerge rule does not skip a check that matters.
-      See [Renovate presets](renovate-presets.md).
-      The image workflows do not run on a Renovate branch that merges as a branch merge.
-      They run after the merge.
+  See [Renovate presets](renovate-presets.md).
+  The image workflows do not run on a Renovate branch that merges as a branch merge.
+  They run after the merge.
 
 ### Release workflow
 
 - A path filter in a workflow lists files that exist.
 - A new image workflow supports `workflow_call` with the `sha` and `version` inputs.
-      It exposes a `digest` output.
-      It runs a smoke test before the release publishes the image.
+  It exposes a `digest` output.
+  It runs a smoke test before the release publishes the image.
 - The release publishes the tested digest.
-      The release does not rebuild the image.
+  The release does not rebuild the image.
 
 ## Automated validation coverage
 
