@@ -3,7 +3,7 @@
 Use this prompt to review a pull request in `marinatedconcrete/config`.
 Automated reviewers and human reviewers can use it.
 Read the pull request diff before you apply the checklist.
-Read `AGENTS.md` for the repository rules.
+Read [AGENTS.md](../../AGENTS.md) for the repository rules.
 
 ## Output
 
@@ -22,17 +22,13 @@ Only recommend an action.
 
 ### Pull request title and commits
 
-- The title must follow [Conventional Commits](https://www.conventionalcommits.org/).
-  The `Validate PR title` job enforces this rule.
-  This job is not a required check on `main`, so do not rely on it.
+- The title and commits must follow the rules in [AGENTS.md](../../AGENTS.md).
+  No required check enforces the title format, so check it yourself.
 - The type must match the effect of the change.
   Release Please uses the type to select the release version.
-- A breaking change must use `!` immediately before the colon of the title.
-  See "Breaking changes" below for the definition.
-- Read the pull request body.
-  See "Pull request body" below.
-- A change to a package must use a type that causes the correct release.
-  A `feat` change in `images/kairos-fedora` causes a minor release of the image.
+  See [release tooling](../../docs/qa/release-tooling.md).
+- The scope must name the component, or `package` for a Renovate update.
+- A change to a released part must use a type that causes the correct release.
 - Renovate uses the `test` type for `e2e.sh`, `tests/`, and `*.test.*` files.
   A change with this type does not cause a release.
   Do not accept a `test` type for a file that changes a released artifact.
@@ -59,45 +55,23 @@ The third command lists each line that has a breaking change footer token, with 
 The template comments say "BREAKING CHANGE" with no colon, so this command does not list them.
 Write "not checked" if `gh` fails.
 
+Check the body against [the pull request template](../pull_request_template.md).
 Flag each of these items:
 
 - A placeholder that the author did not edit.
-  Examples are an empty `## Summary` and the example text from the template, such as `feat(paperless): add a backup job`.
-  Do not flag the standard HTML comments of `.github/pull_request_template.md`.
-  The template does not tell the author to delete them, except the last one for a change that is not breaking.
-- A title that is not a valid Conventional Commit.
-  The `Validate PR title` job in `.github/workflows/semantic-commits.yml` runs `amannn/action-semantic-pull-request`.
-  This job is not a required check.
-  The job passes no `types` or `scopes` input.
-  The action therefore accepts its default types and any scope.
-  The repository uses the name of the component as the scope, for example `paperless` or `kube-vip`.
-  Renovate uses the scope `package`.
-  The job cannot check that the type fits the change.
-  Check the type yourself.
-- A breaking change footer in the wrong form.
-  The footer is a line that starts with `BREAKING CHANGE:` or `BREAKING-CHANGE:`.
-  The footer must be the last paragraph of the pull request description, not of a branch commit.
-  The squash merge uses the description as the commit message and discards the text of the branch commits.
-  A blank line must be before the footer.
-  A `## Breaking changes` heading is not a footer, because Release Please ignores it.
+  Examples are an empty `## Summary` and the example text from the template.
+  Do not flag the standard HTML comments of the template.
+- A breaking change annotation in the wrong form, as the template describes.
   A footer token with its colon inside an HTML comment is a defect.
   Release Please can read it and mark the pull request as breaking.
-  Release Please reads the dash form `BREAKING-CHANGE` even in the middle of a line.
   Report each such token.
 - Extra text that can change how Release Please reads the commit.
-  Text after the footer becomes part of the footer.
-  A `BEGIN_COMMIT_OVERRIDE` block replaces the commit message, as in #988.
+  A `BEGIN_COMMIT_OVERRIDE` block replaces the commit message.
   A `Release-As:` footer sets the release version.
   Accept these only if the maintainer wants the effect.
   Ask the author to state the reason.
 
-The last template comment tells the author to delete it when the change is not breaking.
 A body with no footer is correct for a change that is not breaking.
-
-Automation pull requests are exempt from the template checks.
-Renovate and Release Please write their own bodies.
-Do not ask them to follow the template.
-Still check the title and the breaking change annotation.
 
 ### Breaking changes
 
@@ -107,168 +81,36 @@ Ask this question: "Can a consumer who changes only the version pin see a failur
 If the answer is yes, the change is breaking.
 Judge the effect on the consumer, not the size of the diff.
 
-Each part has its own version, tag, and consumers:
-
-| Part                                               | How a consumer pins it                                                                     |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Kustomize component in `kustomization/components/` | `?ref=kustomize-<name>@v<version>` or the release asset of that tag                        |
-| Image in `images/`                                 | The image tag, for example `kairos-fedora:1.1.1` for the Git tag `kairos-fedora-1.1.1`     |
-| Action in `actions/`                               | `uses: marinatedconcrete/config/actions/image-release-notes@image-release-notes-<version>` |
-| Ansible collection in `ansible/`                   | The Git tag of the collection                                                              |
-| Renovate presets in `renovate/`                    | `github>marinatedconcrete/config//renovate/<file>#renovate-config-<version>`               |
-
-`release-please-config.json` lists the parts that Release Please releases.
-A change outside these paths does not cause a Release Please release.
+Each part has its own version, tag, and consumers.
+The QA page for each part in [docs/qa/](../../docs/qa/) lists what is breaking and what is not for that part.
+Read the page for each part that the change touches.
+A change outside the paths that Release Please releases causes no release.
 A `!` on such a change has no release effect.
-The image `images/devcontainer-base` is not in that list.
-The workflow `.github/workflows/image-devcontainer-base.yml` releases it on a schedule, each Thursday at 12:00 UTC.
 
-#### What is breaking, by part
-
-Kustomize components:
-
-- A resource that a consumer can patch or select is renamed, removed, or replaced.
-  Examples are the Deployment that became a container in a StatefulSet and the renamed PVC in #1035.
-  Another example is the split of the kube-vip DaemonSets in #376.
-- A port, port name, Service name, label, selector, or namespace changes.
-  Consumers use these in scrape rules, firewall rules, NetworkPolicy objects, and patches.
-  Examples are #958 (metrics port) and #1035 (port name).
-- The component needs something new from the consumer or the cluster.
-  Examples are a new required component (#285), a new secret key (#1035), and node support for user namespaces (#1027, #1033, #1035).
-- The component path or the package changes, as in #904.
-- A component is removed.
-- A major version of a pinned workload image changes, such as kube-vip v1 (#453) and Paperless v3 (#839).
-  Read the upstream release notes to decide.
-
-Not breaking for a Kustomize component:
-
-- A patch or minor update of an image that needs no change in the consumer files.
-  Renovate can merge these updates by itself for the Factorio and Mosquitto components and for Docker Hub images.
-  Updates from `ghcr.io`, `quay.io`, `registry.k8s.io`, and `lscr.io` need a person.
-  This applies to kube-vip, UniFi, and Paperless, as #1062, #1053, and #1055 show.
-  Automerge does not make an update not breaking. Judge the effect on the consumer.
-- A new optional resource or setting that does not change an existing selector, port, or name.
-- A change to a README, a test, or a comment.
-- A refactor that does not change the rendered output.
-
-To check the last item, compare the rendered output before and after the change.
-Run `kustomize build kustomization/components/<name>` on the base branch and on the head, then compare the results.
-
-Images:
-
-- The entrypoint, the user, a file path, or the tag scheme changes.
-- A package, command, or file that a consumer uses is removed or renamed.
-- The default behavior changes.
-  Examples are the Kairos v4.4.0 hardening (#927) and the Fedora major version (#988).
-- A major version of the base image or of the Kairos tools changes, as the Kairos section below says.
-
-Not breaking for an image: a patch update of a package, a rebuild, or a change to the release notes.
-
-Action (`actions/image-release-notes`):
-
-- An input is removed, renamed, or made required.
-- An output is removed or renamed.
-- The meaning of an input, the default of an input, or the name of an output file changes.
-- The action needs a new permission.
-
-`action.yml` and the README list the inputs and outputs.
-Not breaking for the action: a new optional input with a default that keeps the old behavior, as in #1040.
-Another example is a new row in the notes, as in #1020.
-
-Ansible collection:
-
-- A role is removed or renamed.
-- A role variable is removed, renamed, or has a new default that changes behavior.
-  The variables in `ansible/roles/minikube_test/defaults/main.yml` are an example.
-- A play is removed, as in the `kustomization_test` play.
-- The value of `requires_ansible` in `ansible/meta/runtime.yml` rises.
-- A new collection or tool is required.
-- A major update of `ansible` in `ansible/requirements.txt` is breaking, as in #1052.
-
-Not breaking for the collection: a new role, a new variable with a default that keeps the old behavior, or a fix to a task.
-
-Renovate presets:
-
-- A preset file is renamed or removed.
-  An example is the rename of `default.json` to `marinatedconcrete.json`.
-- A preset starts to extend another config or to set a time zone.
-- A change makes Renovate open a different set of pull requests for the consumer.
-  History does not show how the maintainers treat this case.
-  Recommend `!` and let the maintainer decide.
-
-Not breaking for the presets: a rule that affects only this repository, or a fix to a regular expression that keeps the same matches.
-
-#### Renovate major updates
-
-Renovate marks each major update as `feat(package)!`.
-The rule `Use a breaking commit type for major updates` in `renovate.json` does this.
+Renovate marks each major update as breaking through its configuration.
+See [Renovate presets](../../docs/qa/renovate-presets.md).
 The `!` matters only when the update changes a released path.
-A major update of a development tool, for example in `.devcontainer/` or `justfile`, causes no release.
-Do not block such an update because of the `!`.
-
-For a major update of a released part, read the upstream release notes.
-Decide if the consumer must act.
+Do not block a major update of a development tool because of the `!`.
+For a major update of a released part, read the upstream release notes and decide if the consumer must act.
 Do not assume that a major update is safe because Renovate wrote it.
-In history, #839 (Paperless v3) and #1052 (Ansible v15) have `!` and no footer.
-#927 (`kairos-init` v4.4.0) has a footer that lists the effects.
-History does not show a rule for this case.
 Recommend a footer when the release notes show a consumer action.
 Do not demand a footer when they show none.
-Renovate writes the body, so ask a maintainer to add the footer or a commit override, as #988 did.
-
-#### Kairos major versions
-
-Apply the Kairos section below in addition.
-A major update of `kairos-init` in `images/kairos-fedora/Containerfile` changes the image.
-It is breaking for `kairos-fedora` when the release notes show a changed default or a removed feature.
-In history, #927 is breaking and has a footer.
-A minor or patch update is not breaking, as in the `kairos-fedora` 1.1.0 and 1.1.1 releases.
-An `auroraboot` update in `e2e.sh` has the `test` type and causes no release.
-
-#### How to annotate
-
-History shows this practice:
-
-- Each change that the maintainers call breaking has `!` immediately before the colon.
-  `git log origin/main -E --grep '^[a-z]+(\([^)]*\))?!:' --format='%h %s'` lists 18 commits on 2026-11-24.
-  This command reads only the subject line.
-  It does not find a footer, a `!` before the scope, or a commit that has no `!`.
-  It also lists changes outside the released paths, for example #608.
-- The hand-written pull requests #958, #1027, #1033, #1035, and #927 have a footer.
-  The footer tells the consumer what to do, and it appears in the release notes.
-- Older breaking changes (#285, #376, #904) have `!` and no footer.
-  The Renovate majors #839 and #1052 also have `!` and no footer.
-  The Renovate major #453 has no `!`, so do not use it as an example.
-  Release Please then writes the title as the breaking entry, for example in `kustomize-kube-vip` 4.0.0.
-- The pull request #988 puts `!` before the scope (`feat!(deps):`).
-  This form is not valid, so do not use it as an example.
-  It uses a commit override.
-- No commit in `origin/main` has a footer and no `!`.
-
-Use these rules:
-
-- Require `!` immediately before the colon of the pull request title for each breaking change, as in `feat(paperless)!: change the backup format`.
-- Require a footer when a person writes the pull request and the consumer must act.
-  The footer is the last paragraph of the pull request description.
-  The footer has a short migration note.
-- Renovate adds `!` to a major update through `renovate.json`, and it adds no footer.
-  Recommend a footer, but do not require it, for a Renovate update.
-- Do not require a footer on a change that is not breaking.
+Renovate writes the body, so ask a maintainer to add the footer or a commit override.
+For a Kairos major version, apply the Kairos section below in addition.
 
 What to write in the review:
 
 - The change looks breaking and has no annotation.
   Request changes.
   Name the part, the consumer-visible change, and the file.
-  Ask the author to add `!` to the title and a footer to the pull request description.
+  Ask the author to annotate the title and the description as the template says.
   A title or description edit makes no new commit.
-- The change has `!` or a footer, but it does not look breaking.
+- The change has an annotation, but it does not look breaking.
   Ask the author to name the action that the consumer must take.
-  If there is no such action, ask the author to remove `!`, because `!` makes a major release of the part.
+  If there is no such action, ask the author to remove the annotation, because it makes a major release of the part.
   Make this blocking only when the part has a release.
 - The change has a footer and no `!`.
   Request changes and ask for `!` in the title.
-  Look for the footer in the pull request description.
   A footer only in a branch commit has no effect, so ask the author to move it to the description.
 - You are not sure that the change is breaking.
   Write "ask the maintainer".
@@ -277,28 +119,19 @@ What to write in the review:
 
 ### Documentation and comments
 
-- Prose must follow ASD-STE100, as `AGENTS.md` describes.
-  This rule applies to Markdown files, release notes, and code comments.
-- Check the wording.
-  A formatting check does not show ASD-STE100 compliance.
-- Past changelog entries must stay unchanged.
-- Commands, identifiers, URLs, and version numbers must stay unchanged when the prose changes.
+- Check the prose against the writing rules in [AGENTS.md](../../AGENTS.md).
+  A formatting check does not show compliance.
 - A comment must explain a reason that the code cannot show.
 
 ### Formatting, lint, and tests
 
 - The author must run `just format` before the commit.
-- Check that these required CI jobs pass: `lint`, `check-format`, `build`, and the `kustomization-test` jobs.
-  Also check `release-automation-test` and `image-release-notes-test` in `ci.yml`. They are not required.
-  The `Validate PR title` job is also not required.
-  The `build-container` job exists only in the Kairos and `vscode-ssh-server` image workflows.
-  Those workflows run only when a path of the image changes, so do not block on a `build-container` job that did not run.
+- Check that the CI checks for the change pass on the head commit.
+  Do not block on a check that did not run because the path filter of the change excluded it.
 - A change to a component in `kustomization/components/` must have a test in `kustomization/tests/`.
   The author can run `just kustomization-test <component>`.
-- A change to `images/kairos-fedora/` starts the image build and the e2e test.
-  The e2e test is `images/kairos-fedora/e2e.sh`.
-  The `Run Kairos Fedora E2E` step of the `build-container` job in `.github/workflows/image-kairos-fedora.yml` runs it.
-  Check that this step ran and passed.
+- A change to `images/kairos-fedora/` must run the e2e test `images/kairos-fedora/e2e.sh`.
+  Check that the e2e step ran and passed.
   Do not accept a skipped e2e step for a change to that image.
 - A change to `.github/release/` or `actions/image-release-notes/` must keep its own tests passing.
 - Do not accept a change that disables a test to make a check pass.
@@ -312,20 +145,19 @@ What to write in the review:
   The reason must name the namespace and the setting.
 - Do not accept a weaker profile only to make a test pass.
 - The test of a new component must set the Pod Security labels in its `namespace.yml`.
-  The `enforce` label must have the level in the README badge, for example `restricted` in `kustomization/tests/mosquitto/namespace.yml`.
+  The `enforce` label must have the level in the README badge.
 
 ### Release and Renovate behavior
 
 - Release Please makes the release pull request for each package.
   Do not change `.release-please-manifest.json` or a `CHANGELOG.md` file by hand.
+  See [release tooling](../../docs/qa/release-tooling.md).
 - Do not move or edit a published tag or release.
 - A change to `renovate/` or `renovate.json` must pass `just lint`.
-  The `renovate-lint` recipe checks the Renovate configuration.
-- A Renovate pull request does not have a human author.
-  Review it as you review any other change.
-  Renovate groups, delays, and automerges updates only as the `packageRules` in `renovate.json` say.
+- Review a Renovate pull request as you review any other change.
+  See [Renovate presets](../../docs/qa/renovate-presets.md) for its rules.
 - Renovate cannot read the release state of an upstream project when the datasource is an image registry.
-  See the next section for the Kairos case.
+  See the Kairos section below.
 
 ### Automated findings
 
@@ -352,13 +184,13 @@ Do this section in addition to the general checklist.
   Another pull request can replace it, or the base can be old.
 - Check that the pull request can merge.
   Read `mergeable` and `mergeStateStatus` with `gh pr view <number> --json mergeable,mergeStateStatus`.
-- Check that all required checks pass on the head commit.
+- Check that all checks pass on the head commit.
 - For a release pull request, check that the release has a real change.
   Read the new section in `CHANGELOG.md`.
   A section that lists only an earlier `chore(main)` release commit is not a real change.
-
 - Check the title and the breaking change annotation, as the general checklist says.
   Do not apply the pull request template checks to the body.
+  Renovate and Release Please write their own bodies.
 
 ### What not to do
 
@@ -368,6 +200,8 @@ Do this section in addition to the general checklist.
 - Do not ask the bot to change the code.
   The bot cannot answer.
   Ask a maintainer to act, or change the source of the generated file.
+- Do not merge the pull request.
+  Only recommend an action.
 
 ### Who decides
 
@@ -388,7 +222,7 @@ Do this section in addition to the general checklist.
   State that Release Please opens a new release pull request when a new release commit exists.
 - Recommend a rebase only if the maintainer needs the exact version tag.
   In that case, keep only the lines that the release pull request owns.
-- Before you recommend `close`, read the log of the last `Release Please` run on `main`.
+- Before you recommend `close`, read the log of the last Release Please run on `main`.
   Check if Release Please still plans this release.
   Write "not checked" if you cannot read the log.
 
@@ -419,7 +253,7 @@ Do not approve until you have written the result of the release check.
 Kairos publishes version 4 releases from the `kairos-io/kairos` repository.
 The images `kairos-init` and `auroraboot` now use the same version numbers as that repository.
 The `kairos-io/kairos-init` and `kairos-io/auroraboot` repositories are archived.
-Its last release is `v0.17.3` for `kairos-init` and `v0.31.0` for `auroraboot`.
+Their last releases are `v0.17.3` for `kairos-init` and `v0.31.0` for `auroraboot`.
 The release notes of `kairos-io/kairos` `v4.6.0` say that the Kairos pipeline releases AuroraBoot.
 Do not look for a version 4 release in the archived repositories.
 
@@ -457,16 +291,15 @@ A bump of a Kairos tag affects only these files:
   A change here changes the `kairos-fedora` image.
   A `feat`, `fix`, `docs`, `build`, or `chore` type also causes a `kairos-fedora` release.
   This includes the `chore(package)` type of a `kairos-init` patch update.
+  A `kairos-init` major update is breaking for `kairos-fedora` when the release notes show a changed default or a removed feature.
 - `images/kairos-fedora/e2e.sh` uses `quay.io/kairos/auroraboot` in `AURORABOOT_IMAGE`.
   It builds the installer ISO for the e2e test.
   A change here changes the test only.
+  An `auroraboot` update in `e2e.sh` has the `test` type and causes no release.
 - `images/kairos-fedora/release-notes-components.sh` reads `/etc/kairos-release` and the `kairos-agent --version` output.
   A change to the output format of Kairos can break the release notes.
-- `.github/workflows/image-kairos-fedora.yml` builds and tests the image.
-  It runs `images/kairos-fedora/e2e.sh`.
-- `images/kairos-fedora/README.md` and `actions/image-release-notes/README.md` describe this use.
 
-These are the files that pin an upstream Kairos image or tool: `Containerfile` and `e2e.sh`.
+`Containerfile` and `e2e.sh` are the files that pin an upstream Kairos image or tool.
 Other files only use the name `kairos-fedora`.
 Search again with `grep -rIn 'kairos' --exclude-dir=.git --exclude-dir=node_modules .`.
 Report each new file that appears in the result.
@@ -484,9 +317,6 @@ Report each new file that appears in the result.
   Renovate skips the wait when the registry gives no timestamp, because of `timestamp-optional`.
   Do not assume that a delay protected the pull request.
 - No rule in `renovate.json` or `renovate/` sets `stabilityDays`, a pre-release setting, or a datasource for the `kairos-io` GitHub releases.
-- The `feat(package)` and `test(package)` titles come from the update type and the file rules.
-  A `kairos-init` minor update in `Containerfile` has the type `feat`.
-  An `auroraboot` update in `e2e.sh` has the type `test`.
 - Renovate cannot know whether the upstream release is a draft, a pre-release, or missing.
   Renovate also cannot know whether the image content is the final content of the release.
 
@@ -550,7 +380,7 @@ Check each of these items for a Kairos update, after the decision is "proceed":
 
 - Read the release notes of `kairos-io/kairos` for the new tag.
   Look for changes to `kairos-init` arguments, to the `/etc/kairos-release` fields, and to AuroraBoot.
-- Check that the `Run Kairos Fedora E2E` step in the `build-container` job of `image-kairos-fedora.yml` ran and passed on the head commit.
+- Check that the e2e step of the `kairos-fedora` image build ran and passed on the head commit.
 - Check that the `kairos-init` and `auroraboot` versions in the diff match, when both change.
   A mismatch is acceptable only with a stated reason.
 
