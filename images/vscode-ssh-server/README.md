@@ -1,4 +1,5 @@
 # Marinated Concrete SSH Server for VS Code
+
 This SSH server supports the VS Code Remote SSH feature.
 The [LinuxServer image](https://docs.linuxserver.io/images/docker-openssh-server/) uses Alpine Linux, which does not include glibc.
 The missing glibc library is a [known limitation](https://code.visualstudio.com/docs/remote/ssh#_remote-ssh-limitations) for VS Code Remote SSH.
@@ -7,12 +8,15 @@ Run this container as a sidecar for an application such as ESPHome, Home Assista
 This image has fewer configuration options than the LinuxServer image.
 
 ## Configuration:
+
 Add a container next to the application container.
+
 - Set `AUTHORIZED_KEYS_URL` to the URL of your authorized keys. For example, use `https://github.com/$GH_USERNAME.keys`.
 - Mount a small persistent volume at `/config`. This volume stores the SSH host key.
 - Mount the volume for SSH access at `/data`. SSH sessions start in this directory.
 
 ## Examples
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment

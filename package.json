@@ -5,7 +5,7 @@
   },
   "packageManager": "pnpm@10.34.9",
   "scripts": {
-    "format": "prettier --log-level warn --no-error-on-unmatched-pattern --write '**/*.yml' '**/*.json' '**/*.md' pnpm-workspace.yaml",
-    "check-format": "prettier --no-error-on-unmatched-pattern --check '**/*.yml' '**/*.json' '**/*.md' pnpm-workspace.yaml"
+    "format": "prettier --log-level warn --no-error-on-unmatched-pattern --write '**/*.md' '**/*.yml' '**/*.yaml' '**/*.json' '**/*.mjs'",
+    "check-format": "prettier --no-error-on-unmatched-pattern --check '**/*.md' '**/*.yml' '**/*.yaml' '**/*.json' '**/*.mjs'"
   }
 }

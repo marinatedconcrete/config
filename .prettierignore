@@ -1,3 +1,12 @@
 # Release Please generated files
 **/CHANGELOG.md
 ansible/galaxy.yml
+
+# Dependencies and local state.
+node_modules
+.pnpm-store
+ansible/.ansible
+.claude/worktrees
+
+# pnpm generates this lock file.
+pnpm-lock.yaml

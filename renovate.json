@@ -20,11 +20,7 @@
     {
       "description": "Do not pin Fedora image digests because old digests disappear",
       "matchDatasources": ["docker"],
-      "matchPackageNames": [
-        "fedora",
-        "fedora-minimal",
-        "quay.io/fedora/**"
-      ],
+      "matchPackageNames": ["fedora", "fedora-minimal", "quay.io/fedora/**"],
       "pinDigests": false
     },
     {
@@ -111,7 +107,9 @@
       "automerge": true,
       "automergeType": "branch",
       "groupName": "samba",
-      "matchFileNames": ["kustomization/components/paperless/kustomization.yml"],
+      "matchFileNames": [
+        "kustomization/components/paperless/kustomization.yml"
+      ],
       "matchPackageNames": ["ghcr.io/servercontainers/samba"],
       "matchUpdateTypes": ["digest"],
       "schedule": ["on the first day of the month"]
@@ -146,10 +144,7 @@
     {
       "description": "Minor k3s updates every two weeks",
       "matchUpdateTypes": ["minor"],
-      "matchDepNames": [
-        "k3s-io/k3s",
-        "kubernetes/kubernetes"
-      ],
+      "matchDepNames": ["k3s-io/k3s", "kubernetes/kubernetes"],
       "minimumReleaseAge": "1 week",
       "schedule": ["* * 7,21 * *"]
     },
@@ -157,10 +152,7 @@
       "description": "Auto-merge k3s patch updates every two weeks",
       "automerge": true,
       "automergeType": "branch",
-      "matchDepNames": [
-        "k3s-io/k3s",
-        "kubernetes/kubernetes"
-      ],
+      "matchDepNames": ["k3s-io/k3s", "kubernetes/kubernetes"],
       "matchUpdateTypes": ["patch"],
       "minimumReleaseAge": "1 week",
       "schedule": ["* * 14,28 * *"]
