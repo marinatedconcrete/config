@@ -116,8 +116,6 @@ Automation cannot check these items. A person must do them.
 
 ## Known gaps
 
-- The enforce-baseline and enforce-restricted READMEs state version `v1.36`. Their `namespace-labels.yml` files set `v1.37`. The Pod Security tests read the YAML, not the README.
-- The `priorityclass` README version badge queries the `factorio` path, so it shows the Factorio version.
 - The `priorityclass` test has no assertion.
 - No test checks a security context directly. The tests rely on the namespace admission level. A restricted component that is deployed without the label is not checked.
 - No test checks that a README example builds. A broken example is not found.
