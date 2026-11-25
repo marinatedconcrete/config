@@ -7,8 +7,12 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
+from unittest import mock
+
+import check_format
 
 HOOK_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 HOOK_FILES = ("check-format.sh", "check_format.py")
@@ -18,6 +22,30 @@ JUST_STUB = """#!/bin/sh
 pwd > "$JUST_LOG"
 echo "$JUST_OUTPUT"
 exit "${JUST_EXIT:-0}"
+"""
+
+
+# The real devcontainer CLI 0.91.0 writes this text to stderr and exits with status 1.
+NOT_FOUND = """[2026-11-25T06:42:56.055Z] Error: Dev container not found.
+    at pg (/cli/dist/spec-node/devContainersSpecCLI.js:479:1484)
+    at async cZ (/cli/dist/spec-node/devContainersSpecCLI.js:678:4001)
+"""
+
+DEVCONTAINER_STUB = f"""#!/usr/bin/env python3
+import json, os, sys, time
+args = sys.argv[1:]
+with open(os.environ["DEVCONTAINER_LOG"], "a") as log:
+    log.write(json.dumps(args) + "\\n")
+mode = os.environ["DEVCONTAINER_MODE"]
+if mode == "missing":
+    sys.stderr.write({NOT_FOUND!r})
+    sys.exit(1)
+if args[-1:] == ["true"]:
+    sys.exit(0)
+if mode == "hang":
+    time.sleep(30)
+print(os.environ["JUST_OUTPUT"])
+sys.exit(0 if mode == "pass" else 1)
 """
 
 
@@ -76,10 +104,12 @@ class HookTest(unittest.TestCase):
         write_executable(os.path.join(self.stubs, "just"), JUST_STUB)
         write_executable(os.path.join(self.stubs, "pnpm"), "#!/bin/sh\n")
         self.just_log = os.path.join(self.tmp, "just.log")
+        self.devcontainer_log = os.path.join(self.tmp, "devcontainer.log")
 
-    def run_hook(self, command_line, cwd=None, just_exit=1, stdin=None):
-        if os.path.exists(self.just_log):
-            os.remove(self.just_log)
+    def run_hook(self, command_line, cwd=None, just_exit=1, stdin=None, mode="fail"):
+        for log in (self.just_log, self.devcontainer_log):
+            if os.path.exists(log):
+                os.remove(log)
         env = {
             "PATH": self.stubs + os.pathsep + self.tools,
             "HOME": self.tmp,
@@ -87,6 +117,8 @@ class HookTest(unittest.TestCase):
             "JUST_LOG": self.just_log,
             "JUST_EXIT": str(just_exit),
             "JUST_OUTPUT": "Code style issues found in README.md.",
+            "DEVCONTAINER_LOG": self.devcontainer_log,
+            "DEVCONTAINER_MODE": mode,
         }
         if stdin is None:
             stdin = json.dumps(
@@ -100,6 +132,25 @@ class HookTest(unittest.TestCase):
         return subprocess.run(
             [self.hook], input=stdin, capture_output=True, text=True, env=env, timeout=60
         )
+
+    def use_devcontainer(self):
+        """Remove `pnpm` from the host and add a stub `devcontainer` CLI."""
+        os.remove(os.path.join(self.stubs, "pnpm"))
+        write_executable(os.path.join(self.stubs, "devcontainer"), DEVCONTAINER_STUB)
+
+    def devcontainer_calls(self):
+        if not os.path.exists(self.devcontainer_log):
+            return []
+        with open(self.devcontainer_log) as log:
+            return [json.loads(line) for line in log]
+
+    def notice_text(self, result):
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        context = output["hookSpecificOutput"]["additionalContext"]
+        self.assertEqual(output["systemMessage"], context)
+        self.assertIn("did not run", context)
+        return context
 
     def test_blocks_commit_and_push_forms(self):
         commands = [
@@ -267,6 +318,103 @@ class HookTest(unittest.TestCase):
         self.assert_outside_notice(
             self.run_hook("jj commit", cwd=self.other_repo), self.other_repo
         )
+
+    def test_devcontainer_runs_check_when_host_has_no_pnpm(self):
+        self.use_devcontainer()
+        result = self.run_hook("git commit -m x", mode="pass")
+        self.assertEqual((result.returncode, result.stdout, result.stderr), (0, "", ""))
+        root = os.path.realpath(self.repo)
+        probe, run = self.devcontainer_calls()
+        self.assertEqual(probe, ["exec", "--workspace-folder", root, "true"])
+        self.assertEqual(run[:3], ["exec", "--workspace-folder", root])
+        self.assertEqual(run[-1], ".")
+        self.assertFalse(os.path.exists(self.just_log))
+
+    def test_devcontainer_check_failure_blocks(self):
+        self.use_devcontainer()
+        result = self.run_hook("git push", mode="fail")
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn(
+            f"`just check-format` failed in {os.path.realpath(self.repo)} in the devcontainer",
+            result.stderr,
+        )
+        self.assertIn("Code style issues found in README.md.", result.stderr)
+
+    def test_host_failure_names_the_host(self):
+        result = self.run_hook("git push")
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("on the host with exit status 1", result.stderr)
+
+    def test_no_running_devcontainer_shows_notice(self):
+        self.use_devcontainer()
+        context = self.notice_text(self.run_hook("git commit -m x", mode="missing"))
+        root = os.path.realpath(self.repo)
+        self.assertIn("`pnpm` is missing on the host", context)
+        self.assertIn("reported: Dev container not found.", context)
+        self.assertIn(f"run `devcontainer up --workspace-folder {root}`", context)
+        self.assertEqual(len(self.devcontainer_calls()), 1)
+
+    def test_missing_devcontainer_cli_shows_notice(self):
+        os.remove(os.path.join(self.stubs, "just"))
+        context = self.notice_text(self.run_hook("git commit -m x"))
+        self.assertIn("`just` is missing on the host and the `devcontainer` CLI is missing", context)
+
+    def test_host_tools_skip_devcontainer(self):
+        write_executable(os.path.join(self.stubs, "devcontainer"), DEVCONTAINER_STUB)
+        result = self.run_hook("git commit -m x", just_exit=0, mode="pass")
+        self.assertEqual((result.returncode, result.stdout), (0, ""))
+        self.assertTrue(os.path.exists(self.just_log))
+        self.assertEqual(self.devcontainer_calls(), [])
+
+    def test_devcontainer_checks_worktree_inside_root(self):
+        self.use_devcontainer()
+        base = os.path.join(self.tmp, "with space")
+        self.repo = os.path.join(base, "repo")
+        make_repo(self.repo)
+        self.hook = install_hook(self.repo)
+        worktree = os.path.join(self.repo, ".claude", "worktrees", "a b")
+        git("-C", self.repo, "worktree", "add", "-q", "--detach", worktree)
+        add_prettier(worktree)
+        result = self.run_hook("git commit -m x", cwd=worktree, mode="pass")
+        self.assertEqual((result.returncode, result.stdout, result.stderr), (0, "", ""))
+        run = self.devcontainer_calls()[-1]
+        self.assertEqual(run[:3], ["exec", "--workspace-folder", os.path.realpath(self.repo)])
+        self.assertEqual(run[-1], os.path.join(".claude", "worktrees", "a b"))
+
+    def test_devcontainer_skips_worktree_outside_root(self):
+        self.use_devcontainer()
+        worktree = os.path.join(self.tmp, "elsewhere", "worktree")
+        git("-C", self.repo, "worktree", "add", "-q", worktree)
+        add_prettier(worktree)
+        context = self.notice_text(self.run_hook("git commit -m x", cwd=worktree, mode="pass"))
+        self.assertIn(f"does not mount {os.path.realpath(worktree)}", context)
+        self.assertEqual(self.devcontainer_calls(), [])
+
+    def test_devcontainer_skips_repository_outside_project(self):
+        self.use_devcontainer()
+        self.assert_outside_notice(
+            self.run_hook("git commit -m x", cwd=self.other_repo, mode="pass"),
+            self.other_repo,
+        )
+        self.assertEqual(self.devcontainer_calls(), [])
+
+    def test_devcontainer_timeout_blocks(self):
+        self.use_devcontainer()
+        env = {
+            "PATH": self.stubs + os.pathsep + self.tools,
+            "DEVCONTAINER_LOG": self.devcontainer_log,
+            "DEVCONTAINER_MODE": "hang",
+            "JUST_OUTPUT": "",
+        }
+        job = check_format.Check(
+            self.repo, "in the devcontainer", ["devcontainer", "exec", "sh"]
+        )
+        with mock.patch.dict(os.environ, env), mock.patch.object(
+            check_format, "CHECK_TIMEOUT_SECONDS", 1
+        ):
+            message = check_format.check(job)
+        self.assertIn("did not finish", message)
+        self.assertIn("in the devcontainer in 1 seconds", message)
 
 
 if __name__ == "__main__":
