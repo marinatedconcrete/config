@@ -41,7 +41,8 @@ Apply each item to the diff.
 ### Security posture
 
 - The `Image Release Notes` action in `actions/image-release-notes/action.yml` needs only `contents: read`.
-  The image workflows call it from jobs that have `contents: read`.
+  The image workflows call it from jobs that also have `packages: write`.
+  Treat a change to the action as a change that runs with that write access.
   A change must not add a permission requirement for this action.
 - The `publish` action must run no code from the image.
   The comment in `publish/action.yml` states this rule.
