@@ -4,7 +4,7 @@ This component sets Pod Security enforcement labels on every Namespace resource 
 
 | Mode    | Policy     | Version |
 | ------- | ---------- | ------- |
-| enforce | restricted | v1.36   |
+| enforce | restricted | v1.37   |
 
 The component does not create Namespace resources or change workload security contexts.
 Add each Namespace resource to the consumer Kustomization.
