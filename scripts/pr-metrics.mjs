@@ -6,6 +6,8 @@
 // The author/hive label marks pull requests from the Hive swarm.
 // The author/clanker label marks pull requests from other people that use the Hive contribution flow.
 // Both are Hive work, so both count.
+// Hive can adopt a pull request that a person wrote. Adopted pull requests carry ADOPTED_LABEL.
+// A person wrote the first version of those, so they do not measure the agents, and they never count.
 //
 // Usage: node scripts/pr-metrics.mjs [--window-days N] [--summary-file PATH]
 // The script needs the gh CLI with read access to pull requests.
@@ -16,6 +18,7 @@ import { promisify } from "node:util";
 
 export const HIVE_PR_LABELS = ["author/hive", "author/clanker"];
 // Release pull requests come from this app. They follow from other work and need no review.
+export const ADOPTED_LABEL = "stage/074-adopted-by-hive";
 export const EXCLUDED_AUTHOR = "app/formwork-remover";
 export const DEFAULT_WINDOW_DAYS = 30;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -49,6 +52,7 @@ export function summarize(
   const hive = pullRequests.filter(
     ({ labels, author }) =>
       author?.login !== EXCLUDED_AUTHOR &&
+      !labels.some(({ name }) => name === ADOPTED_LABEL) &&
       labels.some(({ name }) => hiveLabels.includes(name)),
   );
   const since = now.getTime() - windowDays * DAY_MS;
@@ -74,7 +78,7 @@ export function renderSummary(
   return [
     "## Hive pull request acceptance",
     "",
-    `Pull requests with one of these labels: ${hiveLabels.map((l) => `\`${l}\``).join(", ")}.`,
+    `Pull requests with one of these labels: ${hiveLabels.map((l) => `\`${l}\``).join(", ")}. Pull requests with the \`${ADOPTED_LABEL}\` label do not count.`,
     "",
     "| Period | Merged | Closed unmerged | Open | Acceptance rate |",
     "| --- | --- | --- | --- | --- |",

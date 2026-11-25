@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  ADOPTED_LABEL,
   EXCLUDED_AUTHOR,
   HIVE_PR_LABELS,
   renderSummary,
@@ -123,4 +124,15 @@ test("counts both Hive labels", () => {
     { now, windowDays: 30 },
   );
   assert.equal(allTime.merged, 2);
+});
+
+test("ignores Hive pull requests that Hive adopted from a person", () => {
+  const { allTime } = summarize(
+    [
+      pr("MERGED", "2026-06-01T00:00:00Z", HIVE_PR_LABELS[0], ADOPTED_LABEL),
+      pr("MERGED", "2026-06-01T00:00:00Z", HIVE_PR_LABELS[1]),
+    ],
+    { now, windowDays: 30 },
+  );
+  assert.equal(allTime.merged, 1);
 });
