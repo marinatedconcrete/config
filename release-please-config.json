@@ -85,6 +85,11 @@
       "package-name": "kustomize-kube-vip-wireguard",
       "release-type": "simple"
     },
+    "kustomization/components/longhorn": {
+      "initial-version": "1.0.0",
+      "package-name": "kustomize-longhorn",
+      "release-type": "simple"
+    },
     "kustomization/components/mosquitto": {
       "package-name": "kustomize-mosquitto",
       "release-type": "simple"

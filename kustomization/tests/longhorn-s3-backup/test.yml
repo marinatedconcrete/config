@@ -1,0 +1,26 @@
+---
+- name: Test longhorn-s3-backup
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Render the component
+      ansible.builtin.command:
+        argv:
+          - kustomize
+          - build
+          - "{{ playbook_dir }}"
+      register: rendered
+      changed_when: false
+
+    - name: Check the rendered configuration
+      vars:
+        manifest: "{{ rendered.stdout | from_yaml }}"
+      ansible.builtin.assert:
+        that:
+          - manifest.apiVersion == "longhorn.io/v1beta2"
+          - manifest.kind == "BackupTarget"
+          - manifest.metadata.name == "s3"
+          - manifest.metadata.namespace == "longhorn-test"
+          - manifest.spec.backupTargetURL == "s3://backup-test@us-east-1/"
+          - manifest.spec.credentialSecret == "longhorn-s3-credentials"
+          - manifest.spec.pollInterval == "5m"

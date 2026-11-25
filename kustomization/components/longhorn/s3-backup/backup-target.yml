@@ -1,0 +1,9 @@
+---
+apiVersion: longhorn.io/v1beta2
+kind: BackupTarget
+metadata:
+  name: s3
+spec:
+  backupTargetURL: ""
+  credentialSecret: longhorn-s3-credentials
+  pollInterval: 5m
