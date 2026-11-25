@@ -1,0 +1,25 @@
+---
+name: Feature or idea
+description: Suggest a new feature, an improvement, or an idea to discuss.
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or goal
+      description: Describe the problem to solve or the goal to reach.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the change that you suggest. Describe other options that you considered.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add links, examples, or other details that help.
