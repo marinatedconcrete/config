@@ -6,7 +6,8 @@ See the [README](README.md) for the list of parts.
 
 ## Set up
 
-- Use the devcontainer in `.devcontainer/`. Run `pnpm install --frozen-lockfile` after you open it.
+- Use the devcontainer in `.devcontainer/`. It runs `.devcontainer/post-create-command.sh` when it creates the container. That script installs the package manager, the dependencies, and the Ansible collection.
+- Run `pnpm install --frozen-lockfile` again after a change to `pnpm-lock.yaml`. The script runs only when the container is created.
 - Run `just` to list the recipes.
 
 ## Make a change
