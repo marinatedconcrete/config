@@ -243,10 +243,12 @@ ansible-lint:
     #!/usr/bin/env bash
     set -euo pipefail
 
+    # Stop Minikube when the recipe exits, also after a failure.
+    trap 'minikube stop --profile=ansible-lint' EXIT
+
     # Start Minikube to supply a correct Kubernetes context for ansible-lint.
     minikube start --interactive=false --profile=ansible-lint
     cd ansible && ansible-lint
-    minikube stop --profile=ansible-lint
 
 # Check Containerfiles and Dockerfiles with hadolint.
 [group('lint')]
