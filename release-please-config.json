@@ -72,6 +72,11 @@
       "release-type": "simple",
       "tag-separator": "-"
     },
+    "kustomization/components/authelia": {
+      "initial-version": "1.0.0",
+      "package-name": "kustomize-authelia",
+      "release-type": "simple"
+    },
     "kustomization/components/factorio": {
       "package-name": "kustomize-factorio",
       "release-type": "simple"
