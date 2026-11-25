@@ -135,6 +135,12 @@
       "matchPackageNames": ["marinatedconcrete/config"]
     },
     {
+      "groupName": "marinatedconcrete Pod Security Kustomize Components",
+      "groupSlug": "marinatedconcrete-kustomize-pod-security",
+      "matchCurrentValue": "kustomize-pod-security@**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
       "groupName": "marinatedconcrete Priority Classes Kustomize Component",
       "groupSlug": "marinatedconcrete-kustomize-priorityclass",
       "matchCurrentValue": "kustomize-priorityclass@**",

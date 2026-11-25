@@ -42,7 +42,13 @@
       "automergeType": "branch"
     },
     {
-      "description": "Auto-merge GitHub's own actions. Do not auto-merge third-party actions, because the image workflows give them write tokens.",
+      "description": "Do not auto-merge third-party actions, because the image workflows give them write tokens. This rule overrides the patch rule above.",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["!actions/*"],
+      "automerge": false
+    },
+    {
+      "description": "Auto-merge GitHub's own actions",
       "automerge": true,
       "automergeType": "branch",
       "matchManagers": ["github-actions"],

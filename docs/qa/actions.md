@@ -171,6 +171,3 @@ Do these checks when automation cannot decide.
 - Add a check that the regex manager in `renovate.json` finds the tool image lines in `release-notes.sh`.
 - Add a check that the tables in `README.md` match `action.yml`.
 - Make the image workflows assert the notes, not only create them.
-- The image workflows hold write tokens.
-  Review updates of external GitHub Actions after they merge.
-  See [Renovate presets](renovate-presets.md).

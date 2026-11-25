@@ -186,9 +186,6 @@ A person must check these items, because no automation covers them.
 
 Each gap can become an issue.
 
-- A patch update of a third-party GitHub Action can merge with no pull request.
-  See [Renovate presets](renovate-presets.md).
-  The image workflows do not run before the merge, and the actions get `packages: write` tokens.
 - No image check is required.
   A pull request that breaks an image can merge when the path-filtered check fails.
   An aggregate job that always runs and reads the path-filtered results can fix this.
