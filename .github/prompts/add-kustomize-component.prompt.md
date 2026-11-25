@@ -25,7 +25,11 @@ Copy the structure of a current component. Do not copy from memory.
 - `kustomization/components/mosquitto`: a small `restricted` component with a `Deployment`, a `Service`, a PVC, and a generated `ConfigMap`.
 - `kustomization/components/paperless`: a `baseline` component with documented exceptions.
 - `kustomization/components/kube-vip-wireguard`: a recent component with its own release package.
-  Commit `de1dc7d` added it. Run `git show --stat de1dc7d` to see every file that a new component touches.
+  Commit `de1dc7d` added it. Run `git show --stat de1dc7d` to see the files of a new component.
+  Some files in that commit are specific to kube-vip: `justfile`, `renovate.json`, `.devcontainer/devcontainer.json`, and `.github/workflows/codegen-kube-vip.yml`.
+  Do not copy these changes for another component.
+  The generic files are the component directory, the test directory, the CI matrix in `.github/workflows/ci.yml`, `release-please-config.json`, `.release-please-manifest.json`, and `renovate/marinatedconcrete.json`.
+  That commit changed `.github/workflows/checks.yml`. This file is now `.github/workflows/ci.yml`.
 
 ## Step 1. Build the component
 
@@ -72,13 +76,13 @@ Before you accept an exception, try these fixes:
 2. Add only the capabilities that the container needs. Keep `drop: [ALL]`.
 3. Set `hostUsers: false` so the pod runs in a user namespace.
    `paperless` does this. Document the node requirements in the README.
-4. Move a privileged step to an init container that is not privileged, as `kube-vip-wireguard` does for its node checks.
+4. Do not run a privileged step in the pod. Ask the node owner to do it, and add an init container that is not privileged and checks the result. `kube-vip-wireguard` checks node sysctls this way.
 
 Justify each exception in these three places:
 
 - A comment in the manifest that names the field and the reason, for example the `CHOWN` comment in `kustomization/components/paperless/statefulset.yml`.
 - The Pod Security badge in the component README. Use `baseline` or `privileged` in place of `restricted`.
-- The commit message body.
+- The PR description.
 
 ## Step 2. Add the end-to-end test
 
@@ -132,7 +136,7 @@ Run `just test` to run every component test.
 ## Step 3. Add the CI matrix entry
 
 Add `{name}` to `jobs.kustomization-test.strategy.matrix.kustomization-test` in `.github/workflows/ci.yml`.
-Keep the list in alphabetical order.
+Add the entry in the place that fits the list. The list is not in strict alphabetical order now.
 The `.github/workflows/release-package.yml` workflow runs the same test before it publishes a release.
 
 GitHub shows each matrix entry as a separate check named `kustomization-test (<entry>)`.
@@ -153,7 +157,7 @@ Copy the structure of `kustomization/components/mosquitto/README.md`.
 6. Add the `# Examples` section with a `## Component` example and a `## Resource` example.
    The component URL is `https://github.com/marinatedconcrete/config/kustomization/components/{name}?ref=kustomize-{name}@v{version}`.
    The resource URL is `https://github.com/marinatedconcrete/config/releases/download/kustomize-{name}@v{version}/{name}.yml`.
-7. Add `# Required Secrets`, `# Required Setup`, and `# Optional Patches` sections where they apply.
+7. Add `# Required Secrets`, `# Required Setup`, `# Required Patches`, and `# Optional Patches` sections where they apply.
    Show a complete example for each secret and each patch.
 8. Document each node or cluster requirement, for example user namespace support.
 
@@ -246,6 +250,8 @@ just lint
 - `just kustomize-lint` builds every component. It needs `kustomize`.
 - `just renovate-lint` validates `renovate.json` and the files in `renovate/`. It needs `pnpm install --frozen-lockfile`.
 - `just kustomization-test {name}` needs `minikube` and Docker.
+  `just kustomization-test` and `just test` start and delete minikube profiles. The handlers of the `minikube_test` role run `minikube stop` and `minikube delete`.
+  Run them in the devcontainer or on a machine that has no profile with the same name.
 - `just lint` also runs `ansible-lint` and needs `minikube`. Run the parts that you can.
 - Check all new prose against ASD-STE100. `just check-format` does not check it.
 - Check that `git status` shows no stray files, for example a built manifest.
@@ -255,13 +261,13 @@ just lint
 1. Make a branch. Do not commit to `main`.
 2. Use Conventional Commits. Sign the commits when possible.
    - A new component: `feat({name}): add the {name} component`.
-   - A breaking change to a released component: `feat({name})!: ...` with a `BREAKING CHANGE:` footer.
+   - A breaking change to a released component: `feat({name})!: ...`. Put `!` immediately before the colon. Add a `BREAKING CHANGE:` footer as the last paragraph of the PR description.
    - A fix: `fix({name}): ...`.
    - Documentation only: `docs({name}): ...`.
    - Test only: `test({name}): ...`. Renovate uses the same `test` type for test files.
      Use the component name as the scope.
      The changelog sections are `feat`, `fix`, `docs`, `build`, and `chore`.
-3. Put the reasons, and each Pod Security exception, in the commit body.
+3. Put the reasons, and each Pod Security exception, in the PR description. The repository allows only squash merge. The PR title and the PR description become the commit on `main`, and the text in the branch commits is discarded.
 4. Run `just format` before each commit.
 5. Open the PR. Use a Conventional Commit title, because `.github/workflows/semantic-commits.yml` checks it.
 6. Add "Part of #1076" to the PR description only if the work is part of that issue.
@@ -278,3 +284,7 @@ just lint
 - One new group rule in `renovate/marinatedconcrete.json`.
 - A Renovate auto-merge rule in `renovate.json`, if the component needs one.
 - A PR description that lists the verification results, each exception to `restricted`, and the possible manual update of the required checks.
+
+Put all of these changes in one `feat({name})` commit. This is the established practice.
+A new component also causes a release of the Renovate preset, because `renovate/marinatedconcrete.json` changes.
+See `renovate/CHANGELOG.md` version 2.9.0 and `kube-vip-wireguard` in #1010.
