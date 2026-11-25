@@ -7,7 +7,8 @@ Replace `{file}` with the configuration name.
 Add `#renovate-config-{version}` to select a specified version.
 Replace `{version}` with a version from the [GitHub releases](https://github.com/marinatedconcrete/config/releases?q=%22renovate-config%22).
 
-The examples below include a version tag.
+The examples below use the `{version}` placeholder. Replace it before you use an example.
+If you use the `renovate/marinatedconcrete` preset, Renovate updates the version tag in a root `renovate.json` or `renovate.json5` file.
 
 ## `renovate/devcontainer`
 
@@ -19,7 +20,7 @@ Add this preset to your `extends` list:
 ```json
 {
   "extends": [
-    "github>marinatedconcrete/config//renovate/devcontainer#renovate-config-2.0.0"
+    "github>marinatedconcrete/config//renovate/devcontainer#renovate-config-{version}"
   ]
 }
 ```
@@ -35,7 +36,7 @@ Add this preset to your `extends` list:
 ```json
 {
   "extends": [
-    "github>marinatedconcrete/config//renovate/marinatedconcrete#renovate-config-2.0.0"
+    "github>marinatedconcrete/config//renovate/marinatedconcrete#renovate-config-{version}"
   ]
 }
 ```
@@ -49,7 +50,7 @@ Add this preset to your `extends` list:
 ```json
 {
   "extends": [
-    "github>marinatedconcrete/config//renovate/recommended#renovate-config-2.0.0"
+    "github>marinatedconcrete/config//renovate/recommended#renovate-config-{version}"
   ]
 }
 ```

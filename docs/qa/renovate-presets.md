@@ -75,7 +75,7 @@ These points are specific to Renovate.
 ### Documentation and prose
 
 - Check that the prose follows [AGENTS.md](../../AGENTS.md). This applies to the `description` fields and to the `README.md` file.
-- Check that a version tag in a `README.md` example is not far behind the latest release. See Known gaps.
+- Check that a `README.md` example uses the `{version}` placeholder, not a fixed version tag. A fixed tag becomes old after each release.
 
 ### Evidence in the pull request
 
@@ -122,7 +122,6 @@ A person must check the behavior of the configuration, because no job does.
 - No test checks what a rule or a custom manager does. A mistake in a regular expression passes the validator and has no effect.
   An issue can add a Renovate dry run or a fixture test.
 - The validator accepts a malformed preset name in `extends`. A check that the tags in `renovate.json` exist as releases is missing.
-- `renovate/README.md` shows an old version in its examples. The text says the examples include a version tag, but a reader can copy an old version.
 - `renovate/marinatedconcrete.json` has a group for each released component, but none for `kustomize-pod-security`.
   `kustomization/components/pod-security` is a release-please package. The preset does not group its releases.
   This is a possible omission. It is not confirmed as a defect.
