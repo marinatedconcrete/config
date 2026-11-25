@@ -1,0 +1,25 @@
+---
+name: Coverage gate
+on:
+  push:
+
+jobs:
+  coverage-gate:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The gate needs the --test-coverage-include-all option. Node 24 does
+      # not have it. The runner image can change its Node version at any time.
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+      - name: Install Release Tools
+        run: npm ci --prefix .github/release --ignore-scripts
+      - name: Install Image Release Notes Tools
+        run: npm ci --prefix actions/image-release-notes --ignore-scripts
+      - name: Run Coverage Gate
+        run: node scripts/coverage-gate.mjs
