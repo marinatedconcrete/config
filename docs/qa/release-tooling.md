@@ -116,7 +116,7 @@ Do these checks when a change touches the release sequence, `plan.mjs`, or `publ
 
    Both lists must be empty.
 
-4. For a change to the publisher or the workflows, start a recovery run for a recent merged release PR. Do this after the change is on `main`. Use the command in `.github/release/README.md`. The run must find the existing release and make no change to it. Check the workflow result and the published release.
+4. For a change to the publisher or the workflows, inspect the release workflow result for a recent release PR after the change reaches `main`. Confirm that its release is published, not a draft. Check its tag and validation record. Use simulated recovery tests for routine QA. Do not start a production recovery run solely to test the change. A recovery run for a draft or a missing release starts a new validation and publication.
 5. Before merge, check the package and expected tag in the release PR. After merge, check the Release Please run on `main` for rejected candidates.
 6. Read the workflow `permissions` and the secrets use in the diff. Automation does not check them.
 
