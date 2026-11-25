@@ -152,7 +152,16 @@ jobs:
     secrets: inherit
 
   publish:
-    needs: [recover, component, source, kairos-fedora, buildah-action-runner, github-runner-ci, vscode-ssh-server]
+    needs:
+      [
+        recover,
+        component,
+        source,
+        kairos-fedora,
+        buildah-action-runner,
+        github-runner-ci,
+        vscode-ssh-server,
+      ]
     if: >-
       always() && !cancelled() && needs.recover.outputs.recovered == 'false' &&
       (needs.component.result == 'success' || needs.source.result == 'success' ||
