@@ -26,7 +26,6 @@ on: # yamllint disable-line rule:truthy
       digest:
         value: ${{ jobs.build-buildah-action-runner.outputs.digest }}
 
-
 jobs:
   build-buildah-action-runner:
     name: Build Buildah Action Runner Image

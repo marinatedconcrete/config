@@ -4,12 +4,13 @@
 [![Pod Security Standard: Privileged](https://img.shields.io/badge/pod_security_standard-privileged-red?style=for-the-badge&logo=kubernetes&logoColor=%23326CE5)](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
 
 This component installs [kube-vip](https://kube-vip.io/) as two `DaemonSet` resources:
-1) One for the control plane.
-2) One for the ingress IP addresses of all services.
+
+1. One for the control plane.
+2. One for the ingress IP addresses of all services.
 
 # Metrics
 
-Each `DaemonSet` supplies Prometheus metrics on a different port.  Both `DaemonSet` resources use the host network, and a control plane node runs both.
+Each `DaemonSet` supplies Prometheus metrics on a different port. Both `DaemonSet` resources use the host network, and a control plane node runs both.
 
 | `DaemonSet`       | Port   |
 | ----------------- | ------ |

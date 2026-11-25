@@ -34,7 +34,6 @@ on: # yamllint disable-line rule:truthy
       release-notes-artifact:
         value: ${{ jobs.build-container.outputs.release-notes-artifact }}
 
-
 jobs:
   build-container:
     runs-on: ubuntu-26.04
