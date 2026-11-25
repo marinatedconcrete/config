@@ -101,7 +101,7 @@ The repository has no other rule for untrusted text. These items are recommendat
 ## Images and releases
 
 - The release publishes the tested image digest. It does not rebuild the image. See [the release README](../../.github/release/README.md).
-- Release Please creates the Git tag of a package after validation succeeds. See [the release README](../../.github/release/README.md).
+- After validation succeeds, the package publisher uses the GitHub App token to create the Git tag of a package. Release Please does not create it. See [the release README](../../.github/release/README.md).
 - The `devcontainer-base` image reserves its version with a Git tag before the build starts. A failed build leaves that tag in place. The tag does not show that the image passed validation.
 - Some images get an SBOM. See [container images](../qa/images.md) for the list and for the base image pins.
 - No scan checks the images for known vulnerabilities. See the known gaps in [container images](../qa/images.md).
