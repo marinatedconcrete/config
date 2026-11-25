@@ -9,29 +9,29 @@ A reviewer can be a human or an agent.
 The `images/` directory holds five container images.
 Each image has its own directory, README, and workflow.
 
-| Image                   | Directory                      | Build file      | Workflow                                            | Version source              |
-| ----------------------- | ------------------------------ | --------------- | --------------------------------------------------- | --------------------------- |
-| `buildah-action-runner` | `images/buildah-action-runner` | `Containerfile` | `.github/workflows/image-buildah-action-runner.yml` | release-please              |
-| `devcontainer-base`     | `images/devcontainer-base`     | `Containerfile` | `.github/workflows/image-devcontainer-base.yml`     | CalVer, from the workflow   |
-| `github-runner-ci`      | `images/github-runner-ci`      | `Containerfile` | `.github/workflows/image-github-runner-ci.yml`      | release-please              |
-| `kairos-fedora`         | `images/kairos-fedora`         | `Containerfile` | `.github/workflows/image-kairos-fedora.yml`         | release-please              |
-| `vscode-ssh-server`     | `images/vscode-ssh-server`     | `Dockerfile`    | `.github/workflows/image-vscode-ssh-server.yml`     | release-please (prerelease) |
+| Image                   | Build file      | Version source              |
+| ----------------------- | --------------- | --------------------------- |
+| `buildah-action-runner` | `Containerfile` | release-please              |
+| `devcontainer-base`     | `Containerfile` | CalVer, from the workflow   |
+| `github-runner-ci`      | `Containerfile` | release-please              |
+| `kairos-fedora`         | `Containerfile` | release-please              |
+| `vscode-ssh-server`     | `Dockerfile`    | release-please (prerelease) |
 
 These files also belong to this part:
 
 - `images/*/build_files/`: The scripts that a `Containerfile` runs. The `Containerfile` mounts them from the `ctx` stage.
 - `images/kairos-fedora/e2e.sh`: The boot and install test for the Kairos image.
 - `images/*/release-notes-components.sh`: The scripts that add rows to the release notes.
-- `.github/workflows/release-package.yml`: The workflow that tests and publishes a release image. It calls the image workflows.
 - `.github/release/README.md`: The description of the release sequence.
 
 The action in `actions/image-release-notes/` writes the release notes and the SBOM for three images.
 A separate QA page covers this action.
 
 `devcontainer-base` is not in `release-please-config.json`.
-Its workflow creates a version tag each Thursday at 12:00 UTC.
+Its workflow creates a CalVer version tag on a schedule.
 A manual run on `main` also creates a release.
 The other four images get a release from a release-please pull request.
+See [release tooling](release-tooling.md) for the release-please mechanics.
 
 ## Review checklist
 
@@ -75,70 +75,45 @@ For an image, check these items.
       `images/kairos-fedora/build_files/configure.sh` sets the services and the firewall ports.
 - [ ] A change to `kairos-fedora` keeps the cloud datasource warning in `images/kairos-fedora/README.md` accurate.
 - [ ] New workflow permissions are the least that the job needs.
-      Each image build job sets `contents: read` and `packages: write`.
-      `test-github-actions-job-container` sets `contents: read` and `packages: read`.
-      The `version` and `release` jobs in `image-devcontainer-base.yml` set `contents: write`.
 - [ ] A new third-party GitHub Action is pinned to a commit SHA with a version comment.
-      `renovate.json` has no auto-merge rule for third-party actions.
-      The global patch rule has no manager filter, so a patch update of a third-party action auto-merges as a branch merge with no pull request (see commit `c0dadc7`).
       See the known gaps.
 
 ### Tests
 
 - [ ] A behavior change in an image comes with a change to its check.
-      The checks are the `Smoke Test Image` step, the `test-github-actions-job-container` job, and `e2e.sh`.
+      The checks are the image smoke test, the `github-runner-ci` job container test, and `e2e.sh`.
 - [ ] A new tool in `buildah-action-runner`, `github-runner-ci`, or `vscode-ssh-server` has a version command in the smoke test.
 - [ ] A change to `kairos-fedora` passes `e2e.sh` in the pull request.
-      The `build-container` job runs it when a changed path matches the workflow trigger.
+      The workflow runs it when a changed path matches the workflow trigger.
 - [ ] A change to `e2e.sh` does not lower a timeout or remove a check without a reason in the commit message.
 
 ### Documentation
 
 - [ ] The image README matches the change.
       Update the README when the change affects users, for example tags, users, environment variables, volumes, or ports.
-- [ ] New prose follows ASD-STE100, as `AGENTS.md` requires.
-- [ ] No change edits a `CHANGELOG.md` by hand.
-      Release-please writes these files.
+- [ ] New prose follows [AGENTS.md](../../AGENTS.md).
 
 ### Versioning and commit type
 
-- [ ] The pull request title and each commit use Conventional Commits.
-      The `Validate PR title` check reports a bad title, but branch protection does not require it.
-      The reviewer must check the title.
-      The repository allows only squash merges.
-      The pull request title becomes the commit title, and the pull request description becomes the commit message.
-- [ ] The scope is the image name, for example `fix(kairos-fedora): ...` or `feat(github-runner-ci): ...`.
-      A change for more than one image can have no scope, as in `feat: pin devcontainer-base to CalVer releases and auto-merge updates` (#1018).
+- [ ] The pull request title and each commit follow [AGENTS.md](../../AGENTS.md).
+      Mark a breaking change as [the pull request template](../../.github/pull_request_template.md) describes.
+- [ ] The scope is the image name, for example `fix(kairos-fedora): ...`.
+      A change for more than one image can have no scope.
 - [ ] The type matches the effect on the version.
-      `release-please-config.json` lists `feat`, `fix`, `docs`, `build`, and `chore` in the changelog.
-      A `feat` makes a minor release. A `fix` makes a patch release. A `!` makes a major release.
-      Put the `!` immediately before the colon of the pull request title, as in `feat(paperless)!: ...`.
-      For a pull request that a person writes, add a `BREAKING CHANGE` footer as the last paragraph of the pull request description.
-      A footer in a branch commit is lost in the squash merge.
-      Renovate major updates get the `!` from `renovate.json` and have no footer.
-      The `kairos-init` 4.4.0 update (#927), the UniFi change (#1033), the Factorio change (#1027), and the Paperless change (#1035) are precedents.
-- [ ] A change that must not make a release uses the `test` type.
-      The AuroraBoot update (#1029) is the precedent.
-- [ ] No pull request changes a release version or a `CHANGELOG.md`.
-      Only the release-please pull request changes these files and the versions in `.release-please-manifest.json`.
-      The one exception is a new package. A person adds its line to `.release-please-manifest.json` with the value `0.0.0`.
+      A `feat` or `fix` releases the image. A `test` change does not.
+- [ ] No pull request changes a release version, a `CHANGELOG.md`, or `.release-please-manifest.json`.
+      See [release tooling](release-tooling.md).
 - [ ] A new image has an entry in `release-please-config.json` and an entry with the value `0.0.0` in `.release-please-manifest.json`.
-      It also needs a `groupName` rule and a changelog rule in `renovate/marinatedconcrete.json`, an image workflow, and a job in `release-package.yml`.
+      It also needs a `groupName` rule and a changelog rule in `renovate/marinatedconcrete.json`, an image workflow, and a job in the release workflow.
 
 ### Renovate behavior
 
-- [ ] A dependency update uses the commit type that `renovate.json` assigns.
-      A major update is `feat(package)!`, and a minor update is `feat(package)`.
-      A change to `e2e.sh`, a `tests/` path, or a `*.test.*` file is `test(package)`.
 - [ ] A `devcontainer-base` update is `chore(package)`.
       The result is a patch release of `github-runner-ci`.
-      Renovate merges this update after all pull request checks pass.
 - [ ] An automerge rule does not skip a check that matters.
-      The Fedora digest rule and the `vscode-ssh-server` digest rule use `automergeType: branch`.
-      A branch automerge creates no pull request.
-      The image workflows run only on `pull_request` and on `push` to `main`.
-      They do not run on the Renovate branch before the merge. They run after the merge.
-      The image workflow checks are not required. See the known gaps.
+      See [Renovate presets](renovate-presets.md).
+      The image workflows do not run on a Renovate branch that merges as a branch merge.
+      They run after the merge.
 
 ### Release workflow
 
@@ -151,34 +126,31 @@ For an image, check these items.
 
 ## Automated validation coverage
 
-The "Required" column comes from `gh api repos/marinatedconcrete/config/branches/main/protection`.
-The required contexts are `lint`, `check-format`, `build`, and six `kustomization-test` jobs.
-No image job is in this list.
-The image workflows use path filters.
-A required check from such a workflow stays pending on a pull request that does not match the paths.
+Run `just --list` to find the recipes.
+Read `.github/workflows` to see which checks run on a pull request.
 
-| Check                                        | What it proves                                                                                                                               | Where it runs                                                                                                                                                                           | Required in branch protection | Gap                                                                                                                              |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Hadolint on each Containerfile               | The files follow the rules in `.hadolint.yaml`, with a failure threshold of `info`                                                           | `just hado-lint`, in the `lint` job of `ci.yml`                                                                                                                                         | yes (`lint`)                  | It checks static rules only. It does not build the image.                                                                        |
-| ShellCheck on each `*.sh` file               | The scripts in `images/` and `actions/` have no ShellCheck findings                                                                          | `just shellcheck-lint`, in the `lint` job                                                                                                                                               | yes (`lint`)                  | It does not run the scripts.                                                                                                     |
-| Format check                                 | The README files and workflow files follow the Prettier rules                                                                                | `just check-format`, in the `check-format` job                                                                                                                                          | yes (`check-format`)          | It does not check ASD-STE100 wording.                                                                                            |
-| Devcontainer image build                     | The repository devcontainer builds with the pinned `devcontainer-base`                                                                       | The `build` job of `ci.yml`                                                                                                                                                             | yes (`build`)                 | It tests one consumer of `devcontainer-base`.                                                                                    |
-| Pull request title check                     | The title uses Conventional Commits                                                                                                          | The `Validate PR title` job of `semantic-commits.yml`                                                                                                                                   | no                            | A bad title can merge.                                                                                                           |
-| `buildah-action-runner` build and smoke test | The image builds. `buildah`, `curl`, `jq`, and `node` run.                                                                                   | The `Build Buildah Action Runner Image` job                                                                                                                                             | no                            | The test does not run a `buildah build`. A fork pull request does not push the image.                                            |
-| `github-runner-ci` build and smoke test      | The image builds. The user is `1001:1001`. The home directories are writable. `brew`, `git`, `just`, `jq`, `rg`, `shellcheck`, and `yq` run. | The `Build GitHub Runner CI Image` job                                                                                                                                                  | no                            | The test does not check the other installed packages.                                                                            |
-| `github-runner-ci` job container test        | A GitHub Actions job runs in the pushed image. The workspace is writable and `brew install` works.                                           | The `Test GitHub Actions Job Container` job                                                                                                                                             | no                            | It runs only when the workflow pushes the image. A fork pull request skips it. It does not use an ARC runner.                    |
-| `kairos-fedora` build                        | The image builds and `kairos-init validate` passes                                                                                           | The `build-container` job in `image-kairos-fedora.yml`                                                                                                                                  | no                            | The path filter lists `.devcontainer/Dockerfile`. That file does not exist.                                                      |
-| `kairos-fedora` boot and install test        | The ISO installs through the WebUI. The installed system reboots. SSH works. The hostname is correct. The `k3s` node is `Ready`.             | `just e2e-kairos-fedora`, and the `Run Kairos Fedora E2E` step of the `build-container` job                                                                                             | no                            | It runs in one virtual machine setup. It does not cover real hardware, an upgrade, or Longhorn, `iscsid`, and firewall behavior. |
-| `vscode-ssh-server` build and smoke test     | The image builds. `/init.sh` and `sshd` are executable. User `dev` exists.                                                                   | The `build-container` job in `image-vscode-ssh-server.yml`                                                                                                                              | no                            | No test starts `sshd` or opens an SSH connection.                                                                                |
-| `devcontainer-base` build and full pipeline  | The image builds. `just check-format && just lint && just test` pass in a devcontainer that uses the candidate image.                        | The `Build Devcontainer Base Image` job in `image-devcontainer-base.yml`                                                                                                                | no                            | The pipeline covers what this repository needs. Other consumers can need more.                                                   |
-| Image release notes and SBOM                 | The notes and the SBOM generate for `kairos-fedora`, `github-runner-ci`, and `devcontainer-base`                                             | The `Generate Image Release Notes` step. `just release-notes-kairos-fedora`, `just release-notes-github-runner-ci`, and `just release-notes-devcontainer-base` run it on a local image. | no                            | `buildah-action-runner` and `vscode-ssh-server` have no notes or SBOM.                                                           |
-| Action unit tests                            | The helper code for the release notes works                                                                                                  | `npm test --prefix actions/image-release-notes`, in the `image-release-notes-test` job                                                                                                  | no                            | The tests do not run Syft or the CycloneDX CLI.                                                                                  |
-| Release automation tests                     | The release planner and publisher work                                                                                                       | `npm test --prefix .github/release`, in the `release-automation-test` job                                                                                                               | no                            | The tests do not run a real release.                                                                                             |
-| Release validation                           | The tested digest, not a rebuild, gets the release version                                                                                   | The `release-package.yml` workflow, after a release pull request merges                                                                                                                 | not applicable                | It runs after the merge. No check runs on the pull request.                                                                      |
+| What is validated                   | How to run                                      | What it proves                                                                                                                               | What it does not prove                                                                                                           |
+| ----------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Containerfile rules                 | `just hado-lint`                                | The files follow the rules in `.hadolint.yaml`, with a failure threshold of `info`                                                           | It checks static rules only. It does not build the image.                                                                        |
+| Shell scripts                       | `just shellcheck-lint`                          | The scripts in `images/` and `actions/` have no ShellCheck findings                                                                          | It does not run the scripts.                                                                                                     |
+| README and workflow format          | `just check-format`                             | The README files and workflow files follow the Prettier rules                                                                                | It does not check ASD-STE100 wording.                                                                                            |
+| Devcontainer image                  | manual                                          | The repository devcontainer builds with the pinned `devcontainer-base`                                                                       | It tests one consumer of `devcontainer-base`.                                                                                    |
+| Pull request title                  | manual                                          | The title uses Conventional Commits                                                                                                          | A bad title can merge.                                                                                                           |
+| `buildah-action-runner` build       | manual                                          | The image builds. `buildah`, `curl`, `jq`, and `node` run.                                                                                   | The test does not run a `buildah build`. A fork pull request does not push the image.                                            |
+| `github-runner-ci` build            | manual                                          | The image builds. The user is `1001:1001`. The home directories are writable. `brew`, `git`, `just`, `jq`, `rg`, `shellcheck`, and `yq` run. | The test does not check the other installed packages.                                                                            |
+| `github-runner-ci` job container    | manual                                          | A GitHub Actions job runs in the pushed image. The workspace is writable and `brew install` works.                                           | It runs only when the workflow pushes the image. A fork pull request skips it. It does not use an ARC runner.                    |
+| `kairos-fedora` build               | manual                                          | The image builds and `kairos-init validate` passes                                                                                           | The path filter lists `.devcontainer/Dockerfile`. That file does not exist.                                                      |
+| `kairos-fedora` boot and install    | `just e2e-kairos-fedora`                        | The ISO installs through the WebUI. The installed system reboots. SSH works. The hostname is correct. The `k3s` node is `Ready`.             | It runs in one virtual machine setup. It does not cover real hardware, an upgrade, or Longhorn, `iscsid`, and firewall behavior. |
+| `vscode-ssh-server` build           | manual                                          | The image builds. `/init.sh` and `sshd` are executable. User `dev` exists.                                                                   | No test starts `sshd` or opens an SSH connection.                                                                                |
+| `devcontainer-base` full pipeline   | manual                                          | The image builds. `just check-format && just lint && just test` pass in a devcontainer that uses the candidate image.                        | The pipeline covers what this repository needs. Other consumers can need more.                                                   |
+| Image release notes and SBOM        | `just release-notes-<image>`                    | The notes and the SBOM generate for `kairos-fedora`, `github-runner-ci`, and `devcontainer-base`                                             | `buildah-action-runner` and `vscode-ssh-server` have no notes or SBOM.                                                           |
+| Release notes action helper code    | `npm test --prefix actions/image-release-notes` | The helper code for the release notes works                                                                                                  | The tests do not run Syft or the CycloneDX CLI.                                                                                  |
+| Release planner and publisher       | `npm test --prefix .github/release`             | The release planner and publisher work                                                                                                       | The tests do not run a real release.                                                                                             |
+| Release publishes the tested digest | manual                                          | The tested digest, not a rebuild, gets the release version                                                                                   | It runs after the merge. No check runs on the pull request.                                                                      |
 
 ## Manual QA
 
-A person must check these items, because no job covers them.
+A person must check these items, because no automation covers them.
 
 1. Read each changed `Containerfile` and `build_files` script.
    Confirm that the user, the packages, and the final settings match the README.
@@ -190,20 +162,20 @@ A person must check these items, because no job covers them.
    docker run --rm buildah-action-runner:qa bash -lc 'buildah --version && curl --version && jq --version && node --version'
    ```
 
-   For another image, copy the commands from the `Smoke Test Image` step of its workflow.
+   For another image, copy the commands from the smoke test step of its workflow.
 
 3. For `kairos-fedora`, run `just e2e-kairos-fedora` in the devcontainer.
    The container user needs read and write access to `/dev/kvm`.
    The README lists the settings, such as `KAIROS_IMAGE` and `E2E_WORKDIR`.
    The test takes a long time. The default install timeout is 25 minutes.
 4. For `kairos-fedora`, boot the image on real hardware when the change affects drivers, firmware, storage, networking, or the boot loader.
-   The GRUB `tpm` fix (#1000) and the Longhorn services are examples.
+   GRUB `tpm` settings and the Longhorn services are examples.
    The virtual machine test cannot show these effects.
 5. For `vscode-ssh-server`, run the container with `AUTHORIZED_KEYS_URL` set.
    Open an SSH connection on port 2222.
    Confirm that a VS Code Remote SSH session starts.
 6. For a change to a release workflow, read the concurrency settings and the publish order.
-   A review of #1004 found that two release runs could replace `latest` out of order.
+   Two release runs can replace `latest` out of order.
    Check that one release finishes before the next release starts.
 7. For a change to the release notes, run the matching `just release-notes-<image>` recipe on a local image.
    Read the file `build/release/<component>-notes.md`.
@@ -214,13 +186,13 @@ A person must check these items, because no job covers them.
 
 Each gap can become an issue.
 
-- A patch update of a third-party GitHub Action auto-merges as a branch merge with no pull request.
+- A patch update of a third-party GitHub Action can merge with no pull request.
+  See [Renovate presets](renovate-presets.md).
   The image workflows do not run before the merge, and the actions get `packages: write` tokens.
-  A rule that matches the `github-actions` manager and sets `automerge: false` for third-party actions can fix this.
-- No image job is a required check.
-  A pull request that breaks an image can merge when the path-filtered job fails.
+- No image check is required.
+  A pull request that breaks an image can merge when the path-filtered check fails.
   An aggregate job that always runs and reads the path-filtered results can fix this.
-- `.github/workflows/image-kairos-fedora.yml` lists `.devcontainer/Dockerfile` in its path filters.
+- The `kairos-fedora` workflow lists `.devcontainer/Dockerfile` in its path filters.
   The repository has `.devcontainer/Containerfile`, not that file.
   A change to the devcontainer file does not start the Kairos workflow.
 - `images/kairos-fedora/Containerfile` sets `org.opencontainers.image.title` two times.
