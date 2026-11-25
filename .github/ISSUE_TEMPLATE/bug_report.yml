@@ -30,7 +30,7 @@ body:
     id: reproduce
     attributes:
       label: How to reproduce
-      description: Give the steps or commands that show the defect.
+      description: Give the steps, commands, or configuration that show the defect.
     validations:
       required: true
   - type: textarea

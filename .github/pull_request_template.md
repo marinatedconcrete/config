@@ -12,11 +12,7 @@ Also follow the breaking change instruction at the end of this description.
 
 ## Testing
 
-<!-- Mark each command that you ran. Describe other tests that you did. -->
-
-- [ ] `just format`
-- [ ] `just lint`
-- [ ] `just test`
+<!-- Describe the tests that you did and that CI does not run. Write "None" if CI covers the change. -->
 
 <!--
 Delete this comment if the change is not breaking.
