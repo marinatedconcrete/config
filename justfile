@@ -321,6 +321,15 @@ kustomization-tests:
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
 
+# Run the coverage gate for the Node tests and the component tests.
+[group('test')]
+coverage-gate:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    npm ci --prefix .github/release --ignore-scripts
+    npm ci --prefix actions/image-release-notes --ignore-scripts
+    node scripts/coverage-gate.mjs
+
 # Run all tests..
 [group('test')]
 test: kustomization-tests
