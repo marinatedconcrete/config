@@ -82,7 +82,7 @@ Justify each exception in these three places:
 - The Pod Security badge in the component README. Use `baseline` or `privileged` in place of `restricted`.
 - The PR description.
 
-Also add the level and the reason to `kustomization/pod-security-check/levels.yml`, because `just pod-security-lint` fails without the entry.
+Also add the level and the reason to `kustomization/pod-security-check/exceptions.yml`, because `just pod-security-lint` fails without the entry.
 
 ## Step 2. Add the end-to-end test
 
