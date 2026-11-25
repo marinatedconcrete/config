@@ -28,7 +28,7 @@
 
 - Before you make a commit, run `just format`. This command formats YAML, JSON, Markdown, and the justfile. See the justfile recipes for the formatting rules.
 - Run `just check-format` to check the format.
-- Run `just lint` to run the Ansible, hadolint, Kustomize, Renovate, and ShellCheck checks.
+- Run `just lint` to run the actionlint, Ansible, hadolint, Kustomize, Renovate, and ShellCheck checks.
 
 ## Tests
 
