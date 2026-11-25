@@ -16,4 +16,8 @@ repository: https://github.com/marinatedconcrete/config
 documentation: lol
 homepage: https://github.com/marinatedconcrete/config
 issues: https://github.com/marinatedconcrete/config/issues
-build_ignore: []
+build_ignore:
+  # Keep local tool state and development files out of the archive.
+  - .ansible
+  - .config
+  - requirements.txt

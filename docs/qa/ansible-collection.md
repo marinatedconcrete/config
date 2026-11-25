@@ -129,7 +129,7 @@ cd ansible && /tmp/ansible-venv/bin/ansible-lint
 
 The lint creates the directory `ansible/.ansible`.
 Git ignores it.
-Delete it before you build the collection.
+The `build_ignore` list in `ansible/galaxy.yml` keeps it out of the collection archive.
 
 ### Run the role tests
 
@@ -168,7 +168,6 @@ Never run it against a production cluster.
 Do this check for a change that adds or moves a file in `ansible/`.
 
 ```sh
-rm -rf ansible/.ansible
 ansible-galaxy collection build ansible --output-path /tmp/collection-build
 tar -tzf /tmp/collection-build/marinatedconcrete-config-*.tar.gz
 ```
@@ -193,7 +192,6 @@ Check that each `BREAKING CHANGE` text tells a consumer what to change.
   The comments in `defaults/main.yml` are the only description of its options.
 - No test runs `longhorn_allow_encrypted_trim`.
 - No automation builds the collection archive or installs it from a tag.
-  The `build_ignore` list in `galaxy.yml` is empty, so a local `ansible/.ansible` directory goes into the archive.
 - The `just ansible-lint` recipe does not stop the `ansible-lint` Minikube profile when the lint fails.
   The `set -e` setting ends the script before `minikube stop`.
 - The `exclude-paths` entry for `ansible/requirements.txt` in `release-please-config.json` has no effect.
