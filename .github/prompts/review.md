@@ -15,16 +15,19 @@ Separate blocking findings from optional suggestions.
 Write the commands you ran and the results you saw for each external fact.
 Do not state a fact that you did not check.
 Write "not checked" for an item that you could not check.
+Do not close, merge, push, or change any pull request.
+Only recommend an action.
 
 ## General checklist
 
 ### Pull request title and commits
 
 - The title must follow [Conventional Commits](https://www.conventionalcommits.org/).
-  The `Validate PR title` check enforces this rule.
+  The `Validate PR title` job enforces this rule.
+  This job is not a required check on `main`, so do not rely on it.
 - The type must match the effect of the change.
   Release Please uses the type to select the release version.
-- A breaking change must use `!` before the colon.
+- A breaking change must use `!` immediately before the colon of the title.
   See "Breaking changes" below for the definition.
 - Read the pull request body.
   See "Pull request body" below.
@@ -48,22 +51,23 @@ Read the real body, not only the diff.
 ```sh
 gh pr view <number> --json title,body --jq '.title, .body'
 gh pr view <number> --json body --jq '.body' | grep -n '<!--'
-gh pr view <number> --json body --jq '.body' | grep -niE 'breaking[ -]change'
+gh pr view <number> --json body --jq '.body' | grep -nE 'BREAKING[ -]CHANGE:'
 ```
 
 The second command lists each line that starts an HTML comment.
-The third command lists each line that has a breaking change token.
+The third command lists each line that has a breaking change footer token, with its colon.
+The template comments say "BREAKING CHANGE" with no colon, so this command does not list them.
 Write "not checked" if `gh` fails.
 
 Flag each of these items:
 
-- A leftover HTML comment from `.github/pull_request_template.md`.
-  The comment becomes noise in the commit.
-  Ask the author to delete it.
 - A placeholder that the author did not edit.
-  Examples are an empty `## Summary`, a `## Testing` list with no marked item, and example text from the template.
+  Examples are an empty `## Summary` and the example text from the template, such as `feat(paperless): add a backup job`.
+  Do not flag the standard HTML comments of `.github/pull_request_template.md`.
+  The template does not tell the author to delete them, except the last one for a change that is not breaking.
 - A title that is not a valid Conventional Commit.
   The `Validate PR title` job in `.github/workflows/semantic-commits.yml` runs `amannn/action-semantic-pull-request`.
+  This job is not a required check.
   The job passes no `types` or `scopes` input.
   The action therefore accepts its default types and any scope.
   The repository uses the name of the component as the scope, for example `paperless` or `kube-vip`.
@@ -72,10 +76,11 @@ Flag each of these items:
   Check the type yourself.
 - A breaking change footer in the wrong form.
   The footer is a line that starts with `BREAKING CHANGE:` or `BREAKING-CHANGE:`.
-  The footer must be the last paragraph of the body.
+  The footer must be the last paragraph of the pull request description, not of a branch commit.
+  The squash merge uses the description as the commit message and discards the text of the branch commits.
   A blank line must be before the footer.
   A `## Breaking changes` heading is not a footer, because Release Please ignores it.
-  A footer token in an HTML comment is a defect.
+  A footer token with its colon inside an HTML comment is a defect.
   Release Please can read it and mark the pull request as breaking.
   Release Please reads the dash form `BREAKING-CHANGE` even in the middle of a line.
   Report each such token.
@@ -86,7 +91,7 @@ Flag each of these items:
   Accept these only if the maintainer wants the effect.
   Ask the author to state the reason.
 
-The template tells the author to delete the breaking change comment when the change is not breaking.
+The last template comment tells the author to delete it when the change is not breaking.
 A body with no footer is correct for a change that is not breaking.
 
 Automation pull requests are exempt from the template checks.
@@ -112,9 +117,11 @@ Each part has its own version, tag, and consumers:
 | Ansible collection in `ansible/`                   | The Git tag of the collection                                                              |
 | Renovate presets in `renovate/`                    | `github>marinatedconcrete/config//renovate/<file>#renovate-config-<version>`               |
 
-`release-please-config.json` lists the released parts.
-A change outside these paths does not cause a release.
+`release-please-config.json` lists the parts that Release Please releases.
+A change outside these paths does not cause a Release Please release.
 A `!` on such a change has no release effect.
+The image `images/devcontainer-base` is not in that list.
+The workflow `.github/workflows/image-devcontainer-base.yml` releases it on a schedule, each Thursday at 12:00 UTC.
 
 #### What is breaking, by part
 
@@ -136,7 +143,10 @@ Kustomize components:
 Not breaking for a Kustomize component:
 
 - A patch or minor update of an image that needs no change in the consumer files.
-  Renovate merges these updates for the Factorio, kube-vip, Mosquitto, and UniFi components without a person.
+  Renovate can merge these updates by itself for the Factorio and Mosquitto components and for Docker Hub images.
+  Updates from `ghcr.io`, `quay.io`, `registry.k8s.io`, and `lscr.io` need a person.
+  This applies to kube-vip, UniFi, and Paperless, as #1062, #1053, and #1055 show.
+  Automerge does not make an update not breaking. Judge the effect on the consumer.
 - A new optional resource or setting that does not change an existing selector, port, or name.
 - A change to a README, a test, or a comment.
 - A refactor that does not change the rendered output.
@@ -219,23 +229,30 @@ An `auroraboot` update in `e2e.sh` has the `test` type and causes no release.
 
 History shows this practice:
 
-- Each change that the maintainers call breaking has `!` before the colon.
-  `git log origin/main -E --grep '^[a-z]+(\([^)]*\))?!:' --format='%h %s'` lists 18 commits.
+- Each change that the maintainers call breaking has `!` immediately before the colon.
+  `git log origin/main -E --grep '^[a-z]+(\([^)]*\))?!:' --format='%h %s'` lists 18 commits on 2026-11-24.
+  This command reads only the subject line.
+  It does not find a footer, a `!` before the scope, or a commit that has no `!`.
+  It also lists changes outside the released paths, for example #608.
 - The hand-written pull requests #958, #1027, #1033, #1035, and #927 have a footer.
   The footer tells the consumer what to do, and it appears in the release notes.
 - Older breaking changes (#285, #376, #904) have `!` and no footer.
-  The Renovate majors (#453, #839, #1052) also have `!` and no footer.
+  The Renovate majors #839 and #1052 also have `!` and no footer.
+  The Renovate major #453 has no `!`, so do not use it as an example.
   Release Please then writes the title as the breaking entry, for example in `kustomize-kube-vip` 4.0.0.
-- The pull request #988 has `!` and no footer.
+- The pull request #988 puts `!` before the scope (`feat!(deps):`).
+  This form is not valid, so do not use it as an example.
   It uses a commit override.
 - No commit in `origin/main` has a footer and no `!`.
 
 Use these rules:
 
-- Require `!` before the colon for each breaking change.
+- Require `!` immediately before the colon of the pull request title for each breaking change, as in `feat(paperless)!: change the backup format`.
 - Require a footer when a person writes the pull request and the consumer must act.
+  The footer is the last paragraph of the pull request description.
   The footer has a short migration note.
-- Recommend a footer, but do not require it, for a Renovate update.
+- Renovate adds `!` to a major update through `renovate.json`, and it adds no footer.
+  Recommend a footer, but do not require it, for a Renovate update.
 - Do not require a footer on a change that is not breaking.
 
 What to write in the review:
@@ -243,14 +260,16 @@ What to write in the review:
 - The change looks breaking and has no annotation.
   Request changes.
   Name the part, the consumer-visible change, and the file.
-  Ask the author to add `!` to the title and a footer to the body.
-  A title or body edit makes no new commit.
+  Ask the author to add `!` to the title and a footer to the pull request description.
+  A title or description edit makes no new commit.
 - The change has `!` or a footer, but it does not look breaking.
   Ask the author to name the action that the consumer must take.
   If there is no such action, ask the author to remove `!`, because `!` makes a major release of the part.
   Make this blocking only when the part has a release.
 - The change has a footer and no `!`.
-  Request changes and ask for `!`.
+  Request changes and ask for `!` in the title.
+  Look for the footer in the pull request description.
+  A footer only in a branch commit has no effect, so ask the author to move it to the description.
 - You are not sure that the change is breaking.
   Write "ask the maintainer".
   Give a recommendation and the reason.
@@ -269,13 +288,18 @@ What to write in the review:
 ### Formatting, lint, and tests
 
 - The author must run `just format` before the commit.
-- Check that these CI jobs pass: `check-format`, `lint`, `build`, `build-container`, and the `kustomization-test` jobs.
+- Check that these required CI jobs pass: `lint`, `check-format`, `build`, and the `kustomization-test` jobs.
+  Also check `release-automation-test` and `image-release-notes-test` in `ci.yml`. They are not required.
+  The `Validate PR title` job is also not required.
+  The `build-container` job exists only in the Kairos and `vscode-ssh-server` image workflows.
+  Those workflows run only when a path of the image changes, so do not block on a `build-container` job that did not run.
 - A change to a component in `kustomization/components/` must have a test in `kustomization/tests/`.
   The author can run `just kustomization-test <component>`.
 - A change to `images/kairos-fedora/` starts the image build and the e2e test.
   The e2e test is `images/kairos-fedora/e2e.sh`.
-  Check that the e2e job ran and passed.
-  Do not accept a skipped e2e job for a change to that image.
+  The `Run Kairos Fedora E2E` step of the `build-container` job in `.github/workflows/image-kairos-fedora.yml` runs it.
+  Check that this step ran and passed.
+  Do not accept a skipped e2e step for a change to that image.
 - A change to `.github/release/` or `actions/image-release-notes/` must keep its own tests passing.
 - Do not accept a change that disables a test to make a check pass.
 
@@ -287,7 +311,8 @@ What to write in the review:
 - A workload that needs a baseline or privileged profile needs a stated reason in the pull request.
   The reason must name the namespace and the setting.
 - Do not accept a weaker profile only to make a test pass.
-- A new component must have a test that uses the pod-security component tests.
+- The test of a new component must set the Pod Security labels in its `namespace.yml`.
+  The `enforce` label must have the level in the README badge, for example `restricted` in `kustomization/tests/mosquitto/namespace.yml`.
 
 ### Release and Renovate behavior
 
@@ -409,8 +434,9 @@ A Renovate pull request can therefore propose a tag that upstream has not releas
 Evidence from the repository at the time of writing (2026-11-24):
 
 - `kairos-io/kairos` `v4.5.1` and `v4.6.0` are still pre-releases.
-  Their images exist in `quay.io`.
+  The images `quay.io/kairos/kairos-init:v4.5.1` and `quay.io/kairos/kairos-init:v4.6.0` exist.
   Renovate can propose these tags, because it reads only the registry.
+  The repository `quay.io/kairos/auroraboot` has no 4.x tag before `v4.7.0`.
 - `kairos-io/kairos` `v4.7.0` is published and is not a pre-release.
   The release was published at 2026-11-23T06:11:50Z.
   The `kairos-init:v4.7.0` image was pushed at 06:18:38Z, after the release.
@@ -429,7 +455,8 @@ A bump of a Kairos tag affects only these files:
 - `images/kairos-fedora/Containerfile` uses `quay.io/kairos/kairos-init`.
   The `FROM` line pins a tag and a digest.
   A change here changes the `kairos-fedora` image.
-  A `feat` or `fix` type also causes a `kairos-fedora` release.
+  A `feat`, `fix`, `docs`, `build`, or `chore` type also causes a `kairos-fedora` release.
+  This includes the `chore(package)` type of a `kairos-init` patch update.
 - `images/kairos-fedora/e2e.sh` uses `quay.io/kairos/auroraboot` in `AURORABOOT_IMAGE`.
   It builds the installer ISO for the e2e test.
   A change here changes the test only.
@@ -439,8 +466,8 @@ A bump of a Kairos tag affects only these files:
   It runs `images/kairos-fedora/e2e.sh`.
 - `images/kairos-fedora/README.md` and `actions/image-release-notes/README.md` describe this use.
 
-The repository has no other use of Kairos artifacts.
-The `ansible/`, `kustomization/`, and `renovate/` directories do not pin a `kairos-io` artifact.
+These are the files that pin an upstream Kairos image or tool: `Containerfile` and `e2e.sh`.
+Other files only use the name `kairos-fedora`.
 Search again with `grep -rIn 'kairos' --exclude-dir=.git --exclude-dir=node_modules .`.
 Report each new file that appears in the result.
 
@@ -523,7 +550,7 @@ Check each of these items for a Kairos update, after the decision is "proceed":
 
 - Read the release notes of `kairos-io/kairos` for the new tag.
   Look for changes to `kairos-init` arguments, to the `/etc/kairos-release` fields, and to AuroraBoot.
-- Check that the e2e job in `image-kairos-fedora.yml` ran and passed on the head commit.
+- Check that the `Run Kairos Fedora E2E` step in the `build-container` job of `image-kairos-fedora.yml` ran and passed on the head commit.
 - Check that the `kairos-init` and `auroraboot` versions in the diff match, when both change.
   A mismatch is acceptable only with a stated reason.
 
