@@ -14,13 +14,9 @@ It is a monorepo. Each part has its own version, changelog, and release.
 | [Renovate presets](renovate/README.md)                  | `renovate/`                 | Shared [Renovate](https://docs.renovatebot.com/) presets that other repositories can extend.                                 |
 | [Release automation](.github/release/README.md)         | `.github/release/`          | Scripts that plan, validate, and publish releases.                                                                           |
 
-## Work in this repository
+## Contribute
 
-- Read [AGENTS.md](AGENTS.md) first. It has the writing rules, the commit message rules, and the commands to run before a commit.
-- Use the devcontainer in `.devcontainer/`. Run `pnpm install --frozen-lockfile` after you open it.
-- Run `just` to list the recipes. Use `just format` before a commit and `just lint` and `just test` to check a change.
-- Use the [pull request template](.github/pull_request_template.md). The pull request title must follow [Conventional Commits](https://www.conventionalcommits.org/).
-- Open an issue with the [issue templates](.github/ISSUE_TEMPLATE) to report a defect or ask for a feature.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to set up, make a change, and report a problem.
 
 ## Documentation
 
