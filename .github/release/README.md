@@ -21,16 +21,16 @@ GitHub and GHCR do not support one transaction for all publication operations.
 
 ## Package validation
 
-| Package | Validation | Publication |
-| --- | --- | --- |
-| Kustomize component | Component tests and Kustomize build | Nonempty YAML manifest |
-| Kairos Fedora | Image build and installation/startup tests | Tested image digest in GHCR |
-| Buildah Action Runner | Image build and smoke test | Tested image digest in GHCR |
-| GitHub Runner CI | Image build, smoke test, and Actions job-container test | Tested image digest in GHCR |
-| VSCode SSH Server | Image build and smoke test | Tested image digest in GHCR |
-| Ansible collection | ansible-lint and component tests | Git tag and GitHub release |
-| Renovate configuration | Renovate configuration check | Git tag and GitHub release |
-| Action | ShellCheck on the action scripts | Git tag and GitHub release |
+| Package                | Validation                                              | Publication                 |
+| ---------------------- | ------------------------------------------------------- | --------------------------- |
+| Kustomize component    | Component tests and Kustomize build                     | Nonempty YAML manifest      |
+| Kairos Fedora          | Image build and installation/startup tests              | Tested image digest in GHCR |
+| Buildah Action Runner  | Image build and smoke test                              | Tested image digest in GHCR |
+| GitHub Runner CI       | Image build, smoke test, and Actions job-container test | Tested image digest in GHCR |
+| VSCode SSH Server      | Image build and smoke test                              | Tested image digest in GHCR |
+| Ansible collection     | ansible-lint and component tests                        | Git tag and GitHub release  |
+| Renovate configuration | Renovate configuration check                            | Git tag and GitHub release  |
+| Action                 | ShellCheck on the action scripts                        | Git tag and GitHub release  |
 
 The component tests use the roles in the Ansible collection.
 Release validation does not do a format check. The push checks do the format check.
