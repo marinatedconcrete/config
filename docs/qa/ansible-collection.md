@@ -39,7 +39,6 @@ Apply each item that matches the change.
   The `longhorn_allow_encrypted_trim` role is the model.
   The `minikube_test` role has no `README.md`.
 - Each new option or variable is used.
-  The variable `minikube_test__minikube_nodes` is set but no task reads it.
 
 ### Behavior and security
 
@@ -99,7 +98,7 @@ Apply each item that matches the change.
 | File format                           | `just check-format`                                  | Prettier accepts the `*.yml`, `*.json`, and `*.md` files.                                                           | `ansible/galaxy.yml` and `**/CHANGELOG.md` are in `.prettierignore`. The check does not test wording.                                                                          |
 | Pinned packages                       | Manual: build the devcontainer image                 | The pinned packages in `ansible/requirements.txt` install in the devcontainer image.                                | The build does not run the collection code.                                                                                                                                    |
 | Kustomize component tests             | `just kustomization-test <component>` or `just test` | The `minikube_test` role starts Minikube and applies a kustomization. Each test then checks its own component.      | A test for one component does not cover the others. Run `just test` for a change to the role.                                                                                  |
-| `minikube_test` options               | `just kustomization-test factorio`                   | The `factorio` test uses `enable_user_namespaces` and `enable_local_path_storage`.                                  | No test uses `minikube_test__minikube_nodes`, and the role ignores it. No test uses `enable_user_namespaces` without `enable_local_path_storage`.                              |
+| `minikube_test` options               | `just kustomization-test factorio`                   | The `factorio` test uses `enable_user_namespaces` and `enable_local_path_storage`.                                  | No test sets `minikube_test__minikube_nodes`. No test uses `enable_user_namespaces` without `enable_local_path_storage`.                                                       |
 | `longhorn_allow_encrypted_trim`       | Manual: see "Check the Longhorn role"                | Only the lint and the format check read this role. Nothing automated proves its behavior.                           | The role needs a Longhorn cluster, encrypted volumes, SSH access to the nodes, and `cryptsetup`. A broken task shows only when a consumer runs it.                             |
 | Release validation for `ansible`      | `just release-please-validate ansible`               | The release commit passes `ansible-lint` and the component tests before the tag and the GitHub release exist.       | It runs after merge. A failure blocks the release only. It does not block the change.                                                                                          |
 | Collection build                      | Manual: see "Check the collection package"           | The collection archive has all needed files.                                                                        | No automation runs `ansible-galaxy collection build`. Commit `c305050` shows that an archive can miss a file while all checks pass.                                            |
@@ -188,8 +187,6 @@ Check that each `BREAKING CHANGE` text tells a consumer what to change.
 
 - `ansible/README.md` is empty, and `galaxy.yml` sets `documentation: lol`.
   The Galaxy page for the collection has no content.
-- The variable `minikube_test__minikube_nodes` is documented in `defaults/main.yml` but no task reads it.
-  The `minikube start` command has no `--nodes` argument.
 - The `min_ansible_version` values in the role `meta/main.yml` files disagree with `requires_ansible` in `ansible/meta/runtime.yml`.
   No check finds this.
 - The `minikube_test` role has no `README.md`.
