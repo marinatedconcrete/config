@@ -1,0 +1,46 @@
+{
+  "node": [
+    {
+      "name": "release-automation",
+      "directory": ".github/release",
+      "tests": ["*.test.mjs"],
+      "include": ["*.mjs"],
+      "exclude": ["*.test.mjs", "node_modules/**"],
+      "lines": 77,
+      "branches": 75,
+      "functions": 82
+    },
+    {
+      "name": "image-release-notes",
+      "directory": "actions/image-release-notes",
+      "tests": ["*.test.mjs"],
+      "include": ["*.mjs"],
+      "exclude": ["*.test.mjs", "node_modules/**"],
+      "lines": 83,
+      "branches": 93,
+      "functions": 95
+    },
+    {
+      "name": "scripts",
+      "directory": "scripts",
+      "tests": ["*.test.mjs"],
+      "include": ["*.mjs"],
+      "exclude": ["*.test.mjs", "node_modules/**"],
+      "lines": 59,
+      "branches": 89,
+      "functions": 60
+    }
+  ],
+  "components": {
+    "allowlist": [
+      {
+        "name": "redis",
+        "reason": "The paperless test uses this component. It has no test of its own."
+      },
+      {
+        "name": "gdp-coraltpu",
+        "reason": "The component has no test yet. Minikube has no Coral TPU device."
+      }
+    ]
+  }
+}
