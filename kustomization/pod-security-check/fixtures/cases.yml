@@ -1,78 +1,87 @@
 ---
-# Each case edits base.yml with a yq expression.
-# level is the expected measured level.
-# token is a text that the violation must contain.
 - rule: base
-  level: restricted
+  expected_level: restricted
   edit: "."
 - rule: runAsNonRoot missing
-  level: baseline
-  token: runAsNonRoot
+  expected_level: baseline
+  expected_text: runAsNonRoot
   edit: "del(.spec.template.spec.securityContext.runAsNonRoot)"
 - rule: container runAsNonRoot false
-  level: baseline
-  token: runAsNonRoot
+  expected_level: baseline
+  expected_text: runAsNonRoot
   edit: ".spec.template.spec.containers[0].securityContext.runAsNonRoot = false"
 - rule: runAsUser 0
-  level: baseline
-  token: runAsUser=0
+  expected_level: baseline
+  expected_text: runAsUser=0
   edit: ".spec.template.spec.containers[0].securityContext.runAsUser = 0"
 - rule: allowPrivilegeEscalation missing
-  level: baseline
-  token: allowPrivilegeEscalation
+  expected_level: baseline
+  expected_text: allowPrivilegeEscalation
   edit: "del(.spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation)"
 - rule: capabilities drop missing
-  level: baseline
-  token: unrestricted capabilities
+  expected_level: baseline
+  expected_text: unrestricted capabilities
   edit: "del(.spec.template.spec.containers[0].securityContext.capabilities.drop)"
 - rule: capabilities add CHOWN
-  level: baseline
-  token: unrestricted capabilities
+  expected_level: baseline
+  expected_text: unrestricted capabilities
   edit: '.spec.template.spec.containers[0].securityContext.capabilities.add = ["CHOWN"]'
 - rule: capabilities add NET_BIND_SERVICE
-  level: restricted
+  expected_level: restricted
   edit: '.spec.template.spec.containers[0].securityContext.capabilities.add = ["NET_BIND_SERVICE"]'
 - rule: seccompProfile missing
-  level: baseline
-  token: seccompProfile
+  expected_level: baseline
+  expected_text: seccompProfile
   edit: "del(.spec.template.spec.securityContext.seccompProfile)"
 - rule: seccompProfile Localhost in the container
-  level: restricted
+  expected_level: restricted
   edit: 'del(.spec.template.spec.securityContext.seccompProfile) | .spec.template.spec.containers[0].securityContext.seccompProfile = {"type": "Localhost", "localhostProfile": "p.json"}'
 - rule: volume nfs
-  level: baseline
-  token: restricted volume types
+  expected_level: baseline
+  expected_text: restricted volume types
   edit: '.spec.template.spec.volumes[0] = {"name": "data", "nfs": {"server": "s", "path": "/"}}'
 - rule: volume configMap
-  level: restricted
+  expected_level: restricted
   edit: '.spec.template.spec.volumes[0] = {"name": "data", "configMap": {"name": "c"}}'
 - rule: hostNetwork
-  level: privileged
-  token: hostNetwork
+  expected_level: privileged
+  expected_text: hostNetwork
   edit: ".spec.template.spec.hostNetwork = true"
 - rule: hostPID
-  level: privileged
-  token: hostPID
+  expected_level: privileged
+  expected_text: hostPID
   edit: ".spec.template.spec.hostPID = true"
 - rule: hostIPC
-  level: privileged
-  token: hostIPC
+  expected_level: privileged
+  expected_text: hostIPC
   edit: ".spec.template.spec.hostIPC = true"
 - rule: hostPath volume
-  level: privileged
-  token: hostPath
+  expected_level: privileged
+  expected_text: hostPath
   edit: '.spec.template.spec.volumes[0] = {"name": "data", "hostPath": {"path": "/tmp"}}'
 - rule: privileged container
-  level: privileged
-  token: securityContext.privileged=true
+  expected_level: privileged
+  expected_text: securityContext.privileged=true
   edit: "del(.spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation) | .spec.template.spec.containers[0].securityContext.privileged = true"
+- rule: capabilities add NET_ADMIN
+  expected_level: privileged
+  expected_text: non-default capabilities
+  edit: '.spec.template.spec.containers[0].securityContext.capabilities.add = ["NET_ADMIN"]'
+- rule: hostPort
+  expected_level: privileged
+  expected_text: hostPort
+  edit: '.spec.template.spec.containers[0].ports = [{"containerPort": 80, "hostPort": 80}]'
+- rule: seccompProfile Unconfined
+  expected_level: privileged
+  expected_text: seccompProfile
+  edit: '.spec.template.spec.securityContext.seccompProfile.type = "Unconfined"'
 - rule: deprecated master node affinity is not a violation
-  level: restricted
+  expected_level: restricted
   edit: '.kind = "DaemonSet" | .spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution = [{"weight": 1, "preference": {"matchExpressions": [{"key": "node-role.kubernetes.io/master", "operator": "Exists"}]}}]'
 - rule: ConfigMap only
-  level: none
+  expected_level: none
   edit: '.kind = "ConfigMap" | del(.spec) | .data = {"a": "b"}'
 - rule: unknown kind that holds containers
-  level: error
-  token: Widget
+  expected_level: error
+  expected_text: Widget
   edit: '.kind = "Widget"'

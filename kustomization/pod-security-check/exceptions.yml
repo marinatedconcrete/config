@@ -1,6 +1,4 @@
 ---
-# Components that do not meet the Pod Security restricted level.
-# The level is exact. The check fails when the measured level is different.
 kube-vip:
   level: privileged
   reason: The DaemonSets use hostNetwork and the NET_ADMIN and NET_RAW capabilities.

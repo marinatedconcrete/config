@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Usage: test.sh <kube-context>
-# Prove that the check measures each Pod Security rule and reports a failure.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,6 +7,8 @@ source "${HERE}/check.sh"
 
 total=0
 failed=0
+measured=''
+details=''
 
 report() {
   total=$((total + 1))
@@ -29,17 +29,16 @@ expect_contains() {
 }
 
 run_case() {
-  local index="$1" rule level token edit result measured
+  local index="$1" rule level token edit
   rule="$(yq ".[${index}].rule" "${HERE}/fixtures/cases.yml")"
-  level="$(yq ".[${index}].level" "${HERE}/fixtures/cases.yml")"
-  token="$(yq ".[${index}].token // \"\"" "${HERE}/fixtures/cases.yml")"
+  level="$(yq ".[${index}].expected_level" "${HERE}/fixtures/cases.yml")"
+  token="$(yq ".[${index}].expected_text // \"\"" "${HERE}/fixtures/cases.yml")"
   edit="$(yq ".[${index}].edit" "${HERE}/fixtures/cases.yml")"
-  result="$(yq "${edit}" "${HERE}/fixtures/base.yml" | measure "${context}")"
-  measured="${result%%$'\n'*}"
+  measure "${context}" <<< "$(yq "${edit}" "${HERE}/fixtures/base.yml")"
   if [[ "${measured}" != "${level}" ]]; then
-    report "${rule}" "expected level ${level}, found ${measured}: ${result#"${measured}"}"
-  elif [[ -n "${token}" && "${result#"${measured}"}" != *"${token}"* ]]; then
-    report "${rule}" "expected the text '${token}' in:${result#"${measured}"}"
+    report "${rule}" "expected level ${level}, found ${measured}: ${details}"
+  elif [[ -n "${token}" && "${details}" != *"${token}"* ]]; then
+    report "${rule}" "expected the text '${token}' in: ${details}"
   else
     report "${rule}" ok
   fi
@@ -54,8 +53,8 @@ test_verdict() {
   expect_contains 'verdict: privileged above baseline fails' 'Fix the manifest' "$(verdict a baseline privileged)"
 }
 
-test_validate_levels() {
-  local dir status
+test_validate_exceptions() {
+  local dir status file
   dir="$(mktemp -d)"
   printf 'kube-vip:\n  level: privileged\n  reason: A reason.\n' > "${dir}/good.yml"
   printf 'no-such-component:\n  level: baseline\n  reason: A reason.\n' > "${dir}/path.yml"
@@ -64,13 +63,26 @@ test_validate_levels() {
   printf 'paperless: baseline\n' > "${dir}/scalar.yml"
   for file in good path level reason scalar; do
     status=0
-    (validate_levels "${dir}/${file}.yml") > /dev/null 2>&1 || status=$?
+    (validate_exceptions "${dir}/${file}.yml") > /dev/null 2>&1 || status=$?
     if [[ "${file}" == good ]]; then
-      expect_equal 'levels.yml: a valid file passes' 0 "${status}"
+      expect_equal 'exceptions.yml: a valid file passes' 0 "${status}"
     else
-      expect_equal "levels.yml: ${file} is rejected" 2 "${status}"
+      expect_equal "exceptions.yml: ${file} is rejected" 2 "${status}"
     fi
   done
+  rm -rf "${dir}"
+}
+
+test_documented_levels() {
+  local dir
+  dir="$(mktemp -d)"
+  mkdir -p "${dir}/kustomization/components/a" "${dir}/kustomization/tests/a"
+  printf '![Pod Security](https://img.shields.io/badge/pod_security_standard-baseline-blue)\n' > "${dir}/kustomization/components/a/README.md"
+  printf 'metadata:\n  labels:\n    pod-security.kubernetes.io/enforce: baseline\n' > "${dir}/kustomization/tests/a/namespace.yml"
+  expect_equal 'badge and label: equal levels pass' '' "$(ROOT="${dir}" COMPONENTS="${dir}/kustomization/components" documented_level_problems a baseline)"
+  expect_contains 'badge: a different level fails' 'README badge of a shows baseline' "$(ROOT="${dir}" COMPONENTS="${dir}/kustomization/components" documented_level_problems a restricted)"
+  printf 'metadata:\n  labels: {}\n' > "${dir}/kustomization/tests/a/namespace.yml"
+  expect_contains 'label: a missing enforce label fails' 'enforce label in kustomization/tests/a/namespace.yml' "$(ROOT="${dir}" COMPONENTS="${dir}/kustomization/components" documented_level_problems a baseline)"
   rm -rf "${dir}"
 }
 
@@ -78,7 +90,10 @@ main_test() {
   context="${1:?usage: test.sh <kube-context>}"
   prepare "${context}"
   test_verdict
-  test_validate_levels
+  test_validate_exceptions
+  test_documented_levels
+  measure "${context}" <<< 'kind: [unclosed' 2> /dev/null
+  expect_equal 'measure: YAML that yq cannot read is a check error' error "${measured}"
   local count index
   count="$(yq 'length' "${HERE}/fixtures/cases.yml")"
   for ((index = 0; index < count; index++)); do

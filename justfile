@@ -290,8 +290,8 @@ pod-security-lint:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # Stop and delete Minikube when the recipe exits, also after a failure.
-    trap 'minikube stop --profile=pod-security-lint; minikube delete --profile=pod-security-lint' EXIT
+    # Delete Minikube when the recipe exits, also after a failure.
+    trap 'minikube delete --profile=pod-security-lint' EXIT
 
     # Use the Kubernetes version of the component tests.
     version="$(yq '.minikube_test__kubernetes_version' ansible/roles/minikube_test/defaults/main.yml)"
