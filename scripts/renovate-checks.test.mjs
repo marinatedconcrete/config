@@ -135,6 +135,12 @@ test("the real consumer-only list names real managers", () => {
   }
 });
 
+test("a glob ignores case and a regular expression does not", () => {
+  assert.ok(patternToRegExp("**/containerfile").test("images/a/Containerfile"));
+  assert.ok(patternToRegExp("/^a\\.yml$/").test("a.yml"));
+  assert.equal(patternToRegExp("/^a\\.yml$/").test("A.yml"), false);
+});
+
 test("a manager of another type is ignored", () => {
   assert.deepEqual(run([manager({ customType: "jsonata" })], {}), []);
 });

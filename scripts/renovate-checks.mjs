@@ -31,6 +31,7 @@ export const CONSUMER_ONLY_MANAGERS = [
 ];
 
 // Convert a glob to a regular expression. It supports **, *, ?, and {a,b}.
+// Renovate ignores case in a glob, so the expression ignores case too.
 function globToRegExp(glob) {
   let source = "";
   let braceDepth = 0;
@@ -51,7 +52,7 @@ function globToRegExp(glob) {
     } else if (char === "," && braceDepth > 0) source += "|";
     else source += char.replace(/[.+^$()|[\]\\]/g, "\\$&");
   }
-  return new RegExp(`^${source}$`);
+  return new RegExp(`^${source}$`, "i");
 }
 
 // A pattern in the form /regex/ or /regex/flags is a regular expression.
