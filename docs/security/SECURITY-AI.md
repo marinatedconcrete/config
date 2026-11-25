@@ -48,11 +48,11 @@ The top-level response does not include the review rule. Use the second command 
 ## Tokens and secrets
 
 - The default `GITHUB_TOKEN` permission is `read`, and the token cannot approve pull requests. Read this with `gh api repos/marinatedconcrete/config/actions/permissions/workflow`.
-- The workflows set `permissions:` blocks at the workflow level or the job level. A job with no block gets the `read` default.
+- The workflows set `permissions:` blocks at the workflow level or the job level. A job with no block inherits the workflow-level block. A job gets the `read` default only when its workflow has no block. Some jobs inherit `packages: write` from the workflow level.
 - Several jobs give `packages: write` to the token and run third-party Docker actions in the same job. This is the reason for the Renovate rule in the next section.
 - The workflows use two secrets: `GITHUB_TOKEN` and the private key of the `formwork-remover` GitHub App. The App token creates tags and publishes releases. See [the release README](../../.github/release/README.md).
 - [Release tooling](../qa/release-tooling.md) has the rules for `permissions`, the App token, and `npm ci --ignore-scripts`.
-- An agent session gets no repository secret. The agent uses the credentials of the person who runs it.
+- A local agent session gets no repository secret. It uses the credentials of the person who runs it. A Hive agent writes to GitHub through the Hive GitHub App, so the App is the author of that write.
 
 ## Third-party actions and auto-merge
 
