@@ -1,5 +1,13 @@
 import { spawnSync } from "node:child_process";
-import { readFileSync, readdirSync, existsSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -119,7 +127,33 @@ function listTestDirs(root) {
     .map((entry) => entry.name);
 }
 
-function nodeCoverageArgs(suite) {
+// Add up the found and hit lines of an lcov report. Each file of the report has one LF and one LH line.
+export function sumLcov(text) {
+  let found = 0;
+  let hit = 0;
+  for (const line of text.split("\n")) {
+    if (line.startsWith("LF:")) found += Number(line.slice(3));
+    else if (line.startsWith("LH:")) hit += Number(line.slice(3));
+  }
+  return { found, hit };
+}
+
+// The badge shows the line coverage of all Node suites, as the "all files" row of each suite adds up.
+// The format is the shields endpoint JSON: https://shields.io/badges/endpoint-badge
+export function coverageBadge({ found, hit }) {
+  if (!(found > 0)) throw new Error("The lcov reports have no line.");
+  const percent = (hit / found) * 100;
+  const color =
+    percent >= 80 ? "brightgreen" : percent >= 60 ? "yellow" : "red";
+  return {
+    schemaVersion: 1,
+    label: "node coverage",
+    message: `${percent.toFixed(1)}%`,
+    color,
+  };
+}
+
+function nodeCoverageArgs(suite, lcovFile) {
   return [
     "--test",
     "--experimental-test-coverage",
@@ -129,16 +163,28 @@ function nodeCoverageArgs(suite) {
     `--test-coverage-lines=${suite.lines}`,
     `--test-coverage-branches=${suite.branches}`,
     `--test-coverage-functions=${suite.functions}`,
+    ...(lcovFile
+      ? [
+          "--test-reporter=spec",
+          "--test-reporter-destination=stdout",
+          "--test-reporter=lcov",
+          `--test-reporter-destination=${lcovFile}`,
+        ]
+      : []),
     ...suite.tests,
   ];
 }
 
-function runNodeSuite(root, suite) {
+function runNodeSuite(root, suite, lcovFile) {
   console.log(`\n== Node coverage: ${suite.name} (${suite.directory})`);
-  const result = spawnSync(process.execPath, nodeCoverageArgs(suite), {
-    cwd: path.join(root, suite.directory),
-    stdio: "inherit",
-  });
+  const result = spawnSync(
+    process.execPath,
+    nodeCoverageArgs(suite, lcovFile),
+    {
+      cwd: path.join(root, suite.directory),
+      stdio: "inherit",
+    },
+  );
   if (result.status === 0) return [];
   const why = result.error
     ? result.error.message
@@ -148,13 +194,27 @@ function runNodeSuite(root, suite) {
   ];
 }
 
+// Usage: node scripts/coverage-gate.mjs [--badge-file PATH]
+// With --badge-file, the gate writes the badge JSON when every suite passes.
 function main() {
+  const badgeIndex = process.argv.indexOf("--badge-file");
+  const badgeFile = badgeIndex === -1 ? null : process.argv[badgeIndex + 1];
+  if (badgeIndex !== -1 && !badgeFile) {
+    console.error("Usage: node scripts/coverage-gate.mjs [--badge-file PATH]");
+    process.exit(2);
+  }
   const thresholds = JSON.parse(
     readFileSync(path.join(repoRoot, ".coverage-thresholds.json"), "utf8"),
   );
-  const errors = thresholds.node.flatMap((suite) =>
-    runNodeSuite(repoRoot, suite),
-  );
+  const lcovDir = badgeFile
+    ? mkdtempSync(path.join(os.tmpdir(), "lcov-"))
+    : null;
+  const lcovFiles = [];
+  const errors = thresholds.node.flatMap((suite, index) => {
+    const lcovFile = lcovDir ? path.join(lcovDir, `${index}.info`) : undefined;
+    if (lcovFile) lcovFiles.push(lcovFile);
+    return runNodeSuite(repoRoot, suite, lcovFile);
+  });
 
   console.log("\n== Component tests");
   try {
@@ -176,6 +236,19 @@ function main() {
     console.error("\nCoverage gate failed:");
     for (const error of errors) console.error(`- ${error}`);
     process.exit(1);
+  }
+  if (badgeFile) {
+    const totals = lcovFiles
+      .map((file) => sumLcov(readFileSync(file, "utf8")))
+      .reduce(
+        (sum, part) => ({
+          found: sum.found + part.found,
+          hit: sum.hit + part.hit,
+        }),
+        { found: 0, hit: 0 },
+      );
+    writeFileSync(badgeFile, `${JSON.stringify(coverageBadge(totals))}\n`);
+    rmSync(lcovDir, { recursive: true });
   }
   console.log("\nCoverage gate passed.");
 }
