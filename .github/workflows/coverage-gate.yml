@@ -21,14 +21,18 @@ jobs:
         run: npm ci --prefix .github/release --ignore-scripts
       - name: Install Image Release Notes Tools
         run: npm ci --prefix actions/image-release-notes --ignore-scripts
+      - name: Install kcov
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends kcov
       - name: Run Coverage Gate
-        run: node scripts/coverage-gate.mjs --badge-file "$RUNNER_TEMP/coverage-badge.json"
-      - name: Upload Coverage Badge
+        run: node scripts/coverage-gate.mjs --badge-dir "$RUNNER_TEMP/badges"
+      - name: Upload Coverage Badges
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: coverage-badge
-          path: ${{ runner.temp }}/coverage-badge.json
+          name: coverage-badges
+          path: ${{ runner.temp }}/badges
           if-no-files-found: error
 
   # This job has a write token. It runs only for a push to main, and it runs no code from a branch.
@@ -48,15 +52,17 @@ jobs:
         with:
           persist-credentials: false
           sparse-checkout: scripts
-      - name: Download Coverage Badge
+      - name: Download Coverage Badges
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: coverage-badge
-          path: ${{ runner.temp }}
-      - name: Publish Coverage Badge
+          name: coverage-badges
+          path: ${{ runner.temp }}/badges
+      - name: Publish Coverage Badges
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           EXPECTED_SHA: ${{ github.sha }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        run: bash scripts/publish-badge.sh "$RUNNER_TEMP/coverage-badge.json"
+        run: |
+          bash scripts/publish-badge.sh "$RUNNER_TEMP/badges/coverage.json" \
+            "$RUNNER_TEMP/badges/node-coverage.json" "$RUNNER_TEMP/badges/shell-coverage.json"
