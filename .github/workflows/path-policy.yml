@@ -1,10 +1,9 @@
 name: Path Policy
 
-# pull_request_target gives the token write access on pull requests from forks.
-# The checkout below reads the default branch, not the pull request.
-# Do not set a ref on the checkout. Do not run code from the pull request.
+# This workflow uses pull_request, not pull_request_target.
+# A pull request from a fork gets a read-only token, so the job skips these pull requests.
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - synchronize
@@ -22,6 +21,7 @@ permissions:
 jobs:
   label:
     name: Label by area and risk
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

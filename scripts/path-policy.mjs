@@ -323,10 +323,9 @@ export async function main(
     log(`Added: ${result.add.join(", ") || "none"}`);
     log(`Removed: ${result.remove.join(", ") || "none"}`);
     if (result.unmatched.length > 0) {
-      // The job reads the policy of the default branch. A pull request that adds the rule does not fail here.
-      // "just path-policy-lint" checks the policy of the pull request itself.
+      // A warning does not fail the job. "just path-policy-lint" fails the pull request in this case.
       log(
-        `::warning::The default branch policy has no rule for: ${escapeCommand(result.unmatched.join(", "))}`,
+        `::warning::The policy has no rule for: ${escapeCommand(result.unmatched.join(", "))}`,
       );
     }
     return 0;
