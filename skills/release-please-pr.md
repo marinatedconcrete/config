@@ -23,7 +23,7 @@ The GitHub App `formwork-remover` opens these pull requests. Release Please writ
 - Release Please makes the branch again from `main` each time it updates the pull request. The update removes a manual change.
 - Do not ask the release bot to change the pull request. Ask a named maintainer to act.
 - Recommend a manual rebase only if the maintainer needs the exact version tag. Keep only the lines that the release pull request owns.
-- If the pull request is older than `main`, read the log of the last Release Please run on `main`. Check whether Release Please still plans the release. Recommend `close` only if the log confirms that it no longer plans the release. If you cannot read the log, write "not checked".
+- If the pull request is older than `main`, check the latest Release Please run on `main`. Read the log of the `Update Release PRs` step. Recommend `close` only if this step confirms that Release Please found no release changes for the package. If the step did not run or the log does not answer the question, write "not checked".
 
 ## Fix the wording of a release note
 
@@ -70,7 +70,7 @@ Write the expected tag in your review. If the version, the package, or the tag d
 
 ## Other checks
 
-- Check that the release has a real change. A section that lists only an entry of the form `**main:** release <package> <version>` has no real change. Check the log of the last Release Please run. Recommend `close` only if the log confirms that Release Please no longer plans the release.
+- Check that the release has a real change. A section that lists only an entry of the form `**main:** release <package> <version>` has no real change. Check the log of the `Update Release PRs` step as described above. Recommend `close` only if the log confirms that Release Please found no release changes for the package.
 - Check `mergeable`, `mergeStateStatus`, and the checks on the head commit.
 - Do not merge the pull request. Recommend an action only.
 - Ask one named person for a decision. Ask one question that has two answers, and put your recommendation first.

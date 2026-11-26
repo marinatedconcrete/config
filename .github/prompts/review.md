@@ -229,9 +229,10 @@ Do this section in addition to the general checklist.
   State that Release Please opens a new release pull request when a new release commit exists.
 - Recommend a rebase only if the maintainer needs the exact version tag.
   In that case, keep only the lines that the release pull request owns.
-- Before you recommend `close`, read the log of the last Release Please run on `main`.
-  Check if Release Please still plans this release.
-  Write "not checked" if you cannot read the log.
+- Before you recommend `close`, check the latest Release Please run on `main`.
+  Read the log of the `Update Release PRs` step.
+  Recommend `close` only if this step confirms that Release Please found no release changes for the package.
+  Write "not checked" if the step did not run or the log does not answer the question.
 
 ### How to ask for a decision
 
