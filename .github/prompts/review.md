@@ -202,7 +202,7 @@ Do this section in addition to the general checklist.
 ### What not to do
 
 - Do not comment on style in a generated file.
-  Release Please writes `CHANGELOG.md`, `version.txt`, and `.release-please-manifest.json`.
+  Release Please writes `CHANGELOG.md`, `.release-please-manifest.json`, and a version file such as `ansible/galaxy.yml` or `version.txt`.
   Renovate writes its own branch and title.
 - Do not ask the bot to change the code.
   The bot cannot answer.
