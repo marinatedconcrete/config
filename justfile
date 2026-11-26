@@ -284,6 +284,22 @@ kustomize-lint:
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
 
+# Check each rendered component against its Pod Security level.
+[group('lint')]
+pod-security-lint:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    # Use the Kubernetes version of the component tests.
+    version="$(yq '.minikube_test__kubernetes_version' ansible/roles/minikube_test/defaults/main.yml)"
+
+    # Give each run its own profile. Then the recipe never deletes a cluster that it did not start.
+    profile="pod-security-lint-$$"
+    trap 'minikube delete --profile="${profile}"' EXIT
+    minikube start --interactive=false --profile="${profile}" --kubernetes-version="${version}" --cni=kindnet
+    bash kustomization/pod-security-check/test.sh "${profile}"
+    bash kustomization/pod-security-check/check.sh "${profile}"
+
 # Check the Renovate configuration.
 [group('lint')]
 renovate-lint:
@@ -308,7 +324,7 @@ shellcheck-lint:
 
 # Run all linters.
 [group('lint')]
-lint: actionlint-lint ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
+lint: actionlint-lint ansible-lint hado-lint kustomize-lint pod-security-lint renovate-lint shellcheck-lint
 
 # Run the Kairos Fedora end-to-end test for startup and installation.
 [group('test')]

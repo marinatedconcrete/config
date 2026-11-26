@@ -1,5 +1,7 @@
 # Redis Component
 
+[![Pod Security Standard: Restricted](https://img.shields.io/badge/pod_security_standard-restricted-green?style=for-the-badge&logo=kubernetes&logoColor=%23326CE5)](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+
 This component installs Redis for Paperless with a small PVC for stored data.
 See the [Paperless component](../paperless/README.md) for more information.
 
