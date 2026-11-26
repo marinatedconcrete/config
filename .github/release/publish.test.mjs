@@ -452,7 +452,7 @@ test("an image candidate without a tested digest stops before any write", async 
       candidate: image,
       assets: sbom("1"),
       imageDigest: "",
-      promote: async () => {},
+      promote: () => assert.fail("unexpected image promotion"),
     }),
     /Missing tested image digest/,
   );
@@ -512,7 +512,7 @@ test("an image receipt without a digest stops recovery before any write", async 
       candidate: image,
       assets: sbom("1"),
       imageDigest: `sha256:${"1".repeat(64)}`,
-      promote: async () => {},
+      promote: () => assert.fail("unexpected image promotion"),
     }),
     /no tested image digest/,
   );
