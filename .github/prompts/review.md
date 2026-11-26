@@ -84,6 +84,7 @@ A change is also breaking when the consumer sees a new behavior with no edit of 
 Ask this question: "Can a consumer who changes only the version pin see a failure or a new behavior?"
 If the answer is yes, the change is breaking.
 Judge the effect on the consumer, not the size of the diff.
+To decide how closely to review each changed part, read [risk tiers](../../docs/risk-tiers.md).
 
 Each part has its own version, tag, and consumers.
 The QA page for each part in [docs/qa/](../../docs/qa/) lists what is breaking and what is not for that part.
