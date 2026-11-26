@@ -1,0 +1,41 @@
+name: Path Policy
+
+# pull_request_target gives the token write access on pull requests from forks.
+# The checkout below reads the default branch, not the pull request.
+# Do not set a ref on the checkout. Do not run code from the pull request.
+on:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+
+concurrency:
+  group: path-policy-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  label:
+    name: Label by area and risk
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            scripts
+            .github/policies
+      - name: Apply area and risk labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+        run: node scripts/path-policy.mjs label "$PULL_REQUEST_NUMBER"

@@ -300,6 +300,11 @@ pod-security-lint:
     bash kustomization/pod-security-check/test.sh "${profile}"
     bash kustomization/pod-security-check/check.sh "${profile}"
 
+# Check that the path policy covers every tracked file.
+[group('lint')]
+path-policy-lint:
+    node scripts/path-policy.mjs check
+
 # Check the Renovate configuration.
 [group('lint')]
 renovate-lint:
@@ -324,7 +329,7 @@ shellcheck-lint:
 
 # Run all linters.
 [group('lint')]
-lint: actionlint-lint ansible-lint hado-lint kustomize-lint pod-security-lint renovate-lint shellcheck-lint
+lint: actionlint-lint ansible-lint hado-lint kustomize-lint path-policy-lint pod-security-lint renovate-lint shellcheck-lint
 
 # Run the Kairos Fedora end-to-end test for startup and installation.
 [group('test')]
