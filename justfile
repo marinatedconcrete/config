@@ -363,9 +363,15 @@ coverage-gate:
     npm ci --prefix actions/image-release-notes --ignore-scripts
     node scripts/coverage-gate.mjs
 
+# Run the tests of the release shell scripts.
+[group('test')]
+release-scripts-test:
+    bash .github/scripts/publish-draft-release.test.sh
+    bash .github/scripts/release-latest.test.sh
+
 # Run all tests..
 [group('test')]
-test: kustomization-tests
+test: kustomization-tests release-scripts-test
 
 # Generate the release notes and the SBOM for an image.
 [group('release')]
