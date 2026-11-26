@@ -67,7 +67,7 @@ Write the expected tag in your review. If the version, the package, or the tag d
 
 ## Other checks
 
-- Check that the release has a real change. A section that lists only an entry of the form `**main:** release <package> <version>` has no real change. In that case, check the log of the last Release Please run as described above. Then recommend `close`.
+- Check that the release has a real change. A section that lists only an entry of the form `**main:** release <package> <version>` has no real change. Check the log of the last Release Please run. Recommend `close` only if the log confirms that Release Please no longer plans the release.
 - Check `mergeable`, `mergeStateStatus`, and the checks on the head commit.
 - Do not merge the pull request. Recommend an action only.
 - Ask one named person for a decision. Ask one question that has two answers, and put your recommendation first.
