@@ -53,10 +53,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ fromJson(inputs.candidate).sha }}
-      # The runner can load an AppArmor profile for a program that a test
-      # runs. The profile then applies in the privileged test containers and
-      # blocks the program. Remove these profiles.
+      # The runner can load an AppArmor profile for Mosquitto. The profile
+      # then applies in the privileged test containers and blocks the
+      # program. Only the Mosquitto test needs this step.
       - name: Remove Host AppArmor Profiles
+        if: fromJson(inputs.candidate).project == 'kustomize-mosquitto'
         run: |
           if [[ -f /etc/apparmor.d/mosquitto ]]; then
             sudo apparmor_parser --remove /etc/apparmor.d/mosquitto
@@ -96,10 +97,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ fromJson(inputs.candidate).sha }}
-      # The runner can load an AppArmor profile for a program that a test
-      # runs. The profile then applies in the privileged test containers and
-      # blocks the program. Remove these profiles.
-      - name: Remove Host AppArmor Profiles
+      # The Ansible release runs all component tests through
+      # `just ansible-lint test`. The host profile blocks Mosquitto.
+      - name: Remove Mosquitto AppArmor Profile
+        if: fromJson(inputs.candidate).path == 'ansible'
         run: |
           if [[ -f /etc/apparmor.d/mosquitto ]]; then
             sudo apparmor_parser --remove /etc/apparmor.d/mosquitto
