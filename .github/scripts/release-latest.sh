@@ -5,14 +5,8 @@ set -euo pipefail
 # `--latest` value of `gh release edit` for the draft release at tag $1.
 # Print `false` when a published release of the same image has a newer CalVer
 # version. A retry of an older draft then does not become the Latest release.
-# Print nothing when $2 is not `true`, because the release is not a draft.
 
-tag="${1:?usage: <tag names> | release-latest.sh <name-YYYY.M.N> <is-draft>}"
-is_draft="${2:?usage: <tag names> | release-latest.sh <name-YYYY.M.N> <is-draft>}"
-
-if [[ "${is_draft}" != true ]]; then
-    exit 0
-fi
+tag="${1:?usage: <tag names> | release-latest.sh <name-YYYY.M.N>}"
 
 name="${tag%-*}"
 pattern="^${name//./\\.}-([0-9]+)\.([0-9]+)\.([0-9]+)$"

@@ -366,6 +366,7 @@ coverage-gate:
 # Run the tests of the release shell scripts.
 [group('test')]
 release-scripts-test:
+    bash .github/scripts/publish-draft-release.test.sh
     bash .github/scripts/release-latest.test.sh
 
 # Run all tests..
