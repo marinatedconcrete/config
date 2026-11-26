@@ -28,7 +28,7 @@
 
 - Before you make a commit, run `just format`. This command formats YAML, JSON, Markdown, and the justfile. See the justfile recipes for the formatting rules.
 - Run `just check-format` to check the format.
-- Run `just lint` to run the actionlint, Ansible, hadolint, Kustomize, Renovate, and ShellCheck checks.
+- Run `just lint` to run the actionlint, Ansible, hadolint, Kustomize, Pod Security level, Renovate, and ShellCheck checks. The Ansible and Pod Security checks start Minikube, so `just lint` needs Docker.
 
 ## Tests
 

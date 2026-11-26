@@ -14,6 +14,9 @@ The directory has one action: `actions/image-release-notes`.
 - `actions/image-release-notes/release-notes.sh`, `actions/image-release-notes/previous-sbom.sh`, and `actions/image-release-notes/publish/publish.sh` do the work.
 - `actions/image-release-notes/image-references.mjs` reads a Containerfile.
   `actions/image-release-notes/image-references.test.mjs` tests it.
+- `actions/image-release-notes/release-notes.test.mjs` and `publish.test.mjs` run `release-notes.sh` and `publish/publish.sh` with stub commands and fixed files.
+- `actions/image-release-notes/readme-tables.test.mjs` compares the README tables with `action.yml` and `publish/action.yml`.
+- `actions/image-release-notes/renovate-manager.test.mjs` applies the regex manager in `renovate.json` to `release-notes.sh`.
 - `actions/image-release-notes/README.md` documents the inputs, the outputs, and the behavior.
 
 Other repositories can use the action by tag.
@@ -41,7 +44,8 @@ Apply each item to the diff.
 ### Security posture
 
 - The `Image Release Notes` action in `actions/image-release-notes/action.yml` needs only `contents: read`.
-  The image workflows call it from jobs that have `contents: read`.
+  Three image workflows call it from jobs that also have `packages: write`.
+  Treat a change to the action as a change that runs with that write access.
   A change must not add a permission requirement for this action.
 - The `publish` action must run no code from the image.
   The comment in `publish/action.yml` states this rule.
@@ -97,24 +101,32 @@ Apply each item to the diff.
 
 ## Automated validation coverage
 
-| What is validated                  | How to run                                                       | What it proves                                                                                                                                    | What it does not prove                                                       |
-| ---------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Coverage gate for the action tests | `just coverage-gate`                                             | The image reference tests run in the `coverage-gate` workflow, with minimum line, branch, and function coverage from `.coverage-thresholds.json`. | That the tests are correct. A threshold is a floor, not a goal.              |
-| Image reference parsing            | `npm test --prefix actions/image-release-notes`                  | The action reads a Containerfile correctly: stages, `ARG` values, `--from`, and `target`.                                                         | The behavior of the shell scripts.                                           |
-| Shell scripts                      | `just shellcheck-lint`                                           | The scripts have no ShellCheck findings.                                                                                                          | ShellCheck does not find logic errors.                                       |
-| Action inputs in the workflows     | `just actionlint-lint`                                           | Each workflow step that uses the action gives all required inputs and only the inputs that `action.yml` defines.                                  | The action runs correctly with these inputs.                                 |
-| Formatting                         | `just check-format`                                              | Prettier accepts the files.                                                                                                                       | ASD-STE100 wording.                                                          |
-| Release readiness                  | `just release-please-validate actions/image-release-notes`       | The commit that Release Please selects passes ShellCheck and the unit tests.                                                                      | A merge is safe. This check runs after the merge.                            |
-| Renovate configuration             | `just renovate-lint`                                             | `renovate.json` is valid.                                                                                                                         | The regex manager finds the `SYFT_IMAGE` and `CYCLONEDX_IMAGE` lines.        |
-| The action on a real image         | Manual. Open a PR that changes `actions/image-release-notes/**`. | The action runs end to end on a real image: Syft, the notes, and the artifact upload.                                                             | The contents of the notes. The check runs only when the path filter matches. |
+| What is validated                  | How to run                                                       | What it proves                                                                                                                                                                                                                                                                | What it does not prove                                                                                                       |
+| ---------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Coverage gate for the action tests | `just coverage-gate`                                             | All tests in `actions/image-release-notes` run in CI on each push. The line, branch, and function coverage of `image-references.mjs` must meet the minimums in `.coverage-thresholds.json`.                                                                                   | That the tests are correct. A threshold is a floor, not a goal. The gate does not measure the coverage of the shell scripts. |
+| Image reference parsing            | `npm test --prefix actions/image-release-notes`                  | The action reads a Containerfile correctly: stages, `ARG` values, `--from`, and `target`.                                                                                                                                                                                     | The image reference tests do not test the shell scripts. The next two rows give those tests.                                 |
+| `release-notes.sh` with stubs      | `npm test --prefix actions/image-release-notes`                  | With a stub `docker` command and fixed SBOM files, the script writes the component table, the change table, and the notes of an image with no `dnf`.                                                                                                                          | That Syft, `dnf`, or the CycloneDX CLI write the output that the stubs print.                                                |
+| `publish.sh` with a stub `gh`      | `npm test --prefix actions/image-release-notes`                  | A second run with the same tag gives the same release body and one SBOM asset.                                                                                                                                                                                                | That the real GitHub CLI and API accept the same calls.                                                                      |
+| README tables                      | `npm test --prefix actions/image-release-notes`                  | Each input in `action.yml` and `publish/action.yml` has the same name, requirement, default, and description in the README tables. Each output in `action.yml` has the same name and description. The test does not read outputs in `publish/action.yml`, which has none now. | The prose of the README outside the tables.                                                                                  |
+| Shell scripts                      | `just shellcheck-lint`                                           | The scripts have no ShellCheck findings.                                                                                                                                                                                                                                      | ShellCheck does not find logic errors.                                                                                       |
+| Action inputs in the workflows     | `just actionlint-lint`                                           | Each workflow step that uses the action gives all required inputs and only the inputs that `action.yml` defines.                                                                                                                                                              | The action runs correctly with these inputs.                                                                                 |
+| Formatting                         | `just check-format`                                              | Prettier accepts the files.                                                                                                                                                                                                                                                   | ASD-STE100 wording.                                                                                                          |
+| Release readiness                  | `just release-please-validate actions/image-release-notes`       | The commit that Release Please selects passes ShellCheck and the unit tests.                                                                                                                                                                                                  | A merge is safe. This check runs after the merge.                                                                            |
+| Renovate configuration             | `just renovate-lint`                                             | `renovate.json` is valid. Each regex custom manager matches a file.                                                                                                                                                                                                           | That Renovate sends the updates.                                                                                             |
+| Renovate regex manager             | `npm test --prefix actions/image-release-notes`                  | The `managerFilePatterns` and `matchStrings` in `renovate.json` find the `SYFT_IMAGE` and `CYCLONEDX_IMAGE` lines in `release-notes.sh`.                                                                                                                                      | That Renovate behaves the same. The test uses the JavaScript regex engine.                                                   |
+| The action on a real image         | Manual. Open a PR that changes `actions/image-release-notes/**`. | The action runs end to end on a real image: Syft, the notes, and the artifact upload.                                                                                                                                                                                         | The contents of the notes. The check runs only when the path filter matches.                                                 |
 
 Behavior that no job covers:
 
-- `release-notes.sh`, `previous-sbom.sh`, and `publish/publish.sh` have no tests.
-  This includes the choice of the previous release, the change table, and the edit of the release body.
-- Neither `action.yml` nor `publish/action.yml` has a test.
+- `previous-sbom.sh` has no tests.
+  This includes the choice of the previous release.
+- No test checks the output of the real Syft, `dnf`, CycloneDX CLI, or GitHub CLI.
+  The tests of `release-notes.sh` and `publish.sh` use stubs.
+  The image workflows run `action.yml` on a real image, but they do not check the notes.
+- No test in `actions/image-release-notes` runs the steps of `action.yml` or `publish/action.yml`.
+  This includes the wiring of the inputs to the scripts.
+  Only a release of `devcontainer-base` runs `publish/action.yml`.
 - No test runs the `publish` action against a draft release.
-- No job checks that the tables in `README.md` agree with `action.yml`.
 
 ## Manual QA
 
@@ -168,8 +180,4 @@ Do these checks when automation cannot decide.
 ## Known gaps
 
 - Add tests for `previous-sbom.sh`: version order, drafts, a rerun of an old tag, and a failed download.
-- Add tests for `release-notes.sh` with a fixed SBOM: the component table, the change table, and an image with no `dnf`.
-- Add a test for `publish/publish.sh` that runs it twice with the same tag.
-- Add a check that the regex manager in `renovate.json` finds the tool image lines in `release-notes.sh`.
-- Add a check that the tables in `README.md` match `action.yml`.
 - Make the image workflows assert the notes, not only create them.
