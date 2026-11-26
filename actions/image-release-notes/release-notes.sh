@@ -370,15 +370,7 @@ write_change_table() {
     # and unchanged. The previous release therefore has the removed versions
     # and the unchanged versions. This release has the added versions and the
     # unchanged versions. Compare those two sets.
-    changed="$(jq -r '
-        .componentVersions
-        | to_entries
-        | sort_by(.key)[]
-        | (.value.removed + .value.unchanged | map(.version) | unique) as $old
-        | (.value.added + .value.unchanged | map(.version) | unique) as $new
-        | select(($old | length) > 0 and ($new | length) > 0 and $old != $new)
-        | "| \(.key) | \($old | join(", ")) | \($new | join(", ")) |"
-    ' "$diff_json")"
+    changed="$(jq -r -f "$(dirname "${BASH_SOURCE[0]}")/changed-components.jq" "$diff_json")"
 
     added="$(format_change "$diff_json" added removed)"
     removed="$(format_change "$diff_json" removed added)"
