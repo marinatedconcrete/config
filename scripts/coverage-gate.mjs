@@ -267,10 +267,11 @@ export function coverageBadge(label, { found, hit }) {
   };
 }
 
-// Hive reads coverage.json, so keep that name.
+// Hive reads only coverage.json, so that file has the total of the Node and shell lines.
 export function badgeFiles({ node, shell }) {
   return {
-    "coverage.json": coverageBadge("node coverage", node),
+    "coverage.json": coverageBadge("coverage", addCounts([node, shell])),
+    "node-coverage.json": coverageBadge("node coverage", node),
     "shell-coverage.json": coverageBadge("shell coverage", shell),
   };
 }

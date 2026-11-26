@@ -180,19 +180,37 @@ test("the badge takes its label from the caller", () => {
   );
 });
 
-test("the badge files keep the coverage.json name and add shell-coverage.json", () => {
+test("coverage.json counts the Node and shell lines as one total", () => {
   const badges = badgeFiles({
     node: { found: 100, hit: 85 },
     shell: { found: 517, hit: 330 },
   });
-  assert.deepEqual(Object.keys(badges), [
+  assert.deepEqual(Object.keys(badges).sort(), [
     "coverage.json",
+    "node-coverage.json",
     "shell-coverage.json",
   ]);
-  assert.equal(badges["coverage.json"].label, "node coverage");
-  assert.equal(badges["coverage.json"].message, "85.0%");
+  assert.deepEqual(badges["coverage.json"], {
+    schemaVersion: 1,
+    label: "coverage",
+    message: "67.3%",
+    color: "yellow",
+  });
+  assert.equal(badges["node-coverage.json"].label, "node coverage");
+  assert.equal(badges["node-coverage.json"].message, "85.0%");
   assert.equal(badges["shell-coverage.json"].label, "shell coverage");
   assert.equal(badges["shell-coverage.json"].message, "63.8%");
+});
+
+test("the coverage.json color comes from the combined lines", () => {
+  const badges = badgeFiles({
+    node: { found: 100, hit: 90 },
+    shell: { found: 100, hit: 10 },
+  });
+  assert.equal(badges["node-coverage.json"].color, "brightgreen");
+  assert.equal(badges["shell-coverage.json"].color, "red");
+  assert.equal(badges["coverage.json"].message, "50.0%");
+  assert.equal(badges["coverage.json"].color, "red");
 });
 
 test("the badge refuses a report with no line", () => {

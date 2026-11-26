@@ -65,4 +65,5 @@ jobs:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           bash scripts/publish-badge.sh "$RUNNER_TEMP/badges/coverage.json"
+          bash scripts/publish-badge.sh "$RUNNER_TEMP/badges/node-coverage.json" node-coverage.json
           bash scripts/publish-badge.sh "$RUNNER_TEMP/badges/shell-coverage.json" shell-coverage.json
