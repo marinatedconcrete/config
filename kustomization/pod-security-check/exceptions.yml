@@ -7,7 +7,7 @@ kube-vip-wireguard:
   reason: The DaemonSet uses hostNetwork and the NET_ADMIN and NET_RAW capabilities.
 paperless:
   level: baseline
-  reason: The paperless and samba containers add the CHOWN, SETGID, and SETUID capabilities.
+  reason: The paperless container adds the CHOWN, SETGID, and SETUID capabilities. The samba container adds the SETGID and SETUID capabilities.
 unifi-network-application:
   level: baseline
-  reason: The container adds the CHOWN, DAC_OVERRIDE, SETGID, and SETUID capabilities.
+  reason: The unifi container adds the CHOWN, DAC_OVERRIDE, SETGID, and SETUID capabilities.

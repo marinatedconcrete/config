@@ -50,7 +50,7 @@ test_verdict() {
   expect_contains 'verdict: an entry for no workload is stale' 'no workload' "$(verdict a baseline none)"
   expect_contains 'verdict: stricter than declared is stale' stale "$(verdict a baseline restricted)"
   expect_contains 'verdict: weaker than declared fails' 'Fix the manifest' "$(verdict a restricted baseline)"
-  expect_contains 'verdict: privileged above baseline fails' 'Fix the manifest' "$(verdict a baseline privileged)"
+  expect_contains 'verdict: privileged above baseline fails' 'Fix the manifest of a, or set its level and reason in exceptions.yml.' "$(verdict a baseline privileged)"
 }
 
 test_validate_exceptions() {
@@ -81,8 +81,9 @@ test_documented_levels() {
   printf 'metadata:\n  labels:\n    pod-security.kubernetes.io/enforce: baseline\n' > "${dir}/kustomization/tests/a/namespace.yml"
   expect_equal 'badge and label: equal levels pass' '' "$(ROOT="${dir}" COMPONENTS="${dir}/kustomization/components" documented_level_problems a baseline)"
   expect_contains 'badge: a different level fails' 'README badge of a shows baseline' "$(ROOT="${dir}" COMPONENTS="${dir}/kustomization/components" documented_level_problems a restricted)"
+  expect_contains 'label: a different enforce label fails' 'enforce label in kustomization/tests/a/namespace.yml is baseline. Set it to restricted.' "$(ROOT="${dir}" COMPONENTS="${dir}/kustomization/components" documented_level_problems a restricted)"
   printf 'metadata:\n  labels: {}\n' > "${dir}/kustomization/tests/a/namespace.yml"
-  expect_contains 'label: a missing enforce label fails' 'enforce label in kustomization/tests/a/namespace.yml' "$(ROOT="${dir}" COMPONENTS="${dir}/kustomization/components" documented_level_problems a baseline)"
+  expect_contains 'label: a missing enforce label fails' 'enforce label in kustomization/tests/a/namespace.yml is missing. Set it to baseline.' "$(ROOT="${dir}" COMPONENTS="${dir}/kustomization/components" documented_level_problems a baseline)"
   rm -rf "${dir}"
 }
 

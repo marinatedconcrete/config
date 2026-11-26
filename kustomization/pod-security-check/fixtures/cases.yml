@@ -83,5 +83,5 @@
   edit: '.kind = "ConfigMap" | del(.spec) | .data = {"a": "b"}'
 - rule: unknown kind that holds containers
   expected_level: error
-  expected_text: Widget
+  expected_text: Widget holds containers. Pod Security admission does not measure this kind
   edit: '.kind = "Widget"'

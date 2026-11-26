@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Check that each rendered component meets its declared Pod Security level.
-# Exit 0 when all components pass, 1 when a component fails, 2 when the check cannot run.
+# Exit 0 when all components pass, 1 when a component fails, and 2 when exceptions.yml is not valid
+# or a component cannot be built or measured. When a kubectl command in prepare fails, exit with its status.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -66,7 +67,7 @@ violations() {
 }
 
 # Set measured to the weakest level of the rendered YAML on stdin: none, restricted, baseline,
-# privileged, or error. Set details to the violations of the next stricter level.
+# privileged, or error. Set details to the violations of the next stricter level, or to the error text.
 measure() {
   local rendered unknown docs level lines previous=''
   measured=''
@@ -82,7 +83,7 @@ measure() {
   }
   if [[ -n "${unknown}" ]]; then
     measured=error
-    details="${unknown} holds containers, and check.sh does not examine this kind. Add it to POD_TEMPLATE_KINDS."
+    details="${unknown} holds containers. Pod Security admission does not measure this kind, so check.sh cannot check it."
     return 0
   fi
   docs="$(POD_TEMPLATE_KINDS="${POD_TEMPLATE_KINDS}" yq 'select((.kind // "") | test(strenv(POD_TEMPLATE_KINDS))) | del(.metadata.namespace)' <<< "${rendered}")" || {
@@ -120,7 +121,7 @@ verdict() {
   elif (($(rank "${measured}") < $(rank "${declared}"))); then
     echo "The entry for ${name} in exceptions.yml is stale. Remove it, or set its level to ${measured}."
   else
-    echo "Fix the manifest of ${name}, or add an entry with a level and a reason to exceptions.yml."
+    echo "Fix the manifest of ${name}, or set its level and reason in exceptions.yml."
   fi
 }
 
@@ -139,7 +140,7 @@ documented_level_problems() {
     label="$(yq -r '.metadata.labels["pod-security.kubernetes.io/enforce"] // ""' "${namespace_file}")"
   fi
   if [[ -f "${namespace_file}" && "${label}" != "${declared}" ]]; then
-    echo "The enforce label in ${namespace_file#"${ROOT}/"} is ${label}. Change it to ${declared}."
+    echo "The enforce label in ${namespace_file#"${ROOT}/"} is ${label:-missing}. Set it to ${declared}."
   fi
 }
 
