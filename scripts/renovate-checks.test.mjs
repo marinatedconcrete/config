@@ -238,3 +238,25 @@ test("the combined check reports both rules", () => {
   });
   assert.equal(failures.length, 2);
 });
+
+test("an extends entry in a package rule or a nested object is checked", () => {
+  const missing = (name) =>
+    `github>marinatedconcrete/config//renovate/${name}#v1`;
+  const failures = findMissingPresets({
+    file: "renovate.json",
+    config: {
+      packageRules: [{ matchPackageNames: ["x"], extends: [missing("rule")] }],
+      vulnerabilityAlerts: { extends: missing("alerts") },
+    },
+    files: [],
+  });
+  assert.equal(failures.length, 2);
+  assert.match(failures[0], /needs renovate\/rule\.json,/);
+  assert.match(failures[1], /needs renovate\/alerts\.json,/);
+});
+
+test("only the /regex/ and /regex/i forms are regular expressions", () => {
+  assert.ok(patternToRegExp("/^A$/i").test("a"));
+  assert.equal(patternToRegExp("/^a$/g").test("a"), false);
+  assert.ok(patternToRegExp("/^a$/g").test("/^a$/g"));
+});

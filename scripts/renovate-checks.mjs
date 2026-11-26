@@ -2,8 +2,9 @@
 //
 // Rule 1: Each regex custom manager must match at least one file in the repository.
 // The manager must also find a match for at least one of its matchStrings in a file that it reads.
-// Rule 2: Each extends entry that points at this repository must name a file that exists.
-// Other repositories and built-in presets are not checked.
+// Rule 2: Each extends entry that starts with github>marinatedconcrete/config// or
+// local>marinatedconcrete/config// must name a file that exists. The check reads the
+// extends entries at all levels of the file. It does not check other forms of entry.
 //
 // Usage: node scripts/renovate-checks.mjs
 // Run the script from the repository root. The script reads the files that git tracks.
@@ -30,7 +31,8 @@ export const CONSUMER_ONLY_MANAGERS = [
   },
 ];
 
-// Convert a glob to a regular expression. It supports **, *, ?, and {a,b}.
+// Convert a glob to a regular expression. Renovate uses minimatch for a glob. The result
+// can differ from minimatch, for example for "[...]" or for "**" inside a directory name.
 // Renovate ignores case in a glob, so the expression ignores case too.
 function globToRegExp(glob) {
   let source = "";
@@ -55,10 +57,11 @@ function globToRegExp(glob) {
   return new RegExp(`^${source}$`, "i");
 }
 
-// A pattern in the form /regex/ or /regex/flags is a regular expression.
-// Renovate reads any other pattern as a glob.
+// Renovate reads a pattern that starts with / or !/ and ends with / or /i as a regular
+// expression. A "!" at the start negates the expression. Renovate reads any other
+// pattern as a glob. This check does not support the !/ form and reads it as a glob.
 export function patternToRegExp(pattern) {
-  const form = /^\/(.+)\/([a-z]*)$/s.exec(pattern);
+  const form = /^\/(.+)\/(i?)$/s.exec(pattern);
   return form ? new RegExp(form[1], form[2]) : globToRegExp(pattern);
 }
 
@@ -69,7 +72,8 @@ function describeManager(file, index, manager) {
 
 // config: the parsed contents of one Renovate file. files: the repository paths.
 // readFile: a function that returns the text of a path.
-// The result is a list of failure messages. An empty list means that the manager is live.
+// The result is a list of failure messages. The check skips a manager that is not a
+// regex manager or that the allowed list names.
 export function findDeadManagers({
   file,
   config,
@@ -125,7 +129,8 @@ export function findDeadManagers({
 }
 
 // Return the repository file that an extends entry points at, or null.
-// The entry must use the github> or local> prefix and name this repository.
+// The entry must start with github>marinatedconcrete/config// or
+// local>marinatedconcrete/config//.
 // Renovate uses an explicit .json, .jsonc, or .json5 extension as written.
 // An entry with no extension names a .json file.
 export function presetPath(entry) {
@@ -135,9 +140,19 @@ export function presetPath(entry) {
   return form ? `${form[1]}${form[2] ?? ".json"}` : null;
 }
 
+// Renovate reads extends at the top level and in nested objects, for example in a
+// packageRules entry. A string value is one entry.
+function extendsEntries(node) {
+  if (Array.isArray(node)) return node.flatMap(extendsEntries);
+  if (node === null || typeof node !== "object") return [];
+  return Object.entries(node).flatMap(([key, value]) =>
+    key === "extends" ? [value].flat() : extendsEntries(value),
+  );
+}
+
 export function findMissingPresets({ file, config, files }) {
   const known = new Set(files);
-  return (config.extends ?? []).flatMap((entry) => {
+  return extendsEntries(config).flatMap((entry) => {
     const path = presetPath(entry);
     if (path === null || known.has(path)) return [];
     return [
