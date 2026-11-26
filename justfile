@@ -293,6 +293,7 @@ renovate-lint:
     find renovate -name "*.json" -print | while read -r file; do
         pnpm exec renovate-config-validator ${file}
     done
+    node scripts/renovate-checks.mjs
 
 # Check shell scripts with ShellCheck.
 [group('lint')]
