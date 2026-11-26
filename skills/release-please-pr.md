@@ -29,7 +29,7 @@ The GitHub App `formwork-remover` opens these pull requests. Release Please writ
 
 The release note text comes from the commit message of the merged source pull request. To fix the text, change the source pull request. Do not change the release pull request.
 
-1. Find the merged pull request that made the commit. The changelog line links to it if a pull request exists. If the line has no link, an override cannot fix it. In that case, ask a named maintainer to decide.
+1. Find the merged pull request that made the commit. Use the link in the changelog entry if it exists. If there is no link, find the commit and check for an associated pull request. If the commit has no associated pull request, an override cannot fix the note. In that case, ask a named maintainer to decide.
 2. Ask a named maintainer to add this block to the body of that merged pull request. Use one block only, because Release Please reads only the first block.
 
 ```text
