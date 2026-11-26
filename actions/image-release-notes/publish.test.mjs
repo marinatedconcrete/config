@@ -25,9 +25,22 @@ const scriptPath =
   process.env.PUBLISH_SCRIPT ?? join(here, "publish", "publish.sh");
 
 const MARKER = "<!-- app-image-details -->";
+const LOCAL_SBOM = '{"bomFormat":"CycloneDX"}';
 
 const STUB = `#!/usr/bin/env bash
 case "$1 $2" in
+"api repos/{owner}/{repo}/releases/tags/$STUB_TAG")
+    [[ -d "$STUB_DIR/release" ]] || exit 1
+    # The REST API can give a null digest. The jq filter of the script then
+    # prints an empty digest.
+    for asset in "$STUB_DIR/release/assets"/*; do
+        [[ -e "$asset" ]] || continue
+        digest=""
+        [[ -e "$STUB_DIR/release/no-digest" ]] ||
+            digest="sha256:$(sha256sum -- "$asset" | cut -d' ' -f1)"
+        printf '%s\\t%s\\n' "$(basename "$asset")" "$digest"
+    done
+    ;;
 "release view")
     [[ "$3" == "$STUB_TAG" && -d "$STUB_DIR/release" ]] || exit 1
     case "$*" in
@@ -66,6 +79,7 @@ function setup({
   release = true,
   immutable = false,
   broken = false,
+  noDigest = false,
   assets = [],
 }) {
   const dir = mkdtempSync(join(tmpdir(), "publish-test-"));
@@ -75,12 +89,13 @@ function setup({
   mkdirSync(files);
   writeFileSync(join(bin, "gh"), STUB);
   chmodSync(join(bin, "gh"), 0o755);
-  writeFileSync(join(files, "app-sbom.cdx.json"), '{"bomFormat":"CycloneDX"}');
+  writeFileSync(join(files, "app-sbom.cdx.json"), LOCAL_SBOM);
   if (release) {
     mkdirSync(join(dir, "release", "assets"), { recursive: true });
     writeFileSync(join(dir, "release", "body.md"), body);
     if (immutable) writeFileSync(join(dir, "release", "immutable"), "");
     if (broken) writeFileSync(join(dir, "release", "broken"), "");
+    if (noDigest) writeFileSync(join(dir, "release", "no-digest"), "");
     for (const [name, data] of assets)
       writeFileSync(join(dir, "release", "assets", name), data);
   }
@@ -109,13 +124,13 @@ const state = (dir) => ({
   assets: readdirSync(join(dir, "release", "assets")),
 });
 
-const PUBLISHED_SBOM = '{"bomFormat":"CycloneDX","published":true}';
+const OTHER_SBOM = '{"bomFormat":"CycloneDX","build":2}';
 
-test("a published immutable release that has the SBOM keeps it and gets the notes", () => {
+test("a published immutable release with the same SBOM keeps it and gets the notes", () => {
   const env = setup({
     body: "Human text.\n",
     immutable: true,
-    assets: [["app-sbom.cdx.json", PUBLISHED_SBOM]],
+    assets: [["app-sbom.cdx.json", LOCAL_SBOM]],
   });
   try {
     const result = publish(env, "Notes.\n");
@@ -124,13 +139,52 @@ test("a published immutable release that has the SBOM keeps it and gets the note
       body: `Human text.\n\n${MARKER}\n\nNotes.\n`,
       assets: ["app-sbom.cdx.json"],
     });
+  } finally {
+    rmSync(env.dir, { recursive: true, force: true });
+  }
+});
+
+test("a published immutable release with a different SBOM of the same name stops the script and keeps the body", () => {
+  const env = setup({
+    body: "Human text.\n",
+    immutable: true,
+    assets: [["app-sbom.cdx.json", OTHER_SBOM]],
+  });
+  try {
+    const result = publish(env, "Notes.\n");
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /is not the same as the local/);
+    assert.deepEqual(state(env.dir), {
+      body: "Human text.\n",
+      assets: ["app-sbom.cdx.json"],
+    });
     assert.equal(
       readFileSync(
         join(env.dir, "release", "assets", "app-sbom.cdx.json"),
         "utf8",
       ),
-      PUBLISHED_SBOM,
+      OTHER_SBOM,
     );
+  } finally {
+    rmSync(env.dir, { recursive: true, force: true });
+  }
+});
+
+test("a published immutable release with no SBOM digest stops the script and keeps the body", () => {
+  const env = setup({
+    body: "Human text.\n",
+    immutable: true,
+    noDigest: true,
+    assets: [["app-sbom.cdx.json", LOCAL_SBOM]],
+  });
+  try {
+    const result = publish(env, "Notes.\n");
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /has no digest/);
+    assert.deepEqual(state(env.dir), {
+      body: "Human text.\n",
+      assets: ["app-sbom.cdx.json"],
+    });
   } finally {
     rmSync(env.dir, { recursive: true, force: true });
   }
@@ -146,6 +200,25 @@ test("a published immutable release with no SBOM stops the script and keeps the 
       /release app-1\.0\.0 is immutable and has no app-sbom\.cdx\.json asset/,
     );
     assert.deepEqual(state(env.dir), { body: "Human text.\n", assets: [] });
+  } finally {
+    rmSync(env.dir, { recursive: true, force: true });
+  }
+});
+
+test("a published immutable release with only other assets stops the script and keeps the body", () => {
+  const env = setup({
+    body: "Human text.\n",
+    immutable: true,
+    assets: [["other.json", LOCAL_SBOM]],
+  });
+  try {
+    const result = publish(env, "Notes.\n");
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /has no app-sbom\.cdx\.json asset/);
+    assert.deepEqual(state(env.dir), {
+      body: "Human text.\n",
+      assets: ["other.json"],
+    });
   } finally {
     rmSync(env.dir, { recursive: true, force: true });
   }
