@@ -7,6 +7,7 @@ That file is the canonical source. If this page and the file disagree, the file 
 
 The GitHub settings on this page can change.
 Run the `gh api` commands on this page to read their current values.
+Most of them need admin access to the repository. Without admin access, the `security_and_analysis` command shows `null`.
 
 ## Rules for an agent
 
@@ -20,7 +21,7 @@ An agent must not do these actions:
 
 - Merge, close, or change a pull request when it acts as a reviewer. [The review prompt](../../.github/prompts/review.md) gives this rule.
 - Squash or amend a reviewed commit. Add a new commit. [The component prompt](../../.github/prompts/add-kustomize-component.prompt.md) gives this rule to an author. [The review prompt](../../.github/prompts/review.md) tells a reviewer not to ask for a squash or an amend.
-- Edit `.release-please-manifest.json` or a `CHANGELOG.md` file by hand. [Release tooling](../qa/release-tooling.md) gives this rule and its one exception, the `0.0.0` line for a new package.
+- Edit `.release-please-manifest.json` or a `CHANGELOG.md` file by hand. [The review prompt](../../.github/prompts/review.md) gives this rule. [Release tooling](../qa/release-tooling.md) gives the one exception, the `0.0.0` line for a new package.
 - Move or edit a published tag or release. [The review prompt](../../.github/prompts/review.md) gives this rule.
 - Add a secret, a token, or a key to an image layer, a build argument, or a script. See [container images](../qa/images.md).
 - Weaken a pod security profile or disable a test to make a check pass. See [the review prompt](../../.github/prompts/review.md).
@@ -86,7 +87,7 @@ Do not use the REST `required_pull_request_reviews` endpoint. It returns default
 - GitHub permits only GitHub-owned actions, actions from verified creators, and two named patterns. Read the list with `gh api repos/marinatedconcrete/config/actions/permissions/selected-actions`.
 - Renovate does not merge a third-party action update. A new version of an action can contain new code, and that code runs with the write tokens of the job. The rule in [renovate.json](../../renovate.json) that matches `!actions/*` sets `automerge` to `false`.
 - To verify, find that rule in `renovate.json`. Make sure that no later rule sets `automerge` to `true` for a third-party action. [Renovate presets](../qa/renovate-presets.md) gives the checklist.
-- [renovate.json](../../renovate.json) lists the updates that auto-merge. A rule with `automergeType` set to `branch` pushes the commit to `main` with no pull request. The other two auto-merge rules open a pull request, and Renovate merges it with no review.
+- [renovate.json](../../renovate.json) lists the updates that auto-merge. A rule with `automergeType` set to `branch` pushes the commit to `main` with no pull request. The other two auto-merge rules open a pull request, and it merges with no review. A patch update that the `prettier`, `pnpm`, `cli/cli`, and `node` rule matches also matches the patch rule. That later rule sends the update to `main` with no pull request.
 - Updates from `ghcr.io`, `quay.io`, `registry.k8s.io`, and `lscr.io` do not auto-merge, because these registries can give no release time. `ghcr.io/marinatedconcrete/devcontainer-base` is the named exception.
 
 ## The Claude Code hook
