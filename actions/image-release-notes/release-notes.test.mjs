@@ -244,7 +244,7 @@ test("the notes omit the change table when no previous SBOM exists", () => {
 });
 
 for (const status of [3, 127]) {
-  test(`an image with no dnf (status ${status}) gives notes with no requested packages`, () => {
+  test(`an image with no shell or no dnf (status ${status}) gives notes with no requested packages`, () => {
     const result = run(["--image", "app:1.0"], {
       previous: false,
       env: { STUB_DNF_STATUS: String(status) },

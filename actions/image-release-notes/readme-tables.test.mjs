@@ -124,14 +124,25 @@ test("the publish inputs table of the README matches publish/action.yml", () => 
 });
 
 test("the reader finds a difference in a description", () => {
-  const changed = readme.replace(
-    "The directory for the output files.",
-    "The folder for the output files.",
+  const inputs = readSection(
+    "inputs:\n  a:\n    description: Original text.\n",
+    "inputs",
   );
-  const inputs = readSection(readHere("action.yml"), "inputs");
+  const table = (description) =>
+    [
+      "## Inputs",
+      "",
+      "| Input | Required | Default | Description |",
+      "| --- | --- | --- | --- |",
+      `| \`a\` | no | | ${description} |`,
+    ].join("\n");
+  assert.deepEqual(
+    actualInputRows(table("Original text."), "## Inputs"),
+    expectedInputRows(inputs),
+  );
   assert.notDeepEqual(
-    sortByInput(actualInputRows(changed, "## Inputs")),
-    sortByInput(expectedInputRows(inputs)),
+    actualInputRows(table("Changed text."), "## Inputs"),
+    expectedInputRows(inputs),
   );
 });
 
