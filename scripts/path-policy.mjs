@@ -2,6 +2,8 @@
 //
 // The policy maps paths to an area and a risk tier. A pull request gets one label for each
 // area that it touches and one label for the highest tier that it touches.
+// A path with no rule counts as the highest tier.
+// The script owns every label that starts with "area/" or "risk/". It adds and removes only those.
 //
 // Usage:
 //   node scripts/path-policy.mjs check
@@ -22,10 +24,12 @@ export const AREA_PREFIX = "area/";
 export const RISK_PREFIX = "risk/";
 // The pull request files API returns at most 3000 files.
 const MAX_FILES = 3000;
+// Each line is the name of a file or the old name of a renamed file.
+export const FILES_JQ = ".[] | .filename, (.previous_filename // empty)";
 
 // A policy has this shape: { rules: [{ tier, area, paths: [glob] }] }
 // A classification has this shape: { areas: [string], tier: string | null, unmatched: [string] }
-// The tier is null when no file matches a rule.
+// The tier is null only when the list of files is empty.
 
 export function parsePolicy(text) {
   const policy = JSON.parse(text);
@@ -59,26 +63,39 @@ export function parsePolicy(text) {
   return policy;
 }
 
-// "**" matches any characters, including "/" and a leading ".". "*" matches any characters except "/".
+// Glob syntax: "*" matches any characters except "/". "**" matches any characters, including "/".
+// "**/" matches zero or more directories. A name that starts with a dot matches like any other name.
+// The other characters of a glob, such as "?", "[", and "{", match themselves.
 // path.matchesGlob skips names that start with a dot, so the script does its own conversion.
+function globToRegex(glob) {
+  let source = "";
+  for (let i = 0; i < glob.length; i++) {
+    const char = glob[i];
+    if (char === "*" && glob[i + 1] === "*") {
+      if (glob[i + 2] === "/") {
+        source += "(?:.*/)?";
+        i += 2;
+      } else {
+        source += ".*";
+        i += 1;
+      }
+    } else if (char === "*") {
+      source += "[^/]*";
+    } else {
+      source += char.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+    }
+  }
+  return new RegExp(`^${source}$`);
+}
+
 const globCache = new Map();
 export function matches(file, glob) {
-  let regex = globCache.get(glob);
-  if (!regex) {
-    const source = glob
-      .split("**")
-      .map((part) =>
-        part
-          .split("*")
-          .map((piece) => piece.replace(/[.+?^${}()|[\]\\]/g, "\\$&"))
-          .join("[^/]*"),
-      )
-      .join(".*");
-    regex = new RegExp(`^${source}$`);
-    globCache.set(glob, regex);
-  }
-  return regex.test(file);
+  if (!globCache.has(glob)) globCache.set(glob, globToRegex(glob));
+  return globCache.get(glob).test(file);
 }
+
+const covers = (policy, file) =>
+  policy.rules.some((rule) => rule.paths.some((glob) => matches(file, glob)));
 
 export function classify(policy, files) {
   const areas = new Set();
@@ -90,6 +107,7 @@ export function classify(policy, files) {
     );
     if (rules.length === 0) {
       unmatched.push(file);
+      tierRank = TIERS.length - 1;
       continue;
     }
     for (const rule of rules) {
@@ -108,9 +126,7 @@ export function classify(policy, files) {
 export function checkPolicy(policy, trackedFiles) {
   const errors = [];
   for (const file of trackedFiles) {
-    if (
-      !policy.rules.some((rule) => rule.paths.some((g) => matches(file, g)))
-    ) {
+    if (!covers(policy, file)) {
       errors.push(
         `No rule covers "${file}". Add its path to a rule in .github/policies/paths.json.`,
       );
@@ -128,98 +144,113 @@ export function checkPolicy(policy, trackedFiles) {
   return errors;
 }
 
-export function ownedLabels(policy) {
-  return new Set([
-    ...policy.rules.map((rule) => rule.area),
-    ...TIERS.map((tier) => `${RISK_PREFIX}${tier}`),
-  ]);
-}
+// GitHub ignores the case of a label name, so the script compares names in lower case.
+export const isOwned = (label) => {
+  const name = label.toLowerCase();
+  return name.startsWith(AREA_PREFIX) || name.startsWith(RISK_PREFIX);
+};
 
-// Labels the policy owns are the only ones that this function adds or removes.
 export function planLabels(policy, files, current) {
   const { areas, tier } = classify(policy, files);
-  const wanted = new Set(areas);
+  const wanted = new Set(areas.map((label) => label.toLowerCase()));
   if (tier) wanted.add(`${RISK_PREFIX}${tier}`);
-  const owned = ownedLabels(policy);
-  const have = new Set(current);
+  const have = new Set(current.map((label) => label.toLowerCase()));
   return {
     add: [...wanted].filter((label) => !have.has(label)).sort(),
-    remove: [...have]
-      .filter((label) => owned.has(label) && !wanted.has(label))
+    remove: current
+      .filter((label) => isOwned(label) && !wanted.has(label.toLowerCase()))
       .sort(),
   };
+}
+
+// Run the action. If it fails, run it again only when the wanted state is not there yet.
+// Another person or run can change the labels between the read and the write.
+async function attempt(action, alreadyDone) {
+  try {
+    await action();
+  } catch (error) {
+    if (!(await alreadyDone())) throw error;
+  }
 }
 
 // run(args) runs "gh" with the arguments and returns its standard output.
 export async function labelPullRequest({ repo, number, policy, run }) {
   const lines = async (args) =>
     (await run(args)).split("\n").filter((line) => line !== "");
+  const names = (route) =>
+    lines(["api", "--paginate", `${route}?per_page=100`, "--jq", ".[].name"]);
+  const issueRoute = `repos/${repo}/issues/${number}/labels`;
+
+  const changed = Number(
+    await run([
+      "api",
+      `repos/${repo}/pulls/${number}`,
+      "--jq",
+      ".changed_files",
+    ]),
+  );
+  if (!(changed <= MAX_FILES)) {
+    throw new Error(
+      `The pull request changes ${changed} files. The API lists at most ${MAX_FILES}. The script cannot find the tier.`,
+    );
+  }
   const files = await lines([
     "api",
     "--paginate",
-    `repos/${repo}/pulls/${number}/files`,
+    `repos/${repo}/pulls/${number}/files?per_page=100`,
     "--jq",
-    ".[] | .filename, (.previous_filename // empty)",
+    FILES_JQ,
   ]);
-  const current = await lines([
-    "api",
-    "--paginate",
-    `repos/${repo}/issues/${number}/labels`,
-    "--jq",
-    ".[].name",
-  ]);
-  if (files.length >= MAX_FILES) {
-    throw new Error(
-      `The pull request has ${files.length} files. The API lists at most ${MAX_FILES}, so the tier cannot be trusted.`,
-    );
-  }
+  const current = await names(issueRoute);
   const { unmatched } = classify(policy, files);
   const plan = planLabels(policy, files, current);
 
   if (plan.add.length > 0) {
-    const existing = new Set(
-      await lines([
-        "api",
-        "--paginate",
-        `repos/${repo}/labels`,
-        "--jq",
-        ".[].name",
-      ]),
+    const exists = async (name) =>
+      (await names(`repos/${repo}/labels`)).some(
+        (label) => label.toLowerCase() === name,
+      );
+    const known = new Set(
+      (await names(`repos/${repo}/labels`)).map((label) => label.toLowerCase()),
     );
-    const known = new Set([...existing].map((label) => label.toLowerCase()));
-    for (const name of plan.add.filter((l) => !known.has(l.toLowerCase()))) {
-      try {
-        await run([
-          "api",
-          "-X",
-          "POST",
-          `repos/${repo}/labels`,
-          "-f",
-          `name=${name}`,
-          "-f",
-          "color=ededed",
-        ]);
-      } catch (error) {
-        // Another run can create the same label between the list and the create.
-        if (!/already_exists/.test(`${error.stderr ?? ""}${error.message}`))
-          throw error;
-      }
+    for (const name of plan.add.filter((label) => !known.has(label))) {
+      await attempt(
+        () =>
+          run([
+            "api",
+            "-X",
+            "POST",
+            `repos/${repo}/labels`,
+            "-f",
+            `name=${name}`,
+            "-f",
+            "color=ededed",
+          ]),
+        () => exists(name),
+      );
     }
     await run([
       "api",
       "-X",
       "POST",
-      `repos/${repo}/issues/${number}/labels`,
+      issueRoute,
       ...plan.add.flatMap((label) => ["-f", `labels[]=${label}`]),
     ]);
   }
   for (const label of plan.remove) {
-    await run([
-      "api",
-      "-X",
-      "DELETE",
-      `repos/${repo}/issues/${number}/labels/${encodeURIComponent(label)}`,
-    ]);
+    await attempt(
+      () =>
+        run([
+          "api",
+          "-X",
+          "DELETE",
+          `${issueRoute}/${encodeURIComponent(label)}`,
+        ]),
+      async () =>
+        !(await names(issueRoute)).some(
+          (name) => name.toLowerCase() === label.toLowerCase(),
+        ),
+    );
   }
   return { ...plan, unmatched };
 }
@@ -231,37 +262,58 @@ async function ghRun(args) {
   return stdout;
 }
 
-async function main(argv) {
+async function gitListFiles() {
+  const { stdout } = await execFileAsync("git", ["ls-files", "-z"], {
+    cwd: REPO_ROOT,
+    maxBuffer: 64 * 1024 * 1024,
+  });
+  return stdout.split("\0").filter(Boolean);
+}
+
+// A workflow command reads "%", a carriage return, and a line feed as escapes.
+export const escapeCommand = (text) =>
+  text.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
+
+// Return the exit code.
+export async function main(
+  argv,
+  {
+    env = process.env,
+    run = ghRun,
+    listFiles = gitListFiles,
+    log = console.log,
+    error = console.error,
+    policyText,
+  } = {},
+) {
   const [command, number] = argv;
-  const policy = parsePolicy(await readFile(POLICY_FILE, "utf8"));
+  const policy = parsePolicy(
+    policyText ?? (await readFile(POLICY_FILE, "utf8")),
+  );
   if (command === "check") {
-    const { stdout } = await execFileAsync("git", ["ls-files"], {
-      cwd: REPO_ROOT,
-      maxBuffer: 64 * 1024 * 1024,
-    });
-    const errors = checkPolicy(policy, stdout.split("\n").filter(Boolean));
-    errors.forEach((message) => console.error(message));
+    const errors = checkPolicy(policy, await listFiles());
+    errors.forEach((message) => error(message));
     return errors.length === 0 ? 0 : 1;
   }
   if (command === "label" && /^[0-9]+$/.test(number ?? "")) {
-    const repo = process.env.GH_REPO;
+    const repo = env.GH_REPO;
     if (!repo) {
-      console.error("Set GH_REPO to owner/name.");
+      error("Set GH_REPO to owner/name.");
       return 2;
     }
-    const result = await labelPullRequest({ repo, number, policy, run: ghRun });
-    console.log(`Added: ${result.add.join(", ") || "none"}`);
-    console.log(`Removed: ${result.remove.join(", ") || "none"}`);
+    const result = await labelPullRequest({ repo, number, policy, run });
+    log(`Added: ${result.add.join(", ") || "none"}`);
+    log(`Removed: ${result.remove.join(", ") || "none"}`);
     if (result.unmatched.length > 0) {
-      // The job reads the policy of the default branch, so a pull request that adds the rule is not red here.
+      // The job reads the policy of the default branch. A pull request that adds the rule does not fail here.
       // "just path-policy-lint" checks the policy of the pull request itself.
-      console.log(
-        `::warning::The default branch policy has no rule for: ${result.unmatched.join(", ")}`,
+      log(
+        `::warning::The default branch policy has no rule for: ${escapeCommand(result.unmatched.join(", "))}`,
       );
     }
     return 0;
   }
-  console.error(
+  error(
     "Usage: node scripts/path-policy.mjs check | label PULL_REQUEST_NUMBER",
   );
   return 2;

@@ -11,7 +11,9 @@
       "paths": [
         "justfile",
         ".devcontainer/**",
-        ".github/pull_request_template.md"
+        ".github/pull_request_template.md",
+        ".github/policies/**",
+        "scripts/path-policy.mjs"
       ]
     },
     {
@@ -83,8 +85,7 @@
         ".hadolint.yaml",
         ".prettierignore",
         ".prettierrc.yml",
-        ".github/actionlint.yaml",
-        ".github/policies/**"
+        ".github/actionlint.yaml"
       ]
     },
     {

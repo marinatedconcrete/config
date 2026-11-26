@@ -3,11 +3,14 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import {
+  FILES_JQ,
   checkPolicy,
   classify,
+  escapeCommand,
+  isOwned,
   labelPullRequest,
+  main,
   matches,
-  ownedLabels,
   parsePolicy,
   planLabels,
 } from "./path-policy.mjs";
@@ -53,6 +56,24 @@ test("a glob matches the whole path, not a part of it", () => {
   assert.equal(matches("docs", "docs/**"), false);
 });
 
+test("a double star between slashes matches zero or more directories", () => {
+  assert.equal(matches("a/b", "a/**/b"), true);
+  assert.equal(matches("a/x/y/b", "a/**/b"), true);
+  assert.equal(matches("README.md", "**/*.md"), true);
+  assert.equal(matches("docs/x.md", "**/*.md"), true);
+  assert.equal(matches("ab", "a/**/b"), false);
+});
+
+test("a glob keeps its end anchor and treats other characters as text", () => {
+  assert.equal(matches("docs/a", "docs/**x"), false);
+  assert.equal(matches("docs/ax", "docs/**x"), true);
+  assert.equal(matches("a(b)+c|d[e]{f}?.md", "a(b)+c|d[e]{f}?.md"), true);
+  assert.equal(matches("ab", "a(b)"), false);
+  assert.equal(matches("ab.md", "a?.md"), false);
+  assert.equal(matches("a.mdx", "*.md"), false);
+  assert.equal(matches("a.md.bak", "*.md"), false);
+});
+
 test("a change gets the area of each rule and the highest tier", () => {
   assert.deepEqual(
     classify(policy, ["docs/a.md", ".github/workflows/ci.yml"]),
@@ -72,11 +93,20 @@ test("the highest tier wins when the high file comes first", () => {
   );
 });
 
-test("a file that no rule covers is reported and does not set the tier", () => {
+test("a file that no rule covers is reported and counts as the highest tier", () => {
   assert.deepEqual(classify(policy, ["mystery.bin"]), {
     areas: [],
-    tier: null,
+    tier: "high",
     unmatched: ["mystery.bin"],
+  });
+  assert.equal(classify(policy, ["docs/a.md", "mystery.bin"]).tier, "high");
+});
+
+test("an empty list of files has no tier", () => {
+  assert.deepEqual(classify(policy, []), {
+    areas: [],
+    tier: null,
+    unmatched: [],
   });
 });
 
@@ -92,7 +122,7 @@ test("two rules that match one file give the higher tier", () => {
   assert.equal(classify(both, ["a/b.yml"]).tier, "high");
 });
 
-test("the plan adds missing labels and removes only labels that the policy owns", () => {
+test("the plan adds missing labels and removes only the area and risk labels", () => {
   const plan = planLabels(
     policy,
     ["docs/a.md"],
@@ -104,32 +134,52 @@ test("the plan adds missing labels and removes only labels that the policy owns"
   });
 });
 
-test("the plan keeps a label that is still right", () => {
+test("the plan removes an area label that the policy no longer names", () => {
   assert.deepEqual(
-    planLabels(policy, ["docs/a.md"], ["area/docs", "risk/low"]),
-    { add: [], remove: [] },
+    planLabels(
+      policy,
+      ["docs/a.md"],
+      ["area/old-name", "area/docs", "risk/low"],
+    ),
+    { add: [], remove: ["area/old-name"] },
   );
 });
 
-test("a pull request with no covered file loses its owned labels and gains none", () => {
+test("the plan compares label names without case", () => {
   assert.deepEqual(
-    planLabels(policy, ["mystery.bin"], ["area/ci", "risk/high"]),
+    planLabels(policy, ["docs/a.md"], ["Area/Docs", "risk/LOW", "Risk/High"]),
+    { add: [], remove: ["Risk/High"] },
+  );
+});
+
+test("the plan keeps a label that is still right", () => {
+  assert.deepEqual(
+    planLabels(policy, ["docs/a.md"], ["area/docs", "risk/low"]),
     {
       add: [],
-      remove: ["area/ci", "risk/high"],
+      remove: [],
     },
   );
 });
 
-test("the owned labels are the areas and the three risk labels", () => {
-  assert.deepEqual([...ownedLabels(policy)].sort(), [
-    "area/ci",
-    "area/docs",
-    "area/kustomization",
-    "risk/high",
-    "risk/low",
-    "risk/medium",
-  ]);
+test("an empty pull request loses its owned labels and gains none", () => {
+  assert.deepEqual(planLabels(policy, [], ["area/ci", "risk/high", "bug"]), {
+    add: [],
+    remove: ["area/ci", "risk/high"],
+  });
+});
+
+test("a label is owned when it starts with area/ or risk/", () => {
+  assert.equal(isOwned("area/anything"), true);
+  assert.equal(isOwned("Risk/High"), true);
+  for (const label of [
+    "stage/060-reviewed",
+    "role/trusted",
+    "bug",
+    "areas/x",
+  ]) {
+    assert.equal(isOwned(label), false);
+  }
 });
 
 const rule = { tier: "low", area: "area/docs", paths: ["docs/**"] };
@@ -157,6 +207,11 @@ for (const [name, change, message] of [
   ],
   ["no paths", { rules: [{ ...rule, paths: [] }] }, /paths must be/],
   ["an empty glob", { rules: [{ ...rule, paths: [""] }] }, /paths must be/],
+  [
+    "a glob that is not text",
+    { rules: [{ ...rule, paths: [1] }] },
+    /paths must be/,
+  ],
 ]) {
   test(`the policy parser rejects ${name}`, () => {
     assert.throws(() => parsePolicy(JSON.stringify(change)), message);
@@ -179,20 +234,33 @@ test("the check reports an uncovered file and a glob that matches nothing", () =
   );
 });
 
-function fakeGh({ files, labels, repoLabels }) {
+test("a workflow command escape covers the percent sign and the line breaks", () => {
+  assert.equal(escapeCommand("a%b\r\nc"), "a%25b%0D%0Ac");
+});
+
+// The fake answers the read calls of gh. It fails a list call that does not paginate.
+function fakeGh({ files, labels, repoLabels, changed = files.length }) {
   const calls = [];
+  const state = { labels: [...labels], repoLabels: [...repoLabels] };
   const run = async (args) => {
     calls.push(args);
-    const target = args.find((arg) => arg.startsWith("repos/")) ?? "";
-    if (args[0] === "api" && !args.includes("-X")) {
-      if (target.endsWith("/files")) return files.join("\n") + "\n";
-      if (target.endsWith("/issues/7/labels")) return labels.join("\n") + "\n";
-      if (target.endsWith("/labels")) return repoLabels.join("\n") + "\n";
+    const route = args.find((arg) => arg.startsWith("repos/")) ?? "";
+    if (args.includes("-X")) return "";
+    if (route.endsWith("/pulls/7")) return `${changed}\n`;
+    assert.ok(args.includes("--paginate"), `no --paginate in ${route}`);
+    assert.ok(route.includes("per_page=100"), `no per_page in ${route}`);
+    if (route.includes("/pulls/7/files")) {
+      assert.equal(args.at(-1), FILES_JQ);
+      return files.join("\n") + "\n";
     }
-    return "";
+    if (route.includes("/issues/7/labels"))
+      return state.labels.join("\n") + "\n";
+    return state.repoLabels.join("\n") + "\n";
   };
-  return { run, calls };
+  return { run, calls, state };
 }
+
+const writesOf = (calls) => calls.filter((args) => args.includes("-X"));
 
 test("labeling creates a missing label, adds with POST, and deletes with an encoded name", async () => {
   const { run, calls } = fakeGh({
@@ -208,8 +276,7 @@ test("labeling creates a missing label, adds with POST, and deletes with an enco
   });
   assert.deepEqual(result.add, ["area/docs", "risk/low"]);
   assert.deepEqual(result.remove, ["area/ci"]);
-  const writes = calls.filter((args) => args.includes("-X"));
-  assert.deepEqual(writes, [
+  assert.deepEqual(writesOf(calls), [
     [
       "api",
       "-X",
@@ -247,23 +314,27 @@ test("labeling a pull request that is already right makes no write", async () =>
     run,
   });
   assert.deepEqual([result.add, result.remove], [[], []]);
-  assert.equal(
-    calls.some((args) => args.includes("-X")),
-    false,
-  );
+  assert.deepEqual(writesOf(calls), []);
 });
 
-test("labeling ignores a label that another run created first", async () => {
-  const { run: base } = fakeGh({
-    files: ["docs/a.md"],
-    labels: [],
-    repoLabels: [],
+// A real gh error holds the JSON body in stdout and a short text in stderr.
+const ghError = () =>
+  Object.assign(new Error("Command failed: gh api"), {
+    stdout:
+      '{"message":"Validation Failed","errors":[{"code":"already_exists"}]}',
+    stderr: "gh: Validation Failed (HTTP 422)",
   });
+
+test("labeling goes on when another run created the label first", async () => {
+  const fake = fakeGh({ files: ["docs/a.md"], labels: [], repoLabels: [] });
+  let created = 0;
   const run = async (args) => {
     if (args.includes("-X") && args.at(3) === "repos/o/r/labels") {
-      throw Object.assign(new Error("failed"), { stderr: "already_exists" });
+      created++;
+      fake.state.repoLabels.push(args.at(5).slice("name=".length));
+      throw ghError();
     }
-    return base(args);
+    return fake.run(args);
   };
   const result = await labelPullRequest({
     repo: "o/r",
@@ -271,24 +342,58 @@ test("labeling ignores a label that another run created first", async () => {
     policy,
     run,
   });
+  assert.equal(created, 2);
   assert.deepEqual(result.add, ["area/docs", "risk/low"]);
 });
 
-test("labeling stops on any other error when it creates a label", async () => {
-  const { run: base } = fakeGh({
-    files: ["docs/a.md"],
-    labels: [],
-    repoLabels: [],
-  });
+test("labeling stops when a create fails and the label is still missing", async () => {
+  const fake = fakeGh({ files: ["docs/a.md"], labels: [], repoLabels: [] });
   const run = async (args) => {
-    if (args.includes("-X") && args.at(3) === "repos/o/r/labels") {
-      throw Object.assign(new Error("failed"), { stderr: "403" });
-    }
-    return base(args);
+    if (args.includes("-X") && args.at(3) === "repos/o/r/labels")
+      throw ghError();
+    return fake.run(args);
   };
   await assert.rejects(
     labelPullRequest({ repo: "o/r", number: "7", policy, run }),
-    /failed/,
+    /Command failed/,
+  );
+});
+
+test("labeling goes on when a person removed the label before the delete", async () => {
+  const fake = fakeGh({
+    files: ["docs/a.md"],
+    labels: ["area/ci", "area/docs", "risk/low"],
+    repoLabels: [],
+  });
+  const run = async (args) => {
+    if (args.at(2) === "DELETE") {
+      fake.state.labels = fake.state.labels.filter((l) => l !== "area/ci");
+      throw ghError();
+    }
+    return fake.run(args);
+  };
+  const result = await labelPullRequest({
+    repo: "o/r",
+    number: "7",
+    policy,
+    run,
+  });
+  assert.deepEqual(result.remove, ["area/ci"]);
+});
+
+test("labeling stops when a delete fails and the label is still on the pull request", async () => {
+  const fake = fakeGh({
+    files: ["docs/a.md"],
+    labels: ["area/ci", "area/docs", "risk/low"],
+    repoLabels: [],
+  });
+  const run = async (args) => {
+    if (args.at(2) === "DELETE") throw ghError();
+    return fake.run(args);
+  };
+  await assert.rejects(
+    labelPullRequest({ repo: "o/r", number: "7", policy, run }),
+    /Command failed/,
   );
 });
 
@@ -300,25 +405,45 @@ test("a label that differs only in case is not created again", async () => {
   });
   await labelPullRequest({ repo: "o/r", number: "7", policy, run });
   assert.equal(
-    calls.some((a) => a.includes("repos/o/r/labels") && a.includes("-X")),
+    writesOf(calls).some((args) => args.at(3) === "repos/o/r/labels"),
     false,
   );
 });
 
-test("labeling stops when the file list may be cut at 3000", async () => {
-  const files = Array.from({ length: 3000 }, (_, i) => `docs/${i}.md`);
-  const { run } = fakeGh({ files, labels: [], repoLabels: [] });
+test("labeling stops when the pull request has more than 3000 files", async () => {
+  const { run, calls } = fakeGh({
+    files: ["docs/a.md"],
+    labels: [],
+    repoLabels: [],
+    changed: 3001,
+  });
   await assert.rejects(
     labelPullRequest({ repo: "o/r", number: "7", policy, run }),
-    /3000/,
+    /3001/,
   );
+  assert.deepEqual(writesOf(calls), []);
+});
+
+test("labeling accepts exactly 3000 files, and renames do not count twice", async () => {
+  const { run } = fakeGh({
+    files: Array.from({ length: 3000 }, (_, i) => `docs/${i}.md`),
+    labels: [],
+    repoLabels: [],
+  });
+  const result = await labelPullRequest({
+    repo: "o/r",
+    number: "7",
+    policy,
+    run,
+  });
+  assert.deepEqual(result.add, ["area/docs", "risk/low"]);
 });
 
 test("labeling reports a file that no rule covers", async () => {
   const { run } = fakeGh({
     files: ["docs/a.md", "mystery.bin"],
     labels: [],
-    repoLabels: ["area/docs", "risk/low"],
+    repoLabels: ["area/docs", "risk/high"],
   });
   const result = await labelPullRequest({
     repo: "o/r",
@@ -327,33 +452,103 @@ test("labeling reports a file that no rule covers", async () => {
     run,
   });
   assert.deepEqual(result.unmatched, ["mystery.bin"]);
+  assert.deepEqual(result.add, ["area/docs", "risk/high"]);
 });
 
-test("the file query asks for the old path of a renamed file", async () => {
-  const { run, calls } = fakeGh({
-    files: ["docs/a.md", ".github/workflows/old.yml"],
-    labels: [],
-    repoLabels: [],
+const jqAvailable = (() => {
+  try {
+    execFileSync("jq", ["--version"]);
+    return true;
+  } catch {
+    return false;
+  }
+})();
+
+test(
+  "the file query lists a renamed file and its old name, and skips a null old name",
+  { skip: !jqAvailable && "jq is not installed" },
+  () => {
+    const page = JSON.stringify([
+      { filename: "a" },
+      { filename: "b", previous_filename: "c" },
+    ]);
+    const out = execFileSync("jq", ["-r", FILES_JQ], {
+      input: page,
+      encoding: "utf8",
+    });
+    assert.deepEqual(out.split("\n").filter(Boolean), ["a", "b", "c"]);
+  },
+);
+
+const policyText = readFileSync(
+  new URL("../.github/policies/paths.json", import.meta.url),
+  "utf8",
+);
+
+function cli(argv, options = {}) {
+  const out = { log: [], error: [] };
+  const done = main(argv, {
+    policyText,
+    log: (m) => out.log.push(m),
+    error: (m) => out.error.push(m),
+    ...options,
   });
-  await labelPullRequest({ repo: "o/r", number: "7", policy, run });
-  const filesCall = calls.find(
-    (args) => args.at(-3) === "--jq" || args.includes("--jq"),
+  return done.then((code) => ({ code, ...out }));
+}
+
+test("the check command exits with 1 when a file has no rule and 0 when all have one", async () => {
+  const bad = await cli(["check"], {
+    listFiles: async () => ["docs/a.md", "mystery.bin"],
+  });
+  assert.equal(bad.code, 1);
+  assert.match(bad.error.join("\n"), /mystery\.bin/);
+  const real = await cli(["check"], {
+    listFiles: async () =>
+      execFileSync("git", ["ls-files", "-z"], {
+        cwd: new URL("..", import.meta.url),
+        encoding: "utf8",
+      })
+        .split("\0")
+        .filter(Boolean),
+  });
+  assert.deepEqual([real.code, real.error], [0, []]);
+});
+
+test("the label command rejects a bad number, a missing repository, and an unknown command", async () => {
+  assert.equal(
+    (await cli(["label", "7x"], { env: { GH_REPO: "o/r" } })).code,
+    2,
   );
-  assert.match(filesCall.at(-1), /previous_filename/);
+  assert.equal((await cli(["label"], { env: { GH_REPO: "o/r" } })).code, 2);
+  const noRepo = await cli(["label", "7"], { env: {} });
+  assert.equal(noRepo.code, 2);
+  assert.match(noRepo.error.join(), /GH_REPO/);
+  assert.equal((await cli(["other"])).code, 2);
+});
+
+test("the label command warns with an escaped message about a file with no rule", async () => {
+  const fake = fakeGh({
+    files: ["docs/a.md", "x%0A::error::y"],
+    labels: [],
+    repoLabels: ["area/docs", "risk/high"],
+  });
+  const result = await cli(["label", "7"], {
+    env: { GH_REPO: "o/r" },
+    run: fake.run,
+  });
+  assert.equal(result.code, 0);
+  const warning = result.log.find((line) => line.startsWith("::warning::"));
+  assert.match(warning, /x%250A::error::y/);
+  assert.equal(warning.includes("\n"), false);
 });
 
 test("the repository policy covers every tracked file and has no dead glob", () => {
-  const real = parsePolicy(
-    readFileSync(
-      new URL("../.github/policies/paths.json", import.meta.url),
-      "utf8",
-    ),
-  );
-  const tracked = execFileSync("git", ["ls-files"], {
+  const real = parsePolicy(policyText);
+  const tracked = execFileSync("git", ["ls-files", "-z"], {
     cwd: new URL("..", import.meta.url),
     encoding: "utf8",
   })
-    .split("\n")
+    .split("\0")
     .filter(Boolean);
   assert.deepEqual(checkPolicy(real, tracked), []);
 });
