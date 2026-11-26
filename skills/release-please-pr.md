@@ -30,21 +30,25 @@ The GitHub App `formwork-remover` opens these pull requests. Release Please writ
 The release note text comes from the commit message of the merged source pull request. To fix the text, change the source pull request. Do not change the release pull request.
 
 1. Find the merged pull request that made the commit. Use the link in the changelog entry if it exists. If there is no link, find the commit and check for an associated pull request. If the commit has no associated pull request, an override cannot fix the note. In that case, ask a named maintainer to decide.
-2. Ask a named maintainer to add this block to the body of that merged pull request. Use one block only, because Release Please reads only the first block.
+2. Ask a named maintainer to add this block to the body of that merged pull request. Put the marker words in the body one time only.
 
 ```text
 BEGIN_COMMIT_OVERRIDE
-fix(renovate): the corrected message
+fix(renovate): the corrected message (#1148)
 END_COMMIT_OVERRIDE
 ```
 
-3. Release Please reads the block at its next run. A run starts on a push to `main`. A maintainer can also start the Release Please workflow by hand with an empty `release_pr` input. Editing a pull request body does not start a run. The block replaces the commit message.
+3. Release Please reads the block at its next run. A run starts on a push to `main`. A maintainer can also start the Release Please workflow by hand with an empty `release_pr` input. Editing a pull request body does not start a run.
 
-Follow these rules for the block:
+Follow these rules for the block. Except the last two, each rule comes from a run of Release Please 17.11.2.
 
-- Write one message as a Conventional Commit message. Use the original type and the original breaking-change status of the commit. Release Please uses the type to select the version, so another type can change the release version.
-- The block replaces the whole commit message. If the original message has a footer such as `Release-As:` or `BREAKING CHANGE:`, copy the footer into the block. Without it, the release version can change.
-- Do not add a second message to a wording correction. Another message adds a changelog entry and can change the release version.
+- Write the markers in upper case, as in the example. Always write the `END_COMMIT_OVERRIDE` line. Without it, all later text of the body becomes part of the message.
+- Release Please starts at the first `BEGIN_COMMIT_OVERRIDE` text, also in prose. An empty first block makes it use the original message. To undo an override, delete the block.
+- Write the message in Conventional Commit form. If it is not in this form, Release Please drops the commit, and the changelog and the version ignore it.
+- Use the original type and the original breaking-change status of the commit. Release Please uses the type to select the version, so another type changes the release version.
+- The block replaces the whole commit message. If the original message has a footer such as `Release-As:` or `BREAKING CHANGE:`, copy the footer into the block. Without the footer, the release version changes. A dropped `BREAKING CHANGE:` footer also removes its text from the changelog.
+- Put the `(#N)` number of the pull request at the end of the first line. The link of the changelog entry comes from this text. Without it, the entry has only the commit link.
+- Do not add a second message. A line that starts with a type, such as `feat:`, becomes its own changelog entry and can change the release version.
 - The Release Please README says that the override does not work with plain merges. This repository allows only squash merges.
 - Do not edit the body yourself. Ask the maintainer.
 
