@@ -2,7 +2,10 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "fetchChangeLogs": "branch",
   "commitBody": "{{#if logJSON.hasReleaseNotes}}{{#each logJSON.versions as |release|}}{{# if release.releaseNotes}}##### [\\`{{{release.version}}}\\`]({{{release.releaseNotes.url}}})\n\n{{{release.releaseNotes.body}}}{{else}}##### [\\`{{{release.version}}}\\`]\n\nRelease notes not available{{/if}}{{#unless @last}}\n---\n{{/unless}}{{/each}}{{else}}{{releaseNotes}}{{/if}}",
-  "extends": ["config:best-practices"],
+  "extends": [
+    "config:best-practices",
+    "helpers:pinGitHubActionDigestsToSemver"
+  ],
   "rollbackPrs": true,
   "timezone": "America/Los_Angeles"
 }

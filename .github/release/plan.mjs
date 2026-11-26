@@ -2,6 +2,29 @@ import { appendFileSync } from "node:fs";
 import { GitHub, Manifest } from "release-please";
 import { githubApi } from "./api.mjs";
 
+export function classifyReleasePath(path) {
+  const project = path.startsWith("kustomization/components/")
+    ? `kustomize-${path.split("/").at(-1)}`
+    : path.startsWith("images/") || path.startsWith("actions/")
+      ? path.split("/").at(-1)
+      : path;
+  const kind = project.startsWith("kustomize-")
+    ? "component"
+    : [
+          "kairos-fedora",
+          "buildah-action-runner",
+          "github-runner-ci",
+          "vscode-ssh-server",
+        ].includes(project)
+      ? "image"
+      : path.startsWith("actions/") || ["ansible", "renovate"].includes(project)
+        ? "source"
+        : null;
+  if (!kind || !/^[a-z0-9-]+$/.test(project))
+    throw new Error(`Unsupported release path: ${path}`);
+  return { project, kind };
+}
+
 export async function planReleases({
   github,
   api,
@@ -54,27 +77,7 @@ export async function planReleases({
       );
       if (versions[release.path] !== version)
         throw new Error("Release version does not match the selected commit");
-      const project = release.path.startsWith("kustomization/components/")
-        ? `kustomize-${release.path.split("/").at(-1)}`
-        : release.path.startsWith("images/") ||
-            release.path.startsWith("actions/")
-          ? release.path.split("/").at(-1)
-          : release.path;
-      const kind = project.startsWith("kustomize-")
-        ? "component"
-        : [
-              "kairos-fedora",
-              "buildah-action-runner",
-              "github-runner-ci",
-              "vscode-ssh-server",
-            ].includes(project)
-          ? "image"
-          : release.path.startsWith("actions/") ||
-              ["ansible", "renovate"].includes(project)
-            ? "source"
-            : null;
-      if (!kind || !/^[a-z0-9-]+$/.test(project))
-        throw new Error(`Unsupported release path: ${release.path}`);
+      const { project, kind } = classifyReleasePath(release.path);
       // Old tag workflows can rebuild and replace the version image.
       if (kind === "image") {
         const protocol = await api(
