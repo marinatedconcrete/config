@@ -230,14 +230,25 @@ Do this section in addition to the general checklist.
   In that case, keep only the lines that the release pull request owns.
 - Before you recommend `close`, find the newest Release Please run for the current commit of `main` in which the `Update Release PRs` step passed.
   A run for an older commit can give an old answer.
-  Read the log of that step for the package path in `release-please-config.json`.
-- If the log has a skip line for the path, recommend `close`.
+- A body edit of a merged pull request changes the input of Release Please but not `main`.
+  Run `git log <tag>..origin/main --oneline -- <path>`, with the newest release tag of the package.
+  If there is no tag, omit `<tag>..`.
+  The `(#N)` in each subject names a pull request.
+  Read the `lastEditedAt` of each with GraphQL.
+  Read the `startedAt` of the step with `gh run view <id> --json jobs`.
+  If an edit is later, write "not checked".
+- Read the log of that step for the package path in `release-please-config.json`.
+  The section for the path starts at `Building candidate release pull request for path: <path>`.
+  It ends at the next such line or at `Looking for open release pull requests`.
+  The `No user facing commits` line has no path.
+  Use it only inside the section.
+- If the section has a skip line, recommend `close`.
   Give the reason: the pull request is stale.
   State that Release Please opens a new release pull request when a new release commit exists.
-- If the log has `PR <url> remained the same` or an update line, Release Please still plans the release.
+- If the log has `PR <url> remained the same` or an update line for this pull request, Release Please still plans the release.
   Do not recommend `close`.
   Ask the maintainer to decide.
-- Write "not checked" if there is no such run, or if the log has no line for the path.
+- Write "not checked" if there is no such run, or if the log has none of these lines.
 
 ### How to ask for a decision
 
