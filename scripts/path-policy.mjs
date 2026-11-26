@@ -24,7 +24,6 @@ export const AREA_PREFIX = "area/";
 export const RISK_PREFIX = "risk/";
 // The pull request files API returns at most 3000 files.
 const MAX_FILES = 3000;
-// Each line is the name of a file or the old name of a renamed file.
 export const FILES_JQ = ".[] | .filename, (.previous_filename // empty)";
 
 // A policy has this shape: { rules: [{ tier, area, paths: [glob] }] }
@@ -46,10 +45,11 @@ export function parsePolicy(text) {
     if (
       typeof rule.area !== "string" ||
       !rule.area.startsWith(AREA_PREFIX) ||
-      rule.area.length === AREA_PREFIX.length
+      rule.area.length === AREA_PREFIX.length ||
+      rule.area !== rule.area.toLowerCase()
     ) {
       throw new Error(
-        `${where}: area must start with "${AREA_PREFIX}". Found ${JSON.stringify(rule.area)}.`,
+        `${where}: area must be lower case and start with "${AREA_PREFIX}". Found ${JSON.stringify(rule.area)}.`,
       );
     }
     if (
@@ -63,8 +63,8 @@ export function parsePolicy(text) {
   return policy;
 }
 
-// Glob syntax: "*" matches any characters except "/". "**" matches any characters, including "/".
-// "**/" matches zero or more directories. A name that starts with a dot matches like any other name.
+// Glob syntax: "*" matches any characters except "/". "**" matches any characters on one line, including "/".
+// "**/" at the start of a glob or after a "/" matches zero or more directories. A name that starts with a dot matches like any other name.
 // The other characters of a glob, such as "?", "[", and "{", match themselves.
 // path.matchesGlob skips names that start with a dot, so the script does its own conversion.
 function globToRegex(glob) {
@@ -122,7 +122,6 @@ export function classify(policy, files) {
   };
 }
 
-// Return one message for each file that no rule covers and each glob that no file matches.
 export function checkPolicy(policy, trackedFiles) {
   const errors = [];
   for (const file of trackedFiles) {
@@ -163,8 +162,8 @@ export function planLabels(policy, files, current) {
   };
 }
 
-// Run the action. If it fails, run it again only when the wanted state is not there yet.
 // Another person or run can change the labels between the read and the write.
+// Ignore a failure when the wanted state already exists.
 async function attempt(action, alreadyDone) {
   try {
     await action();
@@ -173,7 +172,6 @@ async function attempt(action, alreadyDone) {
   }
 }
 
-// run(args) runs "gh" with the arguments and returns its standard output.
 export async function labelPullRequest({ repo, number, policy, run }) {
   const lines = async (args) =>
     (await run(args)).split("\n").filter((line) => line !== "");
@@ -181,17 +179,85 @@ export async function labelPullRequest({ repo, number, policy, run }) {
     lines(["api", "--paginate", `${route}?per_page=100`, "--jq", ".[].name"]);
   const issueRoute = `repos/${repo}/issues/${number}/labels`;
 
-  const changed = Number(
+  const apply = async (plan) => {
+    if (plan.add.length > 0) {
+      const exists = async (name) =>
+        (await names(`repos/${repo}/labels`)).some(
+          (label) => label.toLowerCase() === name,
+        );
+      const known = new Set(
+        (await names(`repos/${repo}/labels`)).map((label) =>
+          label.toLowerCase(),
+        ),
+      );
+      for (const name of plan.add.filter((label) => !known.has(label))) {
+        await attempt(
+          () =>
+            run([
+              "api",
+              "-X",
+              "POST",
+              `repos/${repo}/labels`,
+              "-f",
+              `name=${name}`,
+              "-f",
+              "color=ededed",
+            ]),
+          () => exists(name),
+        );
+      }
+      await run([
+        "api",
+        "-X",
+        "POST",
+        issueRoute,
+        ...plan.add.flatMap((label) => ["-f", `labels[]=${label}`]),
+      ]);
+    }
+    for (const label of plan.remove) {
+      await attempt(
+        () =>
+          run([
+            "api",
+            "-X",
+            "DELETE",
+            `${issueRoute}/${encodeURIComponent(label)}`,
+          ]),
+        async () =>
+          !(await names(issueRoute)).some(
+            (name) => name.toLowerCase() === label.toLowerCase(),
+          ),
+      );
+    }
+  };
+  const changedText = (
     await run([
       "api",
       `repos/${repo}/pulls/${number}`,
       "--jq",
       ".changed_files",
-    ]),
-  );
-  if (!(changed <= MAX_FILES)) {
+    ])
+  ).trim();
+  const changed = changedText === "" ? NaN : Number(changedText);
+  if (!Number.isInteger(changed) || changed < 0) {
     throw new Error(
-      `The pull request changes ${changed} files. The API lists at most ${MAX_FILES}. The script cannot find the tier.`,
+      `The API gave no count of changed files: "${changedText}".`,
+    );
+  }
+  if (changed > MAX_FILES) {
+    // The list of files is cut, so the tier is unknown. Fail closed: set the highest risk label.
+    const top = `${RISK_PREFIX}${TIERS.at(-1)}`;
+    const current = await names(issueRoute);
+    await apply({
+      add: current.some((l) => l.toLowerCase() === top) ? [] : [top],
+      remove: current.filter(
+        (label) =>
+          label.toLowerCase().startsWith(RISK_PREFIX) &&
+          label.toLowerCase() !== top,
+      ),
+    });
+    throw new Error(
+      `The pull request changes ${changed} files. The API lists at most ${MAX_FILES}. The script set ${top} and stopped.`,
     );
   }
   const files = await lines([
@@ -205,53 +271,7 @@ export async function labelPullRequest({ repo, number, policy, run }) {
   const { unmatched } = classify(policy, files);
   const plan = planLabels(policy, files, current);
 
-  if (plan.add.length > 0) {
-    const exists = async (name) =>
-      (await names(`repos/${repo}/labels`)).some(
-        (label) => label.toLowerCase() === name,
-      );
-    const known = new Set(
-      (await names(`repos/${repo}/labels`)).map((label) => label.toLowerCase()),
-    );
-    for (const name of plan.add.filter((label) => !known.has(label))) {
-      await attempt(
-        () =>
-          run([
-            "api",
-            "-X",
-            "POST",
-            `repos/${repo}/labels`,
-            "-f",
-            `name=${name}`,
-            "-f",
-            "color=ededed",
-          ]),
-        () => exists(name),
-      );
-    }
-    await run([
-      "api",
-      "-X",
-      "POST",
-      issueRoute,
-      ...plan.add.flatMap((label) => ["-f", `labels[]=${label}`]),
-    ]);
-  }
-  for (const label of plan.remove) {
-    await attempt(
-      () =>
-        run([
-          "api",
-          "-X",
-          "DELETE",
-          `${issueRoute}/${encodeURIComponent(label)}`,
-        ]),
-      async () =>
-        !(await names(issueRoute)).some(
-          (name) => name.toLowerCase() === label.toLowerCase(),
-        ),
-    );
-  }
+  await apply(plan);
   return { ...plan, unmatched };
 }
 
@@ -274,7 +294,6 @@ async function gitListFiles() {
 export const escapeCommand = (text) =>
   text.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
 
-// Return the exit code.
 export async function main(
   argv,
   {

@@ -62,6 +62,9 @@ test("a double star between slashes matches zero or more directories", () => {
   assert.equal(matches("README.md", "**/*.md"), true);
   assert.equal(matches("docs/x.md", "**/*.md"), true);
   assert.equal(matches("ab", "a/**/b"), false);
+  assert.equal(matches("a/xb", "a/**/b"), false);
+  assert.equal(matches("xb", "**/b"), false);
+  assert.equal(matches("b", "**/b"), true);
 });
 
 test("a glob keeps its end anchor and treats other characters as text", () => {
@@ -193,17 +196,22 @@ for (const [name, change, message] of [
   [
     "an area with no prefix",
     { rules: [{ ...rule, area: "docs" }] },
-    /area must start with/,
+    /area must be lower case and start with/,
   ],
   [
     "an area that is only the prefix",
     { rules: [{ ...rule, area: "area/" }] },
-    /area must start with/,
+    /area must be lower case and start with/,
   ],
   [
     "a role label as an area",
     { rules: [{ ...rule, area: "role/trusted" }] },
-    /area must start with/,
+    /area must be lower case and start with/,
+  ],
+  [
+    "an area with capital letters",
+    { rules: [{ ...rule, area: "area/Docs" }] },
+    /lower case/,
   ],
   ["no paths", { rules: [{ ...rule, paths: [] }] }, /paths must be/],
   ["an empty glob", { rules: [{ ...rule, paths: [""] }] }, /paths must be/],
@@ -238,7 +246,6 @@ test("a workflow command escape covers the percent sign and the line breaks", ()
   assert.equal(escapeCommand("a%b\r\nc"), "a%25b%0D%0Ac");
 });
 
-// The fake answers the read calls of gh. It fails a list call that does not paginate.
 function fakeGh({ files, labels, repoLabels, changed = files.length }) {
   const calls = [];
   const state = { labels: [...labels], repoLabels: [...repoLabels] };
@@ -331,7 +338,9 @@ test("labeling goes on when another run created the label first", async () => {
   const run = async (args) => {
     if (args.includes("-X") && args.at(3) === "repos/o/r/labels") {
       created++;
-      fake.state.repoLabels.push(args.at(5).slice("name=".length));
+      fake.state.repoLabels.push(
+        args.at(5).slice("name=".length).toUpperCase(),
+      );
       throw ghError();
     }
     return fake.run(args);
@@ -410,23 +419,52 @@ test("a label that differs only in case is not created again", async () => {
   );
 });
 
-test("labeling stops when the pull request has more than 3000 files", async () => {
+test("labeling sets the highest risk label and stops when the pull request has more than 3000 files", async () => {
   const { run, calls } = fakeGh({
     files: ["docs/a.md"],
-    labels: [],
-    repoLabels: [],
+    labels: ["risk/low", "area/docs", "stage/060-reviewed"],
+    repoLabels: ["risk/high"],
     changed: 3001,
   });
   await assert.rejects(
     labelPullRequest({ repo: "o/r", number: "7", policy, run }),
-    /3001/,
+    /3001.*risk\/high/,
   );
-  assert.deepEqual(writesOf(calls), []);
+  assert.deepEqual(writesOf(calls), [
+    [
+      "api",
+      "-X",
+      "POST",
+      "repos/o/r/issues/7/labels",
+      "-f",
+      "labels[]=risk/high",
+    ],
+    ["api", "-X", "DELETE", "repos/o/r/issues/7/labels/risk%2Flow"],
+  ]);
 });
+
+for (const [name, text] of [
+  ["an empty answer", ""],
+  ["null", "null\n"],
+  ["a fraction", "3000.5\n"],
+  ["a negative number", "-1\n"],
+]) {
+  test(`labeling stops when the count of changed files is ${name}`, async () => {
+    const fake = fakeGh({ files: ["docs/a.md"], labels: [], repoLabels: [] });
+    const run = async (args) =>
+      args.some((a) => a.endsWith("/pulls/7")) ? text : fake.run(args);
+    await assert.rejects(
+      labelPullRequest({ repo: "o/r", number: "7", policy, run }),
+      /no count of changed files/,
+    );
+    assert.deepEqual(writesOf(fake.calls), []);
+  });
+}
 
 test("labeling accepts exactly 3000 files, and renames do not count twice", async () => {
   const { run } = fakeGh({
-    files: Array.from({ length: 3000 }, (_, i) => `docs/${i}.md`),
+    files: Array.from({ length: 4000 }, (_, i) => `docs/${i}.md`),
+    changed: 3000,
     labels: [],
     repoLabels: [],
   });
