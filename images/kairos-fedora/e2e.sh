@@ -360,6 +360,24 @@ reboot_and_wait_for_ssh() {
     die "SSH did not become reachable after reboot before ${E2E_BOOT_TIMEOUT}"
 }
 
+wait_for_hostname() {
+    local deadline
+    local timeout_seconds
+
+    timeout_seconds="$(duration_to_seconds "$E2E_BOOT_TIMEOUT")"
+    deadline=$((SECONDS + timeout_seconds))
+
+    log "Waiting for the cloud-config hostname '${guest_hostname}'"
+    while ((SECONDS < deadline)); do
+        if ssh_cmd "test \"\$(hostname)\" = '${guest_hostname}'" >"${logs_dir}/hostname-wait-last.log" 2>&1; then
+            return
+        fi
+        sleep 5
+    done
+
+    die "The hostname was not '${guest_hostname}' before ${E2E_BOOT_TIMEOUT}"
+}
+
 collect_ssh_diagnostics() {
     [[ "$ssh_ready" == 1 ]] || return 0
 
@@ -403,6 +421,7 @@ run_guest_checks() {
 
     log "Checking the hostname command"
     ssh_cmd 'command -v hostname >/dev/null'
+    wait_for_hostname
     ssh_cmd "test \"\$(hostname)\" = '${guest_hostname}'"
 
     log "Checking Kairos active boot state"
