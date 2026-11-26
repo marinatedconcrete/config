@@ -258,7 +258,7 @@ function fakeGh({ files, labels, repoLabels, changed = files.length }) {
     assert.ok(route.includes("per_page=100"), `no per_page in ${route}`);
     if (route.includes("/pulls/7/files")) {
       assert.equal(args.at(-1), FILES_JQ);
-      return files.join("\n") + "\n";
+      return files.map((file) => JSON.stringify(file)).join("\n") + "\n";
     }
     if (route.includes("/issues/7/labels"))
       return state.labels.join("\n") + "\n";
@@ -411,6 +411,28 @@ for (const [name, text] of [
   });
 }
 
+test("a file name with a line feed stays one file", async () => {
+  const { run } = fakeGh({
+    files: ["docs/a\n.github/workflows/x.yml"],
+    labels: [],
+    repoLabels: [],
+  });
+  const result = await labelPullRequest({
+    repo: "o/r",
+    number: "7",
+    policy,
+    run,
+  });
+  assert.deepEqual(result.add, ["area/docs", "risk/low"]);
+  assert.deepEqual(result.unmatched, []);
+});
+
+test("a double star matches a line feed", () => {
+  assert.equal(matches("docs/a\nb", "docs/**"), true);
+  assert.equal(matches("a\nb/c", "**/c"), true);
+  assert.equal(matches("a\nb", "a*b"), true);
+});
+
 test("labeling accepts exactly 3000 files, and renames do not count twice", async () => {
   const { run } = fakeGh({
     files: Array.from({ length: 4000 }, (_, i) => `docs/${i}.md`),
@@ -459,12 +481,19 @@ test(
     const page = JSON.stringify([
       { filename: "a" },
       { filename: "b", previous_filename: "c" },
+      { filename: "d\ne" },
     ]);
     const out = execFileSync("jq", ["-r", FILES_JQ], {
       input: page,
       encoding: "utf8",
     });
-    assert.deepEqual(out.split("\n").filter(Boolean), ["a", "b", "c"]);
+    assert.deepEqual(
+      out
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => JSON.parse(line)),
+      ["a", "b", "c", "d\ne"],
+    );
   },
 );
 

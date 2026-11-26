@@ -24,7 +24,9 @@ export const AREA_PREFIX = "area/";
 export const RISK_PREFIX = "risk/";
 // The pull request files API returns at most 3000 files.
 const MAX_FILES = 3000;
-export const FILES_JQ = ".[] | .filename, (.previous_filename // empty)";
+// Each line is a JSON string, so a file name with a line feed stays one name.
+export const FILES_JQ =
+  ".[] | (.filename, (.previous_filename // empty)) | tojson";
 
 // A policy has this shape: { rules: [{ tier, area, paths: [glob] }] }
 // A classification has this shape: { areas: [string], tier: string | null, unmatched: [string] }
@@ -63,7 +65,7 @@ export function parsePolicy(text) {
   return policy;
 }
 
-// Glob syntax: "*" matches any characters except "/". "**" matches any characters on one line, including "/".
+// Glob syntax: "*" matches any characters except "/". "**" matches any characters, including "/" and a line feed.
 // "**/" at the start of a glob or after a "/" matches zero or more directories. A name that starts with a dot matches like any other name.
 // The other characters of a glob, such as "?", "[", and "{", match themselves.
 // path.matchesGlob skips names that start with a dot, so the script does its own conversion.
@@ -73,10 +75,10 @@ function globToRegex(glob) {
     const char = glob[i];
     if (char === "*" && glob[i + 1] === "*") {
       if (glob[i + 2] === "/") {
-        source += "(?:.*/)?";
+        source += "(?:[^]*/)?";
         i += 2;
       } else {
-        source += ".*";
+        source += "[^]*";
         i += 1;
       }
     } else if (char === "*") {
@@ -235,13 +237,15 @@ export async function labelPullRequest({ repo, number, policy, run }) {
       `The pull request changes ${changed} files. The API lists at most ${MAX_FILES}. The script set ${top} and stopped.`,
     );
   }
-  const files = await lines([
-    "api",
-    "--paginate",
-    `repos/${repo}/pulls/${number}/files?per_page=100`,
-    "--jq",
-    FILES_JQ,
-  ]);
+  const files = (
+    await lines([
+      "api",
+      "--paginate",
+      `repos/${repo}/pulls/${number}/files?per_page=100`,
+      "--jq",
+      FILES_JQ,
+    ])
+  ).map((line) => JSON.parse(line));
   const current = await names(issueRoute);
   const { unmatched } = classify(policy, files);
   const plan = planLabels(policy, files, current);
