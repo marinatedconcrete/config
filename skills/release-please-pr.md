@@ -42,7 +42,7 @@ A section that lists only `**main:** release <package> <version>` has no real ch
 The release note text comes from the commit message of the merged source pull request. To fix the text, change the source pull request. Do not change the release pull request.
 
 1. Find the merged pull request that made the commit. Use the link in the changelog entry. If there is no link, find the associated pull request of the commit. If there is none, an override cannot fix the note. Ask a named maintainer to decide.
-2. The override changes the note and the version of each package that the commit touches. Find their release pull requests with `gh pr list --label "autorelease: pending" --search "<number> in:body"`. Make sure that the message is correct for each.
+2. The override changes the note and the version of each package that the commit touches. Check the release pull requests that you received for review. Ask a maintainer for the number of each other release pull request that has the commit. Make sure that the message is correct for each.
 3. Ask a named maintainer to add this block to the body of that merged pull request. Do not edit the body yourself. Put the marker words in the body once only.
 
 ```text
