@@ -1,4 +1,5 @@
-// Check the Renovate configuration for mistakes that renovate-config-validator accepts.
+// Check the Renovate configuration for mistakes that renovate-config-validator can accept.
+// The validator finds a missing preset only in a packageRules entry.
 //
 // Rule 1: Each regex custom manager must match at least one file in the repository.
 // The manager must also find a match for at least one of its matchStrings in a file that it reads.
@@ -59,7 +60,8 @@ function globToRegExp(glob) {
 
 // Renovate reads a pattern that starts with / or !/ and ends with / or /i as a regular
 // expression. A "!" at the start negates the expression. Renovate reads any other
-// pattern as a glob. This check does not support the !/ form and reads it as a glob.
+// pattern as a glob. This check does not support a pattern that starts with "!".
+// It reads the pattern as a glob, and it reads the "!" as a literal character.
 export function patternToRegExp(pattern) {
   const form = /^\/(.+)\/(i?)$/s.exec(pattern);
   return form ? new RegExp(form[1], form[2]) : globToRegExp(pattern);
@@ -95,7 +97,9 @@ export function findDeadManagers({
     let patterns;
     let matchers;
     try {
-      patterns = (manager.managerFilePatterns ?? []).map(patternToRegExp);
+      patterns = [manager.managerFilePatterns ?? []]
+        .flat()
+        .map(patternToRegExp);
       matchers = (manager.matchStrings ?? []).map(
         (source) => new RegExp(source, "g"),
       );
@@ -182,6 +186,12 @@ function main() {
   });
   for (const failure of failures) console.error(`FAIL: ${failure}`);
   if (failures.length > 0) process.exit(1);
+  if (configs.length === 0) {
+    console.error(
+      "FAIL: No Renovate file found. Run the script from the repository root.",
+    );
+    process.exit(2);
+  }
   console.log(`Checked ${configs.length} Renovate file(s). No problems found.`);
 }
 

@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import {
   CONSUMER_ONLY_MANAGERS,
   checkRenovateConfig,
@@ -139,6 +141,40 @@ test("a glob ignores case and a regular expression does not", () => {
   assert.ok(patternToRegExp("**/containerfile").test("images/a/Containerfile"));
   assert.ok(patternToRegExp("/^a\\.yml$/").test("a.yml"));
   assert.equal(patternToRegExp("/^a\\.yml$/").test("A.yml"), false);
+});
+
+test("a managerFilePatterns value that is a string is read as one pattern", () => {
+  const [failure] = findDeadManagers({
+    file: "renovate.json",
+    config: {
+      customManagers: [manager({ managerFilePatterns: "/^a\\.yml$/" })],
+    },
+    files: ["a.yml"],
+    readFile: () => "nothing",
+  });
+  assert.match(failure, /no matchStrings entry matches/);
+  assert.deepEqual(
+    findDeadManagers({
+      file: "renovate.json",
+      config: {
+        customManagers: [manager({ managerFilePatterns: "/^a\\.yml$/" })],
+      },
+      files: ["a.yml"],
+      readFile: () => "version: 1",
+    }),
+    [],
+  );
+});
+
+test("a run that finds no Renovate file fails", () => {
+  const here = fileURLToPath(new URL(".", import.meta.url));
+  const result = spawnSync(
+    process.execPath,
+    [fileURLToPath(new URL("./renovate-checks.mjs", import.meta.url))],
+    { cwd: here, encoding: "utf8" },
+  );
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /No Renovate file found/);
 });
 
 test("a manager of another type is ignored", () => {
