@@ -90,6 +90,7 @@ Later commits and releases do not change this source commit.
 
 The validation workflows and publisher use the commit that started the workflow.
 The source checkout uses the selected release commit.
+Source validation checks the format of the Justfile modules before publication.
 Start a new recovery run on `main` to use publication fixes without a new package version.
 A rerun of an existing workflow uses its original workflow commit.
 Publisher changes must preserve compatibility with existing validation records.

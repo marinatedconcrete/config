@@ -4,6 +4,7 @@
   "images/github-runner-ci": "1.3.1",
   "images/kairos-fedora": "1.1.1",
   "images/vscode-ssh-server": "0.1.7",
+  "justfile-modules": "0.0.0",
   "kustomization/components/factorio": "1.0.0",
   "kustomization/components/kube-vip": "5.1.1",
   "kustomization/components/kube-vip-wireguard": "1.0.1",

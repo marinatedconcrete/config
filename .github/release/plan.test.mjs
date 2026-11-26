@@ -1,7 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { Manifest } from "release-please";
-import { planReleases, collectPlan } from "./plan.mjs";
+import { classifyReleasePath, planReleases, collectPlan } from "./plan.mjs";
+
+test("Justfile modules release as a source package", () => {
+  assert.deepEqual(classifyReleasePath("justfile-modules"), {
+    project: "justfile-modules",
+    kind: "source",
+  });
+});
 
 const sha = "a".repeat(40);
 const path = "kustomization/components/pod-security-enforce-privileged";
