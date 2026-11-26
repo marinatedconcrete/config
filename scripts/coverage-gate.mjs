@@ -253,18 +253,25 @@ export function formatShellReport({ files, lines, minFoundLines }) {
   ].join("\n");
 }
 
-// The badge shows the line coverage of all Node suites, as the "all files" row of each suite adds up.
 // The format is the shields endpoint JSON: https://shields.io/badges/endpoint-badge
-export function coverageBadge({ found, hit }) {
-  if (!(found > 0)) throw new Error("The lcov reports have no line.");
+export function coverageBadge(label, { found, hit }) {
+  if (!(found > 0)) throw new Error("The coverage report has no line.");
   const percent = (hit / found) * 100;
   const color =
     percent >= 80 ? "brightgreen" : percent >= 60 ? "yellow" : "red";
   return {
     schemaVersion: 1,
-    label: "node coverage",
+    label,
     message: `${percent.toFixed(1)}%`,
     color,
+  };
+}
+
+// Hive reads coverage.json, so keep that name.
+export function badgeFiles({ node, shell }) {
+  return {
+    "coverage.json": coverageBadge("node coverage", node),
+    "shell-coverage.json": coverageBadge("shell coverage", shell),
   };
 }
 
@@ -404,9 +411,9 @@ function runNodeSuite(root, suite, lcovFile, env) {
   ];
 }
 
-const USAGE = `Usage: node scripts/coverage-gate.mjs [--badge-file PATH] [--kcov-dir DIR]
-  --badge-file PATH  Write the badge JSON in PATH when every check passes.
-  --kcov-dir DIR     Keep the kcov output and the HTML report in DIR.`;
+const USAGE = `Usage: node scripts/coverage-gate.mjs [--badge-dir DIR] [--kcov-dir DIR]
+  --badge-dir DIR  Write the badge files in DIR when every check passes.
+  --kcov-dir DIR   Keep the kcov output and the HTML report in DIR.`;
 
 function optionValue(name) {
   const index = process.argv.indexOf(name);
@@ -420,7 +427,7 @@ function optionValue(name) {
 }
 
 function main() {
-  const badgeFile = optionValue("--badge-file");
+  const badgeDir = optionValue("--badge-dir");
   const keepDir = optionValue("--kcov-dir");
   const thresholds = JSON.parse(
     readFileSync(path.join(repoRoot, ".coverage-thresholds.json"), "utf8"),
@@ -428,11 +435,12 @@ function main() {
   const kcovDir = keepDir
     ? path.resolve(keepDir)
     : mkdtempSync(path.join(os.tmpdir(), "kcov-"));
-  const lcovDir = badgeFile
+  const lcovDir = badgeDir
     ? mkdtempSync(path.join(os.tmpdir(), "lcov-"))
     : null;
   const lcovFiles = [];
   const errors = [];
+  let shellFiles = [];
 
   const kcov = prepareKcov(repoRoot, thresholds.shell, kcovDir);
   if (kcov.error) errors.push(kcov.error);
@@ -450,8 +458,8 @@ function main() {
     errors.push(...runShellTests(repoRoot, thresholds.shell.tests, kcov.env));
     console.log("\n== Shell coverage");
     try {
-      const files = mergeKcov(kcov, repoRoot, kcovDir);
-      const shell = { files, ...thresholds.shell };
+      shellFiles = mergeKcov(kcov, repoRoot, kcovDir);
+      const shell = { files: shellFiles, ...thresholds.shell };
       console.log(formatShellReport(shell));
       errors.push(...checkShellCoverage(shell));
       if (keepDir) {
@@ -487,11 +495,17 @@ function main() {
     if (lcovDir) rmSync(lcovDir, { recursive: true });
     process.exit(1);
   }
-  if (badgeFile) {
-    const totals = addCounts(
-      lcovFiles.map((file) => sumLcov(readFileSync(file, "utf8"))),
-    );
-    writeFileSync(badgeFile, `${JSON.stringify(coverageBadge(totals))}\n`);
+  if (badgeDir) {
+    const badges = badgeFiles({
+      node: addCounts(
+        lcovFiles.map((file) => sumLcov(readFileSync(file, "utf8"))),
+      ),
+      shell: addCounts(shellFiles),
+    });
+    mkdirSync(badgeDir, { recursive: true });
+    for (const [name, badge] of Object.entries(badges)) {
+      writeFileSync(path.join(badgeDir, name), `${JSON.stringify(badge)}\n`);
+    }
     rmSync(lcovDir, { recursive: true });
   }
   console.log("\nCoverage gate passed.");

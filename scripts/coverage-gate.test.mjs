@@ -15,6 +15,7 @@ import path from "node:path";
 import {
   addCounts,
   checkComponents,
+  badgeFiles,
   checkShellCoverage,
   coverageBadge,
   formatShellReport,
@@ -145,7 +146,7 @@ test("sumLcov ignores the FNF, FNH, BRF, and BRH lines", () => {
 });
 
 test("the badge has the shields endpoint format with one decimal", () => {
-  assert.deepEqual(coverageBadge({ found: 512, hit: 398 }), {
+  assert.deepEqual(coverageBadge("node coverage", { found: 512, hit: 398 }), {
     schemaVersion: 1,
     label: "node coverage",
     message: "77.7%",
@@ -154,15 +155,55 @@ test("the badge has the shields endpoint format with one decimal", () => {
 });
 
 test("the badge color changes at 80 and 60 percent", () => {
-  assert.equal(coverageBadge({ found: 100, hit: 80 }).color, "brightgreen");
-  assert.equal(coverageBadge({ found: 100, hit: 79 }).color, "yellow");
-  assert.equal(coverageBadge({ found: 100, hit: 60 }).color, "yellow");
-  assert.equal(coverageBadge({ found: 100, hit: 59 }).color, "red");
+  assert.equal(
+    coverageBadge("node coverage", { found: 100, hit: 80 }).color,
+    "brightgreen",
+  );
+  assert.equal(
+    coverageBadge("node coverage", { found: 100, hit: 79 }).color,
+    "yellow",
+  );
+  assert.equal(
+    coverageBadge("node coverage", { found: 100, hit: 60 }).color,
+    "yellow",
+  );
+  assert.equal(
+    coverageBadge("node coverage", { found: 100, hit: 59 }).color,
+    "red",
+  );
+});
+
+test("the badge takes its label from the caller", () => {
+  assert.equal(
+    coverageBadge("shell coverage", { found: 10, hit: 5 }).label,
+    "shell coverage",
+  );
+});
+
+test("the badge files keep the coverage.json name and add shell-coverage.json", () => {
+  const badges = badgeFiles({
+    node: { found: 100, hit: 85 },
+    shell: { found: 517, hit: 330 },
+  });
+  assert.deepEqual(Object.keys(badges), [
+    "coverage.json",
+    "shell-coverage.json",
+  ]);
+  assert.equal(badges["coverage.json"].label, "node coverage");
+  assert.equal(badges["coverage.json"].message, "85.0%");
+  assert.equal(badges["shell-coverage.json"].label, "shell coverage");
+  assert.equal(badges["shell-coverage.json"].message, "63.8%");
 });
 
 test("the badge refuses a report with no line", () => {
-  assert.throws(() => coverageBadge({ found: 0, hit: 0 }), /no line/);
-  assert.throws(() => coverageBadge({ found: Number.NaN, hit: 0 }), /no line/);
+  assert.throws(
+    () => coverageBadge("node coverage", { found: 0, hit: 0 }),
+    /no line/,
+  );
+  assert.throws(
+    () => coverageBadge("node coverage", { found: Number.NaN, hit: 0 }),
+    /no line/,
+  );
 });
 
 const floors = {

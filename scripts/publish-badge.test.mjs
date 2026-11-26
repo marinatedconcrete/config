@@ -30,6 +30,7 @@ function publish({
   fail = "",
   mainSha = "run1",
   expectedSha = "run1",
+  name,
 }) {
   const dir = mkdtempSync(path.join(os.tmpdir(), "publish-badge-"));
   writeFileSync(path.join(dir, "gh"), fakeGh);
@@ -38,7 +39,7 @@ function publish({
   writeFileSync(file, badge);
   const log = path.join(dir, "log");
   writeFileSync(log, "");
-  const result = spawnSync("bash", [script, file], {
+  const result = spawnSync("bash", [script, file, ...(name ? [name] : [])], {
     encoding: "utf8",
     env: {
       PATH: `${dir}:${process.env.PATH}`,
@@ -173,4 +174,52 @@ test("the script needs a file and GH_REPO", () => {
   });
   assert.notEqual(noRepo.status, 0);
   assert.match(noRepo.stderr, /GH_REPO/);
+});
+
+test("a new file name on a missing branch goes in the tree of the first commit", () => {
+  const result = publish({ branch: "no", name: "shell-coverage.json" });
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(result.tree, {
+    tree: [
+      {
+        path: "shell-coverage.json",
+        mode: "100644",
+        type: "blob",
+        sha: "blobsha",
+      },
+    ],
+  });
+});
+
+test("a new file name on an existing branch is a PUT with no file sha", () => {
+  const result = publish({
+    branch: "yes",
+    current: "",
+    name: "shell-coverage.json",
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const put = result.calls.find((call) => call.includes("-X PUT"));
+  assert.ok(put.includes("repos/o/r/contents/shell-coverage.json"), put);
+  assert.equal(put.includes("sha="), false, put);
+  assert.ok(put.includes("branch=badges"));
+  assert.ok(put.includes(`content=${Buffer.from(badge).toString("base64")}`));
+});
+
+test("a bad file name stops the script before any gh call", () => {
+  for (const name of [
+    "../coverage.json",
+    "dir/coverage.json",
+    "coverage",
+    "Coverage.json",
+    "coverage.json.txt",
+    ".json",
+  ]) {
+    const result = publish({ branch: "no", name });
+    assert.equal(result.status, 2, `${name}: ${result.stderr}`);
+    assert.deepEqual(result.calls, [], name);
+    assert.match(
+      result.stderr,
+      /must have only lowercase letters, digits, and hyphens/,
+    );
+  }
 });

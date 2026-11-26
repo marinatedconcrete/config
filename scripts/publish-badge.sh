@@ -1,18 +1,24 @@
 #!/usr/bin/env bash
-# Publish a badge file as coverage.json on the "badges" branch.
+# Publish a badge file on the "badges" branch. NAME is the file name on the branch.
+# NAME is one lowercase name that ends in .json. The default is coverage.json.
 # The script uses the GitHub API only. It makes no commit on the default branch.
 # A commit that the workflow token makes does not start another workflow run.
 # The script writes only when EXPECTED_SHA is the head of the default branch.
 # A run for an older commit leaves the badge as it is.
-# Usage: GH_REPO=owner/name EXPECTED_SHA=sha publish-badge.sh BADGE_FILE
+# Usage: GH_REPO=owner/name EXPECTED_SHA=sha publish-badge.sh BADGE_FILE [NAME]
 set -euo pipefail
 
-file=${1:?Usage: publish-badge.sh BADGE_FILE}
+file=${1:?Usage: publish-badge.sh BADGE_FILE [NAME]}
+path=${2:-coverage.json}
 repo=${GH_REPO:?Set GH_REPO to owner/name.}
 expected=${EXPECTED_SHA:?Set EXPECTED_SHA to the commit of this run.}
 default_branch=${DEFAULT_BRANCH:-main}
 branch=badges
-path=coverage.json
+
+if [[ ! "${path}" =~ ^[a-z0-9-]+\.json$ ]]; then
+    echo "The name \"${path}\" must have only lowercase letters, digits, and hyphens, and end in .json." >&2
+    exit 2
+fi
 
 head=$(gh api "repos/${repo}/git/ref/heads/${default_branch}" --jq .object.sha)
 if [[ "${head}" != "${expected}" ]]; then

@@ -41,7 +41,7 @@
       "actions/image-release-notes/release-notes.sh": 266,
       "actions/image-release-notes/previous-sbom.sh": 80,
       "actions/image-release-notes/publish/publish.sh": 84,
-      "scripts/publish-badge.sh": 27,
+      "scripts/publish-badge.sh": 30,
       ".github/scripts/publish-draft-release.sh": 9,
       ".github/scripts/release-latest.sh": 13,
       ".github/scripts/next-calver-version.sh": 7
