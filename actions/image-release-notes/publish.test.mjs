@@ -30,11 +30,22 @@ const STUB = `#!/usr/bin/env bash
 case "$1 $2" in
 "release view")
     [[ "$3" == "$STUB_TAG" && -d "$STUB_DIR/release" ]] || exit 1
-    [[ "$*" == *"--json body"* ]] && cat "$STUB_DIR/release/body.md"
+    case "$*" in
+    *"--json body"*) cat "$STUB_DIR/release/body.md" ;;
+    *"--json isImmutable"*)
+        [[ -e "$STUB_DIR/release/immutable" ]] && echo true || echo false
+        ;;
+    *"--json assets"*) ls -- "$STUB_DIR/release/assets" ;;
+    esac
     exit 0
     ;;
 "release upload")
     [[ "$3" == "$STUB_TAG" ]] || exit 1
+    # GitHub refuses an asset change on a published immutable release.
+    if [[ -e "$STUB_DIR/release/immutable" ]]; then
+        echo "HTTP 422: Cannot upload assets to an immutable release." >&2
+        exit 1
+    fi
     # The real command fails on an existing asset without --clobber.
     asset="$STUB_DIR/release/assets/$(basename "$4")"
     [[ ! -e "$asset" || "$*" == *--clobber* ]] || exit 1
@@ -50,7 +61,7 @@ case "$1 $2" in
 esac
 `;
 
-function setup({ body, release = true }) {
+function setup({ body, release = true, immutable = false, assets = [] }) {
   const dir = mkdtempSync(join(tmpdir(), "publish-test-"));
   const bin = join(dir, "bin");
   const files = join(dir, "files");
@@ -62,6 +73,9 @@ function setup({ body, release = true }) {
   if (release) {
     mkdirSync(join(dir, "release", "assets"), { recursive: true });
     writeFileSync(join(dir, "release", "body.md"), body);
+    if (immutable) writeFileSync(join(dir, "release", "immutable"), "");
+    for (const [name, data] of assets)
+      writeFileSync(join(dir, "release", "assets", name), data);
   }
   return { dir, bin, files };
 }
@@ -86,6 +100,48 @@ function publish({ dir, bin, files }, notes, args = ["--tag", "app-1.0.0"]) {
 const state = (dir) => ({
   body: readFileSync(join(dir, "release", "body.md"), "utf8"),
   assets: readdirSync(join(dir, "release", "assets")),
+});
+
+const PUBLISHED_SBOM = '{"bomFormat":"CycloneDX","published":true}';
+
+test("a published immutable release that has the SBOM keeps it and gets the notes", () => {
+  const env = setup({
+    body: "Human text.\n",
+    immutable: true,
+    assets: [["app-sbom.cdx.json", PUBLISHED_SBOM]],
+  });
+  try {
+    const result = publish(env, "Notes.\n");
+    assert.equal(result.status, 0, result.stderr);
+    assert.deepEqual(state(env.dir), {
+      body: `Human text.\n\n${MARKER}\n\nNotes.\n`,
+      assets: ["app-sbom.cdx.json"],
+    });
+    assert.equal(
+      readFileSync(
+        join(env.dir, "release", "assets", "app-sbom.cdx.json"),
+        "utf8",
+      ),
+      PUBLISHED_SBOM,
+    );
+  } finally {
+    rmSync(env.dir, { recursive: true, force: true });
+  }
+});
+
+test("a published immutable release with no SBOM stops the script and keeps the body", () => {
+  const env = setup({ body: "Human text.\n", immutable: true });
+  try {
+    const result = publish(env, "Notes.\n");
+    assert.notEqual(result.status, 0);
+    assert.match(
+      result.stderr,
+      /release app-1\.0\.0 is immutable and has no app-sbom\.cdx\.json asset/,
+    );
+    assert.deepEqual(state(env.dir), { body: "Human text.\n", assets: [] });
+  } finally {
+    rmSync(env.dir, { recursive: true, force: true });
+  }
 });
 
 test("a second run with the same tag gives the same release", () => {
