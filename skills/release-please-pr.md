@@ -38,7 +38,7 @@ fix(renovate): the corrected message (#1148)
 END_COMMIT_OVERRIDE
 ```
 
-3. Release Please reads the block at its next run. A run starts on a push to `main`. A maintainer can also start the Release Please workflow by hand with an empty `release_pr` input. Editing a pull request body does not start a run.
+3. Release Please reads the block at its next run. Editing a pull request body does not start a run. A push to `main` starts a run. A maintainer can also start the Release Please workflow on `main` by hand with an empty `release_pr` input. A run can publish other pending merged release pull requests before it updates the open ones. Check that the open release pull request shows the corrected note after the run.
 
 Follow these rules for the block. Except the last two, each rule comes from a run of Release Please 17.11.2.
 
