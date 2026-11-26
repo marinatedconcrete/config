@@ -10,9 +10,12 @@ on:
       - reopened
       - edited
 
+# Each run waits in a queue, so a run for an old head cannot cancel the run for the current head.
+# The queue holds up to 100 runs. A run for an old head stops and changes no label.
 concurrency:
   group: path-policy-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: read

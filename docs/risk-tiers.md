@@ -25,7 +25,10 @@ To see the current rules, run `gh api repos/marinatedconcrete/config/branches/ma
 ## Map
 
 The file [`.github/policies/paths.json`](../.github/policies/paths.json) holds this map as data.
-A workflow runs for a pull request from a branch in this repository when the pull request opens, changes, reopens, or has its title or body edited. A pull request from a fork gets no labels, because its token is read-only. The workflow adds one `area/` label for each area and one `risk/` label for the highest tier of the changed files.
+A workflow runs for a pull request from a branch in this repository when the pull request opens, changes, reopens, or has its title or body edited. A pull request from a fork gets no labels, because its token is read-only.
+GitHub does not run the workflow while the pull request has a merge conflict, so the labels can be from an older commit.
+Do not use the labels until the workflow completes for the last commit after a person resolves the conflict.
+The workflow adds one `area/` label for each area and one `risk/` label for the highest tier of the changed files.
 It also removes `area/` and `risk/` labels that no longer fit, even a label that a person added by hand.
 If the pull request has more than 3000 files, the workflow sets `risk/high` and stops.
 A path with no rule counts as High.
