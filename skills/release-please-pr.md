@@ -22,7 +22,7 @@ The GitHub App `formwork-remover` opens these pull requests. Release Please writ
 - Do not suggest an edit to a `CHANGELOG.md` file, to `.release-please-manifest.json`, or to a version file such as `ansible/galaxy.yml` or `version.txt`.
 - Release Please makes the branch again from `main` each time it updates the pull request. The update removes a manual change.
 - Do not ask the release bot to change the pull request. Ask a named maintainer to act.
-- Do not suggest a manual rebase of the branch. If the pull request is older than `main`, read the log of the last Release Please run on `main`. Then recommend `close`. Release Please opens a new pull request on its next run if the package has a new release commit.
+- Do not suggest a manual rebase of the branch. If the pull request is older than `main`, read the log of the last Release Please run on `main`. Check whether Release Please still plans the release. Recommend `close` only if the log confirms that it no longer plans the release. If you cannot read the log, write "not checked".
 
 ## Fix the wording of a release note
 
@@ -66,7 +66,7 @@ Write the expected tag in your review. If the version, the package, or the tag d
 
 ## Other checks
 
-- Check that the release has a real change. A section that lists only an entry of the form `**main:** release <package> <version>` has no real change. In that case, recommend `close`.
+- Check that the release has a real change. A section that lists only an entry of the form `**main:** release <package> <version>` has no real change. In that case, check the log of the last Release Please run as described above. Then recommend `close`.
 - Check `mergeable`, `mergeStateStatus`, and the checks on the head commit.
 - Do not merge the pull request. Recommend an action only.
 - Ask one named person for a decision. Ask one question that has two answers, and put your recommendation first.
