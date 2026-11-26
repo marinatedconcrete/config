@@ -49,6 +49,8 @@ test_verdict() {
   expect_equal 'verdict: no workload passes' '' "$(verdict a restricted none)"
   expect_contains 'verdict: an entry for no workload is stale' 'no workload' "$(verdict a baseline none)"
   expect_contains 'verdict: stricter than declared is stale' stale "$(verdict a baseline restricted)"
+  expect_equal 'verdict: restricted measured says remove the entry' 'The entry for a in exceptions.yml is stale. Remove it.' "$(verdict a baseline restricted)"
+  expect_equal 'verdict: baseline measured says set the level' 'The entry for a in exceptions.yml is stale. Set its level to baseline.' "$(verdict a privileged baseline)"
   expect_contains 'verdict: weaker than declared fails' 'Fix the manifest' "$(verdict a restricted baseline)"
   expect_contains 'verdict: privileged above baseline fails' 'Fix the manifest of a, or set its level and reason in exceptions.yml.' "$(verdict a baseline privileged)"
 }

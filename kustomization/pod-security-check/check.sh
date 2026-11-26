@@ -2,6 +2,7 @@
 # Check that each rendered component meets its declared Pod Security level.
 # Exit 0 when all components pass, 1 when a component fails, and 2 when exceptions.yml is not valid
 # or a component cannot be built or measured. When a kubectl command in prepare fails, exit with its status.
+# Exit 1 also when the kube context argument is missing.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -118,8 +119,10 @@ verdict() {
     echo "${name} has no workload. Remove its entry from exceptions.yml."
   elif [[ "${measured}" == none || "${measured}" == "${declared}" ]]; then
     return 0
+  elif [[ "${measured}" == restricted ]]; then
+    echo "The entry for ${name} in exceptions.yml is stale. Remove it."
   elif (($(rank "${measured}") < $(rank "${declared}"))); then
-    echo "The entry for ${name} in exceptions.yml is stale. Remove it, or set its level to ${measured}."
+    echo "The entry for ${name} in exceptions.yml is stale. Set its level to ${measured}."
   else
     echo "Fix the manifest of ${name}, or set its level and reason in exceptions.yml."
   fi
