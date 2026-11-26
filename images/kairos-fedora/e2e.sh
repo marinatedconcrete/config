@@ -360,6 +360,40 @@ reboot_and_wait_for_ssh() {
     die "SSH did not become reachable after reboot before ${E2E_BOOT_TIMEOUT}"
 }
 
+wait_for_guest_check() {
+    local check="$1"
+    local command="$2"
+    local expected_output="${3-}"
+    local output
+    local last_output="(no output)"
+    local timeout_seconds
+    local deadline
+
+    timeout_seconds="$(duration_to_seconds "$E2E_BOOT_TIMEOUT")"
+    deadline=$((SECONDS + timeout_seconds))
+
+    log "Waiting for ${check}"
+    while ((SECONDS < deadline)); do
+        if output="$(ssh_cmd "$command")" &&
+            [[ $# -lt 3 || "$output" == "$expected_output" ]]; then
+            if [[ -n "$output" ]]; then
+                log "${check}: ${output}"
+            fi
+            return
+        fi
+        if [[ -n "$output" ]]; then
+            last_output="$output"
+        fi
+        sleep 5
+    done
+
+    die "Timed out waiting for ${check} after ${E2E_BOOT_TIMEOUT}. Last output: '${last_output}'"
+}
+
+wait_for_hostname() {
+    wait_for_guest_check "hostname ${guest_hostname}" hostname "$guest_hostname"
+}
+
 collect_ssh_diagnostics() {
     [[ "$ssh_ready" == 1 ]] || return 0
 
@@ -392,21 +426,19 @@ on_exit() {
 }
 
 run_guest_checks() {
+    wait_for_hostname
+
     log "Checking Fedora identity"
     ssh_cmd 'grep -E "^(ID|ID_LIKE)=" /etc/os-release | grep -q fedora'
 
     log "Checking SSH service configuration"
     ssh_cmd 'sudo -n systemctl is-enabled --quiet sshd.service'
-    ssh_cmd 'sudo -n systemctl is-active --quiet sshd.service'
+    wait_for_guest_check "active sshd.service" 'sudo -n systemctl is-active --quiet sshd.service'
     ssh_cmd 'sudo -n systemctl is-enabled sshd.socket | grep -qx masked'
     ssh_cmd '! sudo -n systemctl is-active --quiet sshd.socket'
 
-    log "Checking the hostname command"
-    ssh_cmd 'command -v hostname >/dev/null'
-    ssh_cmd "test \"\$(hostname)\" = '${guest_hostname}'"
-
-    log "Checking Kairos active boot state"
-    ssh_cmd 'kairos-agent state get boot | tee /tmp/kairos-boot-state.txt && grep -q active_boot /tmp/kairos-boot-state.txt'
+    wait_for_guest_check "Kairos active boot state" \
+        'kairos-agent state get boot | tee /tmp/kairos-boot-state.txt && grep -q active_boot /tmp/kairos-boot-state.txt'
 
     log "Waiting for K3s API"
     ssh_cmd "timeout ${E2E_K3S_TIMEOUT} bash -c 'until sudo -n systemctl is-active --quiet k3s && sudo -n test -s /etc/rancher/k3s/k3s.yaml && sudo -n env KUBECONFIG=/etc/rancher/k3s/k3s.yaml k3s kubectl get nodes >/dev/null 2>&1; do sleep 10; done'"
