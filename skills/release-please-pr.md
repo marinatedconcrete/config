@@ -35,8 +35,6 @@ The release note text comes from the commit message of the merged source pull re
 ```text
 BEGIN_COMMIT_OVERRIDE
 fix(renovate): the corrected message
-
-feat: a second message for the same commit
 END_COMMIT_OVERRIDE
 ```
 
@@ -44,8 +42,8 @@ END_COMMIT_OVERRIDE
 
 Follow these rules for the block:
 
-- Write each message as a Conventional Commit message. Start each message with a standard type such as `feat` or `fix`. Do not add `!` to the type of a message after the first message, because Release Please does not split that message off.
-- Put a blank line between messages.
+- Write one message as a Conventional Commit message. Use the original type and the original breaking-change status of the commit. Release Please uses the type to select the version, so another type can change the release version.
+- Do not add a second message to a wording correction. Another message adds a changelog entry and can change the release version.
 - The Release Please README says that the override does not work with plain merges. This repository allows only squash merges.
 - Do not edit the body yourself. Ask the maintainer.
 
