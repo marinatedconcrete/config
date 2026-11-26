@@ -1,7 +1,7 @@
 FROM scratch AS ctx
 COPY build_files /
 
-FROM ghcr.io/marinatedconcrete/devcontainer-base:2026.11.2@sha256:0ed9920098e1d82f1206b5cb3ba299a3d4617b32c2a5e4c0af967da1e3ed38aa
+FROM ghcr.io/marinatedconcrete/devcontainer-base:2026.11.3@sha256:7279da1deb7ad4de16acbe0c0397dfd20a7fe355251492ffb58d5cda752acce8
 
 LABEL org.opencontainers.image.title="github-runner-ci"
 LABEL org.opencontainers.image.description="A CI job image for ARC kubernetes-novolume runners."
