@@ -31,6 +31,22 @@
       "functions": 60
     }
   ],
+  "shell": {
+    "lines": 63,
+    "tests": [
+      ".github/scripts/publish-draft-release.test.sh",
+      ".github/scripts/release-latest.test.sh"
+    ],
+    "minFoundLines": {
+      "actions/image-release-notes/release-notes.sh": 266,
+      "actions/image-release-notes/previous-sbom.sh": 80,
+      "actions/image-release-notes/publish/publish.sh": 84,
+      "scripts/publish-badge.sh": 27,
+      ".github/scripts/publish-draft-release.sh": 9,
+      ".github/scripts/release-latest.sh": 13,
+      ".github/scripts/next-calver-version.sh": 7
+    }
+  },
   "components": {
     "allowlist": [
       {

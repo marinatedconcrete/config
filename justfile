@@ -354,14 +354,18 @@ kustomization-tests:
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
 
-# Run the coverage gate for the Node tests and the component tests.
+# Run the coverage gate for the Node tests, the shell scripts, and the component tests. Run it in the devcontainer, which has kcov.
 [group('test')]
-coverage-gate:
+coverage-gate *args:
     #!/usr/bin/env bash
     set -euo pipefail
     npm ci --prefix .github/release --ignore-scripts
     npm ci --prefix actions/image-release-notes --ignore-scripts
-    node scripts/coverage-gate.mjs
+    node scripts/coverage-gate.mjs {{ args }}
+
+# Run the coverage gate and keep the kcov HTML report in /tmp/shell-coverage-report.
+[group('test')]
+shell-coverage: (coverage-gate "--kcov-dir" "/tmp/shell-coverage-report")
 
 # Run the tests of the release shell scripts.
 [group('test')]

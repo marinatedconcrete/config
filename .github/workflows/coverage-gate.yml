@@ -21,6 +21,10 @@ jobs:
         run: npm ci --prefix .github/release --ignore-scripts
       - name: Install Image Release Notes Tools
         run: npm ci --prefix actions/image-release-notes --ignore-scripts
+      - name: Install kcov
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends kcov
       - name: Run Coverage Gate
         run: node scripts/coverage-gate.mjs --badge-file "$RUNNER_TEMP/coverage-badge.json"
       - name: Upload Coverage Badge
