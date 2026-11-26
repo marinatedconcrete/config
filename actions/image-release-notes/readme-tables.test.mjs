@@ -4,10 +4,12 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// The tests read action.yml with a line-based reader, because the repository
-// has no YAML package. The reader accepts only the layout that the files use
-// now: one-line values at fixed indents. It throws on other input, so a change
-// of layout fails the test and does not skip a check.
+// The tests read action.yml with a line-based reader, because this package has
+// no YAML dependency. The reader accepts only the layout that the files use
+// now: one-line values at fixed indents. It throws on a line that it cannot
+// read. A quoted value, a trailing comment, or a section that it does not find
+// gives a value that does not match the README. A change of layout thus fails
+// the test and does not skip a check.
 
 const here = dirname(fileURLToPath(import.meta.url));
 const readHere = (...parts) => readFileSync(join(here, ...parts), "utf8");
