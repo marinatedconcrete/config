@@ -246,8 +246,18 @@ test("a workflow command escape covers the percent sign and the line breaks", ()
   assert.equal(escapeCommand("a%b\r\nc"), "a%25b%0D%0Ac");
 });
 
-function fakeGh({ files, labels, repoLabels, changed = files.length }) {
+function fakeGh({
+  files,
+  labels,
+  repoLabels,
+  changed = files.length,
+  heads = "h1",
+  bases = "b1",
+}) {
   const counts = [changed].flat();
+  const headList = [heads].flat();
+  const baseList = [bases].flat();
+  const next = (list) => (list.length > 1 ? list.shift() : list[0]);
   const calls = [];
   const state = { labels: [...labels], repoLabels: [...repoLabels] };
   const run = async (args) => {
@@ -255,7 +265,7 @@ function fakeGh({ files, labels, repoLabels, changed = files.length }) {
     const route = args.find((arg) => arg.startsWith("repos/")) ?? "";
     if (args.includes("-X")) return "";
     if (route.endsWith("/pulls/7"))
-      return `${counts.length > 1 ? counts.shift() : counts[0]}\n`;
+      return `${next(counts)}\t${next(headList)}\t${next(baseList)}\n`;
     assert.ok(args.includes("--paginate"), `no --paginate in ${route}`);
     assert.ok(route.includes("per_page=100"), `no per_page in ${route}`);
     if (route.includes("/pulls/7/files")) {
@@ -399,9 +409,9 @@ test("labeling sets the highest risk label and stops when the pull request has m
 
 for (const [name, text] of [
   ["an empty answer", ""],
-  ["null", "null\n"],
-  ["a fraction", "3000.5\n"],
-  ["a negative number", "-1\n"],
+  ["null", "null\th\tb\n"],
+  ["a fraction", "3000.5\th\tb\n"],
+  ["a negative number", "-1\th\tb\n"],
 ]) {
   test(`labeling stops when the count of changed files is ${name}`, async () => {
     const fake = fakeGh({ files: ["docs/a.md"], labels: [], repoLabels: [] });
@@ -432,7 +442,7 @@ test("a list shorter than the count cannot lower the risk label", async () => {
 test("a count that changes during the read is read again", async () => {
   const { run, calls } = fakeGh({
     files: ["docs/a.md"],
-    changed: [2, 1, 1],
+    changed: [2, 2, 1, 1],
     labels: [],
     repoLabels: [],
   });
@@ -476,6 +486,87 @@ test("a file renamed out of a high path keeps the high tier", async () => {
     run,
   });
   assert.deepEqual(result.add, ["area/ci", "area/docs", "risk/high"]);
+});
+
+test("a head change that keeps the count the same stops the run with no write", async () => {
+  const { run, calls } = fakeGh({
+    files: ["docs/a.md"],
+    heads: ["h1", "h2", "h1", "h2", "h1", "h2"],
+    labels: ["risk/high"],
+    repoLabels: [],
+  });
+  await assert.rejects(
+    labelPullRequest({ repo: "o/r", number: "7", policy, run }),
+    /did not agree/,
+  );
+  assert.deepEqual(writesOf(calls), []);
+});
+
+test("a base change that keeps the head and the count stops the run with no write", async () => {
+  const { run, calls } = fakeGh({
+    files: ["docs/a.md"],
+    bases: ["b1", "b2", "b1", "b2", "b1", "b2"],
+    labels: ["risk/high"],
+    repoLabels: [],
+  });
+  await assert.rejects(
+    labelPullRequest({ repo: "o/r", number: "7", policy, run }),
+    /did not agree/,
+  );
+  assert.deepEqual(writesOf(calls), []);
+});
+
+test("a run for an old head skips the pull request before it reads the files", async () => {
+  const { run, calls } = fakeGh({
+    files: ["docs/a.md"],
+    heads: "h2",
+    labels: ["risk/high"],
+    repoLabels: [],
+  });
+  const result = await labelPullRequest({
+    repo: "o/r",
+    number: "7",
+    policy,
+    run,
+    headSha: "h1",
+  });
+  assert.match(result.skipped, /h2.*h1/);
+  assert.deepEqual(writesOf(calls), []);
+  assert.equal(
+    calls.some((args) => args.some((a) => a.includes("/files"))),
+    false,
+  );
+});
+
+test("a push during the file list skips the run and leaves the labels", async () => {
+  const { run, calls } = fakeGh({
+    files: ["docs/a.md"],
+    heads: ["h1", "h2"],
+    labels: ["risk/high"],
+    repoLabels: [],
+  });
+  const result = await labelPullRequest({
+    repo: "o/r",
+    number: "7",
+    policy,
+    run,
+    headSha: "h1",
+  });
+  assert.match(result.skipped, /h2/);
+  assert.deepEqual(writesOf(calls), []);
+});
+
+test("a run for the current head labels the pull request", async () => {
+  const { run } = fakeGh({ files: ["docs/a.md"], labels: [], repoLabels: [] });
+  const result = await labelPullRequest({
+    repo: "o/r",
+    number: "7",
+    policy,
+    run,
+    headSha: "h1",
+  });
+  assert.equal(result.skipped, undefined);
+  assert.deepEqual(result.add, ["area/docs", "risk/low"]);
 });
 
 test("a file name with a line feed stays one file", async () => {
@@ -626,6 +717,22 @@ test("the label command warns with an escaped message about a file with no rule"
   const warning = result.log.find((line) => line.startsWith("::warning::"));
   assert.match(warning, /x%250A::error::y/);
   assert.equal(warning.includes("\n"), false);
+});
+
+test("the label command reads HEAD_SHA and exits with 0 when the run is for an old head", async () => {
+  const fake = fakeGh({
+    files: ["docs/a.md"],
+    heads: "h2",
+    labels: [],
+    repoLabels: [],
+  });
+  const result = await cli(["label", "7"], {
+    env: { GH_REPO: "o/r", HEAD_SHA: "h1" },
+    run: fake.run,
+  });
+  assert.equal(result.code, 0);
+  assert.match(result.log.join("\n"), /Skipped: .*h2.*h1/);
+  assert.deepEqual(writesOf(fake.calls), []);
 });
 
 test("the repository policy covers every tracked file and has no dead glob", () => {

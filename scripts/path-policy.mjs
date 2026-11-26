@@ -25,6 +25,7 @@ export const RISK_PREFIX = "risk/";
 // The pull request files API returns at most 3000 files.
 const MAX_FILES = 3000;
 const READ_ATTEMPTS = 3;
+export const PULL_JQ = "[.changed_files, .head.sha, .base.sha] | @tsv";
 // Each line is a JSON array with the file name and the old name of a renamed file.
 // JSON keeps a file name with a line feed in one piece.
 export const FILES_JQ =
@@ -176,7 +177,7 @@ async function attempt(action, alreadyDone) {
   }
 }
 
-export async function labelPullRequest({ repo, number, policy, run }) {
+export async function labelPullRequest({ repo, number, policy, run, headSha }) {
   const lines = async (args) =>
     (await run(args)).split("\n").filter((line) => line !== "");
   const names = (route) =>
@@ -209,21 +210,19 @@ export async function labelPullRequest({ repo, number, policy, run }) {
       );
     }
   };
-  const countChanged = async () => {
+  // The count, the head, and the base come from one request.
+  const readPull = async () => {
     const text = (
-      await run([
-        "api",
-        `repos/${repo}/pulls/${number}`,
-        "--jq",
-        ".changed_files",
-      ])
+      await run(["api", `repos/${repo}/pulls/${number}`, "--jq", PULL_JQ])
     ).trim();
-    const count = text === "" ? NaN : Number(text);
-    if (!Number.isInteger(count) || count < 0) {
+    const [count, head, base] = text.split("\t");
+    const changed = count === "" ? NaN : Number(count);
+    if (!Number.isInteger(changed) || changed < 0) {
       throw new Error(`The API gave no count of changed files: "${text}".`);
     }
-    return count;
+    return { changed, head, base };
   };
+  const sameRevision = (x, y) => x.head === y.head && x.base === y.base;
   const listEntries = async () =>
     (
       await lines([
@@ -235,8 +234,15 @@ export async function labelPullRequest({ repo, number, policy, run }) {
       ])
     ).map((line) => JSON.parse(line));
 
-  const changed = await countChanged();
-  if (changed > MAX_FILES) {
+  const first = await readPull();
+  // A newer push starts a newer run. Leave the labels to that run.
+  const skipped = (pull) =>
+    headSha && pull.head !== headSha
+      ? `The head of the pull request is ${pull.head}. This run is for ${headSha}.`
+      : null;
+  if (skipped(first))
+    return { add: [], remove: [], unmatched: [], skipped: skipped(first) };
+  if (first.changed > MAX_FILES) {
     // The list of files is cut, so the tier is unknown. Fail closed: set the highest risk label.
     const top = `${RISK_PREFIX}${TIERS.at(-1)}`;
     const current = await names(issueRoute);
@@ -249,19 +255,28 @@ export async function labelPullRequest({ repo, number, policy, run }) {
       ),
     });
     throw new Error(
-      `The pull request changes ${changed} files. The API lists at most ${MAX_FILES}. The script set ${top} and stopped.`,
+      `The pull request changes ${first.changed} files. The API lists at most ${MAX_FILES}. The script set ${top} and stopped.`,
     );
   }
-  // The count and the list come from separate requests. Use the list only when
-  // the count before and after it agrees with the number of entries.
+  // The pull request and the list come from separate requests. Use the list only when
+  // the pull request has the same head, base, and count before and after the list.
   let entries;
   for (let attempt = 1; ; attempt++) {
-    const before = attempt === 1 ? changed : await countChanged();
+    const before = attempt === 1 ? first : await readPull();
     entries = await listEntries();
-    if (entries.length === before && (await countChanged()) === before) break;
+    const after = await readPull();
+    if (skipped(after))
+      return { add: [], remove: [], unmatched: [], skipped: skipped(after) };
+    if (
+      entries.length === before.changed &&
+      after.changed === before.changed &&
+      sameRevision(before, after)
+    ) {
+      break;
+    }
     if (attempt === READ_ATTEMPTS) {
       throw new Error(
-        `The list of files and the count of changed files did not agree after ${READ_ATTEMPTS} reads. No label changed.`,
+        `The list of files and the pull request did not agree after ${READ_ATTEMPTS} reads. No label changed.`,
       );
     }
   }
@@ -319,7 +334,17 @@ export async function main(
       error("Set GH_REPO to owner/name.");
       return 2;
     }
-    const result = await labelPullRequest({ repo, number, policy, run });
+    const result = await labelPullRequest({
+      repo,
+      number,
+      policy,
+      run,
+      headSha: env.HEAD_SHA,
+    });
+    if (result.skipped) {
+      log(`Skipped: ${result.skipped}`);
+      return 0;
+    }
     log(`Added: ${result.add.join(", ") || "none"}`);
     log(`Removed: ${result.remove.join(", ") || "none"}`);
     if (result.unmatched.length > 0) {
