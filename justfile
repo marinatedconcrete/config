@@ -290,14 +290,15 @@ pod-security-lint:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # Delete Minikube when the recipe exits, also after a failure.
-    trap 'minikube delete --profile=pod-security-lint' EXIT
-
     # Use the Kubernetes version of the component tests.
     version="$(yq '.minikube_test__kubernetes_version' ansible/roles/minikube_test/defaults/main.yml)"
-    minikube start --interactive=false --profile=pod-security-lint --kubernetes-version="${version}" --cni=kindnet
-    bash kustomization/pod-security-check/test.sh pod-security-lint
-    bash kustomization/pod-security-check/check.sh pod-security-lint
+
+    # Give each run its own profile. Then the recipe never deletes a cluster that it did not start.
+    profile="pod-security-lint-$$"
+    trap 'minikube delete --profile="${profile}"' EXIT
+    minikube start --interactive=false --profile="${profile}" --kubernetes-version="${version}" --cni=kindnet
+    bash kustomization/pod-security-check/test.sh "${profile}"
+    bash kustomization/pod-security-check/check.sh "${profile}"
 
 # Check the Renovate configuration.
 [group('lint')]

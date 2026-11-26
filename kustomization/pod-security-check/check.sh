@@ -133,9 +133,11 @@ declared_level() {
 }
 
 documented_level_problems() {
-  local name="$1" declared="$2" badge='' label='' namespace_file
+  local name="$1" declared="$2" measured="${3:-}" badge='' label='' namespace_file
   badge="$(grep -o 'pod_security_standard-[a-z]*' "${COMPONENTS}/${name}/README.md" 2> /dev/null | head -n 1 | cut -d- -f2 || true)"
-  if [[ -n "${badge}" && "${badge}" != "${declared}" ]]; then
+  if [[ -z "${badge}" && "${measured}" != none ]]; then
+    echo "The README of ${name} has no Pod Security badge. Add the badge for ${declared}."
+  elif [[ -n "${badge}" && "${badge}" != "${declared}" ]]; then
     echo "The README badge of ${name} shows ${badge}. Change it to ${declared}."
   fi
   namespace_file="${ROOT}/kustomization/tests/${name//\//-}/namespace.yml"
@@ -161,7 +163,7 @@ check_component() {
   fi
   problems="$(
     verdict "${name}" "${declared}" "${measured}"
-    documented_level_problems "${name}" "${declared}"
+    documented_level_problems "${name}" "${declared}" "${measured}"
   )"
   if [[ -z "${problems}" ]]; then
     printf 'OK   %s: %s\n' "${name}" "${measured}"

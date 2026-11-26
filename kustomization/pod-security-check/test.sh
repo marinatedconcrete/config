@@ -86,6 +86,10 @@ test_documented_levels() {
   expect_contains 'label: a different enforce label fails' 'enforce label in kustomization/tests/a/namespace.yml is baseline. Set it to restricted.' "$(ROOT="${dir}" COMPONENTS="${dir}/kustomization/components" documented_level_problems a restricted)"
   printf 'metadata:\n  labels: {}\n' > "${dir}/kustomization/tests/a/namespace.yml"
   expect_contains 'label: a missing enforce label fails' 'enforce label in kustomization/tests/a/namespace.yml is missing. Set it to baseline.' "$(ROOT="${dir}" COMPONENTS="${dir}/kustomization/components" documented_level_problems a baseline)"
+  printf '# A\n' > "${dir}/kustomization/components/a/README.md"
+  rm "${dir}/kustomization/tests/a/namespace.yml"
+  expect_equal 'badge: a missing badge fails for a workload' 'The README of a has no Pod Security badge. Add the badge for baseline.' "$(ROOT="${dir}" COMPONENTS="${dir}/kustomization/components" documented_level_problems a baseline baseline | head -n 1)"
+  expect_equal 'badge: a missing badge passes for a component with no workload' '' "$(ROOT="${dir}" COMPONENTS="${dir}/kustomization/components" documented_level_problems a restricted none)"
   rm -rf "${dir}"
 }
 
