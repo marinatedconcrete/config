@@ -168,7 +168,10 @@ jobs:
         with:
           name: devcontainer-base-release-notes
           path: build/release
-      - name: Create Release
+      # The repository uses immutable releases. GitHub locks the assets of a
+      # release when it is published. Create a draft, attach the SBOM, and
+      # then publish the draft.
+      - name: Create Draft Release
         env:
           GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
@@ -185,9 +188,19 @@ jobs:
           else
             body="First versioned release."
           fi
-          gh release create "${TAG}" --title "devcontainer-base ${VERSION}" --verify-tag --notes "${body}"
+          gh release create "${TAG}" --draft --title "devcontainer-base ${VERSION}" --verify-tag --notes "${body}"
       - name: Publish Image Release Notes
         uses: ./actions/image-release-notes/publish
         with:
           component: devcontainer-base
           tag: ${{ needs.version.outputs.tag }}
+      - name: Publish Release
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          is_draft=$(gh release view "${TAG}" --json isDraft --jq .isDraft)
+          if [[ "${is_draft}" == true ]]; then
+            gh release edit "${TAG}" --draft=false
+          fi

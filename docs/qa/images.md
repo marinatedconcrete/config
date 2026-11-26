@@ -30,6 +30,8 @@ A separate QA page covers this action.
 `devcontainer-base` is not in `release-please-config.json`.
 Its workflow creates a CalVer version tag on a schedule.
 A manual run on `main` also creates a release.
+The release job creates a draft release and adds the notes and the SBOM to it.
+Then the job publishes the draft, because GitHub locks the assets of an immutable release at publication.
 The other four images get a release from a release-please pull request.
 See [release tooling](release-tooling.md) for the release-please mechanics.
 

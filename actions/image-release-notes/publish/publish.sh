@@ -2,6 +2,8 @@
 set -euo pipefail
 
 # Attach the SBOM to a release. Add the notes to the end of the release body.
+# Run this script on a draft release. Publish the release after the script ends.
+# GitHub then locks the SBOM in an immutable release.
 # This script reads two files and calls the GitHub API. This script runs no code
 # from the image, so a job with write access to the release does not run the
 # image.
@@ -64,8 +66,10 @@ body_above_marker() {
 }
 
 main() {
+    local assets
     local body
     local file
+    local immutable
     local marker
     local notes
     local release_body
@@ -126,8 +130,18 @@ main() {
     gh release view "$tag" >/dev/null 2>&1 ||
         die "release ${tag} does not exist; create the release first"
 
-    log "Attaching the SBOM to ${tag}"
-    gh release upload "$tag" "$sbom" --clobber
+    # GitHub refuses asset changes on a published immutable release. For that
+    # release, only make sure that the SBOM is there.
+    immutable="$(gh release view "$tag" --json isImmutable --jq .isImmutable)"
+    if [[ "$immutable" != true ]]; then
+        log "Attaching the SBOM to ${tag}"
+        gh release upload "$tag" "$sbom" --clobber
+    else
+        assets="$(gh release view "$tag" --json assets --jq '.assets[].name')"
+        grep -qxF -- "${sbom##*/}" <<<"$assets" ||
+            die "release ${tag} is immutable and has no ${sbom##*/} asset; create the release as a draft and publish it after this action"
+        log "Immutable release ${tag} already has the SBOM"
+    fi
 
     body="$(body_above_marker "$marker")"
 

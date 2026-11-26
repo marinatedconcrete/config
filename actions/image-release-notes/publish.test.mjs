@@ -33,6 +33,7 @@ case "$1 $2" in
     case "$*" in
     *"--json body"*) cat "$STUB_DIR/release/body.md" ;;
     *"--json isImmutable"*)
+        [[ -e "$STUB_DIR/release/broken" ]] && exit 1
         [[ -e "$STUB_DIR/release/immutable" ]] && echo true || echo false
         ;;
     *"--json assets"*) ls -- "$STUB_DIR/release/assets" ;;
@@ -41,7 +42,6 @@ case "$1 $2" in
     ;;
 "release upload")
     [[ "$3" == "$STUB_TAG" ]] || exit 1
-    # GitHub refuses an asset change on a published immutable release.
     if [[ -e "$STUB_DIR/release/immutable" ]]; then
         echo "HTTP 422: Cannot upload assets to an immutable release." >&2
         exit 1
@@ -61,7 +61,13 @@ case "$1 $2" in
 esac
 `;
 
-function setup({ body, release = true, immutable = false, assets = [] }) {
+function setup({
+  body,
+  release = true,
+  immutable = false,
+  broken = false,
+  assets = [],
+}) {
   const dir = mkdtempSync(join(tmpdir(), "publish-test-"));
   const bin = join(dir, "bin");
   const files = join(dir, "files");
@@ -74,6 +80,7 @@ function setup({ body, release = true, immutable = false, assets = [] }) {
     mkdirSync(join(dir, "release", "assets"), { recursive: true });
     writeFileSync(join(dir, "release", "body.md"), body);
     if (immutable) writeFileSync(join(dir, "release", "immutable"), "");
+    if (broken) writeFileSync(join(dir, "release", "broken"), "");
     for (const [name, data] of assets)
       writeFileSync(join(dir, "release", "assets", name), data);
   }
@@ -217,6 +224,17 @@ test("an empty tag stops the script before it calls GitHub", () => {
     const result = publish(env, "Notes.\n", ["--tag", ""]);
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /--tag is required/);
+    assert.deepEqual(state(env.dir), { body: "Keep.\n", assets: [] });
+  } finally {
+    rmSync(env.dir, { recursive: true, force: true });
+  }
+});
+
+test("a failed immutability query stops the script before it changes the release", () => {
+  const env = setup({ body: "Keep.\n", broken: true });
+  try {
+    const result = publish(env, "Notes.\n");
+    assert.notEqual(result.status, 0);
     assert.deepEqual(state(env.dir), { body: "Keep.\n", assets: [] });
   } finally {
     rmSync(env.dir, { recursive: true, force: true });
