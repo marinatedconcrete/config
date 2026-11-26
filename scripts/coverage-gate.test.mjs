@@ -2,7 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   checkComponents,
+  coverageBadge,
   parseMatrixEntries,
+  sumLcov,
   testNameFor,
 } from "./coverage-gate.mjs";
 
@@ -109,4 +111,39 @@ test("the matrix parser rejects a missing key, an empty list, and a quoted item"
       ),
     /Cannot parse/,
   );
+});
+
+test("sumLcov adds the LF and LH lines of every file", () => {
+  const report =
+    "TN:\nSF:a.mjs\nLF:10\nLH:7\nend_of_record\nSF:b.mjs\nLF:5\nLH:5\nend_of_record\n";
+  assert.deepEqual(sumLcov(report), { found: 15, hit: 12 });
+  assert.deepEqual(sumLcov(""), { found: 0, hit: 0 });
+});
+
+test("sumLcov ignores the FNF, FNH, BRF, and BRH lines", () => {
+  assert.deepEqual(sumLcov("FNF:9\nFNH:9\nBRF:8\nBRH:8\nLF:4\nLH:1\n"), {
+    found: 4,
+    hit: 1,
+  });
+});
+
+test("the badge has the shields endpoint format with one decimal", () => {
+  assert.deepEqual(coverageBadge({ found: 512, hit: 398 }), {
+    schemaVersion: 1,
+    label: "node coverage",
+    message: "77.7%",
+    color: "yellow",
+  });
+});
+
+test("the badge color changes at 80 and 60 percent", () => {
+  assert.equal(coverageBadge({ found: 100, hit: 80 }).color, "brightgreen");
+  assert.equal(coverageBadge({ found: 100, hit: 79 }).color, "yellow");
+  assert.equal(coverageBadge({ found: 100, hit: 60 }).color, "yellow");
+  assert.equal(coverageBadge({ found: 100, hit: 59 }).color, "red");
+});
+
+test("the badge refuses a report with no line", () => {
+  assert.throws(() => coverageBadge({ found: 0, hit: 0 }), /no line/);
+  assert.throws(() => coverageBadge({ found: Number.NaN, hit: 0 }), /no line/);
 });

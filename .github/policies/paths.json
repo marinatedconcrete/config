@@ -13,7 +13,8 @@
         ".devcontainer/**",
         ".github/pull_request_template.md",
         ".github/policies/**",
-        "scripts/path-policy.mjs"
+        "scripts/path-policy.mjs",
+        "scripts/publish-badge.sh"
       ]
     },
     {
