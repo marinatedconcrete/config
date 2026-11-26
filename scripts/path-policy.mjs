@@ -181,31 +181,6 @@ export async function labelPullRequest({ repo, number, policy, run }) {
 
   const apply = async (plan) => {
     if (plan.add.length > 0) {
-      const exists = async (name) =>
-        (await names(`repos/${repo}/labels`)).some(
-          (label) => label.toLowerCase() === name,
-        );
-      const known = new Set(
-        (await names(`repos/${repo}/labels`)).map((label) =>
-          label.toLowerCase(),
-        ),
-      );
-      for (const name of plan.add.filter((label) => !known.has(label))) {
-        await attempt(
-          () =>
-            run([
-              "api",
-              "-X",
-              "POST",
-              `repos/${repo}/labels`,
-              "-f",
-              `name=${name}`,
-              "-f",
-              "color=ededed",
-            ]),
-          () => exists(name),
-        );
-      }
       await run([
         "api",
         "-X",

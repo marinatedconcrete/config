@@ -32,6 +32,7 @@ If the pull request has more than 3000 files, the workflow sets `risk/high` and 
 A path with no rule counts as High.
 `just path-policy-lint` fails when no rule covers a tracked file or when a glob matches no tracked file.
 Change the table and the file in the same pull request.
+Create the `area/` label in the repository before a rule uses a new area. The workflow does not create labels.
 The label uses only the path. It does not use the exception in a row, such as "High if the change lowers the level".
 
 | Part                                                                                                                                            | Tier                                        | Why a mistake here is risky                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Read                                                                                               |

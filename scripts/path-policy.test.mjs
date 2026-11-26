@@ -269,11 +269,11 @@ function fakeGh({ files, labels, repoLabels, changed = files.length }) {
 
 const writesOf = (calls) => calls.filter((args) => args.includes("-X"));
 
-test("labeling creates a missing label, adds with POST, and deletes with an encoded name", async () => {
+test("labeling adds with one POST and deletes with an encoded name, and creates no label", async () => {
   const { run, calls } = fakeGh({
     files: ["docs/a.md"],
     labels: ["area/ci", "role/trusted"],
-    repoLabels: ["area/ci", "area/docs", "role/trusted"],
+    repoLabels: [],
   });
   const result = await labelPullRequest({
     repo: "o/r",
@@ -288,16 +288,6 @@ test("labeling creates a missing label, adds with POST, and deletes with an enco
       "api",
       "-X",
       "POST",
-      "repos/o/r/labels",
-      "-f",
-      "name=risk/low",
-      "-f",
-      "color=ededed",
-    ],
-    [
-      "api",
-      "-X",
-      "POST",
       "repos/o/r/issues/7/labels",
       "-f",
       "labels[]=area/docs",
@@ -306,6 +296,15 @@ test("labeling creates a missing label, adds with POST, and deletes with an enco
     ],
     ["api", "-X", "DELETE", "repos/o/r/issues/7/labels/area%2Fci"],
   ]);
+  assert.equal(
+    calls.some((args) =>
+      args.some(
+        (arg) =>
+          arg === "repos/o/r/labels" || arg.startsWith("repos/o/r/labels?"),
+      ),
+    ),
+    false,
+  );
 });
 
 test("labeling a pull request that is already right makes no write", async () => {
@@ -331,42 +330,6 @@ const ghError = () =>
       '{"message":"Validation Failed","errors":[{"code":"already_exists"}]}',
     stderr: "gh: Validation Failed (HTTP 422)",
   });
-
-test("labeling goes on when another run created the label first", async () => {
-  const fake = fakeGh({ files: ["docs/a.md"], labels: [], repoLabels: [] });
-  let created = 0;
-  const run = async (args) => {
-    if (args.includes("-X") && args.at(3) === "repos/o/r/labels") {
-      created++;
-      fake.state.repoLabels.push(
-        args.at(5).slice("name=".length).toUpperCase(),
-      );
-      throw ghError();
-    }
-    return fake.run(args);
-  };
-  const result = await labelPullRequest({
-    repo: "o/r",
-    number: "7",
-    policy,
-    run,
-  });
-  assert.equal(created, 2);
-  assert.deepEqual(result.add, ["area/docs", "risk/low"]);
-});
-
-test("labeling stops when a create fails and the label is still missing", async () => {
-  const fake = fakeGh({ files: ["docs/a.md"], labels: [], repoLabels: [] });
-  const run = async (args) => {
-    if (args.includes("-X") && args.at(3) === "repos/o/r/labels")
-      throw ghError();
-    return fake.run(args);
-  };
-  await assert.rejects(
-    labelPullRequest({ repo: "o/r", number: "7", policy, run }),
-    /Command failed/,
-  );
-});
 
 test("labeling goes on when a person removed the label before the delete", async () => {
   const fake = fakeGh({
@@ -403,19 +366,6 @@ test("labeling stops when a delete fails and the label is still on the pull requ
   await assert.rejects(
     labelPullRequest({ repo: "o/r", number: "7", policy, run }),
     /Command failed/,
-  );
-});
-
-test("a label that differs only in case is not created again", async () => {
-  const { run, calls } = fakeGh({
-    files: ["docs/a.md"],
-    labels: [],
-    repoLabels: ["Area/Docs", "risk/LOW"],
-  });
-  await labelPullRequest({ repo: "o/r", number: "7", policy, run });
-  assert.equal(
-    writesOf(calls).some((args) => args.at(3) === "repos/o/r/labels"),
-    false,
   );
 });
 
