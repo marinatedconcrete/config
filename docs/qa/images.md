@@ -137,12 +137,13 @@ Read `.github/workflows` to see which checks run on a pull request.
 | README and workflow format          | `just check-format`                             | The README files and workflow files follow the Prettier rules                                                                                | It does not check ASD-STE100 wording.                                                                                            |
 | Devcontainer image                  | manual                                          | The repository devcontainer builds with the pinned `devcontainer-base`                                                                       | It tests one consumer of `devcontainer-base`.                                                                                    |
 | Pull request title                  | manual                                          | The title uses Conventional Commits                                                                                                          | A bad title can merge.                                                                                                           |
-| `buildah-action-runner` build       | manual                                          | The image builds. `buildah`, `curl`, `jq`, and `node` run.                                                                                   | The test does not run a `buildah build`. A fork pull request does not push the image.                                            |
+| `buildah-action-runner` build       | manual                                          | The image builds. `buildah`, `curl`, `jq`, and `node` run. Buildah builds a scratch image.                                                   | The scratch build does not pull a base image or run build commands.                                                              |
 | `github-runner-ci` build            | manual                                          | The image builds. The user is `1001:1001`. The home directories are writable. `brew`, `git`, `just`, `jq`, `rg`, `shellcheck`, and `yq` run. | The test does not check the other installed packages.                                                                            |
 | `github-runner-ci` job container    | manual                                          | A GitHub Actions job runs in the pushed image. The workspace is writable and `brew install` works.                                           | It runs only when the workflow pushes the image. A fork pull request skips it. It does not use an ARC runner.                    |
 | `kairos-fedora` build               | manual                                          | The image builds and `kairos-init validate` passes                                                                                           | None known.                                                                                                                      |
 | `kairos-fedora` boot and install    | `just e2e-kairos-fedora`                        | The ISO installs through the WebUI. The installed system reboots. SSH works. The hostname is correct. The `k3s` node is `Ready`.             | It runs in one virtual machine setup. It does not cover real hardware, an upgrade, or Longhorn, `iscsid`, and firewall behavior. |
-| `vscode-ssh-server` build           | manual                                          | The image builds. `/init.sh` and `sshd` are executable. User `dev` exists.                                                                   | No test starts `sshd` or opens an SSH connection.                                                                                |
+| `vscode-ssh-server` build           | manual                                          | The image starts `sshd` through `/init.sh`. The server gives an ED25519 host key on port 2222.                                               | The test does not authenticate a user or start a VS Code session.                                                                |
+| Image vulnerability scan            | Image workflow                                  | Grype reports known vulnerabilities in `buildah-action-runner` and `vscode-ssh-server`.                                                      | Vulnerability findings do not fail the build.                                                                                    |
 | `devcontainer-base` full pipeline   | manual                                          | The image builds. `just check-format && just lint && just test` pass in a devcontainer that uses the candidate image.                        | The pipeline covers what this repository needs. Other consumers can need more.                                                   |
 | Image release notes and SBOM        | `just release-notes-<image>`                    | The notes and the SBOM generate for `kairos-fedora`, `github-runner-ci`, and `devcontainer-base`                                             | `buildah-action-runner` and `vscode-ssh-server` have no notes or SBOM.                                                           |
 | Release notes action helper code    | `npm test --prefix actions/image-release-notes` | The helper code for the release notes works                                                                                                  | The tests do not run Syft or the CycloneDX CLI.                                                                                  |
@@ -160,7 +161,7 @@ A person must check these items, because no automation covers them.
 
    ```sh
    docker build -f images/buildah-action-runner/Containerfile -t buildah-action-runner:qa images/buildah-action-runner
-   docker run --rm buildah-action-runner:qa bash -lc 'buildah --version && curl --version && jq --version && node --version'
+   images/buildah-action-runner/smoke-test.sh buildah-action-runner:qa
    ```
 
    For another image, copy the commands from the smoke test step of its workflow.
@@ -191,9 +192,6 @@ Each gap can become an issue.
   A pull request that breaks an image can merge when the path-filtered check fails.
   An aggregate job that always runs and reads the path-filtered results can fix this.
 - `buildah-action-runner` and `vscode-ssh-server` have no release notes or SBOM.
-- No test starts `sshd` in `vscode-ssh-server`.
-  No test runs a `buildah build` in `buildah-action-runner`.
-- No scan checks the images for known vulnerabilities.
 - The Kairos test does not test an upgrade from the previous release.
 - A fork pull request does not run the `github-runner-ci` job container test.
 - The `justfile` has no recipe that runs the smoke tests of all images on a local machine.

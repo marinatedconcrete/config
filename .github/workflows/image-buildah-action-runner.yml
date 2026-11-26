@@ -36,17 +36,14 @@ jobs:
       contents: read
       packages: write
 
+    env:
+      IMAGE_REPOSITORY: ghcr.io/${{ github.repository_owner }}/buildah-action-runner
+
     steps:
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.sha || github.sha }}
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Compute Version Tag
         env:
           BRANCH: ${{ inputs.sha && format('candidate-{0}-{1}-{2}', inputs.sha, github.run_id, github.run_attempt) || github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('pr-{0}.{1}.{2}.{3}', github.event.number, github.run_id, github.run_number, github.run_attempt) }}
@@ -66,6 +63,13 @@ jobs:
             echo "load=false" >> "$GITHUB_OUTPUT"
             echo "push=true" >> "$GITHUB_OUTPUT"
           fi
+      - name: Login to GitHub Container Registry
+        if: ${{ steps.image_export.outputs.push == 'true' }}
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Generate Metadata
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         id: metadata
@@ -83,13 +87,30 @@ jobs:
             org.opencontainers.image.version=${{ inputs.version || steps.metadata.outputs.version }}
           load: ${{ steps.image_export.outputs.load }}
           push: ${{ steps.image_export.outputs.push }}
-          tags: ghcr.io/${{ github.repository_owner }}/buildah-action-runner:${{ steps.version_tag.outputs.tag }}
-      - name: Smoke Test Image
+          tags: ${{ env.IMAGE_REPOSITORY }}:${{ steps.version_tag.outputs.tag }}
+      - name: Pull Candidate Image
+        if: ${{ steps.image_export.outputs.push == 'true' }}
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          IMAGE_TAG: ${{ steps.version_tag.outputs.tag }}
         run: |
-          docker run --rm ghcr.io/${{ github.repository_owner }}/buildah-action-runner:${{ steps.version_tag.outputs.tag }} bash -lc '
+          docker pull "$IMAGE_REPOSITORY@$DIGEST"
+          docker tag "$IMAGE_REPOSITORY@$DIGEST" "$IMAGE_REPOSITORY:$IMAGE_TAG"
+      - name: Smoke Test Image
+        env:
+          IMAGE_TAG: ${{ steps.version_tag.outputs.tag }}
+        run: |
+          docker run --rm "$IMAGE_REPOSITORY:$IMAGE_TAG" bash -lc '
             set -e
             buildah --version
             curl --version
             jq --version
             node --version
           '
+          images/buildah-action-runner/smoke-test.sh "$IMAGE_REPOSITORY:$IMAGE_TAG"
+      - name: Scan Image for Vulnerabilities
+        uses: anchore/scan-action@11983a512817154c80a9db660c1a184be7513ed6 # v7.4.3
+        with:
+          image: ${{ env.IMAGE_REPOSITORY }}:${{ steps.version_tag.outputs.tag }}
+          fail-build: false
+          output-format: table
