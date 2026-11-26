@@ -17,7 +17,8 @@ export function classifyReleasePath(path) {
           "vscode-ssh-server",
         ].includes(project)
       ? "image"
-      : path.startsWith("actions/") || ["ansible", "renovate"].includes(project)
+      : path.startsWith("actions/") ||
+          ["ansible", "justfile-modules", "renovate"].includes(project)
         ? "source"
         : null;
   if (!kind || !/^[a-z0-9-]+$/.test(project))

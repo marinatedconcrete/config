@@ -11,6 +11,7 @@ It is a monorepo. Each part has its own version, changelog, and release.
 | Container images                                        | `images/`                   | Images that are published to GHCR. Each directory has a README.                                                              |
 | [GitHub Actions](actions/image-release-notes/README.md) | `actions/`                  | Composite actions. Today this is `image-release-notes`.                                                                      |
 | [Ansible collection](ansible)                           | `ansible/`                  | The `marinatedconcrete.config` collection of roles.                                                                          |
+| [Justfile modules](justfile-modules/README.md)          | `justfile-modules/`         | Reusable Just recipes for other repositories.                                                                                |
 | [Renovate presets](renovate/README.md)                  | `renovate/`                 | Shared [Renovate](https://docs.renovatebot.com/) presets that other repositories can extend.                                 |
 | [Release automation](.github/release/README.md)         | `.github/release/`          | Scripts that plan, validate, and publish releases.                                                                           |
 

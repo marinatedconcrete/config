@@ -469,6 +469,9 @@ release-please-validate path:
             # The Kustomize component tests use the roles in this collection.
             just ansible-lint test
             ;;
+        justfile-modules)
+            just --unstable --fmt --check --justfile "${path}/format.just"
+            ;;
         renovate)
             just renovate-lint
             ;;
