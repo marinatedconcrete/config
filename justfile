@@ -363,7 +363,7 @@ coverage-gate *args:
     npm ci --prefix actions/image-release-notes --ignore-scripts
     node scripts/coverage-gate.mjs {{ args }}
 
-# Run the coverage gate and keep the kcov HTML report in /tmp/shell-coverage-report.
+# Run the coverage gate and keep the kcov HTML report in a new directory in /tmp/shell-coverage-report. The gate prints the path of the report.
 [group('test')]
 shell-coverage: (coverage-gate "--kcov-dir" "/tmp/shell-coverage-report")
 

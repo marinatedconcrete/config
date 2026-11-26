@@ -12,6 +12,7 @@ import {
 } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   addCounts,
   checkComponents,
@@ -22,6 +23,7 @@ import {
   kcovWrapper,
   parseKcovReport,
   parseMatrixEntries,
+  prepareKcov,
   sumLcov,
   testNameFor,
 } from "./coverage-gate.mjs";
@@ -489,3 +491,131 @@ test("wrapper: a root path with a space and a quote still matches", () => {
     path.join(result.root, "scripts", "plain.sh"),
   );
 });
+
+const asRoot = process.getuid?.() === 0;
+
+function stubKcov(dir, coveredFile) {
+  const kcov = path.join(dir, "kcov");
+  writeFileSync(
+    kcov,
+    `#!${REAL_BASH}
+if [[ $1 == --merge ]]; then
+  mkdir -p "$2/kcov-merged"
+  touch "$2/kcov-merged/index.html"
+  printf '%s' ${JSON.stringify(JSON.stringify({ files: [{ file: coveredFile, total_lines: 1, covered_lines: 1 }] }))} > "$2/kcov-merged/coverage.json"
+  exit 0
+fi
+mkdir -p "$4"
+shift 4
+exec ${REAL_BASH} "$@"
+`,
+  );
+  chmodSync(kcov, 0o755);
+}
+
+function withSentinels(parent) {
+  const names = ["bin", "runs", "report"].map((name) =>
+    path.join(parent, name, "sentinel"),
+  );
+  for (const name of names) {
+    mkdirSync(path.dirname(name), { recursive: true });
+    writeFileSync(name, "keep\n");
+  }
+  return names;
+}
+
+test(
+  "prepareKcov makes a new directory and keeps the files that are already in the parent",
+  { skip: asRoot },
+  () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "kcov-prepare-"));
+    const stub = path.join(dir, "stub");
+    mkdirSync(stub);
+    stubKcov(stub, "/none");
+    const parent = path.join(dir, "keep");
+    const sentinels = withSentinels(parent);
+    const savedPath = process.env.PATH;
+    process.env.PATH = `${stub}${path.delimiter}${savedPath}`;
+    try {
+      const kcov = prepareKcov(dir, { minFoundLines: { "s.sh": 1 } }, parent);
+      assert.equal(kcov.error, undefined);
+      for (const sentinel of sentinels) {
+        assert.equal(readFileSync(sentinel, "utf8"), "keep\n", sentinel);
+      }
+      assert.equal(path.dirname(path.dirname(kcov.runsDir)), parent);
+      assert.notEqual(path.dirname(kcov.runsDir), parent);
+    } finally {
+      process.env.PATH = savedPath;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  },
+);
+
+test(
+  "CLI: --kcov-dir keeps the files that are already in the directory and prints the path of the new report",
+  { skip: asRoot },
+  () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "kcov-cli-"));
+    const root = path.join(dir, "repo");
+    for (const sub of [
+      "scripts",
+      "kustomization/components",
+      "kustomization/tests",
+      ".github/workflows",
+    ]) {
+      mkdirSync(path.join(root, sub), { recursive: true });
+    }
+    writeFileSync(
+      path.join(root, "scripts", "coverage-gate.mjs"),
+      readFileSync(
+        fileURLToPath(new URL("./coverage-gate.mjs", import.meta.url)),
+      ),
+    );
+    writeFileSync(
+      path.join(root, ".github", "workflows", "ci.yml"),
+      "    matrix:\n      kustomization-test:\n        - x\n",
+    );
+    writeFileSync(
+      path.join(root, ".coverage-thresholds.json"),
+      JSON.stringify({
+        node: [],
+        shell: { lines: 0, tests: ["t.test.sh"], minFoundLines: { "s.sh": 1 } },
+        components: { allowlist: [] },
+      }),
+    );
+    writeFileSync(path.join(root, "s.sh"), "echo measured\n");
+    writeFileSync(
+      path.join(root, "t.test.sh"),
+      `bash ${JSON.stringify(path.join(root, "s.sh"))}\n`,
+    );
+    const stub = path.join(dir, "stub");
+    mkdirSync(stub);
+    stubKcov(stub, path.join(root, "s.sh"));
+    const parent = path.join(dir, "keep");
+    const sentinels = withSentinels(parent);
+    try {
+      const result = spawnSync(
+        process.execPath,
+        [path.join(root, "scripts", "coverage-gate.mjs"), "--kcov-dir", parent],
+        {
+          encoding: "utf8",
+          env: {
+            ...process.env,
+            PATH: `${stub}${path.delimiter}${process.env.PATH}`,
+          },
+        },
+      );
+      assert.equal(result.status, 0, result.stdout + result.stderr);
+      assert.match(result.stdout, /measured/);
+      for (const sentinel of sentinels) {
+        assert.equal(readFileSync(sentinel, "utf8"), "keep\n", sentinel);
+      }
+      const report = result.stdout.match(/^Report: (.+)$/m)?.[1];
+      assert.ok(report, "the gate prints the report path");
+      assert.ok(existsSync(report), report);
+      assert.ok(report.startsWith(`${parent}${path.sep}kcov-`), report);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  },
+);

@@ -310,7 +310,7 @@ function findOnPath(name, pathEnv) {
   return null;
 }
 
-function prepareKcov(root, shell, kcovDir) {
+export function prepareKcov(root, shell, parentDir) {
   const kcov = findOnPath("kcov", process.env.PATH ?? "");
   const bash = findOnPath("bash", process.env.PATH ?? "");
   if (!kcov) {
@@ -326,12 +326,11 @@ function prepareKcov(root, shell, kcovDir) {
         "kcov cannot trace bash as root. Run the gate as a user that is not root.",
     };
   }
+  mkdirSync(parentDir, { recursive: true });
+  const kcovDir = mkdtempSync(path.join(parentDir, "kcov-"));
   const binDir = path.join(kcovDir, "bin");
   const runsDir = path.join(kcovDir, "runs");
-  for (const dir of [binDir, runsDir, path.join(kcovDir, "report")]) {
-    rmSync(dir, { recursive: true, force: true });
-  }
-  mkdirSync(binDir, { recursive: true });
+  mkdirSync(binDir);
   mkdirSync(runsDir);
   const includePaths = [
     ...new Set(
@@ -348,6 +347,7 @@ function prepareKcov(root, shell, kcovDir) {
   chmodSync(wrapper, 0o755);
   return {
     kcov,
+    kcovDir,
     runsDir,
     env: {
       ...process.env,
@@ -370,7 +370,7 @@ function runShellTests(root, tests, env) {
   });
 }
 
-function mergeKcov({ kcov, runsDir }, root, kcovDir) {
+function mergeKcov({ kcov, kcovDir, runsDir }, root) {
   const runs = readdirSync(runsDir).map((name) => path.join(runsDir, name));
   if (runs.length === 0) {
     throw new Error(
@@ -414,7 +414,7 @@ function runNodeSuite(root, suite, lcovFile, env) {
 
 const USAGE = `Usage: node scripts/coverage-gate.mjs [--badge-dir DIR] [--kcov-dir DIR]
   --badge-dir DIR  Write the badge files in DIR when every check passes.
-  --kcov-dir DIR   Keep the kcov output and the HTML report in DIR.`;
+  --kcov-dir DIR   Keep the kcov output and the HTML report in a new directory in DIR.`;
 
 function optionValue(name) {
   const index = process.argv.indexOf(name);
@@ -433,9 +433,6 @@ function main() {
   const thresholds = JSON.parse(
     readFileSync(path.join(repoRoot, ".coverage-thresholds.json"), "utf8"),
   );
-  const kcovDir = keepDir
-    ? path.resolve(keepDir)
-    : mkdtempSync(path.join(os.tmpdir(), "kcov-"));
   const lcovDir = badgeDir
     ? mkdtempSync(path.join(os.tmpdir(), "lcov-"))
     : null;
@@ -443,7 +440,11 @@ function main() {
   const errors = [];
   let shellFiles = [];
 
-  const kcov = prepareKcov(repoRoot, thresholds.shell, kcovDir);
+  const kcov = prepareKcov(
+    repoRoot,
+    thresholds.shell,
+    keepDir ? path.resolve(keepDir) : os.tmpdir(),
+  );
   if (kcov.error) errors.push(kcov.error);
   errors.push(
     ...thresholds.node.flatMap((suite, index) => {
@@ -459,20 +460,22 @@ function main() {
     errors.push(...runShellTests(repoRoot, thresholds.shell.tests, kcov.env));
     console.log("\n== Shell coverage");
     try {
-      shellFiles = mergeKcov(kcov, repoRoot, kcovDir);
+      shellFiles = mergeKcov(kcov, repoRoot);
       const shell = { files: shellFiles, ...thresholds.shell };
       console.log(formatShellReport(shell));
       errors.push(...checkShellCoverage(shell));
       if (keepDir) {
         console.log(
-          `Report: ${path.join(kcovDir, "report", "kcov-merged", "index.html")}`,
+          `Report: ${path.join(kcov.kcovDir, "report", "kcov-merged", "index.html")}`,
         );
       }
     } catch (error) {
       errors.push(error.message);
     }
   }
-  if (!keepDir) rmSync(kcovDir, { recursive: true, force: true });
+  if (!keepDir && kcov.kcovDir) {
+    rmSync(kcov.kcovDir, { recursive: true, force: true });
+  }
 
   console.log("\n== Component tests");
   try {
