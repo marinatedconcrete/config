@@ -502,6 +502,93 @@ test("a head change that keeps the count the same stops the run with no write", 
   assert.deepEqual(writesOf(calls), []);
 });
 
+// The head of the pull request changes when the script reads the labels.
+function headMovesDuringLabelRead(fake) {
+  let moved = false;
+  return async (args) => {
+    const route = args.find((arg) => arg.startsWith("repos/")) ?? "";
+    if (route.endsWith("/pulls/7") && moved) {
+      const [count] = (await fake.run(args)).split("\t");
+      return `${count}\th2\tb1\n`;
+    }
+    const out = await fake.run(args);
+    if (route.includes("/issues/7/labels") && !args.includes("-X"))
+      moved = true;
+    return out;
+  };
+}
+
+test("a head change during the label read leaves the labels as they are", async () => {
+  const fake = fakeGh({
+    files: ["docs/a.md"],
+    labels: ["risk/high"],
+    repoLabels: [],
+  });
+  const result = await labelPullRequest({
+    repo: "o/r",
+    number: "7",
+    policy,
+    run: headMovesDuringLabelRead(fake),
+    headSha: "h1",
+  });
+  assert.match(result.skipped, /h2/);
+  assert.deepEqual(writesOf(fake.calls), []);
+});
+
+test("a head change during the label read makes the run read again when no head is given", async () => {
+  const fake = fakeGh({
+    files: ["docs/a.md"],
+    labels: ["risk/high"],
+    repoLabels: [],
+  });
+  const result = await labelPullRequest({
+    repo: "o/r",
+    number: "7",
+    policy,
+    run: headMovesDuringLabelRead(fake),
+  });
+  assert.deepEqual(result.add, ["area/docs", "risk/low"]);
+  assert.equal(
+    fake.calls.filter((a) => a.some((x) => x.includes("/files"))).length,
+    2,
+  );
+});
+
+test("a head change during the label read of a large pull request leaves the labels", async () => {
+  const fake = fakeGh({
+    files: ["docs/a.md"],
+    labels: ["risk/low"],
+    repoLabels: [],
+    changed: 3001,
+  });
+  const moved = headMovesDuringLabelRead(fake);
+  const result = await labelPullRequest({
+    repo: "o/r",
+    number: "7",
+    policy,
+    run: moved,
+    headSha: "h1",
+  });
+  assert.match(result.skipped, /h2/);
+  assert.deepEqual(writesOf(fake.calls), []);
+  const fake2 = fakeGh({
+    files: ["docs/a.md"],
+    labels: ["risk/low"],
+    repoLabels: [],
+    changed: 3001,
+  });
+  await assert.rejects(
+    labelPullRequest({
+      repo: "o/r",
+      number: "7",
+      policy,
+      run: headMovesDuringLabelRead(fake2),
+    }),
+    /changed during the read/,
+  );
+  assert.deepEqual(writesOf(fake2.calls), []);
+});
+
 test("a base change that keeps the head and the count stops the run with no write", async () => {
   const { run, calls } = fakeGh({
     files: ["docs/a.md"],

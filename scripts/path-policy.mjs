@@ -246,6 +246,14 @@ export async function labelPullRequest({ repo, number, policy, run, headSha }) {
     // The list of files is cut, so the tier is unknown. Fail closed: set the highest risk label.
     const top = `${RISK_PREFIX}${TIERS.at(-1)}`;
     const current = await names(issueRoute);
+    const last = await readPull();
+    if (skipped(last))
+      return { add: [], remove: [], unmatched: [], skipped: skipped(last) };
+    if (!sameRevision(first, last) || last.changed !== first.changed) {
+      throw new Error(
+        "The pull request changed during the read. No label changed.",
+      );
+    }
     await apply({
       add: current.some((l) => l.toLowerCase() === top) ? [] : [top],
       remove: current.filter(
@@ -258,12 +266,14 @@ export async function labelPullRequest({ repo, number, policy, run, headSha }) {
       `The pull request changes ${first.changed} files. The API lists at most ${MAX_FILES}. The script set ${top} and stopped.`,
     );
   }
-  // The pull request and the list come from separate requests. Use the list only when
-  // the pull request has the same head, base, and count before and after the list.
+  // The pull request, the list, and the labels come from separate requests. Use them only when
+  // the pull request has the same head, base, and count before the list and after the labels.
   let entries;
+  let current;
   for (let attempt = 1; ; attempt++) {
     const before = attempt === 1 ? first : await readPull();
     entries = await listEntries();
+    current = await names(issueRoute);
     const after = await readPull();
     if (skipped(after))
       return { add: [], remove: [], unmatched: [], skipped: skipped(after) };
@@ -281,7 +291,6 @@ export async function labelPullRequest({ repo, number, policy, run, headSha }) {
     }
   }
   const files = entries.flat();
-  const current = await names(issueRoute);
   const { unmatched } = classify(policy, files);
   const plan = planLabels(policy, files, current);
 
