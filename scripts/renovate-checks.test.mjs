@@ -149,10 +149,21 @@ test("an entry for this repository gives a path", () => {
   const base = "marinatedconcrete/config//renovate/recommended";
   assert.equal(
     presetPath(`github>${base}#renovate-config-2.9.0`),
-    "renovate/recommended",
+    "renovate/recommended.json",
   );
-  assert.equal(presetPath(`local>${base}`), "renovate/recommended");
-  assert.equal(presetPath(`github>${base}.json#tag`), "renovate/recommended");
+  assert.equal(presetPath(`local>${base}`), "renovate/recommended.json");
+  assert.equal(
+    presetPath(`github>${base}.json#tag`),
+    "renovate/recommended.json",
+  );
+  assert.equal(
+    presetPath(`github>${base}.json5#tag`),
+    "renovate/recommended.json5",
+  );
+  assert.equal(
+    presetPath(`github>${base}.jsonc`),
+    "renovate/recommended.jsonc",
+  );
 });
 
 test("other presets give no path", () => {
@@ -170,7 +181,21 @@ test("a missing preset file fails and names the entry", () => {
     files: ["renovate/recommended.json"],
   });
   assert.match(failure, /doesnotexist#nope/);
-  assert.match(failure, /renovate\/doesnotexist\.json/);
+  assert.match(failure, /renovate\/doesnotexist\.json,/);
+});
+
+test("an explicit extension must match the file that exists", () => {
+  const check = (entry, files) =>
+    findMissingPresets({
+      file: "renovate.json",
+      config: { extends: [entry] },
+      files,
+    });
+  const base = "github>marinatedconcrete/config//renovate/recommended";
+  const [failure] = check(`${base}.json5`, ["renovate/recommended.json"]);
+  assert.match(failure, /needs renovate\/recommended\.json5,/);
+  assert.deepEqual(check(`${base}.json5`, ["renovate/recommended.json5"]), []);
+  assert.deepEqual(check(`${base}.json`, ["renovate/recommended.json"]), []);
 });
 
 test("an existing preset file passes", () => {

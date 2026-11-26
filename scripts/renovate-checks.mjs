@@ -124,22 +124,24 @@ export function findDeadManagers({
   return failures;
 }
 
-// Return the repository path that an extends entry points at, or null.
+// Return the repository file that an extends entry points at, or null.
 // The entry must use the github> or local> prefix and name this repository.
+// Renovate uses an explicit .json, .jsonc, or .json5 extension as written.
+// An entry with no extension names a .json file.
 export function presetPath(entry) {
   const form = new RegExp(
-    `^(?:github|local)>${REPOSITORY}//([^#:]+?)(?:\\.json5?)?(?:#.*)?$`,
+    `^(?:github|local)>${REPOSITORY}//([^#:]+?)(\\.json[c5]?)?(?:#.*)?$`,
   ).exec(entry);
-  return form ? form[1] : null;
+  return form ? `${form[1]}${form[2] ?? ".json"}` : null;
 }
 
 export function findMissingPresets({ file, config, files }) {
   const known = new Set(files);
   return (config.extends ?? []).flatMap((entry) => {
     const path = presetPath(entry);
-    if (path === null || known.has(`${path}.json`)) return [];
+    if (path === null || known.has(path)) return [];
     return [
-      `${file}: extends entry "${entry}" needs ${path}.json, which does not exist.`,
+      `${file}: extends entry "${entry}" needs ${path}, which does not exist.`,
     ];
   });
 }
