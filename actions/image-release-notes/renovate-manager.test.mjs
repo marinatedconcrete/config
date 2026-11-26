@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 
 // These tests apply the regex manager of renovate.json to release-notes.sh
 // with the JavaScript regular expression engine. Renovate uses the RE2 engine.
+// Renovate matches a pattern against the whole file, so ^ and $ match only at
+// the start and the end of the file. The test sets no multiline flag.
 // The pattern uses no feature that differs, but this test does not run
 // Renovate.
 
@@ -38,7 +40,7 @@ const manager = config.customManagers.find((candidate) =>
 
 function dependencies(text) {
   return manager.matchStrings.flatMap((matchString) =>
-    [...text.matchAll(new RegExp(matchString, "gm"))].map(
+    [...text.matchAll(new RegExp(matchString, "g"))].map(
       (match) => match.groups,
     ),
   );
