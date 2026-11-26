@@ -75,7 +75,6 @@
       "tier": "low",
       "area": "area/dev-tooling",
       "paths": [
-        ".claude/**",
         "scripts/**",
         ".coverage-thresholds.json",
         "package.json",

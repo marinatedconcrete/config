@@ -92,19 +92,6 @@ Do not use the REST `required_pull_request_reviews` endpoint. It returns default
 - [renovate.json](../../renovate.json) lists the updates that auto-merge. A rule with `automergeType` set to `branch` pushes the commit to `main` with no pull request. The other two auto-merge rules open a pull request, and it merges with no review. A patch update that the `prettier`, `pnpm`, `cli/cli`, and `node` rule matches also matches the patch rule. That later rule sends the update to `main` with no pull request.
 - Updates from `ghcr.io`, `quay.io`, `registry.k8s.io`, and `lscr.io` do not auto-merge, because these registries can give no release time. `ghcr.io/marinatedconcrete/devcontainer-base` is the named exception.
 
-## The Claude Code hook
-
-[.claude/settings.json](../../.claude/settings.json) runs [the format check hook](../../.claude/hooks/check-format.sh) before each Bash command.
-
-- The hook blocks a `git` or `jj` commit or push when `just check-format` fails.
-- The hook runs the check only in this repository and in its linked git worktrees and jj workspaces.
-- The hook is a convenience gate. It is not a security boundary. The required format status check is the gate.
-- The hook does not block a command when it cannot start the check. Examples are a missing `python3`, or a host with no `just` or `pnpm` and no running devcontainer.
-- The hook blocks a command when the check does not finish in 100 seconds, or when the hook has an error after it finds a commit or a push.
-- The hook does not find some command forms. Examples are `gh pr merge`, aliases, and commands that `eval` builds. The module docstring in [check_format.py](../../.claude/hooks/check_format.py) lists more forms, but that list is not complete. For example, the hook does not find a commit after `time` or `xargs`, or in an `if` or a `for` block.
-- Only Claude Code runs the hook. Other agents do not.
-- The project settings set no permission rules. The person who runs the agent sets them.
-
 ## Review of agent-authored changes
 
 - Labels mark the author of a pull request. `author/hive` marks this repository's Hive, `author/clanker` marks the Hive of a contributor, and `author/human` marks a person.
