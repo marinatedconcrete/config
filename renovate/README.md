@@ -45,6 +45,16 @@ Add this preset to your `extends` list:
 
 Use this preset as the initial configuration for your project.
 
+Renovate pins GitHub Actions and reusable workflows to commit SHAs.
+For supported release tags, Renovate uses the full version in the comment next to the SHA.
+For example, an update can change a `v5` comment to `v5.1.0` and pin the commit for `v5.1.0`.
+
+The [Renovate helper](https://docs.renovatebot.com/presets-helpers/#helperspingithubactiondigeststosemver) selects release tags in `vX.Y.Z` or `X.Y.Z` form.
+Branch names and tags such as `v5.1.0-rc.1` are outside this format.
+Renovate can still pin these references to commit SHAs and keep their names in the comments.
+To select versions from other tag formats, add a package rule for that dependency after the preset.
+Set `extractVersion` and `versioning` for the tag format that the dependency uses.
+
 Add this preset to your `extends` list:
 
 ```json

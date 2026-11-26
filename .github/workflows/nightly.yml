@@ -1,0 +1,60 @@
+---
+name: Nightly component tests
+on:
+  schedule:
+    - cron: "37 9 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  list-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      kustomization-tests: ${{ steps.list.outputs.tests }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Build the list from the test directories. A written list can differ
+      # from the tests in the repository.
+      - name: List component tests
+        id: list
+        shell: bash
+        run: |
+          tests="$(find kustomization/tests -mindepth 2 -maxdepth 2 -name test.yml -printf '%h\n' | xargs -n1 basename | sort | jq -R . | jq -sc .)"
+          echo "tests=${tests}" >> "${GITHUB_OUTPUT}"
+  nightly-kustomization-test:
+    needs: list-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The runner can load an AppArmor profile for Mosquitto. The profile
+      # then applies in the privileged test containers and blocks the
+      # program. Only the Mosquitto test needs this step.
+      - name: Remove Host AppArmor Profiles
+        if: matrix.kustomization-test == 'mosquitto'
+        run: |
+          if [[ -f /etc/apparmor.d/mosquitto ]]; then
+            sudo apparmor_parser --remove /etc/apparmor.d/mosquitto
+          fi
+      - name: Run component test
+        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
+        with:
+          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
+          env: |
+            CI=1
+          imageName: ghcr.io/marinatedconcrete/config-devcontainer
+          push: never
+          runCmd: just kustomization-test ${{ matrix.kustomization-test }}
+    strategy:
+      fail-fast: false
+      matrix:
+        kustomization-test: ${{ fromJSON(needs.list-tests.outputs.kustomization-tests) }}
