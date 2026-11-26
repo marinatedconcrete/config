@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Publish a badge file on the "badges" branch. NAME is the file name on the branch.
-# NAME is one lowercase name that ends in .json. The default is coverage.json.
+# Publish a badge file on the "badges" branch as NAME. The default NAME is coverage.json.
 # The script uses the GitHub API only. It makes no commit on the default branch.
 # A commit that the workflow token makes does not start another workflow run.
 # The script writes only when EXPECTED_SHA is the head of the default branch.

@@ -202,7 +202,7 @@ export function checkShellCoverage({ files, lines, minFoundLines }) {
       `"shell.lines" must be a number, not ${JSON.stringify(lines)}.`,
     );
   }
-  for (const [name, floor] of Object.entries(minFoundLines ?? {})) {
+  for (const [name, floor] of Object.entries(minFoundLines)) {
     if (!Number.isInteger(floor) || floor < 0) {
       errors.push(
         `"shell.minFoundLines" for "${name}" must be a whole number, not ${JSON.stringify(floor)}.`,
@@ -267,7 +267,6 @@ export function coverageBadge(label, { found, hit }) {
   };
 }
 
-// Hive reads only coverage.json, so that file has the total of the Node and shell lines.
 export function badgeFiles({ node, shell }) {
   return {
     "coverage.json": coverageBadge("coverage", addCounts([node, shell])),
@@ -473,7 +472,7 @@ function main() {
       errors.push(error.message);
     }
   }
-  if (!keepDir && kcov.kcovDir) {
+  if (!keepDir && !kcov.error) {
     rmSync(kcov.kcovDir, { recursive: true, force: true });
   }
 
