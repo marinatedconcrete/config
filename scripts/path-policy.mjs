@@ -24,9 +24,11 @@ export const AREA_PREFIX = "area/";
 export const RISK_PREFIX = "risk/";
 // The pull request files API returns at most 3000 files.
 const MAX_FILES = 3000;
-// Each line is a JSON string, so a file name with a line feed stays one name.
+const READ_ATTEMPTS = 3;
+// Each line is a JSON array with the file name and the old name of a renamed file.
+// JSON keeps a file name with a line feed in one piece.
 export const FILES_JQ =
-  ".[] | (.filename, (.previous_filename // empty)) | tojson";
+  ".[] | [.filename, (.previous_filename // empty)] | tojson";
 
 // A policy has this shape: { rules: [{ tier, area, paths: [glob] }] }
 // A classification has this shape: { areas: [string], tier: string | null, unmatched: [string] }
@@ -207,20 +209,33 @@ export async function labelPullRequest({ repo, number, policy, run }) {
       );
     }
   };
-  const changedText = (
-    await run([
-      "api",
-      `repos/${repo}/pulls/${number}`,
-      "--jq",
-      ".changed_files",
-    ])
-  ).trim();
-  const changed = changedText === "" ? NaN : Number(changedText);
-  if (!Number.isInteger(changed) || changed < 0) {
-    throw new Error(
-      `The API gave no count of changed files: "${changedText}".`,
-    );
-  }
+  const countChanged = async () => {
+    const text = (
+      await run([
+        "api",
+        `repos/${repo}/pulls/${number}`,
+        "--jq",
+        ".changed_files",
+      ])
+    ).trim();
+    const count = text === "" ? NaN : Number(text);
+    if (!Number.isInteger(count) || count < 0) {
+      throw new Error(`The API gave no count of changed files: "${text}".`);
+    }
+    return count;
+  };
+  const listEntries = async () =>
+    (
+      await lines([
+        "api",
+        "--paginate",
+        `repos/${repo}/pulls/${number}/files?per_page=100`,
+        "--jq",
+        FILES_JQ,
+      ])
+    ).map((line) => JSON.parse(line));
+
+  const changed = await countChanged();
   if (changed > MAX_FILES) {
     // The list of files is cut, so the tier is unknown. Fail closed: set the highest risk label.
     const top = `${RISK_PREFIX}${TIERS.at(-1)}`;
@@ -237,15 +252,20 @@ export async function labelPullRequest({ repo, number, policy, run }) {
       `The pull request changes ${changed} files. The API lists at most ${MAX_FILES}. The script set ${top} and stopped.`,
     );
   }
-  const files = (
-    await lines([
-      "api",
-      "--paginate",
-      `repos/${repo}/pulls/${number}/files?per_page=100`,
-      "--jq",
-      FILES_JQ,
-    ])
-  ).map((line) => JSON.parse(line));
+  // The count and the list come from separate requests. Use the list only when
+  // the count before and after it agrees with the number of entries.
+  let entries;
+  for (let attempt = 1; ; attempt++) {
+    const before = attempt === 1 ? changed : await countChanged();
+    entries = await listEntries();
+    if (entries.length === before && (await countChanged()) === before) break;
+    if (attempt === READ_ATTEMPTS) {
+      throw new Error(
+        `The list of files and the count of changed files did not agree after ${READ_ATTEMPTS} reads. No label changed.`,
+      );
+    }
+  }
+  const files = entries.flat();
   const current = await names(issueRoute);
   const { unmatched } = classify(policy, files);
   const plan = planLabels(policy, files, current);

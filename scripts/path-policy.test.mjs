@@ -247,18 +247,22 @@ test("a workflow command escape covers the percent sign and the line breaks", ()
 });
 
 function fakeGh({ files, labels, repoLabels, changed = files.length }) {
+  const counts = [changed].flat();
   const calls = [];
   const state = { labels: [...labels], repoLabels: [...repoLabels] };
   const run = async (args) => {
     calls.push(args);
     const route = args.find((arg) => arg.startsWith("repos/")) ?? "";
     if (args.includes("-X")) return "";
-    if (route.endsWith("/pulls/7")) return `${changed}\n`;
+    if (route.endsWith("/pulls/7"))
+      return `${counts.length > 1 ? counts.shift() : counts[0]}\n`;
     assert.ok(args.includes("--paginate"), `no --paginate in ${route}`);
     assert.ok(route.includes("per_page=100"), `no per_page in ${route}`);
     if (route.includes("/pulls/7/files")) {
       assert.equal(args.at(-1), FILES_JQ);
-      return files.map((file) => JSON.stringify(file)).join("\n") + "\n";
+      return (
+        files.map((file) => JSON.stringify([file].flat())).join("\n") + "\n"
+      );
     }
     if (route.includes("/issues/7/labels"))
       return state.labels.join("\n") + "\n";
@@ -411,6 +415,69 @@ for (const [name, text] of [
   });
 }
 
+test("a list shorter than the count cannot lower the risk label", async () => {
+  const { run, calls } = fakeGh({
+    files: ["docs/a.md"],
+    changed: 2,
+    labels: ["risk/high", "area/ci"],
+    repoLabels: [],
+  });
+  await assert.rejects(
+    labelPullRequest({ repo: "o/r", number: "7", policy, run }),
+    /did not agree after 3 reads. No label changed/,
+  );
+  assert.deepEqual(writesOf(calls), []);
+});
+
+test("a count that changes during the read is read again", async () => {
+  const { run, calls } = fakeGh({
+    files: ["docs/a.md"],
+    changed: [2, 1, 1],
+    labels: [],
+    repoLabels: [],
+  });
+  const result = await labelPullRequest({
+    repo: "o/r",
+    number: "7",
+    policy,
+    run,
+  });
+  assert.deepEqual(result.add, ["area/docs", "risk/low"]);
+  assert.equal(
+    calls.filter((args) => args.some((a) => a.includes("/files"))).length,
+    2,
+  );
+});
+
+test("a count that differs after the list stops the run", async () => {
+  const { run, calls } = fakeGh({
+    files: ["docs/a.md"],
+    changed: [1, 2, 1, 2, 1, 2],
+    labels: ["risk/high"],
+    repoLabels: [],
+  });
+  await assert.rejects(
+    labelPullRequest({ repo: "o/r", number: "7", policy, run }),
+    /did not agree/,
+  );
+  assert.deepEqual(writesOf(calls), []);
+});
+
+test("a file renamed out of a high path keeps the high tier", async () => {
+  const { run } = fakeGh({
+    files: [["docs/x.md", ".github/workflows/x.yml"]],
+    labels: [],
+    repoLabels: [],
+  });
+  const result = await labelPullRequest({
+    repo: "o/r",
+    number: "7",
+    policy,
+    run,
+  });
+  assert.deepEqual(result.add, ["area/ci", "area/docs", "risk/high"]);
+});
+
 test("a file name with a line feed stays one file", async () => {
   const { run } = fakeGh({
     files: ["docs/a\n.github/workflows/x.yml"],
@@ -435,8 +502,10 @@ test("a double star matches a line feed", () => {
 
 test("labeling accepts exactly 3000 files, and renames do not count twice", async () => {
   const { run } = fakeGh({
-    files: Array.from({ length: 4000 }, (_, i) => `docs/${i}.md`),
-    changed: 3000,
+    files: Array.from({ length: 3000 }, (_, i) => [
+      `docs/${i}.md`,
+      `docs/old${i}.md`,
+    ]),
     labels: [],
     repoLabels: [],
   });
@@ -492,7 +561,7 @@ test(
         .split("\n")
         .filter(Boolean)
         .map((line) => JSON.parse(line)),
-      ["a", "b", "c", "d\ne"],
+      [["a"], ["b", "c"], ["d\ne"]],
     );
   },
 );
