@@ -14,6 +14,7 @@ const badge =
 const fakeGh = `#!/usr/bin/env bash
 printf '%s\\n' "$*" >> "$LOG"
 case "$*" in
+  *"git/ref/heads/main"*) echo "$MAIN_SHA" ;;
   *"git/ref/heads/badges"*) [[ "$BRANCH" == yes ]] && exit 0 || exit 1 ;;
   *"Accept: application/vnd.github.raw+json"*) printf '%s' "$CURRENT" ;;
   *"contents/coverage.json?ref=badges --jq .sha"*) echo oldsha ;;
@@ -23,7 +24,13 @@ case "$*" in
 esac
 `;
 
-function publish({ branch, current = "", fail = "" }) {
+function publish({
+  branch,
+  current = "",
+  fail = "",
+  mainSha = "run1",
+  expectedSha = "run1",
+}) {
   const dir = mkdtempSync(path.join(os.tmpdir(), "publish-badge-"));
   writeFileSync(path.join(dir, "gh"), fakeGh);
   chmodSync(path.join(dir, "gh"), 0o755);
@@ -40,6 +47,8 @@ function publish({ branch, current = "", fail = "" }) {
       BRANCH: branch,
       CURRENT: current,
       FAIL: fail,
+      MAIN_SHA: mainSha,
+      EXPECTED_SHA: expectedSha,
     },
   });
   const calls = readFileSync(log, "utf8").split("\n").filter(Boolean);
@@ -59,6 +68,7 @@ test("a missing branch gets a commit with no parent, then the branch", () => {
   assert.deepEqual(
     result.calls.map((call) => call.split(" ").slice(0, 4).join(" ")),
     [
+      "api repos/o/r/git/ref/heads/main --jq .object.sha",
       "api repos/o/r/git/ref/heads/badges",
       "api -X POST repos/o/r/git/blobs",
       "api -X POST repos/o/r/git/trees",
@@ -109,16 +119,57 @@ test("a failed call stops the script before it makes the branch", () => {
   );
 });
 
+test("a run for an older commit writes nothing", () => {
+  const result = publish({
+    branch: "yes",
+    current: '{"message":"new"}',
+    mainSha: "run2",
+    expectedSha: "run1",
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /run2.*run1.*No write/);
+  assert.equal(
+    result.calls.some((call) => call.includes("-X")),
+    false,
+  );
+  assert.equal(
+    result.calls.some((call) => call.includes("git/ref/heads/badges")),
+    false,
+  );
+});
+
+test("a run for an older commit does not create the branch", () => {
+  const result = publish({
+    branch: "no",
+    mainSha: "run2",
+    expectedSha: "run1",
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(
+    result.calls.some((call) => call.includes("-X")),
+    false,
+  );
+});
+
+test("the script needs EXPECTED_SHA", () => {
+  const result = spawnSync("bash", [script, "x"], {
+    encoding: "utf8",
+    env: { PATH: process.env.PATH, GH_REPO: "o/r" },
+  });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /EXPECTED_SHA/);
+});
+
 test("the script needs a file and GH_REPO", () => {
   const noFile = spawnSync("bash", [script], {
     encoding: "utf8",
-    env: { PATH: process.env.PATH, GH_REPO: "o/r" },
+    env: { PATH: process.env.PATH, GH_REPO: "o/r", EXPECTED_SHA: "x" },
   });
   assert.notEqual(noFile.status, 0);
   assert.match(noFile.stderr, /Usage/);
   const noRepo = spawnSync("bash", [script, "x"], {
     encoding: "utf8",
-    env: { PATH: process.env.PATH },
+    env: { PATH: process.env.PATH, EXPECTED_SHA: "x" },
   });
   assert.notEqual(noRepo.status, 0);
   assert.match(noRepo.stderr, /GH_REPO/);
