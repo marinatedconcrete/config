@@ -228,7 +228,8 @@ Do this section in addition to the general checklist.
   It copies tool output by hand and the tool can replace it.
 - Recommend a rebase only if the maintainer needs the exact version tag.
   In that case, keep only the lines that the release pull request owns.
-- Before you recommend `close`, find the newest Release Please run on `main` in which the `Update Release PRs` step ran.
+- Before you recommend `close`, find the newest Release Please run for the current commit of `main` in which the `Update Release PRs` step passed.
+  A run for an older commit can give an old answer.
   Read the log of that step for the package path in `release-please-config.json`.
 - If the log has a skip line for the path, recommend `close`.
   Give the reason: the pull request is stale.
@@ -236,7 +237,7 @@ Do this section in addition to the general checklist.
 - If the log has `PR <url> remained the same` or an update line, Release Please still plans the release.
   Do not recommend `close`.
   Ask the maintainer to decide.
-- Write "not checked" if no run ran the step, or if the log has no line for the path.
+- Write "not checked" if there is no such run, or if the log has no line for the path.
 
 ### How to ask for a decision
 

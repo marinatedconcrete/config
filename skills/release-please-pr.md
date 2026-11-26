@@ -30,11 +30,11 @@ The GitHub App `formwork-remover` opens these pull requests. Release Please writ
 Recommend `close` only after you read the log. Do these steps.
 
 1. Find the package path in `release-please-config.json`. The log names a package by its path.
-2. Find the newest run of the Release Please workflow on `main` in which the `Update Release PRs` step ran. A run can pass and skip this step. The run summary then gives the reason.
+2. Find the newest run of the Release Please workflow for the current commit of `main` in which the `Update Release PRs` step passed. A run can pass and skip this step. A run for an older commit can give an old answer. If there is no such run, write "not checked" and stop this check.
 3. Read the log of that step for the path.
    - `No commits for path: <path>, skipping` or `No user facing commits found ... skipping` means that Release Please no longer plans the release. Recommend `close`.
    - `PR <url> remained the same`, or a line for an updated pull request, means that Release Please still plans the release. Do not recommend `close`. Ask a named maintainer to decide.
-4. If no run ran the step, or the log has no line for the path, write "not checked".
+4. If the log has no line for the path, write "not checked".
 
 A section that lists only an entry of the form `**main:** release <package> <version>` has no real change. Release Please can still plan this release. Use the log check above.
 
