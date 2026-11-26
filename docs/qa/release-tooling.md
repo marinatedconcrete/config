@@ -17,7 +17,7 @@ Review a change to these workflows with this page also.
 ### Release configuration
 
 - `release-config.test.mjs` checks that each path in `packages` in `release-please-config.json` has an entry in `.release-please-manifest.json`, and the reverse. It also checks that each path exists in the repository.
-- Do not edit a version in `.release-please-manifest.json` by hand. Release Please changes it in a release PR. One exception applies. To register a new package, a person adds a line with the value `0.0.0` to this file and a matching entry to `release-please-config.json`.
+- Do not edit a version in `.release-please-manifest.json` by hand. Release Please changes it in a release PR. One exception applies. To register a new package, add a line with the value `0.0.0` to this file and a matching entry to `release-please-config.json`. A person or an agent can add these lines. A person must review that PR. A Hive review does not replace that review.
 - A new image package sets `include-v-in-tag` to `false` and `tag-separator` to `-`. `release-config.test.mjs` checks this rule.
 - A new package path must also fit `plan.mjs`. That script accepts only `kustomization/components/*`, `actions/*`, `ansible`, `renovate`, and four named images. `release-config.test.mjs` calls `classifyReleasePath` from `plan.mjs` to check each path. Without the update, the test fails and the release fails with `Unsupported release path`. Update `plan.mjs`, its tests, and the release package workflow in the same PR.
 - A new image needs its own job in the release package workflow. A new component needs a test in `kustomization/tests/` and an entry in the CI test matrix. The coverage gate checks both.
