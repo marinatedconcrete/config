@@ -7,6 +7,7 @@ on: # yamllint disable-line rule:truthy
       - main
     paths:
       - .github/scripts/next-calver-version.sh
+      - .github/scripts/release-latest.sh
       - .github/workflows/image-devcontainer-base.yml
       - actions/image-release-notes/**
       - images/devcontainer-base/**
@@ -15,6 +16,7 @@ on: # yamllint disable-line rule:truthy
       - main
     paths:
       - .github/scripts/next-calver-version.sh
+      - .github/scripts/release-latest.sh
       - .github/workflows/image-devcontainer-base.yml
       - actions/image-release-notes/**
       - images/devcontainer-base/**
@@ -200,7 +202,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.version.outputs.tag }}
         run: |
+          set -o pipefail
           is_draft=$(gh release view "${TAG}" --json isDraft --jq .isDraft)
-          if [[ "${is_draft}" == true ]]; then
-            gh release edit "${TAG}" --draft=false
+          latest=$(
+            gh api --paginate "repos/${GH_REPO}/releases" --jq '.[] | select(.draft | not) | .tag_name' |
+              .github/scripts/release-latest.sh "${TAG}" "${is_draft}"
+          )
+          if [[ -n "${latest}" ]]; then
+            gh release edit "${TAG}" --draft=false --latest="${latest}"
           fi
