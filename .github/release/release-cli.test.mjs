@@ -526,18 +526,14 @@ test("a failed image verification stops before any write", async () => {
 
 for (const script of ["publish-cli.mjs", "recover-cli.mjs"]) {
   test(`${script} run through the CLI guard exits on bad candidate JSON`, () => {
-    const result = spawnSync(
-      process.execPath,
-      [`${cliDir}/${script}`],
-      {
-        encoding: "utf8",
-        env: {
-          ...process.env,
-          CANDIDATE: "{ not valid JSON",
-          GITHUB_REPOSITORY: "marinatedconcrete/config",
-        },
+    const result = spawnSync(process.execPath, [`${cliDir}/${script}`], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        CANDIDATE: "{ not valid JSON",
+        GITHUB_REPOSITORY: "marinatedconcrete/config",
       },
-    );
+    });
     assert.notEqual(result.status, 0, result.stderr);
     assert.match(result.stderr, /SyntaxError/);
     assert.doesNotMatch(result.stderr, /api\.github\.com/);
