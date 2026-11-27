@@ -7,6 +7,8 @@ on: # yamllint disable-line rule:truthy
       - main
     paths:
       - .github/scripts/next-calver-version.sh
+      - .github/scripts/publish-draft-release.sh
+      - .github/scripts/release-latest.sh
       - .github/workflows/image-devcontainer-base.yml
       - actions/image-release-notes/**
       - images/devcontainer-base/**
@@ -15,6 +17,8 @@ on: # yamllint disable-line rule:truthy
       - main
     paths:
       - .github/scripts/next-calver-version.sh
+      - .github/scripts/publish-draft-release.sh
+      - .github/scripts/release-latest.sh
       - .github/workflows/image-devcontainer-base.yml
       - actions/image-release-notes/**
       - images/devcontainer-base/**
@@ -168,7 +172,10 @@ jobs:
         with:
           name: devcontainer-base-release-notes
           path: build/release
-      - name: Create Release
+      # The repository uses immutable releases. GitHub locks the assets of a
+      # release when it is published. Create a draft, attach the SBOM, and
+      # then publish the draft.
+      - name: Create Draft Release
         env:
           GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
@@ -185,9 +192,15 @@ jobs:
           else
             body="First versioned release."
           fi
-          gh release create "${TAG}" --title "devcontainer-base ${VERSION}" --verify-tag --notes "${body}"
+          gh release create "${TAG}" --draft --title "devcontainer-base ${VERSION}" --verify-tag --notes "${body}"
       - name: Publish Image Release Notes
         uses: ./actions/image-release-notes/publish
         with:
           component: devcontainer-base
           tag: ${{ needs.version.outputs.tag }}
+      - name: Publish Release
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.version.outputs.tag }}
+        run: .github/scripts/publish-draft-release.sh "${TAG}"

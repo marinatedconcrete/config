@@ -4,6 +4,7 @@ kind: StorageClass
 metadata:
   name: longhorn-encrypted
 provisioner: driver.longhorn.io
+reclaimPolicy: Retain
 allowVolumeExpansion: true
 parameters:
   encrypted: "true"

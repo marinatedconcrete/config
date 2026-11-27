@@ -205,3 +205,46 @@ test("the schema check rejects a keyword it does not support", () => {
     /Unsupported schema keyword minimum/,
   );
 });
+
+test("formatting alone does not create a release pull request", async () => {
+  const { parseConventionalCommits } =
+    await import("release-please/build/src/commit.js");
+  const { Simple } =
+    await import("release-please/build/src/strategies/simple.js");
+  const { config } = real();
+  const strategy = new Simple({
+    github: { repository: { owner: "example", repo: "config" } },
+    targetBranch: "main",
+    path: "kustomization/components/kube-vip",
+    changelogSections: config["changelog-sections"],
+  });
+  const formatting = {
+    sha: "a".repeat(40),
+    message: "style(prettier): format README",
+  };
+  const documentation = {
+    sha: "b".repeat(40),
+    message: "docs: explain the setup",
+  };
+  const fix = {
+    sha: "c".repeat(40),
+    message: "fix: correct the configuration",
+  };
+
+  assert.equal(
+    await strategy.buildReleasePullRequest(
+      parseConventionalCommits([formatting]),
+    ),
+    undefined,
+  );
+  assert.ok(
+    await strategy.buildReleasePullRequest(
+      parseConventionalCommits([documentation]),
+    ),
+  );
+  assert.ok(
+    await strategy.buildReleasePullRequest(
+      parseConventionalCommits([formatting, fix]),
+    ),
+  );
+});

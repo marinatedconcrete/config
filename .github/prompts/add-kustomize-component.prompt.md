@@ -82,6 +82,8 @@ Justify each exception in these three places:
 - The Pod Security badge in the component README. Use `baseline` or `privileged` in place of `restricted`.
 - The PR description.
 
+Also add the level and the reason to `kustomization/pod-security-check/exceptions.yml`, because `just pod-security-lint` fails without the entry.
+
 ## Step 2. Add the end-to-end test
 
 For a standalone component, create `kustomization/tests/{name}/`.
@@ -148,7 +150,7 @@ Copy the structure of `kustomization/components/mosquitto/README.md`.
 5. Describe what the component installs in short sentences.
 6. Add the `# Examples` section with a `## Component` example and a `## Resource` example.
    The component URL is `https://github.com/marinatedconcrete/config/kustomization/components/{name}?ref=kustomize-{name}@v{version}`.
-   The resource URL is `https://github.com/marinatedconcrete/config/releases/download/kustomize-{name}@v{version}/{name}.yml`.
+   The resource URL is `https://github.com/marinatedconcrete/config/releases/download/kustomize-{name}@v{version}/kustomize-{name}.yml`.
 7. Add `# Required Secrets`, `# Required Setup`, `# Required Patches`, and `# Optional Patches` sections where they apply.
    Show a complete example for each secret and each patch.
 8. Document each node or cluster requirement, for example user namespace support.

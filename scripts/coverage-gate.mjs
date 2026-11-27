@@ -1,5 +1,18 @@
 import { spawnSync } from "node:child_process";
-import { readFileSync, readdirSync, existsSync } from "node:fs";
+import {
+  accessSync,
+  chmodSync,
+  constants,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -119,7 +132,150 @@ function listTestDirs(root) {
     .map((entry) => entry.name);
 }
 
-function nodeCoverageArgs(suite) {
+// Add up the found and hit lines of an lcov report. Each file of the report has one LF and one LH line.
+export function sumLcov(text) {
+  let found = 0;
+  let hit = 0;
+  for (const line of text.split("\n")) {
+    if (line.startsWith("LF:")) found += Number(line.slice(3));
+    else if (line.startsWith("LH:")) hit += Number(line.slice(3));
+  }
+  return { found, hit };
+}
+
+export function addCounts(parts) {
+  return parts.reduce(
+    (sum, part) => ({
+      found: sum.found + part.found,
+      hit: sum.hit + part.hit,
+    }),
+    { found: 0, hit: 0 },
+  );
+}
+
+const shellQuote = (text) => `'${text.replaceAll("'", `'\\''`)}'`;
+
+export function kcovWrapper({ bash, kcov, root, includePaths, runsDir }) {
+  return `#!${bash}
+if [[ -z "\${KCOV_WRAP_ACTIVE:-}" && "\${1:-}" == ${shellQuote(root)}/*.sh && "\${1:-}" != *.test.sh ]]; then
+  export KCOV_WRAP_ACTIVE=1
+  exec ${shellQuote(kcov)} ${shellQuote(`--include-path=${includePaths.join(",")}`)} --include-pattern=.sh --exclude-pattern=.test.sh ${shellQuote(runsDir)}"/run-$$-$RANDOM" "$@"
+fi
+exec ${shellQuote(bash)} "$@"
+`;
+}
+
+export function parseKcovReport(text, root) {
+  const report = JSON.parse(text);
+  if (!Array.isArray(report?.files)) {
+    throw new Error('The kcov report has no "files" list.');
+  }
+  return report.files
+    .map((file) => {
+      const found = Number(file?.total_lines);
+      const hit = Number(file?.covered_lines);
+      if (
+        typeof file?.file !== "string" ||
+        !Number.isInteger(found) ||
+        !Number.isInteger(hit)
+      ) {
+        throw new Error(
+          `The kcov report has a file entry with no path or no line counts: ${JSON.stringify(file)}.`,
+        );
+      }
+      if (!file.file.startsWith(`${root}/`)) {
+        throw new Error(
+          `The kcov report has the file "${file.file}", which is not in "${root}".`,
+        );
+      }
+      return { path: file.file.slice(root.length + 1), found, hit };
+    })
+    .sort((a, b) => a.path.localeCompare(b.path));
+}
+
+const percentOf = ({ found, hit }) => (hit / found) * 100;
+
+export function checkShellCoverage({ files, lines, minFoundLines }) {
+  const errors = [];
+  if (!Number.isFinite(lines)) {
+    errors.push(
+      `"shell.lines" must be a number, not ${JSON.stringify(lines)}.`,
+    );
+  }
+  for (const [name, floor] of Object.entries(minFoundLines)) {
+    if (!Number.isInteger(floor) || floor < 0) {
+      errors.push(
+        `"shell.minFoundLines" for "${name}" must be a whole number, not ${JSON.stringify(floor)}.`,
+      );
+    }
+  }
+  if (errors.length > 0) return errors;
+  const reported = new Set(files.map((file) => file.path));
+  for (const file of files) {
+    if (!Object.hasOwn(minFoundLines, file.path)) {
+      errors.push(
+        `kcov measured "${file.path}", but "shell.minFoundLines" has no entry for it. Add an entry.`,
+      );
+    } else if (file.found < minFoundLines[file.path]) {
+      errors.push(
+        `kcov found ${file.found} lines in "${file.path}". The floor is ${minFoundLines[file.path]}. Lower the floor only when you deleted code from the script. Otherwise look for a multi-line quoted string inside $(...). A kcov parser bug (SimonKagstrom/kcov#519) drops the lines after it.`,
+      );
+    }
+  }
+  for (const name of Object.keys(minFoundLines)) {
+    if (!reported.has(name)) {
+      errors.push(
+        `"shell.minFoundLines" has an entry for "${name}", but kcov did not measure it. Check that a test runs the script by its absolute path, or remove the entry.`,
+      );
+    }
+  }
+  const total = addCounts(files);
+  if (!(total.found > 0)) {
+    errors.push("The kcov report has no line.");
+  } else if (percentOf(total) < lines) {
+    errors.push(
+      `Shell line coverage is ${percentOf(total).toFixed(1)}%. The minimum is ${lines}%.`,
+    );
+  }
+  return errors;
+}
+
+export function formatShellReport({ files, lines, minFoundLines }) {
+  const rows = files.map((file) => {
+    const percent = file.found > 0 ? percentOf(file).toFixed(1) : "0.0";
+    return `${file.path}: ${file.hit} of ${file.found} lines (${percent}%). Floor: ${minFoundLines[file.path] ?? "none"}.`;
+  });
+  const total = addCounts(files);
+  const percent = total.found > 0 ? percentOf(total).toFixed(1) : "0.0";
+  return [
+    ...rows,
+    `Total: ${total.hit} of ${total.found} lines (${percent}%). Minimum: ${lines}%.`,
+  ].join("\n");
+}
+
+// The format is the shields endpoint JSON: https://shields.io/badges/endpoint-badge
+export function coverageBadge(label, { found, hit }) {
+  if (!(found > 0)) throw new Error("The coverage report has no line.");
+  const percent = (hit / found) * 100;
+  const color =
+    percent >= 80 ? "brightgreen" : percent >= 60 ? "yellow" : "red";
+  return {
+    schemaVersion: 1,
+    label,
+    message: `${percent.toFixed(1)}%`,
+    color,
+  };
+}
+
+export function badgeFiles({ node, shell }) {
+  return {
+    "coverage.json": coverageBadge("coverage", addCounts([node, shell])),
+    "node-coverage.json": coverageBadge("node coverage", node),
+    "shell-coverage.json": coverageBadge("shell coverage", shell),
+  };
+}
+
+function nodeCoverageArgs(suite, lcovFile) {
   return [
     "--test",
     "--experimental-test-coverage",
@@ -129,16 +285,123 @@ function nodeCoverageArgs(suite) {
     `--test-coverage-lines=${suite.lines}`,
     `--test-coverage-branches=${suite.branches}`,
     `--test-coverage-functions=${suite.functions}`,
+    ...(lcovFile
+      ? [
+          "--test-reporter=spec",
+          "--test-reporter-destination=stdout",
+          "--test-reporter=lcov",
+          `--test-reporter-destination=${lcovFile}`,
+        ]
+      : []),
     ...suite.tests,
   ];
 }
 
-function runNodeSuite(root, suite) {
-  console.log(`\n== Node coverage: ${suite.name} (${suite.directory})`);
-  const result = spawnSync(process.execPath, nodeCoverageArgs(suite), {
-    cwd: path.join(root, suite.directory),
-    stdio: "inherit",
+function findOnPath(name, pathEnv) {
+  for (const dir of pathEnv.split(path.delimiter)) {
+    if (!dir) continue;
+    const candidate = path.join(dir, name);
+    try {
+      accessSync(candidate, constants.X_OK);
+      if (statSync(candidate).isFile()) return candidate;
+    } catch {}
+  }
+  return null;
+}
+
+export function prepareKcov(root, shell, parentDir) {
+  const kcov = findOnPath("kcov", process.env.PATH ?? "");
+  const bash = findOnPath("bash", process.env.PATH ?? "");
+  if (!kcov) {
+    return {
+      error:
+        "kcov is not on PATH. Use the devcontainer, or install kcov 43 (apt-get install kcov).",
+    };
+  }
+  if (!bash) return { error: "bash is not on PATH." };
+  if (process.getuid?.() === 0) {
+    return {
+      error:
+        "kcov cannot trace bash as root. Run the gate as a user that is not root.",
+    };
+  }
+  mkdirSync(parentDir, { recursive: true });
+  const kcovDir = mkdtempSync(path.join(parentDir, "kcov-"));
+  const binDir = path.join(kcovDir, "bin");
+  const runsDir = path.join(kcovDir, "runs");
+  mkdirSync(binDir);
+  mkdirSync(runsDir);
+  const includePaths = [
+    ...new Set(
+      Object.keys(shell.minFoundLines).map((file) =>
+        path.dirname(path.join(root, file)),
+      ),
+    ),
+  ].sort();
+  const wrapper = path.join(binDir, "bash");
+  writeFileSync(
+    wrapper,
+    kcovWrapper({ bash, kcov, root, includePaths, runsDir }),
+  );
+  chmodSync(wrapper, 0o755);
+  return {
+    kcov,
+    kcovDir,
+    runsDir,
+    env: {
+      ...process.env,
+      PATH: `${binDir}${path.delimiter}${process.env.PATH}`,
+    },
+  };
+}
+
+function runShellTests(root, tests, env) {
+  return tests.flatMap((test) => {
+    console.log(`\n== Shell test: ${test}`);
+    const result = spawnSync("bash", [path.join(root, test)], {
+      cwd: root,
+      env,
+      stdio: "inherit",
+    });
+    return result.status === 0
+      ? []
+      : [`The shell test "${test}" failed (exit code ${result.status}).`];
   });
+}
+
+function mergeKcov({ kcov, kcovDir, runsDir }, root) {
+  const runs = readdirSync(runsDir).map((name) => path.join(runsDir, name));
+  if (runs.length === 0) {
+    throw new Error(
+      "kcov recorded no run. No test called a measured script with bash and an absolute path.",
+    );
+  }
+  const reportDir = path.join(kcovDir, "report");
+  const result = spawnSync(kcov, ["--merge", reportDir, ...runs], {
+    encoding: "utf8",
+  });
+  if (result.status !== 0) {
+    throw new Error(
+      `kcov could not merge the runs (exit code ${result.status}). ${result.stderr}`,
+    );
+  }
+  return parseKcovReport(
+    readFileSync(path.join(reportDir, "kcov-merged", "coverage.json"), "utf8"),
+    root,
+  );
+}
+
+function runNodeSuite(root, suite, lcovFile, env) {
+  console.log(`\n== Node coverage: ${suite.name} (${suite.directory})`);
+  const result = spawnSync(
+    process.execPath,
+    nodeCoverageArgs(suite, lcovFile),
+    {
+      cwd: path.join(root, suite.directory),
+      env,
+      stdio: "inherit",
+    },
+  );
   if (result.status === 0) return [];
   const why = result.error
     ? result.error.message
@@ -148,13 +411,70 @@ function runNodeSuite(root, suite) {
   ];
 }
 
+const USAGE = `Usage: node scripts/coverage-gate.mjs [--badge-dir DIR] [--kcov-dir DIR]
+  --badge-dir DIR  Write the badge files in DIR when every check passes.
+  --kcov-dir DIR   Keep the kcov output and the HTML report in a new directory in DIR.`;
+
+function optionValue(name) {
+  const index = process.argv.indexOf(name);
+  if (index === -1) return null;
+  const value = process.argv[index + 1];
+  if (!value) {
+    console.error(USAGE);
+    process.exit(2);
+  }
+  return value;
+}
+
 function main() {
+  const badgeDir = optionValue("--badge-dir");
+  const keepDir = optionValue("--kcov-dir");
   const thresholds = JSON.parse(
     readFileSync(path.join(repoRoot, ".coverage-thresholds.json"), "utf8"),
   );
-  const errors = thresholds.node.flatMap((suite) =>
-    runNodeSuite(repoRoot, suite),
+  const lcovDir = badgeDir
+    ? mkdtempSync(path.join(os.tmpdir(), "lcov-"))
+    : null;
+  const lcovFiles = [];
+  const errors = [];
+  let shellFiles = [];
+
+  const kcov = prepareKcov(
+    repoRoot,
+    thresholds.shell,
+    keepDir ? path.resolve(keepDir) : os.tmpdir(),
   );
+  if (kcov.error) errors.push(kcov.error);
+  errors.push(
+    ...thresholds.node.flatMap((suite, index) => {
+      const lcovFile = lcovDir
+        ? path.join(lcovDir, `${index}.info`)
+        : undefined;
+      if (lcovFile) lcovFiles.push(lcovFile);
+      return runNodeSuite(repoRoot, suite, lcovFile, kcov.env);
+    }),
+  );
+
+  if (!kcov.error) {
+    errors.push(...runShellTests(repoRoot, thresholds.shell.tests, kcov.env));
+    console.log("\n== Shell coverage");
+    try {
+      shellFiles = mergeKcov(kcov, repoRoot);
+      const shell = { files: shellFiles, ...thresholds.shell };
+      console.log(formatShellReport(shell));
+      errors.push(...checkShellCoverage(shell));
+      if (keepDir) {
+        console.log(
+          `Report: ${path.join(kcov.kcovDir, "report", "kcov-merged", "index.html")}`,
+        );
+      }
+    } catch (error) {
+      errors.push(error.message);
+    }
+  }
+  if (!keepDir && !kcov.error) {
+    rmSync(kcov.kcovDir, { recursive: true, force: true });
+  }
 
   console.log("\n== Component tests");
   try {
@@ -175,7 +495,21 @@ function main() {
   if (errors.length > 0) {
     console.error("\nCoverage gate failed:");
     for (const error of errors) console.error(`- ${error}`);
+    if (lcovDir) rmSync(lcovDir, { recursive: true });
     process.exit(1);
+  }
+  if (badgeDir) {
+    const badges = badgeFiles({
+      node: addCounts(
+        lcovFiles.map((file) => sumLcov(readFileSync(file, "utf8"))),
+      ),
+      shell: addCounts(shellFiles),
+    });
+    mkdirSync(badgeDir, { recursive: true });
+    for (const [name, badge] of Object.entries(badges)) {
+      writeFileSync(path.join(badgeDir, name), `${JSON.stringify(badge)}\n`);
+    }
+    rmSync(lcovDir, { recursive: true });
   }
   console.log("\nCoverage gate passed.");
 }

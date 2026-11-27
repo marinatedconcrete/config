@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.2.2](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.2.1...kustomize-paperless@v2.2.2) (2026-11-27)
+
+
+### Bug Fixes
+
+* **paperless:** prevent HTTP probes from creating sessions ([#1161](https://github.com/marinatedconcrete/config/issues/1161)) ([5904ef0](https://github.com/marinatedconcrete/config/commit/5904ef0481034e90e524268e97d79c3493914050))
+
+
+### Other Changes
+
+* **prettier:** format nested files with Prettier ([#1108](https://github.com/marinatedconcrete/config/issues/1108)) ([c6b6286](https://github.com/marinatedconcrete/config/commit/c6b6286db17cf2ab50a72158933351b8859fc4d9)), closes [#1086](https://github.com/marinatedconcrete/config/issues/1086)
+
 ## [2.2.1](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.2.0...kustomize-paperless@v2.2.1) (2026-11-22)
 
 

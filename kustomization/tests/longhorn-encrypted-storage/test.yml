@@ -20,6 +20,7 @@
           - manifest.kind == "StorageClass"
           - manifest.metadata.name == "longhorn-encrypted"
           - manifest.provisioner == "driver.longhorn.io"
+          - manifest.reclaimPolicy == "Retain"
           - manifest.allowVolumeExpansion
           - manifest.parameters.encrypted == "true"
           - manifest.parameters["csi.storage.k8s.io/" ~ item ~ "-secret-name"] == "longhorn-crypto"

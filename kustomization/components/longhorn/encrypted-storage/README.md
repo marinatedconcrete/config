@@ -2,9 +2,13 @@
 
 This component adds the `longhorn-encrypted` StorageClass.
 Set `storageClassName: longhorn-encrypted` on a new PersistentVolumeClaim to use it.
+The `Retain` policy keeps the volume after you delete the claim.
+Remove the volume manually when you no longer need the data.
 
-Install Longhorn 1.13 or later.
-Load the `dm_crypt` module and install `cryptsetup` on each node that uses encrypted volumes.
+Install Longhorn with support for encrypted volumes.
+The Kairos Fedora image includes `cryptsetup` and the kernel modules.
+On other images, install `cryptsetup`.
+Load the `dm_crypt` module on each storage node.
 Create the Secret before you mount an encrypted volume.
 Keep a secure copy of the passphrase for volume recovery.
 
@@ -22,7 +26,6 @@ components:
 ## Required Secret
 
 Supply your passphrase through your Secret management system.
-If you use a different Secret name or namespace, patch all three CSI Secret references in the StorageClass.
 
 ```yaml
 apiVersion: v1
@@ -36,4 +39,4 @@ stringData:
   CRYPTO_KEY_PROVIDER: secret
 ```
 
-See the [Longhorn volume encryption instructions](https://longhorn.io/docs/1.13.0/advanced-resources/security/volume-encryption/).
+See the [Longhorn volume encryption instructions](https://longhorn.io/docs/1.12.0/advanced-resources/security/volume-encryption/).
