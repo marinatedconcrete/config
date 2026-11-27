@@ -15,6 +15,8 @@ concurrency:
 
 jobs:
   build:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -119,7 +121,7 @@ jobs:
           runCmd: just lint
   publish:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [check-format, kustomization-test, lint]
+    needs: [build, check-format, kustomization-test, lint]
     permissions:
       contents: read
       packages: write
