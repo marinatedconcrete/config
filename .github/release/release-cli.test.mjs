@@ -1,7 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import * as publishCli from "./publish-cli.mjs";
 import * as recoverCli from "./recover-cli.mjs";
+
+const cliDir = dirname(fileURLToPath(import.meta.url));
 
 const repository = "marinatedconcrete/config";
 const component = {
@@ -512,3 +517,29 @@ test("a failed image verification stops before any write", async () => {
   );
   assert(state.operations.every((operation) => operation.startsWith("GET ")));
 });
+
+// The two entry points reach run() only through the direct-execution guard.
+// A test that imports run() would still pass if that guard stopped calling
+// run(). Start each script as a child process with malformed candidate data
+// so the parse error ends the run before it builds the GitHub API client or
+// makes any request.
+
+for (const script of ["publish-cli.mjs", "recover-cli.mjs"]) {
+  test(`${script} run through the CLI guard exits on bad candidate JSON`, () => {
+    const result = spawnSync(
+      process.execPath,
+      [`${cliDir}/${script}`],
+      {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          CANDIDATE: "{ not valid JSON",
+          GITHUB_REPOSITORY: "marinatedconcrete/config",
+        },
+      },
+    );
+    assert.notEqual(result.status, 0, result.stderr);
+    assert.match(result.stderr, /SyntaxError/);
+    assert.doesNotMatch(result.stderr, /api\.github\.com/);
+  });
+}

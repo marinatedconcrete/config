@@ -98,14 +98,17 @@ function setup() {
   return { dir, bin };
 }
 
-function run(args, { env = {}, previous = true, diff = DIFF } = {}) {
+function run(
+  args,
+  { env = {}, previous = true, diff = DIFF, script = scriptPath, cwd } = {},
+) {
   const { dir, bin } = setup();
   writeFileSync(join(dir, "diff.json"), JSON.stringify(diff));
   const out = join(dir, "out");
   const result = spawnSync(
     "bash",
     [
-      scriptPath,
+      script,
       "--notes",
       join(out, "notes.md"),
       "--sbom",
@@ -115,6 +118,7 @@ function run(args, { env = {}, previous = true, diff = DIFF } = {}) {
     ],
     {
       encoding: "utf8",
+      cwd,
       env: {
         ...process.env,
         PATH: `${bin}:${process.env.PATH}`,
@@ -216,6 +220,15 @@ test("the change table lists changed, added, and removed packages", () => {
     ),
     result.notes,
   );
+});
+
+test("the change table works when the script runs by a relative path", () => {
+  const result = run(["--image", "app:1.0", "--previous-tag", "app-0.9.0"], {
+    script: "release-notes.sh",
+    cwd: here,
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(result.notes.includes("| kernel | 6.0.0 | 6.1.0 |"), result.notes);
 });
 
 test("the change table says so when nothing changed", () => {

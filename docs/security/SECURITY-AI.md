@@ -75,6 +75,8 @@ Do not use the REST `required_pull_request_reviews` endpoint. It returns default
 - The workflows set `permissions:` blocks at the workflow level or the job level. A job with no block inherits the workflow-level block. A job gets the `read` default only when its workflow has no block. Some jobs inherit `packages: write` from the workflow level.
 - Several jobs give `packages: write` to the token and run third-party Docker actions in the same job. This is the reason for the Renovate rule in the next section.
 - The workflows use two secrets: `GITHUB_TOKEN` and the private key of the `formwork-remover` GitHub App. The App token creates the tags and releases of the Release Please packages. See [the release README](../../.github/release/README.md).
+- One workflow labels each pull request from its list of changed files. It uses the `pull_request` trigger, not `pull_request_target`. Its job has `pull-requests: write` and no `issues` permission. The job runs only for a pull request from a branch in this repository, because GitHub gives a pull request from a fork a read-only token. The job runs the script and the policy of the pull request.
+- The coverage gate workflow has one job with `contents: write`. The job runs only for a push to `main`. It runs `scripts/publish-badge.sh`, which writes the coverage badge files on the `badges` branch with the GitHub API. See the coverage gate in [release tooling](../qa/release-tooling.md#automated-validation-coverage). The script accepts only a file name of lowercase letters, digits, and hyphens that ends in `.json`. It makes no commit on `main`.
 - [Release tooling](../qa/release-tooling.md) has the rules for `permissions`, the App token, and `npm ci --ignore-scripts`.
 - A local agent session gets no repository secret. It uses the credentials of the person who runs it. This repository's Hive writes as its App or one of its agent lanes. The Hive of a contributor writes under the login of that contributor.
 
@@ -89,19 +91,6 @@ Do not use the REST `required_pull_request_reviews` endpoint. It returns default
 - To verify, find that rule in `renovate.json`. Make sure that no later rule sets `automerge` to `true` for a third-party action. [Renovate presets](../qa/renovate-presets.md) gives the checklist.
 - [renovate.json](../../renovate.json) lists the updates that auto-merge. A rule with `automergeType` set to `branch` pushes the commit to `main` with no pull request. The other two auto-merge rules open a pull request, and it merges with no review. A patch update that the `prettier`, `pnpm`, `cli/cli`, and `node` rule matches also matches the patch rule. That later rule sends the update to `main` with no pull request.
 - Updates from `ghcr.io`, `quay.io`, `registry.k8s.io`, and `lscr.io` do not auto-merge, because these registries can give no release time. `ghcr.io/marinatedconcrete/devcontainer-base` is the named exception.
-
-## The Claude Code hook
-
-[.claude/settings.json](../../.claude/settings.json) runs [the format check hook](../../.claude/hooks/check-format.sh) before each Bash command.
-
-- The hook blocks a `git` or `jj` commit or push when `just check-format` fails.
-- The hook runs the check only in this repository and in its linked git worktrees and jj workspaces.
-- The hook is a convenience gate. It is not a security boundary. The required format status check is the gate.
-- The hook does not block a command when it cannot start the check. Examples are a missing `python3`, or a host with no `just` or `pnpm` and no running devcontainer.
-- The hook blocks a command when the check does not finish in 100 seconds, or when the hook has an error after it finds a commit or a push.
-- The hook does not find some command forms. Examples are `gh pr merge`, aliases, and commands that `eval` builds. The module docstring in [check_format.py](../../.claude/hooks/check_format.py) lists more forms, but that list is not complete. For example, the hook does not find a commit after `time` or `xargs`, or in an `if` or a `for` block.
-- Only Claude Code runs the hook. Other agents do not.
-- The project settings set no permission rules. The person who runs the agent sets them.
 
 ## Review of agent-authored changes
 
