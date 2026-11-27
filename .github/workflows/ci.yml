@@ -125,34 +125,4 @@ jobs:
     permissions:
       contents: read
       packages: write
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Set up Docker
-        uses: docker/setup-docker-action@3f1ab1ab0e29231562e4db4ca600c1a49653bac6 # v5.7.0
-        with:
-          daemon-config: |
-            {
-              "features": {
-                "containerd-snapshotter": true
-              }
-            }
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build devcontainer image
-        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
-        with:
-          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
-          cacheTo: ghcr.io/marinatedconcrete/config-devcontainer
-          env: |
-            CI=1
-          imageName: ghcr.io/marinatedconcrete/config-devcontainer
-          push: always
+    uses: ./.github/workflows/ci-publish-devcontainer.yml
