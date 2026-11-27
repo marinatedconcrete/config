@@ -1,6 +1,11 @@
 {
   "changelog-sections": [
     {
+      "hidden": true,
+      "type": "style",
+      "section": "Formatting"
+    },
+    {
       "hidden": false,
       "type": "feat",
       "section": "Features"
