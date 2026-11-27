@@ -32,11 +32,11 @@
 
 ## Tests
 
-- Run `just test` to run all Kustomize component tests. Run `just kustomization-test <component>` to test one component.
+- Run `just test` to run all Kustomize component tests and the tests of the release shell scripts in `.github/scripts/`. Run `just kustomization-test <component>` to test one component.
 
 ## Commit Messages
 
-- Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages. Use types such as `feat`, `fix`, `docs`, `chore`, and `tests`. Add `!` for a breaking change. For example, use `feat!: rename ...`.
+- Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages. Use types such as `feat`, `fix`, `docs`, `chore`, and `test`. Add `!` for a breaking change. For example, use `feat!: rename ...`.
 - Keep the summary short. Put more information in the message body if necessary. Put issue or pull request references in parentheses after the summary if necessary.
 - Use signed commits when possible. See commit `Support GPG Signing of Commits (#76)`.
 - Use [Conventional Commits](https://www.conventionalcommits.org/) for pull request titles.
