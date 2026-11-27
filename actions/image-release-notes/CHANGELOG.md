@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.2](https://github.com/marinatedconcrete/config/compare/image-release-notes-1.3.1...image-release-notes-1.3.2) (2026-11-27)
+
+
+### Bug Fixes
+
+* **image-release-notes:** attach the SBOM before an immutable release is published ([#1169](https://github.com/marinatedconcrete/config/issues/1169)) ([a099560](https://github.com/marinatedconcrete/config/commit/a099560ebbe28054435a2bd65972858c57e604b7))
+
+
+### Other Changes
+
+* **prettier:** format nested files with Prettier ([#1108](https://github.com/marinatedconcrete/config/issues/1108)) ([c6b6286](https://github.com/marinatedconcrete/config/commit/c6b6286db17cf2ab50a72158933351b8859fc4d9)), closes [#1086](https://github.com/marinatedconcrete/config/issues/1086)
+
 ## [1.3.1](https://github.com/marinatedconcrete/config/compare/image-release-notes-1.3.0...image-release-notes-1.3.1) (2026-11-20)
 
 
