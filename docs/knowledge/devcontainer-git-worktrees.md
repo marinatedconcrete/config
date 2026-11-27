@@ -25,7 +25,4 @@ These recipes call git, so they fail in that container:
 
 Recipes that do not call git work, for example `just check-format`.
 
-To run the checks for a worktree, do one of these steps:
-
-- Run the Node scripts on the host, for example `node scripts/path-policy.mjs check`.
-- Open the devcontainer on the main checkout, not on the worktree.
+To run these checks for a worktree, run the Node scripts on the host from the worktree directory. For example, run `node scripts/path-policy.mjs check` in the worktree. Do not open the devcontainer on the main checkout to check a worktree. Those checks read the files of the main checkout, so they can pass while the worktree still has a failure.
