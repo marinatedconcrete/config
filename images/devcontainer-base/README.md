@@ -29,7 +29,7 @@ FROM ghcr.io/marinatedconcrete/devcontainer-base:2026.11.0@sha256:...
 
 Renovate then sends an update for each new release.
 This repository pins its devcontainer and its `github-runner-ci` image this way.
-Renovate merges these updates after all pull request checks pass.
+Renovate merges these updates after all pull request checks pass and a code owner approves the pull request.
 Renovate does not change the `latest` tag to a version tag.
 With `latest`, Renovate sends only digest updates.
 

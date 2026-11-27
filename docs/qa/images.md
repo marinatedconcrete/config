@@ -116,8 +116,9 @@ For an image, check these items.
   The result is a patch release of `github-runner-ci`.
 - An automerge rule does not skip a check that matters.
   See [Renovate presets](renovate-presets.md).
-  The image workflows do not run on a Renovate branch that merges as a branch merge.
-  They run after the merge.
+  The image workflows do not run on a Renovate branch that has no pull request.
+  They run on a Renovate pull request that changes a path in their `paths` filter.
+  GitHub auto-merge does not wait for them, because they are not required checks.
 
 ### Release workflow
 
