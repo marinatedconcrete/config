@@ -15,6 +15,7 @@ See the [README](README.md) for the list of parts.
 - Read [AGENTS.md](AGENTS.md). It has the writing rules, the commit message rules, and the commands to run before a commit.
 - Run `just format` before a commit. Run `just lint` and `just test` to check a change.
 - Use the [pull request template](.github/pull_request_template.md). The pull request title must follow [Conventional Commits](https://www.conventionalcommits.org/).
+- Use `style:` for a commit or pull request that only changes formatting. Release Please skips releases that contain only these commits.
 - Read the QA page in [docs/qa/](docs/qa) for the part that you change. It lists the checks that the part needs.
 
 ## Report a problem or ask for a feature

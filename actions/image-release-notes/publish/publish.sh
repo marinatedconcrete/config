@@ -2,6 +2,8 @@
 set -euo pipefail
 
 # Attach the SBOM to a release. Add the notes to the end of the release body.
+# Run this script on a draft release. Publish the release after the script ends.
+# GitHub then locks the SBOM in an immutable release.
 # This script reads two files and calls the GitHub API. This script runs no code
 # from the image, so a job with write access to the release does not run the
 # image.
@@ -64,8 +66,12 @@ body_above_marker() {
 }
 
 main() {
+    local assets
     local body
+    local digest
     local file
+    local immutable
+    local local_digest
     local marker
     local notes
     local release_body
@@ -100,7 +106,9 @@ main() {
     done
 
     require_cmd awk
+    require_cmd cut
     require_cmd gh
+    require_cmd sha256sum
 
     [[ -n "$component" ]] || {
         usage >&2
@@ -126,8 +134,31 @@ main() {
     gh release view "$tag" >/dev/null 2>&1 ||
         die "release ${tag} does not exist; create the release first"
 
-    log "Attaching the SBOM to ${tag}"
-    gh release upload "$tag" "$sbom" --clobber
+    # GitHub refuses asset changes on a published immutable release. For that
+    # release, make sure that the attached SBOM is the same as the local SBOM.
+    # Otherwise the notes and the SBOM can come from different builds.
+    immutable="$(gh release view "$tag" --json isImmutable --jq .isImmutable)"
+    if [[ "$immutable" != true ]]; then
+        log "Attaching the SBOM to ${tag}"
+        gh release upload "$tag" "$sbom" --clobber
+    else
+        # The GitHub REST API gives the SHA-256 digest of each asset. A direct
+        # API call does not depend on the release fields of the GitHub CLI.
+        assets="$(gh api "repos/{owner}/{repo}/releases/tags/${tag}" \
+            --jq '.assets[] | [.name, (.digest // "")] | @tsv')"
+        if ! digest="$(NAME="${sbom##*/}" awk -F '\t' '
+            $1 == ENVIRON["NAME"] { print $2; found = 1 }
+            END { exit !found }
+        ' <<<"$assets")"; then
+            die "release ${tag} is immutable and has no ${sbom##*/} asset; create the release as a draft and publish it after this action"
+        fi
+        [[ -n "$digest" ]] ||
+            die "the ${sbom##*/} asset of release ${tag} has no digest; the script cannot compare it with the local SBOM"
+        local_digest="sha256:$(sha256sum -- "$sbom" | cut -d ' ' -f 1)"
+        [[ "$digest" == "$local_digest" ]] ||
+            die "the ${sbom##*/} asset of release ${tag} (${digest}) is not the same as the local SBOM (${local_digest}); the notes must come from the build of the attached SBOM"
+        log "Immutable release ${tag} already has the same SBOM"
+    fi
 
     body="$(body_above_marker "$marker")"
 

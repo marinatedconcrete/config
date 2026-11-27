@@ -25,6 +25,8 @@ COMMON_PACKAGES=(
     # Install version control tools.
     "diffutils"
     "git"
+    # Install the line coverage tool for shell scripts.
+    "kcov"
     # Install the text editor.
     "vim"
 )

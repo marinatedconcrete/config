@@ -109,7 +109,7 @@ spec:
               memory: 2Gi
           livenessProbe:
             httpGet:
-              path: /
+              path: /static/admin/img/icon-yes.svg
               port: 8000
               scheme: HTTP
               httpHeaders:
@@ -117,7 +117,7 @@ spec:
                   value: localhost
           startupProbe:
             httpGet:
-              path: /
+              path: /static/admin/img/icon-yes.svg
               port: 8000
               scheme: HTTP
               httpHeaders:

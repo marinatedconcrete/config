@@ -150,7 +150,7 @@ Copy the structure of `kustomization/components/mosquitto/README.md`.
 5. Describe what the component installs in short sentences.
 6. Add the `# Examples` section with a `## Component` example and a `## Resource` example.
    The component URL is `https://github.com/marinatedconcrete/config/kustomization/components/{name}?ref=kustomize-{name}@v{version}`.
-   The resource URL is `https://github.com/marinatedconcrete/config/releases/download/kustomize-{name}@v{version}/{name}.yml`.
+   The resource URL is `https://github.com/marinatedconcrete/config/releases/download/kustomize-{name}@v{version}/kustomize-{name}.yml`.
 7. Add `# Required Secrets`, `# Required Setup`, `# Required Patches`, and `# Optional Patches` sections where they apply.
    Show a complete example for each secret and each patch.
 8. Document each node or cluster requirement, for example user namespace support.

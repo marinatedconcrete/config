@@ -26,8 +26,15 @@ on: # yamllint disable-line rule:truthy
       digest:
         value: ${{ jobs.build-buildah-action-runner.outputs.digest }}
 
+permissions:
+  contents: read
+
+env:
+  IMAGE_REPOSITORY: ghcr.io/${{ github.repository_owner }}/buildah-action-runner
+
 jobs:
   build-buildah-action-runner:
+    if: github.event_name != 'pull_request' && (inputs.sha != '' || github.ref == 'refs/heads/main')
     name: Build Buildah Action Runner Image
     outputs:
       digest: ${{ steps.build.outputs.digest }}
@@ -36,35 +43,18 @@ jobs:
       contents: read
       packages: write
 
-    env:
-      IMAGE_REPOSITORY: ghcr.io/${{ github.repository_owner }}/buildah-action-runner
-
     steps:
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           ref: ${{ inputs.sha || github.sha }}
       - name: Compute Version Tag
         env:
           BRANCH: ${{ inputs.sha && format('candidate-{0}-{1}-{2}', inputs.sha, github.run_id, github.run_attempt) || github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('pr-{0}.{1}.{2}.{3}', github.event.number, github.run_id, github.run_number, github.run_attempt) }}
         id: version_tag
         run: echo "tag=$BRANCH" | sed -e 's/buildah-action-runner-//' >> "$GITHUB_OUTPUT"
-      - name: Select Image Export Mode
-        id: image_export
-        env:
-          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
-        run: |
-          set -euo pipefail
-
-          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" && "${HEAD_REPOSITORY}" != "${GITHUB_REPOSITORY}" ]]; then
-            echo "load=true" >> "$GITHUB_OUTPUT"
-            echo "push=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "load=false" >> "$GITHUB_OUTPUT"
-            echo "push=true" >> "$GITHUB_OUTPUT"
-          fi
       - name: Login to GitHub Container Registry
-        if: ${{ steps.image_export.outputs.push == 'true' }}
         uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
@@ -85,32 +75,43 @@ jobs:
             ${{ steps.metadata.outputs.labels }}
             org.opencontainers.image.revision=${{ inputs.sha || github.sha }}
             org.opencontainers.image.version=${{ inputs.version || steps.metadata.outputs.version }}
-          load: ${{ steps.image_export.outputs.load }}
-          push: ${{ steps.image_export.outputs.push }}
+          push: true
           tags: ${{ env.IMAGE_REPOSITORY }}:${{ steps.version_tag.outputs.tag }}
-      - name: Pull Candidate Image
-        if: ${{ steps.image_export.outputs.push == 'true' }}
+  smoke:
+    if: ${{ !cancelled() && (github.event_name == 'pull_request' || needs.build-buildah-action-runner.result == 'success') }}
+    needs: build-buildah-action-runner
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.sha || github.sha }}
+      - name: Build pull request image
+        if: github.event_name == 'pull_request'
+        run: docker build -f images/buildah-action-runner/Containerfile -t buildah-smoke:local images/buildah-action-runner
+      - name: Load published candidate
+        if: github.event_name != 'pull_request'
         env:
-          DIGEST: ${{ steps.build.outputs.digest }}
-          IMAGE_TAG: ${{ steps.version_tag.outputs.tag }}
+          DIGEST: ${{ needs.build-buildah-action-runner.outputs.digest }}
         run: |
           docker pull "$IMAGE_REPOSITORY@$DIGEST"
-          docker tag "$IMAGE_REPOSITORY@$DIGEST" "$IMAGE_REPOSITORY:$IMAGE_TAG"
+          docker tag "$IMAGE_REPOSITORY@$DIGEST" buildah-smoke:local
       - name: Smoke Test Image
-        env:
-          IMAGE_TAG: ${{ steps.version_tag.outputs.tag }}
         run: |
-          docker run --rm "$IMAGE_REPOSITORY:$IMAGE_TAG" bash -lc '
+          docker run --rm buildah-smoke:local bash -lc '
             set -e
             buildah --version
             curl --version
             jq --version
             node --version
           '
-          images/buildah-action-runner/smoke-test.sh "$IMAGE_REPOSITORY:$IMAGE_TAG"
+          images/buildah-action-runner/smoke-test.sh buildah-smoke:local
       - name: Scan Image for Vulnerabilities
         uses: anchore/scan-action@11983a512817154c80a9db660c1a184be7513ed6 # v7.4.3
         with:
-          image: ${{ env.IMAGE_REPOSITORY }}:${{ steps.version_tag.outputs.tag }}
+          image: buildah-smoke:local
           fail-build: false
           output-format: table

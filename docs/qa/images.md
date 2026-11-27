@@ -30,6 +30,10 @@ A separate QA page covers this action.
 `devcontainer-base` is not in `release-please-config.json`.
 Its workflow creates a CalVer version tag on a schedule.
 A manual run on `main` also creates a release.
+The release job creates a draft release and adds the notes and the SBOM to it.
+Then the job publishes the draft, because GitHub locks the assets of an immutable release at publication.
+A retry of an older draft can run after a newer release is published.
+Then `.github/scripts/publish-draft-release.sh` uses `release-latest.sh` to set `--latest=false`. The older release then does not become the Latest release.
 The other four images get a release from a release-please pull request.
 See [release tooling](release-tooling.md) for the release-please mechanics.
 
