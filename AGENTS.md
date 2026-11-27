@@ -32,7 +32,7 @@
 
 ## Tests
 
-- Run `just test` to run all Kustomize component tests. Run `just kustomization-test <component>` to test one component.
+- Run `just test` to run all Kustomize component tests and the tests of the release shell scripts in `.github/scripts/`. Run `just kustomization-test <component>` to test one component.
 
 ## Commit Messages
 
