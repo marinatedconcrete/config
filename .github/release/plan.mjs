@@ -130,22 +130,37 @@ export async function collectPlan(createContext) {
   return { candidates, errors };
 }
 
+// The plan entry point. It builds the release plan, writes it to the
+// GitHub Actions output file, and logs the candidates. The tests drive
+// run() with a fake context so the wrapper logic has a fast check.
+export async function run({
+  createContext,
+  appendSync = appendFileSync,
+  output = process.env.GITHUB_OUTPUT,
+  log = console.log,
+} = {}) {
+  const { candidates, errors } = await collectPlan(createContext);
+  appendSync(
+    output,
+    `candidates=${JSON.stringify(candidates)}\nerrors=${JSON.stringify(errors)}\n`,
+  );
+  log(candidates.map(({ tag, sha, pr }) => ({ tag, sha, pr })));
+  return { candidates, errors };
+}
+
 if (
   process.argv[1] &&
   import.meta.url === new URL(`file://${process.argv[1]}`).href
 ) {
-  const { candidates, errors } = await collectPlan(async () => {
-    const repository = process.env.GITHUB_REPOSITORY;
+  const environment = process.env;
+  const createContext = async () => {
+    const repository = environment.GITHUB_REPOSITORY;
     const [owner, repo] = repository.split("/");
-    const token = process.env.GH_TOKEN;
+    const token = environment.GH_TOKEN;
     const api = githubApi(repository, token);
     const github = await GitHub.create({ owner, repo, token });
     const manifest = await Manifest.fromManifest(github, "main");
-    return { github, api, manifest, requested: process.env.RELEASE_PR };
-  });
-  appendFileSync(
-    process.env.GITHUB_OUTPUT,
-    `candidates=${JSON.stringify(candidates)}\nerrors=${JSON.stringify(errors)}\n`,
-  );
-  console.log(candidates.map(({ tag, sha, pr }) => ({ tag, sha, pr })));
+    return { github, api, manifest, requested: environment.RELEASE_PR };
+  };
+  await run({ createContext });
 }

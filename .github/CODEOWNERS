@@ -1,0 +1,4 @@
+* @sdwilsh @robarnold
+
+# The last matching pattern wins. Keep this line last so that only people own this file, also when a later rule names a bot account.
+/.github/CODEOWNERS @sdwilsh @robarnold

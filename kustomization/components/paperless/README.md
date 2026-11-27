@@ -33,7 +33,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - https://github.com/marinatedconcrete/config/releases/download/kustomize-paperless@v{version}/paperless.yml
+  - https://github.com/marinatedconcrete/config/releases/download/kustomize-paperless@v{version}/kustomize-paperless.yml
 ```
 
 # Required Secrets

@@ -32,7 +32,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - https://github.com/marinatedconcrete/config/releases/download/kustomize-unifi-network-application@v{version}/unifi-network-application.yml
+  - https://github.com/marinatedconcrete/config/releases/download/kustomize-unifi-network-application@v{version}/kustomize-unifi-network-application.yml
 ```
 
 ## Required Patches

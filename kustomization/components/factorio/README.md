@@ -29,7 +29,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - https://github.com/marinatedconcrete/config/releases/download/kustomize-factorio@v{version}/factorio.yml
+  - https://github.com/marinatedconcrete/config/releases/download/kustomize-factorio@v{version}/kustomize-factorio.yml
 ```
 
 # Required Setup
