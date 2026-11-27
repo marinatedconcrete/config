@@ -2,7 +2,20 @@
 
 Use a network plugin that enforces Kubernetes NetworkPolicy.
 Install `egress-deny-all` to isolate all Pods in the namespace for egress.
-Configure ingress separately.
+To isolate ingress and egress with the same policy, add this patch to the namespace Kustomization.
+
+```yaml
+patches:
+  - patch: |-
+      - op: add
+        path: /spec/policyTypes/-
+        value: Ingress
+    target:
+      kind: NetworkPolicy
+      name: deny-all-egress-networkpolicy
+```
+
+Add ingress rules for the connections that your workloads need.
 NetworkPolicies combine their permissions.
 Check the other policies that select the same Pods.
 
