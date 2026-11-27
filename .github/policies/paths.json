@@ -11,6 +11,7 @@
       "paths": [
         "justfile",
         ".devcontainer/**",
+        ".github/CODEOWNERS",
         ".github/pull_request_template.md",
         ".github/policies/**",
         "scripts/path-policy.mjs",
