@@ -16,7 +16,7 @@ changed() {
 }
 
 build=false
-if changed .devcontainer ansible/requirements.txt .github/workflows/ci.yml .github/scripts/select-ci-checks.sh; then
+if changed .devcontainer ansible/requirements.txt ':(glob).github/workflows/ci*.yml' .github/scripts/select-ci-checks.sh; then
   build=true
 fi
 
