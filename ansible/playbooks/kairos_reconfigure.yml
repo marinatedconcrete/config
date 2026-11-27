@@ -1,0 +1,5 @@
+---
+- name: Run Kairos reconfigure
+  ansible.builtin.import_playbook: kairos_maintenance.yml
+  vars:
+    kairos_operation: reconfigure

@@ -1,0 +1,17 @@
+---
+- name: Check that the OEM partition is mounted
+  ansible.builtin.command:
+    argv: [mountpoint, --quiet, /oem]
+  changed_when: false
+  check_mode: false
+
+- name: Install the cloud configuration
+  ansible.builtin.copy:
+    src: "{{ kairos_config_src }}"
+    dest: /oem/100_ansible.yaml
+    owner: root
+    group: root
+    mode: "0600"
+  register: kairos_config_copy
+  no_log: true
+  diff: false

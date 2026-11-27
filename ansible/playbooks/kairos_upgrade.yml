@@ -1,0 +1,5 @@
+---
+- name: Run Kairos upgrade
+  ansible.builtin.import_playbook: kairos_maintenance.yml
+  vars:
+    kairos_operation: upgrade
