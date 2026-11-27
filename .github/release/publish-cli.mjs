@@ -31,6 +31,15 @@ if (candidate.kind === "image") {
     throw new Error("Validated manifest is missing or unexpected");
   if (result.sha !== candidate.sha || result.tag !== candidate.tag)
     throw new Error("Validation result does not match the release");
+  if (candidate.project === "kustomize-frigate") {
+    if (!result.manifest) throw new Error("Missing base Frigate manifest");
+    for (const variant of ["coral", "va-amd", "va-intel"]) {
+      const name = `${candidate.project}-${variant}.yml`;
+      const data = readFileSync(`artifacts/${name}`);
+      if (!data.length) throw new Error(`Empty Frigate manifest: ${name}`);
+      assets.push({ name, data });
+    }
+  }
 }
 const receipt = await publishRelease({
   api,

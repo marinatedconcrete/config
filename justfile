@@ -284,6 +284,31 @@ kustomize-lint:
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
 
+# Check each rendered component against its Pod Security level.
+[group('lint')]
+pod-security-lint:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    # Use the Kubernetes version of the component tests.
+    version="$(yq '.minikube_test__kubernetes_version' ansible/roles/minikube_test/defaults/main.yml)"
+
+    # Give each run its own profile. Then the recipe never deletes a cluster that it did not start.
+    profile="pod-security-lint-$$"
+    trap 'minikube delete --profile="${profile}"' EXIT
+    # Minikube calls GitHub to check a version that is newer than its newest
+    # supported version. The call fails when the rate limit is spent. Force the
+    # version, as the component tests do, so a spent rate limit cannot fail the
+    # gate.
+    minikube start --interactive=false --profile="${profile}" --kubernetes-version="${version}" --cni=kindnet --force
+    bash kustomization/pod-security-check/test.sh "${profile}"
+    bash kustomization/pod-security-check/check.sh "${profile}"
+
+# Check that the path policy covers every tracked file.
+[group('lint')]
+path-policy-lint:
+    node scripts/path-policy.mjs check
+
 # Check the Renovate configuration.
 [group('lint')]
 renovate-lint:
@@ -293,6 +318,7 @@ renovate-lint:
     find renovate -name "*.json" -print | while read -r file; do
         pnpm exec renovate-config-validator ${file}
     done
+    node scripts/renovate-checks.mjs
 
 # Check shell scripts with ShellCheck.
 [group('lint')]
@@ -307,7 +333,7 @@ shellcheck-lint:
 
 # Run all linters.
 [group('lint')]
-lint: actionlint-lint ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
+lint: actionlint-lint ansible-lint hado-lint kustomize-lint path-policy-lint pod-security-lint renovate-lint shellcheck-lint
 
 # Run the Kairos Fedora end-to-end test for startup and installation.
 [group('test')]
@@ -332,18 +358,28 @@ kustomization-tests:
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
 
-# Run the coverage gate for the Node tests and the component tests.
+# Run the coverage gate for the Node tests, the shell scripts, and the component tests. Run it in the devcontainer, which has kcov.
 [group('test')]
-coverage-gate:
+coverage-gate *args:
     #!/usr/bin/env bash
     set -euo pipefail
     npm ci --prefix .github/release --ignore-scripts
     npm ci --prefix actions/image-release-notes --ignore-scripts
-    node scripts/coverage-gate.mjs
+    node scripts/coverage-gate.mjs {{ args }}
+
+# Run the coverage gate and keep the kcov HTML report in a new directory in /tmp/shell-coverage-report. The gate prints the path of the report.
+[group('test')]
+shell-coverage: (coverage-gate "--kcov-dir" "/tmp/shell-coverage-report")
+
+# Run the tests of the release shell scripts.
+[group('test')]
+release-scripts-test:
+    bash .github/scripts/publish-draft-release.test.sh
+    bash .github/scripts/release-latest.test.sh
 
 # Run all tests..
 [group('test')]
-test: kustomization-tests
+test: kustomization-tests release-scripts-test
 
 # Generate the release notes and the SBOM for an image.
 [group('release')]
@@ -427,6 +463,13 @@ release-please-build project dest="":
     # Run component tests before the release build.
     just kustomization-test "${component}"
     kustomize build "${component_path}/" -o "${dest_path}"
+
+    if [[ "${component}" == frigate ]]; then
+        for variant in coral va-amd va-intel; do
+            just kustomization-test "frigate-${variant}"
+            kustomize build "kustomization/tests/frigate-${variant}" -o "${dest_path%.yml}-${variant}.yml"
+        done
+    fi
     echo "${dest_path}"
 
 # Validate a source release.

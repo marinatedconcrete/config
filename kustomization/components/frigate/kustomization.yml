@@ -7,6 +7,5 @@ images:
     newTag: 0.18.3@sha256:d1a3e0008557bb3f3314d442ecd4ba68e9b16ab7872d64612649f7a6e5156635
 resources:
   - deployment.yml
-  - networkpolicy.yml
   - persistentvolumeclaim.yml
   - service.yml

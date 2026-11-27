@@ -36,10 +36,20 @@ resources:
   - https://github.com/marinatedconcrete/config/releases/download/kustomize-frigate@v{version}/kustomize-frigate.yml
 ```
 
+Each release also includes a complete manifest for each hardware option.
+Use one hardware manifest in place of the base manifest.
+
+| Hardware     | Release asset                    |
+| ------------ | -------------------------------- |
+| USB Coral    | `kustomize-frigate-coral.yml`    |
+| AMD VA-API   | `kustomize-frigate-va-amd.yml`   |
+| Intel VA-API | `kustomize-frigate-va-intel.yml` |
+
 # Required Setup
 
-Use a CNI that enforces NetworkPolicy.
-The ingress policy permits TCP port 8971 and protects the unauthenticated interface on port 5000.
+Configure ingress restrictions in your cluster before you deploy Frigate.
+Port 5000 on the Pod accepts unauthenticated requests.
+Restrict direct access to this port.
 Connect to `frigate-svc` on port 8971 with HTTPS.
 Get the initial administrator password from the Frigate container logs.
 Use the Frigate UI to add cameras and change settings.
@@ -84,7 +94,8 @@ model:
 
 ## AMD or Intel VA-API
 
-Install the GPU driver on each node that has the applicable GPU.
+The Kairos Fedora image includes AMD and Intel GPU firmware.
+Check that the kernel driver creates a render device on the node.
 Configure the [Generic Device Plugin](https://github.com/squat/generic-device-plugin) on those nodes to advertise the vendor-specific resource.
 For AMD, add this device definition to the plugin:
 

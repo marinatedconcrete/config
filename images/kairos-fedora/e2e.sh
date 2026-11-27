@@ -44,7 +44,7 @@ E2E_WEBUI_PORT="${E2E_WEBUI_PORT:-18080}"
 E2E_SSH_PORT="${E2E_SSH_PORT:-10022}"
 KAIROS_E2E_VERSION="${KAIROS_E2E_VERSION:-0.0.0-e2e}"
 # renovate: datasource=docker depName=quay.io/kairos/auroraboot
-AURORABOOT_IMAGE="${AURORABOOT_IMAGE:-quay.io/kairos/auroraboot:v0.30.0@sha256:5c12af1ecbb54193420abe0643f459a9812a2f90c88bba86a889dbcdf53e6fdf}"
+AURORABOOT_IMAGE="${AURORABOOT_IMAGE:-quay.io/kairos/auroraboot:v4.7.0@sha256:cba8ccbc0914e439945b1d370e609c4ce70d5f1c1533d34506581243f3824899}"
 
 logs_dir="${E2E_WORKDIR}/logs"
 guest_hostname="kairos-fedora-e2e"
@@ -391,6 +391,31 @@ on_exit() {
     exit "$status"
 }
 
+wait_for_hostname() {
+    local current=""
+    local deadline
+    local timeout_seconds
+
+    timeout_seconds="$(duration_to_seconds "$E2E_BOOT_TIMEOUT")"
+    deadline=$((SECONDS + timeout_seconds))
+
+    log "Waiting for hostname ${guest_hostname}"
+    while ((SECONDS < deadline)); do
+        if [[ -n "$qemu_pid" ]] && ! kill -0 "$qemu_pid" >/dev/null 2>&1; then
+            wait "$qemu_pid" || true
+            die "QEMU validation VM exited while waiting for the hostname"
+        fi
+
+        if current="$(ssh_cmd hostname 2>"${logs_dir}/ssh-hostname-wait-last.log")" &&
+            [[ "$current" == "$guest_hostname" ]]; then
+            return
+        fi
+        sleep 5
+    done
+
+    die "Expected hostname '${guest_hostname}' within ${E2E_BOOT_TIMEOUT}. Last result: '${current:-<empty>}'"
+}
+
 run_guest_checks() {
     log "Checking Fedora identity"
     ssh_cmd 'grep -E "^(ID|ID_LIKE)=" /etc/os-release | grep -q fedora'
@@ -400,10 +425,6 @@ run_guest_checks() {
     ssh_cmd 'sudo -n systemctl is-active --quiet sshd.service'
     ssh_cmd 'sudo -n systemctl is-enabled sshd.socket | grep -qx masked'
     ssh_cmd '! sudo -n systemctl is-active --quiet sshd.socket'
-
-    log "Checking the hostname command"
-    ssh_cmd 'command -v hostname >/dev/null'
-    ssh_cmd "test \"\$(hostname)\" = '${guest_hostname}'"
 
     log "Checking Kairos active boot state"
     ssh_cmd 'kairos-agent state get boot | tee /tmp/kairos-boot-state.txt && grep -q active_boot /tmp/kairos-boot-state.txt'
@@ -470,6 +491,7 @@ main() {
     start_qemu validate "" "$ovmf_code" "$ovmf_vars"
     wait_for_ssh
     reboot_and_wait_for_ssh
+    wait_for_hostname
     run_guest_checks
 
     phase="complete"
