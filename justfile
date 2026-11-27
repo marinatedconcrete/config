@@ -463,6 +463,13 @@ release-please-build project dest="":
     # Run component tests before the release build.
     just kustomization-test "${component}"
     kustomize build "${component_path}/" -o "${dest_path}"
+
+    if [[ "${component}" == frigate ]]; then
+        for variant in coral va-amd va-intel; do
+            just kustomization-test "frigate-${variant}"
+            kustomize build "kustomization/tests/frigate-${variant}" -o "${dest_path%.yml}-${variant}.yml"
+        done
+    fi
     echo "${dest_path}"
 
 # Validate a source release.

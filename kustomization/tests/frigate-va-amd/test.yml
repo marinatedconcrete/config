@@ -1,0 +1,7 @@
+---
+- name: Test the Frigate va-amd component
+  ansible.builtin.import_playbook: ../frigate/device-test.yml
+  vars:
+    frigate_test_variant: va-amd
+    frigate_test_device: devic.es/dri-amd
+    frigate_test_driver: "radeonsi"

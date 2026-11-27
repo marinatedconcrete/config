@@ -1,0 +1,7 @@
+---
+- name: Test the Frigate coral component
+  ansible.builtin.import_playbook: ../frigate/device-test.yml
+  vars:
+    frigate_test_variant: coral
+    frigate_test_device: devic.es/coraltpu
+    frigate_test_driver: ""

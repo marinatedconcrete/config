@@ -1,0 +1,7 @@
+---
+- name: Test the Frigate va-intel component
+  ansible.builtin.import_playbook: ../frigate/device-test.yml
+  vars:
+    frigate_test_variant: va-intel
+    frigate_test_device: devic.es/dri-intel
+    frigate_test_driver: "iHD"

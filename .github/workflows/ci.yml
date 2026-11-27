@@ -80,6 +80,10 @@ jobs:
       matrix:
         kustomization-test:
           - factorio
+          - frigate
+          - frigate-coral
+          - frigate-va-amd
+          - frigate-va-intel
           - kube-vip
           - kube-vip-wireguard
           - mosquitto

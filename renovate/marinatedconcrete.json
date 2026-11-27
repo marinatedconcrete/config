@@ -123,6 +123,12 @@
       "matchPackageNames": ["marinatedconcrete/config"]
     },
     {
+      "groupName": "marinatedconcrete Frigate Kustomize Component",
+      "groupSlug": "marinatedconcrete-kustomize-frigate",
+      "matchCurrentValue": "kustomize-frigate@**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
       "groupName": "marinatedconcrete Mosquitto Kustomize Component",
       "groupSlug": "marinatedconcrete-kustomize-mosquitto",
       "matchCurrentValue": "kustomize-mosquitto@**",

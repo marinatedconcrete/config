@@ -1,4 +1,7 @@
 ---
+frigate:
+  level: baseline
+  reason: The Frigate container starts as root to set the user IDs of its services.
 kube-vip:
   level: privileged
   reason: The DaemonSets use hostNetwork and the NET_ADMIN and NET_RAW capabilities.
