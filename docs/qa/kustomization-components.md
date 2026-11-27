@@ -65,7 +65,7 @@ Apply each item to the files that the change touches.
 
 - The README has the version badge and the Pod Security badge. A component that sets a `priorityClassName` also has the priority class badge.
 - Each badge points at the right component. The version badge query uses the component path.
-- The README has an Examples section with a Component example and a Resource example. The Resource URL has the form `.../releases/download/kustomize-<name>@v{version}/<name>.yml`.
+- The README has an Examples section with a Component example and a Resource example. The Resource URL has the form `.../releases/download/kustomize-<name>@v{version}/kustomize-<name>.yml`.
 - Setup sections use the same headings as the other READMEs: `Required Setup`, `Required Secrets`, `Required Patches`, and `Optional Patches`.
 - A change to a default value, a port, or a version also changes the README text that states it.
 - New prose follows ASD-STE100, as `AGENTS.md` requires. Past changelog entries stay unchanged.
