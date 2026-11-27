@@ -40,7 +40,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - https://github.com/marinatedconcrete/config/releases/download/kustomize-kube-vip@v{version}/kube-vip.yml
+  - https://github.com/marinatedconcrete/config/releases/download/kustomize-kube-vip@v{version}/kustomize-kube-vip.yml
 ```
 
 # Patches

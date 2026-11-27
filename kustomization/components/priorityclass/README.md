@@ -28,5 +28,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - https://github.com/marinatedconcrete/config/releases/download/kustomize-priorityclass@v{version}/priorityclass.yml
+  - https://github.com/marinatedconcrete/config/releases/download/kustomize-priorityclass@v{version}/kustomize-priorityclass.yml
 ```
