@@ -4,7 +4,84 @@ on:
   push:
 
 jobs:
+  changes:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.paths.outputs.build }}
+      components: ${{ steps.paths.outputs.components }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select checks
+        id: paths
+        shell: bash
+        env:
+          BEFORE: ${{ github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          KUSTOMIZATION_TESTS: |
+            factorio
+            kube-vip
+            kube-vip-wireguard
+            mosquitto
+            paperless
+            pod-security-audit-warn-baseline
+            pod-security-audit-warn-restricted
+            pod-security-enforce-baseline
+            pod-security-enforce-restricted
+            pod-security-enforce-privileged
+            priorityclass
+            unifi-network-application
+        run: |
+          base="$BEFORE"
+          if [[ "$base" == 0000000000000000000000000000000000000000 ]]; then
+            if [[ "$GITHUB_REF" == "refs/heads/$DEFAULT_BRANCH" ]]; then
+              base=
+            else
+              base=$(git merge-base HEAD "refs/remotes/origin/$DEFAULT_BRANCH") || base=
+            fi
+          fi
+
+          # Select all checks if Git cannot compare the two revisions.
+          changed() {
+            [[ -z "$base" ]] || ! git diff --quiet --no-renames "$base" HEAD -- "$@"
+          }
+
+          build=false
+          if changed .devcontainer ansible/requirements.txt .github/workflows/ci.yml; then
+            build=true
+          fi
+
+          components=()
+          while IFS= read -r test; do
+            paths=("kustomization/tests/$test")
+            case "$test" in
+              pod-security-*)
+                # These tests check combinations of Pod Security components.
+                paths+=(kustomization/components/pod-security kustomization/tests/pod_security.py renovate.json)
+                ;;
+              *) paths+=("kustomization/components/$test" kustomization/components/priorityclass) ;;
+            esac
+            case "$test" in
+              paperless) paths+=(kustomization/components/redis) ;;
+              kube-vip-wireguard) paths+=(kustomization/components/kube-vip) ;;
+            esac
+            if [[ "$build" == true ]] || changed "${paths[@]}" ansible justfile \
+              pnpm-lock.yaml pnpm-workspace.yaml package.json ':(exclude,glob)**/*.md'; then
+              components+=("$test")
+            fi
+          done <<< "${KUSTOMIZATION_TESTS%$'\n'}"
+
+          printf 'build=%s\n' "$build" >> "$GITHUB_OUTPUT"
+          jq -cn '$ARGS.positional' --args "${components[@]}" | sed 's/^/components=/' >> "$GITHUB_OUTPUT"
+
   build:
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     permissions:
       contents: read
       packages: write
@@ -39,6 +116,7 @@ jobs:
           refFilterForPush: refs/heads/main
   check-format:
     needs: build
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -53,7 +131,11 @@ jobs:
           push: never
           runCmd: just check-format
   kustomization-test:
-    needs: build
+    needs: [changes, build]
+    if: >-
+      ${{ !cancelled() && needs.changes.result == 'success' &&
+      needs.changes.outputs.components != '[]' &&
+      (needs.build.result == 'success' || needs.build.result == 'skipped') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -78,21 +160,10 @@ jobs:
           runCmd: just kustomization-test ${{ matrix.kustomization-test }}
     strategy:
       matrix:
-        kustomization-test:
-          - factorio
-          - kube-vip
-          - kube-vip-wireguard
-          - mosquitto
-          - paperless
-          - pod-security-audit-warn-baseline
-          - pod-security-audit-warn-restricted
-          - pod-security-enforce-baseline
-          - pod-security-enforce-restricted
-          - pod-security-enforce-privileged
-          - priorityclass
-          - unifi-network-application
+        kustomization-test: ${{ fromJSON(needs.changes.outputs.components) }}
   lint:
     needs: build
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo

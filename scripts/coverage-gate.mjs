@@ -23,7 +23,7 @@ const repoRoot = path.resolve(
 const COMPONENTS_DIR = "kustomization/components";
 const TESTS_DIR = "kustomization/tests";
 const CI_WORKFLOW = ".github/workflows/ci.yml";
-const MATRIX_KEY = "kustomization-test";
+const MATRIX_KEY = "KUSTOMIZATION_TESTS";
 
 // A component path such as "pod-security/enforce-baseline" has the test name
 // "pod-security-enforce-baseline". A top-level component has the same name.
@@ -73,41 +73,37 @@ export function checkComponents({
     }
     if (!hasMatrix) {
       errors.push(
-        `Component "${component}" has no "${testName}" entry in the ${MATRIX_KEY} matrix of ${CI_WORKFLOW}.`,
+        `Component "${component}" has no "${testName}" entry in the ${MATRIX_KEY} list in ${CI_WORKFLOW}.`,
       );
     }
   }
   return errors;
 }
 
-// Read the list under "matrix: kustomization-test:" in the CI file. The file must hold
-// one plain list of unquoted names. Any other shape throws, so a change in the
-// CI file never makes the check pass by accident.
+// Read the plain list of test names used to construct the CI matrix.
 export function parseMatrixEntries(workflowText) {
   const lines = workflowText.split("\n");
-  const matrixIndex = lines.findIndex((line) => /^\s+matrix:\s*$/.test(line));
-  const keyIndex = lines.findIndex(
-    (line, index) =>
-      index > matrixIndex && new RegExp(`^\\s+${MATRIX_KEY}:\\s*$`).test(line),
+  const keyIndex = lines.findIndex((line) =>
+    new RegExp(`^\\s+${MATRIX_KEY}: \\|$`).test(line),
   );
-  if (matrixIndex === -1 || keyIndex === -1) {
-    throw new Error(`No "matrix: ${MATRIX_KEY}:" key in ${CI_WORKFLOW}.`);
+  if (keyIndex === -1) {
+    throw new Error(`No "${MATRIX_KEY}: |" key in ${CI_WORKFLOW}.`);
   }
   const keyIndent = lines[keyIndex].search(/\S/);
   const entries = [];
   for (const line of lines.slice(keyIndex + 1)) {
     if (line.trim() === "") continue;
     if (line.search(/\S/) <= keyIndent) break;
-    const match = line.match(/^\s+- ([A-Za-z0-9][A-Za-z0-9._-]*)\s*$/);
+    const match = line.match(/^\s+([A-Za-z0-9][A-Za-z0-9._-]*)\s*$/);
     if (!match) {
       throw new Error(
-        `Cannot parse the matrix line "${line.trim()}" in ${CI_WORKFLOW}. Use one plain name for each list item.`,
+        `Cannot parse the test list line "${line.trim()}" in ${CI_WORKFLOW}. Use one plain name per line.`,
       );
     }
     entries.push(match[1]);
   }
   if (entries.length === 0) {
-    throw new Error(`The "${MATRIX_KEY}" matrix in ${CI_WORKFLOW} is empty.`);
+    throw new Error(`The "${MATRIX_KEY}" list in ${CI_WORKFLOW} is empty.`);
   }
   return entries;
 }
