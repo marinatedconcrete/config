@@ -4,58 +4,17 @@ on:
   push:
 
 jobs:
-  changes:
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    outputs:
-      build: ${{ steps.paths.outputs.build }}
-      components: ${{ steps.paths.outputs.components }}
-      matrix: ${{ steps.paths.outputs.matrix }}
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Select checks
-        id: paths
-        shell: bash
-        env:
-          BEFORE: ${{ github.event.before }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          KUSTOMIZATION_TESTS: |
-            factorio
-            kube-vip
-            kube-vip-wireguard
-            mosquitto
-            paperless
-            pod-security-audit-warn-baseline
-            pod-security-audit-warn-restricted
-            pod-security-enforce-baseline
-            pod-security-enforce-restricted
-            pod-security-enforce-privileged
-            priorityclass
-            unifi-network-application
-        run: |
-          .github/scripts/select-ci-checks.sh
-
   build:
     needs: changes
-    if: ${{ !cancelled() }}
+    if: needs.changes.outputs.build == 'true'
     permissions:
       contents: read
       packages: write
     runs-on: ubuntu-latest
     steps:
-      - name: Check path selection
-        if: needs.changes.result != 'success'
-        run: exit 1
       - name: Checkout Repo
-        if: needs.changes.outputs.build == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up Docker
-        if: needs.changes.outputs.build == 'true'
         uses: docker/setup-docker-action@3f1ab1ab0e29231562e4db4ca600c1a49653bac6 # v5.7.0
         with:
           daemon-config: |
@@ -65,14 +24,12 @@ jobs:
               }
             }
       - name: Login to GitHub Container Registry
-        if: needs.changes.outputs.build == 'true'
         uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build devcontainer image
-        if: needs.changes.outputs.build == 'true'
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
           cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
@@ -83,7 +40,7 @@ jobs:
           push: filter
           refFilterForPush: refs/heads/main
   check-format:
-    needs: build
+    needs: [changes, build]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
@@ -98,9 +55,30 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
           runCmd: just check-format
+  changes:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      build: ${{ steps.paths.outputs.build }}
+      components: ${{ steps.paths.outputs.components }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select checks
+        id: paths
+        shell: bash
+        env:
+          BEFORE: ${{ github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: .github/scripts/select-ci-checks.sh
   kustomization-test:
     needs: [changes, build]
-    if: ${{ !cancelled() && needs.changes.result == 'success' && needs.build.result == 'success' }}
+    if: ${{ !cancelled() && needs.changes.result == 'success' && needs.build.result != 'failure' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -127,12 +105,27 @@ jobs:
           runCmd: just kustomization-test ${{ matrix.kustomization-test }}
     strategy:
       matrix:
-        kustomization-test: ${{ fromJSON(needs.changes.outputs.matrix) }}
+        kustomization-test:
+          - factorio
+          - kube-vip
+          - kube-vip-wireguard
+          - mosquitto
+          - paperless
+          - pod-security-audit-warn-baseline
+          - pod-security-audit-warn-restricted
+          - pod-security-enforce-baseline
+          - pod-security-enforce-restricted
+          - pod-security-enforce-privileged
+          - priorityclass
+          - unifi-network-application
   lint:
-    needs: build
+    needs: [changes, build]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
+      - name: Check path selection
+        if: needs.changes.result != 'success'
+        run: exit 1
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Validate configs

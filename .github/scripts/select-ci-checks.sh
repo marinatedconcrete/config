@@ -20,17 +20,23 @@ if changed .devcontainer ansible/requirements.txt .github/workflows/ci.yml .gith
   build=true
 fi
 
-matrix=()
 components=()
-while IFS= read -r test; do
-  matrix+=("$test")
+for suite in kustomization/tests/*/test.yml; do
+  test_dir=${suite%/test.yml}
+  test=${test_dir##*/}
   paths=("kustomization/tests/$test")
   case "$test" in
     pod-security-*)
       # These tests check combinations of Pod Security components.
       paths+=(kustomization/components/pod-security kustomization/tests/pod_security.py renovate.json)
       ;;
-    *) paths+=("kustomization/components/$test" kustomization/components/priorityclass) ;;
+    factorio|kube-vip|kube-vip-wireguard|mosquitto|paperless|priorityclass|unifi-network-application)
+      paths+=("kustomization/components/$test" kustomization/components/priorityclass)
+      ;;
+    *)
+      # A new test can use several components or shared test files.
+      paths+=(kustomization/components kustomization/tests kustomization/examples)
+      ;;
   esac
   case "$test" in
     paperless) paths+=(kustomization/components/redis) ;;
@@ -40,8 +46,7 @@ while IFS= read -r test; do
     pnpm-lock.yaml pnpm-workspace.yaml package.json ':(exclude,glob)**/*.md'; then
     components+=("$test")
   fi
-done <<< "${KUSTOMIZATION_TESTS%$'\n'}"
+done
 
 printf 'build=%s\n' "$build" >> "$GITHUB_OUTPUT"
 jq -cn '$ARGS.positional' --args "${components[@]}" | sed 's/^/components=/' >> "$GITHUB_OUTPUT"
-jq -cn '$ARGS.positional' --args "${matrix[@]}" | sed 's/^/matrix=/' >> "$GITHUB_OUTPUT"

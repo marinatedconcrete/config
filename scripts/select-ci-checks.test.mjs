@@ -49,7 +49,6 @@ test("a second push keeps the component selected until the branch merges", (t) =
         DEFAULT_BRANCH: "main",
         GITHUB_REF: "refs/heads/" + ref,
         GITHUB_OUTPUT: output,
-        KUSTOMIZATION_TESTS: "factorio\npaperless\n",
       },
     });
     return Object.fromEntries(
@@ -64,6 +63,11 @@ test("a second push keeps the component selected until the branch merges", (t) =
   }
   git("init", "-q", "-b", "main");
   writeFileSync(path.join(cwd, "README.md"), "base\n");
+  for (const name of ["factorio", "paperless"]) {
+    const suite = path.join(cwd, "kustomization/tests", name);
+    mkdirSync(suite, { recursive: true });
+    writeFileSync(path.join(suite, "test.yml"), "---\n");
+  }
   const base = commit("base");
   git("update-ref", "refs/remotes/origin/main", base);
   git("switch", "-qc", "feature");
@@ -73,7 +77,6 @@ test("a second push keeps the component selected until the branch merges", (t) =
   const first = commit("component");
   const expected = {
     build: false,
-    matrix: ["factorio", "paperless"],
     components: ["paperless"],
   };
   assert.deepEqual(select("feature", base), expected);
@@ -84,6 +87,6 @@ test("a second push keeps the component selected until the branch merges", (t) =
   assert.deepEqual(select("main", "0".repeat(40)), {
     ...expected,
     build: true,
-    components: expected.matrix,
+    components: ["factorio", "paperless"],
   });
 });

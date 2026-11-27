@@ -96,10 +96,11 @@ test("an allowlist entry for a missing component fails", () => {
 
 const workflow = `jobs:
   kustomization-test:
-    env:
-      KUSTOMIZATION_TESTS: |
-        factorio
-        pod-security-enforce-baseline
+    strategy:
+      matrix:
+        kustomization-test:
+          - factorio
+          - pod-security-enforce-baseline
   lint:
     runs-on: ubuntu-latest
 `;
@@ -114,14 +115,20 @@ test("the matrix parser reads the plain list and stops at the next key", () => {
 test("the matrix parser rejects a missing key, an empty list, and a quoted item", () => {
   assert.throws(
     () => parseMatrixEntries("jobs: {}\n"),
-    /No "KUSTOMIZATION_TESTS: \|"/,
+    /No "matrix: kustomization-test:"/,
   );
   assert.throws(
-    () => parseMatrixEntries("      KUSTOMIZATION_TESTS: |\n  lint:\n"),
+    () =>
+      parseMatrixEntries(
+        "      matrix:\n        kustomization-test:\n  lint:\n",
+      ),
     /empty/,
   );
   assert.throws(
-    () => parseMatrixEntries('      KUSTOMIZATION_TESTS: |\n        "a"\n'),
+    () =>
+      parseMatrixEntries(
+        '      matrix:\n        kustomization-test:\n          - "a"\n',
+      ),
     /Cannot parse/,
   );
 });
@@ -566,7 +573,7 @@ test(
     );
     writeFileSync(
       path.join(root, ".github", "workflows", "ci.yml"),
-      "      KUSTOMIZATION_TESTS: |\n        x\n",
+      "    matrix:\n      kustomization-test:\n        - x\n",
     );
     writeFileSync(
       path.join(root, ".coverage-thresholds.json"),
