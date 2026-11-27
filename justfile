@@ -296,7 +296,11 @@ pod-security-lint:
     # Give each run its own profile. Then the recipe never deletes a cluster that it did not start.
     profile="pod-security-lint-$$"
     trap 'minikube delete --profile="${profile}"' EXIT
-    minikube start --interactive=false --profile="${profile}" --kubernetes-version="${version}" --cni=kindnet
+    # Minikube calls GitHub to check a version that is newer than its newest
+    # supported version. The call fails when the rate limit is spent. Force the
+    # version, as the component tests do, so a spent rate limit cannot fail the
+    # gate.
+    minikube start --interactive=false --profile="${profile}" --kubernetes-version="${version}" --cni=kindnet --force
     bash kustomization/pod-security-check/test.sh "${profile}"
     bash kustomization/pod-security-check/check.sh "${profile}"
 
