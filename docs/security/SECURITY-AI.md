@@ -26,12 +26,36 @@ An agent must not do these actions:
 - Add a secret, a token, or a key to an image layer, a build argument, or a script. See [container images](../qa/images.md).
 - Weaken a pod security profile or disable a test to make a check pass. See [the review prompt](../../.github/prompts/review.md).
 
-As a recommendation, do not force-push `main`. Branch protection permits a force push (see the next section), and no file in the repository forbids it.
+As a recommendation, do not force-push `main`. The ruleset blocks a force push, but two actors can bypass the ruleset. See the next section.
 
-## Branch protection on main
+## Rules on main
 
-Branch protection controls what reaches `main`. It does not require a pull request or a review.
-An account with write access can push a commit to `main` when the required status checks pass for that commit. Renovate branch auto-merge uses this.
+Two sets of rules control what reaches `main`. They are the `Review Requirements` ruleset and a branch protection rule.
+GitHub applies the rules of both. If the two sets give different values for the same rule, the stricter value applies.
+
+### The ruleset
+
+The ruleset requires a pull request and a review. Read the rules that apply to `main` with this command:
+
+```sh
+gh api repos/marinatedconcrete/config/rules/branches/main
+```
+
+Each rule in the result has a `ruleset_id`. Read the bypass list of a ruleset with `gh api repos/marinatedconcrete/config/rulesets/<ruleset_id> --jq .bypass_actors`.
+
+- A change to `main` must come from a pull request.
+- A pull request must have an approving review from a code owner. [The CODEOWNERS file](../../.github/CODEOWNERS) names the code owners of each path, and only people own the CODEOWNERS file itself.
+- The approval must come from a person who did not make the last push to the pull request. A new push dismisses the earlier approvals.
+- All review threads must be resolved before the pull request can merge.
+- The ruleset permits squash merge and rebase merge. `main` must have a linear history.
+- The ruleset blocks a force push to `main` and the deletion of `main`.
+- Two actors can bypass the ruleset at all times. They are an organization admin and the Renovate GitHub App. Each can push to `main` and can merge a pull request that does not obey the rules.
+- The Renovate app is on the bypass list so that its auto-merge rules work with no approval. Revisit this exception when more automation reviews its updates.
+- All members of the organization are admins. Thus an agent that uses the credentials of a member can bypass the ruleset.
+
+### Branch protection
+
+Branch protection requires status checks. It does not require a review.
 Read the settings with this command:
 
 ```sh
@@ -59,15 +83,15 @@ gh api graphql -f query='
   }'
 ```
 
-Do not use the REST `required_pull_request_reviews` endpoint. It returns default values when the review rule is off.
+This query does not show the ruleset. Do not use the REST `required_pull_request_reviews` endpoint. It returns default values when the review rule is off.
 
-- Branch protection does not require an approving review. A pull request can merge with no approval when the required status checks pass.
+- Branch protection does not require an approving review (`requiresApprovingReviews` is `false`). The ruleset adds the review rule.
 - The required status checks are the build, the format check, the lint check, and six of the twelve component tests. The `kube-vip-wireguard` test and the five `pod-security-*` tests are not required.
 - No other check is required. Examples are the image checks, the coverage gate, and the pull request title check. See the known gaps in [container images](../qa/images.md).
 - The repository permits only squash merge, and `main` must have a linear history.
-- Signed commits are not required. [AGENTS.md](../../AGENTS.md) tells you to sign commits when possible.
+- Signed commits are not required. Neither the ruleset nor branch protection requires them. [AGENTS.md](../../AGENTS.md) tells you to sign commits when possible.
 - `isAdminEnforced` is `false`, so branch protection does not apply to an admin. An admin can push to `main` or merge when a required status check has not passed.
-- Force pushes to `main` are permitted. Deletion of `main` is not permitted.
+- Branch protection permits force pushes to `main` (`allowsForcePushes` is `true`), but the ruleset blocks them. Neither permits the deletion of `main`.
 
 ## Tokens and secrets
 
@@ -89,13 +113,17 @@ Do not use the REST `required_pull_request_reviews` endpoint. It returns default
 - GitHub permits only GitHub-owned actions, actions from verified creators, and two named patterns. Read the list with `gh api repos/marinatedconcrete/config/actions/permissions/selected-actions`.
 - Renovate does not merge a third-party action update. A new version of an action can contain new code, and that code runs with the write tokens of the job. The rule in [renovate.json](../../renovate.json) that matches `!actions/*` sets `automerge` to `false`.
 - To verify, find that rule in `renovate.json`. Make sure that no later rule sets `automerge` to `true` for a third-party action. [Renovate presets](../qa/renovate-presets.md) gives the checklist.
-- [renovate.json](../../renovate.json) lists the updates that auto-merge. A rule with `automergeType` set to `branch` pushes the commit to `main` with no pull request. The other two auto-merge rules open a pull request, and it merges with no review. A patch update that the `prettier`, `pnpm`, `cli/cli`, and `node` rule matches also matches the patch rule. That later rule sends the update to `main` with no pull request.
+- [renovate.json](../../renovate.json) lists the updates that auto-merge. The Renovate app can bypass the [ruleset](#the-ruleset), so most of these updates need no approval.
+- A rule with `automergeType` set to `branch` pushes the commit to `main` with no pull request and no review.
+- The `devcontainer-base` rule opens a pull request, and Renovate merges it after all checks pass. Renovate does the merge, so the bypass applies.
+- The `prettier`, `pnpm`, `cli/cli`, and `node` rule opens a pull request and turns on GitHub auto-merge. This repository has not yet seen if GitHub auto-merge uses the bypass of the Renovate app. Thus these pull requests can wait for the approval of a code owner.
+- A patch update that the `prettier`, `pnpm`, `cli/cli`, and `node` rule matches also matches the patch rule. That later rule sets `automergeType` to `branch` for the update.
 - Updates from `ghcr.io`, `quay.io`, `registry.k8s.io`, and `lscr.io` do not auto-merge, because these registries can give no release time. `ghcr.io/marinatedconcrete/devcontainer-base` is the named exception.
 
 ## Review of agent-authored changes
 
 - Labels mark the author of a pull request. `author/hive` marks this repository's Hive, `author/clanker` marks the Hive of a contributor, and `author/human` marks a person.
-- The `role/*` labels describe the trust tiers of Hive. Hive applies these tiers. No file in the repository enforces them, and branch protection does not require a review.
+- The `role/*` labels describe the trust tiers of Hive. Hive applies these tiers. No file in the repository enforces them. The [ruleset](#the-ruleset) requires the approval of a code owner, but two actors can bypass it.
 - [scripts/pr-metrics.mjs](../../scripts/pr-metrics.mjs) counts how many Hive pull requests merge. It does not gate a merge.
 - [The review prompt](../../.github/prompts/review.md) is the checklist for each reviewer. The QA page in [docs/qa/](../qa/) for each part lists what a person must check.
 - "Pull requests from automation" in [the review prompt](../../.github/prompts/review.md) applies to Hive bots, Renovate, and Release Please. It adds checks to the general checklist.
