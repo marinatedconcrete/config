@@ -401,6 +401,11 @@ wait_for_hostname() {
 
     log "Waiting for hostname ${guest_hostname}"
     while ((SECONDS < deadline)); do
+        if [[ -n "$qemu_pid" ]] && ! kill -0 "$qemu_pid" >/dev/null 2>&1; then
+            wait "$qemu_pid" || true
+            die "QEMU validation VM exited while waiting for the hostname"
+        fi
+
         if current="$(ssh_cmd hostname 2>"${logs_dir}/ssh-hostname-wait-last.log")" &&
             [[ "$current" == "$guest_hostname" ]]; then
             return
