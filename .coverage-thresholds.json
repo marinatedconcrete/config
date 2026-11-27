@@ -44,7 +44,8 @@
       "scripts/publish-badge.sh": 38,
       ".github/scripts/publish-draft-release.sh": 9,
       ".github/scripts/release-latest.sh": 13,
-      ".github/scripts/next-calver-version.sh": 7
+      ".github/scripts/next-calver-version.sh": 7,
+      ".github/scripts/select-ci-checks.sh": 24
     }
   },
   "components": {

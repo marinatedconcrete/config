@@ -5,6 +5,8 @@ on:
 
 jobs:
   build:
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     permissions:
       contents: read
       packages: write
@@ -38,7 +40,8 @@ jobs:
           push: filter
           refFilterForPush: refs/heads/main
   check-format:
-    needs: build
+    needs: [changes, build]
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -52,22 +55,46 @@ jobs:
           imageName: ghcr.io/marinatedconcrete/config-devcontainer
           push: never
           runCmd: just check-format
+  changes:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      build: ${{ steps.paths.outputs.build }}
+      components: ${{ steps.paths.outputs.components }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select checks
+        id: paths
+        shell: bash
+        env:
+          BEFORE: ${{ github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: .github/scripts/select-ci-checks.sh
   kustomization-test:
-    needs: build
+    needs: [changes, build]
+    if: ${{ !cancelled() && needs.changes.result == 'success' && needs.build.result != 'failure' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
+        if: contains(fromJSON(needs.changes.outputs.components), matrix.kustomization-test)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       # The runner can load an AppArmor profile for Mosquitto. The profile
       # then applies in the privileged test containers and blocks the
       # program. Only the Mosquitto test needs this step.
       - name: Remove Host AppArmor Profiles
-        if: matrix.kustomization-test == 'mosquitto'
+        if: matrix.kustomization-test == 'mosquitto' && contains(fromJSON(needs.changes.outputs.components), matrix.kustomization-test)
         run: |
           if [[ -f /etc/apparmor.d/mosquitto ]]; then
             sudo apparmor_parser --remove /etc/apparmor.d/mosquitto
           fi
       - name: Validate configs
+        if: contains(fromJSON(needs.changes.outputs.components), matrix.kustomization-test)
         uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
           cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
@@ -92,9 +119,13 @@ jobs:
           - priorityclass
           - unifi-network-application
   lint:
-    needs: build
+    needs: [changes, build]
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
+      - name: Check path selection
+        if: needs.changes.result != 'success'
+        run: exit 1
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Validate configs
