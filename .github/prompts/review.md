@@ -84,6 +84,7 @@ A change is also breaking when the consumer sees a new behavior with no edit of 
 Ask this question: "Can a consumer who changes only the version pin see a failure or a new behavior?"
 If the answer is yes, the change is breaking.
 Judge the effect on the consumer, not the size of the diff.
+To decide how closely to review each changed part, read [risk tiers](../../docs/risk-tiers.md).
 
 Each part has its own version, tag, and consumers.
 The QA page for each part in [docs/qa/](../../docs/qa/) lists what is breaking and what is not for that part.
@@ -194,6 +195,7 @@ Do this section in addition to the general checklist.
 - For a release pull request, check that the release has a real change.
   Read the new section in `CHANGELOG.md`.
   A section that lists only an earlier `chore(main)` release commit is not a real change.
+  Release Please can still plan this release. Use the log check in the section on stale pull requests.
 - Check the title and the breaking change annotation, as the general checklist says.
   Do not apply the pull request template checks to the body.
   Renovate and Release Please write their own bodies.
@@ -201,7 +203,7 @@ Do this section in addition to the general checklist.
 ### What not to do
 
 - Do not comment on style in a generated file.
-  Release Please writes `CHANGELOG.md`, `version.txt`, and `.release-please-manifest.json`.
+  Release Please writes `CHANGELOG.md`, `.release-please-manifest.json`, and a version file such as `ansible/galaxy.yml` or `version.txt`.
   Renovate writes its own branch and title.
 - Do not ask the bot to change the code.
   The bot cannot answer.
@@ -218,19 +220,35 @@ Do this section in addition to the general checklist.
 
 ### Stale or no-op release pull requests
 
-- Release Please skips a package when it finds no user-facing commits.
+- A release pull request is often behind `main`. This is not a reason to close it.
+- Release Please skips a package when the log shows `No commits for path: <path>, skipping` or `No user facing commits found ... skipping`.
   The old release pull request then stays open and does not update.
   It can conflict with `main`.
 - A manual rebase of a generated branch is the wrong fix.
   It copies tool output by hand and the tool can replace it.
-- Recommend `close`.
-  Give the reason: the pull request is stale, or its release has no real change.
-  State that Release Please opens a new release pull request when a new release commit exists.
 - Recommend a rebase only if the maintainer needs the exact version tag.
   In that case, keep only the lines that the release pull request owns.
-- Before you recommend `close`, read the log of the last Release Please run on `main`.
-  Check if Release Please still plans this release.
-  Write "not checked" if you cannot read the log.
+- Before you recommend `close`, find the newest Release Please run for the current commit of `main` in which the `Update Release PRs` step passed.
+  A run for an older commit can give an old answer.
+- A body edit of a merged pull request changes the input of Release Please but not `main`.
+  Run `git log <tag>..origin/main --oneline -- <path>`, with the newest release tag of the package.
+  If there is no tag, omit `<tag>..`.
+  The `(#N)` in each subject names a pull request.
+  Read the `lastEditedAt` of each with GraphQL.
+  Read the `startedAt` of the step with `gh run view <id> --json jobs`.
+  If an edit is later, write "not checked".
+- Read the log of that step for the package path in `release-please-config.json`.
+  The section for the path starts at `Building candidate release pull request for path: <path>`.
+  It ends at the next such line or at `Looking for open release pull requests`.
+  The `No user facing commits` line has no path.
+  Use it only inside the section.
+- If the section has a skip line, recommend `close`.
+  Give the reason: the pull request is stale.
+  State that Release Please opens a new release pull request when a new release commit exists.
+- If the log has `PR <url> remained the same` or an update line for this pull request, Release Please still plans the release.
+  Do not recommend `close`.
+  Ask the maintainer to decide.
+- Write "not checked" if there is no such run, or if the log has none of these lines.
 
 ### How to ask for a decision
 
@@ -240,8 +258,8 @@ Do this section in addition to the general checklist.
 - Use this form:
 
 ```text
-Decision needed: @<maintainer>, close this release PR so Release Please can regenerate it, or keep it for the 1.1.1 tag?
-Recommendation: close. The 1.1.1 section lists only the 1.1.0 release commit.
+Decision needed: @<maintainer>, close this release PR, or keep it for the 1.1.1 tag?
+Recommendation: close. The log has "No commits for path: <path>, skipping".
 ```
 
 The maintainer can answer with `close` or `keep`.

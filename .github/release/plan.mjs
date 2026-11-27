@@ -2,6 +2,29 @@ import { appendFileSync } from "node:fs";
 import { GitHub, Manifest } from "release-please";
 import { githubApi } from "./api.mjs";
 
+export function classifyReleasePath(path) {
+  const project = path.startsWith("kustomization/components/")
+    ? `kustomize-${path.split("/").at(-1)}`
+    : path.startsWith("images/") || path.startsWith("actions/")
+      ? path.split("/").at(-1)
+      : path;
+  const kind = project.startsWith("kustomize-")
+    ? "component"
+    : [
+          "kairos-fedora",
+          "buildah-action-runner",
+          "github-runner-ci",
+          "vscode-ssh-server",
+        ].includes(project)
+      ? "image"
+      : path.startsWith("actions/") || ["ansible", "renovate"].includes(project)
+        ? "source"
+        : null;
+  if (!kind || !/^[a-z0-9-]+$/.test(project))
+    throw new Error(`Unsupported release path: ${path}`);
+  return { project, kind };
+}
+
 export async function planReleases({
   github,
   api,
@@ -54,27 +77,7 @@ export async function planReleases({
       );
       if (versions[release.path] !== version)
         throw new Error("Release version does not match the selected commit");
-      const project = release.path.startsWith("kustomization/components/")
-        ? `kustomize-${release.path.split("/").at(-1)}`
-        : release.path.startsWith("images/") ||
-            release.path.startsWith("actions/")
-          ? release.path.split("/").at(-1)
-          : release.path;
-      const kind = project.startsWith("kustomize-")
-        ? "component"
-        : [
-              "kairos-fedora",
-              "buildah-action-runner",
-              "github-runner-ci",
-              "vscode-ssh-server",
-            ].includes(project)
-          ? "image"
-          : release.path.startsWith("actions/") ||
-              ["ansible", "renovate"].includes(project)
-            ? "source"
-            : null;
-      if (!kind || !/^[a-z0-9-]+$/.test(project))
-        throw new Error(`Unsupported release path: ${release.path}`);
+      const { project, kind } = classifyReleasePath(release.path);
       // Old tag workflows can rebuild and replace the version image.
       if (kind === "image") {
         const protocol = await api(
@@ -127,22 +130,37 @@ export async function collectPlan(createContext) {
   return { candidates, errors };
 }
 
+// The plan entry point. It builds the release plan, writes it to the
+// GitHub Actions output file, and logs the candidates. The tests drive
+// run() with a fake context so the wrapper logic has a fast check.
+export async function run({
+  createContext,
+  appendSync = appendFileSync,
+  output = process.env.GITHUB_OUTPUT,
+  log = console.log,
+} = {}) {
+  const { candidates, errors } = await collectPlan(createContext);
+  appendSync(
+    output,
+    `candidates=${JSON.stringify(candidates)}\nerrors=${JSON.stringify(errors)}\n`,
+  );
+  log(candidates.map(({ tag, sha, pr }) => ({ tag, sha, pr })));
+  return { candidates, errors };
+}
+
 if (
   process.argv[1] &&
   import.meta.url === new URL(`file://${process.argv[1]}`).href
 ) {
-  const { candidates, errors } = await collectPlan(async () => {
-    const repository = process.env.GITHUB_REPOSITORY;
+  const environment = process.env;
+  const createContext = async () => {
+    const repository = environment.GITHUB_REPOSITORY;
     const [owner, repo] = repository.split("/");
-    const token = process.env.GH_TOKEN;
+    const token = environment.GH_TOKEN;
     const api = githubApi(repository, token);
     const github = await GitHub.create({ owner, repo, token });
     const manifest = await Manifest.fromManifest(github, "main");
-    return { github, api, manifest, requested: process.env.RELEASE_PR };
-  });
-  appendFileSync(
-    process.env.GITHUB_OUTPUT,
-    `candidates=${JSON.stringify(candidates)}\nerrors=${JSON.stringify(errors)}\n`,
-  );
-  console.log(candidates.map(({ tag, sha, pr }) => ({ tag, sha, pr })));
+    return { github, api, manifest, requested: environment.RELEASE_PR };
+  };
+  await run({ createContext });
 }

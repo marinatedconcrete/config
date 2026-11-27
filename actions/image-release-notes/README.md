@@ -88,6 +88,16 @@ That job does not use the publish action.
 The publish action needs a release at the tag.
 Create the release before the job runs.
 
+If the repository uses immutable releases, create the release as a draft.
+Publish the draft after the publish action.
+GitHub does not let you change the assets of a published immutable release.
+On a published immutable release, the publish action does not upload the SBOM.
+If the release already has the same SBOM, the action writes the notes.
+The action compares the SHA-256 digest of the release asset with the digest of the local SBOM.
+If the release does not have the SBOM, the action fails.
+If the SBOM of the release is different, or GitHub gives no digest, the action fails.
+In each failure case, the action does not change the release body.
+
 ## Renovate
 
 Add both of these presets to the `extends` list of your Renovate configuration:

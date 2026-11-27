@@ -11,7 +11,6 @@
       - kubectl
       - "--context={{ kairos_kube_context | mandatory }}"
       - --request-timeout=15s
-    kairos_image: ghcr.io/marinatedconcrete/kairos-fedora:1.1.1
   tasks:
     - name: Check for changes to the cloud configuration
       check_mode: true
@@ -65,7 +64,13 @@
 
         - name: Upgrade the Kairos image
           ansible.builtin.command:
-            argv: [kairos-agent, upgrade, --source, "oci:{{ kairos_image }}"]
+            argv:
+              [
+                kairos-agent,
+                upgrade,
+                --source,
+                "oci:{{ kairos_image | default('ghcr.io/marinatedconcrete/kairos-fedora:1.1.1') }}",
+              ]
           changed_when: true
           when: kairos_operation == 'upgrade'
 

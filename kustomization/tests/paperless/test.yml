@@ -20,6 +20,21 @@
         wait: true
         wait_timeout: 300 # 5 minutes.
       changed_when: false
+    - name: Check the Paperless probe response
+      kubernetes.core.k8s_exec:
+        command: >-
+          curl --silent --show-error --max-time 5 --dump-header - --output /dev/null
+          --header "Host: localhost" http://127.0.0.1:8000/static/admin/img/icon-yes.svg
+        container: paperless
+        context: "{{ kubernetes_core_k8s__context }}"
+        namespace: "{{ test_namespace }}"
+        pod: paperless-0
+      changed_when: false
+      failed_when: >-
+        probe.rc != 0 or
+        probe.stdout is not search('^HTTP/[^ ]+ 200 ', multiline=True) or
+        probe.stdout is search('^Set-Cookie:[ ]*sessionid=', ignorecase=True, multiline=True)
+      register: probe
     - name: Get Paperless endpoints information
       kubernetes.core.k8s_info:
         api_version: v1

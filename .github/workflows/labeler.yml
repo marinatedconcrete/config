@@ -1,0 +1,44 @@
+name: Path Policy
+
+# This workflow uses pull_request, not pull_request_target.
+# A pull request from a fork gets a read-only token, so the job skips these pull requests.
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+
+# Each run waits in a queue, so a run for an old head cannot cancel the run for the current head.
+# The queue holds up to 100 runs. A run for an old head stops and changes no label.
+concurrency:
+  group: path-policy-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+  queue: max
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    name: Label by area and risk
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            scripts
+            .github/policies
+      - name: Apply area and risk labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: node scripts/path-policy.mjs label "$PULL_REQUEST_NUMBER"
