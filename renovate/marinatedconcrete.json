@@ -135,6 +135,12 @@
       "matchPackageNames": ["marinatedconcrete/config"]
     },
     {
+      "groupName": "marinatedconcrete Longhorn Kustomize Components",
+      "groupSlug": "marinatedconcrete-kustomize-longhorn",
+      "matchCurrentValue": "kustomize-longhorn@**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
       "groupName": "marinatedconcrete Pod Security Kustomize Components",
       "groupSlug": "marinatedconcrete-kustomize-pod-security",
       "matchCurrentValue": "kustomize-pod-security@**",

@@ -1,0 +1,31 @@
+---
+- name: Test longhorn-encrypted-storage
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Render the component
+      ansible.builtin.command:
+        argv:
+          - kustomize
+          - build
+          - "{{ playbook_dir }}"
+      register: rendered
+      changed_when: false
+
+    - name: Check the rendered configuration
+      vars:
+        manifest: "{{ rendered.stdout | from_yaml }}"
+      ansible.builtin.assert:
+        that:
+          - manifest.kind == "StorageClass"
+          - manifest.metadata.name == "longhorn-encrypted"
+          - manifest.provisioner == "driver.longhorn.io"
+          - manifest.reclaimPolicy == "Retain"
+          - manifest.allowVolumeExpansion
+          - manifest.parameters.encrypted == "true"
+          - manifest.parameters["csi.storage.k8s.io/" ~ item ~ "-secret-name"] == "longhorn-crypto"
+          - manifest.parameters["csi.storage.k8s.io/" ~ item ~ "-secret-namespace"] == "longhorn-system"
+      loop:
+        - node-publish
+        - node-stage
+        - node-expand

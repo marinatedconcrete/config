@@ -84,6 +84,8 @@ jobs:
           - kube-vip-wireguard
           - mosquitto
           - paperless
+          - longhorn-encrypted-storage
+          - longhorn-s3-backup
           - pod-security-audit-warn-baseline
           - pod-security-audit-warn-restricted
           - pod-security-enforce-baseline
