@@ -77,6 +77,22 @@
       "release-type": "simple",
       "tag-separator": "-"
     },
+    "kustomization/components/egress-coredns": {
+      "package-name": "kustomize-egress-coredns",
+      "release-type": "simple"
+    },
+    "kustomization/components/egress-deny-all": {
+      "package-name": "kustomize-egress-deny-all",
+      "release-type": "simple"
+    },
+    "kustomization/components/egress-kubernetes-api": {
+      "package-name": "kustomize-egress-kubernetes-api",
+      "release-type": "simple"
+    },
+    "kustomization/components/egress-public-internet": {
+      "package-name": "kustomize-egress-public-internet",
+      "release-type": "simple"
+    },
     "kustomization/components/factorio": {
       "package-name": "kustomize-factorio",
       "release-type": "simple"

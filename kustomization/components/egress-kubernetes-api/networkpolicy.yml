@@ -1,0 +1,12 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-kubernetes-api-networkpolicy
+spec:
+  egress: []
+  podSelector:
+    matchLabels:
+      networking.marinatedconcrete.com/api-server-client: "true"
+  policyTypes:
+    - Egress

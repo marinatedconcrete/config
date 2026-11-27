@@ -79,6 +79,10 @@ jobs:
     strategy:
       matrix:
         kustomization-test:
+          - egress-coredns
+          - egress-deny-all
+          - egress-kubernetes-api
+          - egress-public-internet
           - factorio
           - kube-vip
           - kube-vip-wireguard

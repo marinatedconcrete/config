@@ -1,0 +1,44 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+components:
+  - ../../components/egress-coredns
+  - ../../components/egress-deny-all
+  - ../../components/egress-kubernetes-api
+  - ../../components/egress-public-internet
+kind: Kustomization
+namespace: egress-example
+patches:
+  - patch: |
+      - op: replace
+        path: /spec/egress
+        value:
+        - ports:
+          - port: 53
+            protocol: TCP
+          - port: 53
+            protocol: UDP
+          to:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: kube-system
+            podSelector:
+              matchLabels:
+                k8s-app: kube-dns
+          - ipBlock:
+              cidr: 192.0.2.53/32
+    target:
+      kind: NetworkPolicy
+      name: allow-egress-coredns-networkpolicy
+  - patch: |
+      - op: replace
+        path: /spec/egress
+        value:
+        - ports:
+          - port: 6443
+            protocol: TCP
+          to:
+          - ipBlock:
+              cidr: 192.0.2.10/32
+    target:
+      kind: NetworkPolicy
+      name: allow-egress-kubernetes-api-networkpolicy

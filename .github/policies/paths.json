@@ -92,7 +92,11 @@
     {
       "tier": "low",
       "area": "area/kustomization",
-      "paths": ["kustomization/tests/**", "kustomization/pod-security-check/**"]
+      "paths": [
+        "kustomization/tests/**",
+        "kustomization/pod-security-check/**",
+        "kustomization/examples/**"
+      ]
     },
     {
       "tier": "low",
