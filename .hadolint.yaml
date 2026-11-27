@@ -2,3 +2,5 @@
 failure-threshold: info
 ignored:
   - DL3008
+  # Named users are defined by the base image or created during the build.
+  - DL3066

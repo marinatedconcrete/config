@@ -1,5 +1,47 @@
 # Changelog
 
+## [5.1.1](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v5.1.0...kustomize-kube-vip@v5.1.1) (2026-11-22)
+
+
+### Other Changes
+
+* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1.3.2 ([#1062](https://github.com/marinatedconcrete/config/issues/1062)) ([26350e5](https://github.com/marinatedconcrete/config/commit/26350e559a0c0eac844b5fa9f8fcbb562343c98c))
+
+## [5.1.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v5.0.0...kustomize-kube-vip@v5.1.0) (2026-11-08)
+
+
+### Features
+
+* **kube-vip:** name the services instance ([#1009](https://github.com/marinatedconcrete/config/issues/1009)) ([17d9439](https://github.com/marinatedconcrete/config/commit/17d9439a899eb06a9a7358f4e2bb936362a83b4c))
+
+## [5.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.7...kustomize-kube-vip@v5.0.0) (2026-10-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **kube-vip:** kube-vip-svc-ds now supplies metrics on port 2113. Change a scrape or a firewall rule for this DaemonSet from port 2112 to port 2113.
+
+### Bug Fixes
+
+* **kube-vip:** give each DaemonSet its own metrics port ([#958](https://github.com/marinatedconcrete/config/issues/958)) ([909bcc1](https://github.com/marinatedconcrete/config/commit/909bcc133b77412ffcc297da5689e3c055429ed7))
+
+
+### Other Changes
+
+* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1.3.1 ([#918](https://github.com/marinatedconcrete/config/issues/918)) ([3c6b1cb](https://github.com/marinatedconcrete/config/commit/3c6b1cbcb0f71a2de6bfe26d54aa1aac8cface8e))
+
+## [4.0.7](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.6...kustomize-kube-vip@v4.0.7) (2026-10-15)
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
+
+### Other Changes
+
+* **package:** update ghcr.io/kube-vip/kube-vip docker tag to v1.2.4 ([#907](https://github.com/marinatedconcrete/config/issues/907)) ([361ecba](https://github.com/marinatedconcrete/config/commit/361ecbadc89cb32450d943e25fc10525ad16c026))
+
 ## [4.0.6](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v4.0.5...kustomize-kube-vip@v4.0.6) (2026-08-30)
 
 

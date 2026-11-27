@@ -1,0 +1,29 @@
+---
+- connection: local
+  gather_facts: false
+  hosts: localhost
+  name: Check the egress-coredns component
+  tasks:
+    - ansible.builtin.include_tasks: ../egress-assertions.yml
+      name: Check the component
+  vars:
+    expected_policies:
+      allow-egress-coredns-networkpolicy:
+        egress:
+          - ports:
+              - port: 53
+                protocol: TCP
+              - port: 53
+                protocol: UDP
+            to:
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: kube-system
+                podSelector:
+                  matchLabels:
+                    k8s-app: kube-dns
+        podSelector:
+          matchLabels:
+            networking.marinatedconcrete.com/dns-client: "true"
+        policyTypes:
+          - Egress

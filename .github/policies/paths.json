@@ -1,0 +1,114 @@
+{
+  "rules": [
+    {
+      "tier": "high",
+      "area": "area/ci",
+      "paths": [".github/workflows/**"]
+    },
+    {
+      "tier": "high",
+      "area": "area/dev-tooling",
+      "paths": [
+        "justfile",
+        ".devcontainer/**",
+        ".github/CODEOWNERS",
+        ".github/pull_request_template.md",
+        ".github/policies/**",
+        "scripts/path-policy.mjs",
+        "scripts/publish-badge.sh"
+      ]
+    },
+    {
+      "tier": "high",
+      "area": "area/ansible",
+      "paths": ["ansible/requirements.txt"]
+    },
+    {
+      "tier": "high",
+      "area": "area/release-tooling",
+      "paths": [
+        ".github/release/**",
+        ".github/scripts/**",
+        "release-please-config.json",
+        ".release-please-manifest.json"
+      ]
+    },
+    {
+      "tier": "high",
+      "area": "area/renovate",
+      "paths": ["renovate.json"]
+    },
+    {
+      "tier": "high",
+      "area": "area/kustomization",
+      "paths": [
+        "kustomization/components/kube-vip/**",
+        "kustomization/components/kube-vip-wireguard/**",
+        "kustomization/components/pod-security/**"
+      ]
+    },
+    {
+      "tier": "high",
+      "area": "area/images",
+      "paths": ["images/**"]
+    },
+    {
+      "tier": "high",
+      "area": "area/actions",
+      "paths": ["actions/**"]
+    },
+    {
+      "tier": "medium",
+      "area": "area/kustomization",
+      "paths": ["kustomization/components/**"]
+    },
+    {
+      "tier": "medium",
+      "area": "area/ansible",
+      "paths": ["ansible/**"]
+    },
+    {
+      "tier": "medium",
+      "area": "area/renovate",
+      "paths": ["renovate/**"]
+    },
+    {
+      "tier": "low",
+      "area": "area/dev-tooling",
+      "paths": [
+        "scripts/**",
+        ".coverage-thresholds.json",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        ".editorconfig",
+        ".gitignore",
+        ".hadolint.yaml",
+        ".prettierignore",
+        ".prettierrc.yml",
+        ".github/actionlint.yaml"
+      ]
+    },
+    {
+      "tier": "low",
+      "area": "area/kustomization",
+      "paths": [
+        "kustomization/tests/**",
+        "kustomization/pod-security-check/**",
+        "kustomization/examples/**"
+      ]
+    },
+    {
+      "tier": "low",
+      "area": "area/docs",
+      "paths": [
+        "docs/**",
+        ".github/prompts/**",
+        "skills/**",
+        ".github/ISSUE_TEMPLATE/**",
+        "LICENSE",
+        "*.md"
+      ]
+    }
+  ]
+}

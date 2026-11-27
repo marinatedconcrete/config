@@ -20,6 +20,8 @@ PACKAGES=(
     "linux-firmware"
     # Supply the wireless regulatory database for cfg80211.
     "wireless-regdb"
+    # Supply the `hostname` command.
+    "hostname"
     # Supply iSCSI volume support for Longhorn.
     "iscsi-initiator-utils"
     "openssh-server"

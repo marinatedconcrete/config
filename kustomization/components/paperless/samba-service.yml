@@ -4,9 +4,10 @@ metadata:
   name: samba-svc
 spec:
   selector:
-    app.kubernetes.io/name: samba
+    app.kubernetes.io/name: paperless
   ports:
     - protocol: TCP
       port: 445
+      targetPort: smb
   type: LoadBalancer
   loadBalancerClass: kube-vip.io/kube-vip-class

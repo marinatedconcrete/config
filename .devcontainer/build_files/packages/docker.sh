@@ -16,9 +16,12 @@ skip_if_unavailable=1
 module_hotfixes=1
 EOF
 
+# Install the nftables backend of iptables. The legacy backend needs the
+# iptable_nat module in the host kernel, and a container cannot load it.
 dnf install \
     --setopt=install_weak_deps=False \
     -y \
     containerd.io \
     docker-ce \
-    docker-ce-cli
+    docker-ce-cli \
+    iptables-nft

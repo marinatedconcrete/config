@@ -9,7 +9,7 @@ check-format:
     #!/usr/bin/env bash
     set -euo pipefail
     just --unstable --fmt --check -f justfile
-    yarn prettier --no-error-on-unmatched-pattern --check **/*.yml **/*.json **/*.md
+    pnpm exec prettier --no-error-on-unmatched-pattern --check '**/*.md' '**/*.yml' '**/*.yaml' '**/*.json' '**/*.mjs'
 
 # Generate the kube-vip manifests.
 [group('codegen')]
@@ -18,8 +18,8 @@ codegen-kube-vip:
     set -euo pipefail
 
     # renovate: datasource=docker depName=ghcr.io/kube-vip/kube-vip
-    KUBE_VIP_VERSION=v1.2.3
-    KUBE_VIP_DIGEST=sha256:2fcdbb014a2e217b9ea1b6dacac53d6851b185af323cdd28d100ad82d74bc79a
+    KUBE_VIP_VERSION=v1.3.2
+    KUBE_VIP_DIGEST=sha256:50b25c001fe19628a932b42ec6f8ec31bb65a5e1811a723a57ceddbc5cd5aade
     KUBE_VIP_IMAGE=ghcr.io/kube-vip/kube-vip@${KUBE_VIP_DIGEST}
 
     # Generate the VIP DaemonSet manifest.
@@ -32,6 +32,7 @@ codegen-kube-vip:
             --controlplane \
             --inCluster \
             --leaderElection \
+            --prometheusHTTPServer=:2112 \
             --taint \
         > ${SCRATCH}
 
@@ -52,9 +53,6 @@ codegen-kube-vip:
     # Remove the VIP address. The user must set this address with a patch.
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "address"))' ${SCRATCH}
 
-    # Remove prometheus_server.
-    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "prometheus_server"))' ${SCRATCH}
-
     # Set cp_namespace with a field reference.
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "cp_namespace") | .value)' ${SCRATCH}
     yq -i '(.spec.template.spec.containers[0].env[] | select(.name == "cp_namespace") | .valueFrom.fieldRef.fieldPath) = "metadata.namespace"' ${SCRATCH}
@@ -74,13 +72,17 @@ codegen-kube-vip:
         >> ${DEST}
 
 
-    # Generate the services DaemonSet manifest.
+    # Generate the services DaemonSet manifest.  Use a metrics port that is
+    # different from the control plane DaemonSet port.  Both DaemonSets use the
+    # host network, and a control plane node runs both.
     DEST=kustomization/components/kube-vip/daemonset/services.yml
     SCRATCH=$(mktemp --tmpdir daemonset-XXX.yml)
     docker run --network host --rm ${KUBE_VIP_IMAGE} \
         manifest daemonset \
             --arp \
             --inCluster \
+            --instanceName=arp \
+            --prometheusHTTPServer=:2113 \
             --services \
             --servicesElection \
         > ${SCRATCH}
@@ -107,7 +109,6 @@ codegen-kube-vip:
     # Remove unused environment settings.
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "dns_mode"))' ${SCRATCH}
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "port"))' ${SCRATCH}
-    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "prometheus_server"))' ${SCRATCH}
     yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "vip_address"))' ${SCRATCH}
 
     # Set cp_namespace with a field reference.
@@ -115,6 +116,81 @@ codegen-kube-vip:
 
     # Set priorityClassName in the manifest.
     yq -i '.spec.template.spec.priorityClassName = "critical-application-infra"' ${SCRATCH}
+
+    # Sort the environment variables by name.
+    yq -i '.spec.template.spec.containers[0].env |= sort_by(.name)' ${SCRATCH}
+
+    # Write the final manifest.
+    echo '# @codegen-command: just codegen-kube-vip' > ${DEST}
+    echo '# @generated' >> ${DEST}
+    echo '---' >> ${DEST}
+    yq '.' ${SCRATCH} \
+        | sed -e "s/'/\"/g" \
+        >> ${DEST}
+
+
+    # Generate the WireGuard DaemonSet manifest.  Use a metrics port that is
+    # different from the other DaemonSet ports, because all DaemonSets use the
+    # host network.
+    DEST=kustomization/components/kube-vip-wireguard/daemonset/wireguard.yml
+    SCRATCH=$(mktemp --tmpdir daemonset-XXX.yml)
+    docker run --network host --rm ${KUBE_VIP_IMAGE} \
+        manifest daemonset \
+            --inCluster \
+            --instanceName wg \
+            --lbClassName kube-vip.io/wireguard \
+            --lbClassOnly \
+            --prometheusHTTPServer :2114 \
+            --services \
+            --servicesElection \
+            --servicesLeaseName plndr-wg-svcs-lock \
+            --wireguard \
+        > ${SCRATCH}
+
+    # Set a name that differs from the other DaemonSet names.
+    yq -i '.metadata.name = "kube-vip-wg-ds"' ${SCRATCH}
+    yq -i '.metadata.labels."app.kubernetes.io/name" = "kube-vip-wg-ds"' ${SCRATCH}
+    yq -i '.spec.selector.matchLabels."app.kubernetes.io/name" = "kube-vip-wg-ds"' ${SCRATCH}
+    yq -i '.spec.template.metadata.labels."app.kubernetes.io/name" = "kube-vip-wg-ds"' ${SCRATCH}
+
+    # Remove the namespace so the user can configure it.
+    yq -i 'del(.metadata.namespace)' ${SCRATCH}
+
+    # Remove the unused creationTimestamp fields.
+    yq -i 'del(.metadata.creationTimestamp)' ${SCRATCH}
+    yq -i 'del(.spec.template.metadata.creationTimestamp)' ${SCRATCH}
+
+    # Remove empty objects from the generated manifest.
+    yq -i 'del(.spec.template.spec.containers[0].resources)' ${SCRATCH}
+    yq -i 'del(.spec.updateStrategy)' ${SCRATCH}
+
+    # Remove the image tag. The `kustomization.yml` file controls this tag.
+    yq -i '.spec.template.spec.containers[0].image = "ghcr.io/kube-vip/kube-vip"' ${SCRATCH}
+
+    # Remove unused environment settings.
+    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "dhcp_mode"))' ${SCRATCH}
+    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "dns_mode"))' ${SCRATCH}
+    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "port"))' ${SCRATCH}
+    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "vip_address"))' ${SCRATCH}
+    yq -i 'del(.spec.template.spec.containers[0].env[] | select(.name == "vip_arp"))' ${SCRATCH}
+
+    # Set cp_namespace with a field reference.
+    yq -i '.spec.template.spec.containers[0].env += [{"name": "cp_namespace", "valueFrom": { "fieldRef": { "fieldPath": "metadata.namespace"}}}]' ${SCRATCH}
+
+    # Set priorityClassName in the manifest.
+    yq -i '.spec.template.spec.priorityClassName = "critical-application-infra"' ${SCRATCH}
+
+    # Kube-vip needs two node settings and cannot write them without privilege.
+    # This check stops the pod early with a clear message.
+    CHECK_SCRIPT='for name in src_valid_mark route_localnet; do
+      value=$(cat "/proc/sys/net/ipv4/conf/all/${name}")
+      if [ "${value}" != 1 ]; then
+        echo "net.ipv4.conf.all.${name} is ${value}.  The node must set it to 1."
+        exit 1
+      fi
+    done'
+    export CHECK_SCRIPT
+    yq -i '.spec.template.spec.initContainers = [{"name": "check-node-sysctls", "image": "busybox", "command": ["sh", "-c", strenv(CHECK_SCRIPT)], "securityContext": {"allowPrivilegeEscalation": false, "capabilities": {"drop": ["ALL"]}, "readOnlyRootFilesystem": true, "runAsNonRoot": true, "runAsUser": 65534}}]' ${SCRATCH}
 
     # Sort the environment variables by name.
     yq -i '.spec.template.spec.containers[0].env |= sort_by(.name)' ${SCRATCH}
@@ -159,7 +235,18 @@ format:
     #!/usr/bin/env bash
     set -euo pipefail
     just --unstable --fmt -f justfile
-    yarn prettier --no-error-on-unmatched-pattern --log-level warn --write **/*.yml **/*.json **/*.md
+    pnpm exec prettier --no-error-on-unmatched-pattern --log-level warn --write '**/*.md' '**/*.yml' '**/*.yaml' '**/*.json' '**/*.mjs'
+
+# Check GitHub workflow files with actionlint.
+[group('lint')]
+actionlint-lint:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    find .github/workflows -type f \( -name "*.yml" -o -name "*.yaml" \) -print | while read -r file; do
+        echo -n "Running \`actionlint\` on ${file}..."
+        actionlint ${file}
+        echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
+    done
 
 # Check Ansible plays, roles, and configuration.
 [group('lint')]
@@ -167,17 +254,19 @@ ansible-lint:
     #!/usr/bin/env bash
     set -euo pipefail
 
+    # Stop Minikube when the recipe exits, also after a failure.
+    trap 'minikube stop --profile=ansible-lint' EXIT
+
     # Start Minikube to supply a correct Kubernetes context for ansible-lint.
     minikube start --interactive=false --profile=ansible-lint
     cd ansible && ansible-lint
-    minikube stop --profile=ansible-lint
 
 # Check Containerfiles and Dockerfiles with hadolint.
 [group('lint')]
 hado-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    find . -name "*erfile*" -print | while read -r file; do 
+    find . \( -name .git -o -name node_modules \) -prune -o -type f -name "*erfile*" -print | while read -r file; do
         echo -n "Running \`hadolint\` on ${file}..."
         hadolint ${file}
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
@@ -188,28 +277,55 @@ hado-lint:
 kustomize-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    find kustomization/components -mindepth 1 -maxdepth 1 -type d -print | while read -r file; do 
+    find kustomization/components -name kustomization.yml -print | while read -r manifest; do
+        file="${manifest%/*}"
         echo -n "Running \`kustomize build\` on ${file}..."
         kustomize build ${file} > /dev/null
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
+
+# Check each rendered component against its Pod Security level.
+[group('lint')]
+pod-security-lint:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    # Use the Kubernetes version of the component tests.
+    version="$(yq '.minikube_test__kubernetes_version' ansible/roles/minikube_test/defaults/main.yml)"
+
+    # Give each run its own profile. Then the recipe never deletes a cluster that it did not start.
+    profile="pod-security-lint-$$"
+    trap 'minikube delete --profile="${profile}"' EXIT
+    # Minikube calls GitHub to check a version that is newer than its newest
+    # supported version. The call fails when the rate limit is spent. Force the
+    # version, as the component tests do, so a spent rate limit cannot fail the
+    # gate.
+    minikube start --interactive=false --profile="${profile}" --kubernetes-version="${version}" --cni=kindnet --force
+    bash kustomization/pod-security-check/test.sh "${profile}"
+    bash kustomization/pod-security-check/check.sh "${profile}"
+
+# Check that the path policy covers every tracked file.
+[group('lint')]
+path-policy-lint:
+    node scripts/path-policy.mjs check
 
 # Check the Renovate configuration.
 [group('lint')]
 renovate-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    yarn renovate-config-validator renovate.json
+    pnpm exec renovate-config-validator renovate.json
     find renovate -name "*.json" -print | while read -r file; do
-        yarn renovate-config-validator ${file}
+        pnpm exec renovate-config-validator ${file}
     done
+    node scripts/renovate-checks.mjs
 
 # Check shell scripts with ShellCheck.
 [group('lint')]
 shellcheck-lint:
     #!/usr/bin/env bash
     set -euo pipefail
-    find . -path "./.yarn" -prune -o -name "*.sh" -print | while read -r file; do
+    find . -type d -name node_modules -prune -o -name "*.sh" -print | while read -r file; do
         echo -n "Running \`shellcheck\` on ${file}..."
         shellcheck ${file}
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
@@ -217,7 +333,7 @@ shellcheck-lint:
 
 # Run all linters.
 [group('lint')]
-lint: ansible-lint hado-lint kustomize-lint renovate-lint shellcheck-lint
+lint: actionlint-lint ansible-lint hado-lint kustomize-lint path-policy-lint pod-security-lint renovate-lint shellcheck-lint
 
 # Run the Kairos Fedora end-to-end test for startup and installation.
 [group('test')]
@@ -242,9 +358,72 @@ kustomization-tests:
         echo "{{ BOLD + GREEN }}OK{{ NORMAL }}"
     done
 
+# Run the coverage gate for the Node tests, the shell scripts, and the component tests. Run it in the devcontainer, which has kcov.
+[group('test')]
+coverage-gate *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    npm ci --prefix .github/release --ignore-scripts
+    npm ci --prefix actions/image-release-notes --ignore-scripts
+    node scripts/coverage-gate.mjs {{ args }}
+
+# Run the coverage gate and keep the kcov HTML report in a new directory in /tmp/shell-coverage-report. The gate prints the path of the report.
+[group('test')]
+shell-coverage: (coverage-gate "--kcov-dir" "/tmp/shell-coverage-report")
+
+# Run the tests of the release shell scripts.
+[group('test')]
+release-scripts-test:
+    bash .github/scripts/publish-draft-release.test.sh
+    bash .github/scripts/release-latest.test.sh
+
 # Run all tests..
 [group('test')]
-test: kustomization-tests
+test: kustomization-tests release-scripts-test
+
+# Generate the release notes and the SBOM for an image.
+[group('release')]
+release-notes component image highlights="" components="" previous="" containerfile="" target="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    # The script ignores an empty components script, an empty Containerfile, an
+    # empty target, and an absent previous SBOM.
+    bash actions/image-release-notes/release-notes.sh \
+        --components-script "{{ components }}" \
+        --containerfile "{{ containerfile }}" \
+        --highlights "{{ highlights }}" \
+        --image "{{ image }}" \
+        --notes "build/release/{{ component }}-notes.md" \
+        --previous-sbom "{{ previous }}" \
+        --sbom "build/release/{{ component }}-sbom.cdx.json" \
+        --target "{{ target }}"
+
+# Generate the Kairos Fedora release notes and SBOM from an image.
+[group('release')]
+release-notes-kairos-fedora image previous="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    just release-notes kairos-fedora "{{ image }}" "kernel systemd" \
+        images/kairos-fedora/release-notes-components.sh "{{ previous }}"
+
+# Generate the Devcontainer Base release notes and SBOM from an image.
+[group('release')]
+release-notes-devcontainer-base image previous="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    just release-notes devcontainer-base "{{ image }}" "" \
+        images/devcontainer-base/release-notes-components.sh "{{ previous }}" \
+        images/devcontainer-base/Containerfile
+
+# Generate the GitHub Runner CI release notes and SBOM from an image.
+[group('release')]
+release-notes-github-runner-ci image previous="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    just release-notes github-runner-ci "{{ image }}" "git jq ripgrep ShellCheck yq" \
+        images/github-runner-ci/release-notes-components.sh "{{ previous }}" \
+        images/github-runner-ci/Containerfile
 
 [group('release')]
 release-please-build project dest="":
@@ -259,7 +438,6 @@ release-please-build project dest="":
 
     component="${project#kustomize-}"
     component_path="kustomization/components/${component}"
-
     if [[ ! -d "${component_path}" ]]; then
         echo "Component path not found: ${component_path}" >&2
         exit 1
@@ -270,13 +448,47 @@ release-please-build project dest="":
         dest_path="/tmp/${component}.yml"
     fi
 
+    if [[ ! -f "${component_path}/kustomization.yaml" && ! -f "${component_path}/kustomization.yml" && ! -f "${component_path}/Kustomization" ]]; then
+        # Test all components in the shared release.
+        for child_path in "${component_path}"/*/; do
+            name="${child_path%/}"
+            just kustomization-test "${component}-${name##*/}"
+        done
+        # The group has no combined resource manifest.
+        : > "${dest_path}"
+        echo "${dest_path}"
+        exit 0
+    fi
+
     # Run component tests before the release build.
     just kustomization-test "${component}"
     kustomize build "${component_path}/" -o "${dest_path}"
     echo "${dest_path}"
 
-# Generate the Yarn integration files for tools such as VS Code.
-regen-yarn-sdks:
+# Validate a source release.
+[group('release')]
+release-please-validate path:
     #!/usr/bin/env bash
     set -euo pipefail
-    yarn dlx @yarnpkg/sdks
+
+    path="{{ path }}"
+    case "${path}" in
+        ansible)
+            # The Kustomize component tests use the roles in this collection.
+            just ansible-lint test
+            ;;
+        renovate)
+            just renovate-lint
+            ;;
+        actions/*)
+            find "${path}" -name "*.sh" -exec shellcheck {} +
+            if [[ -f "${path}/package.json" ]]; then
+                npm ci --ignore-scripts --prefix "${path}"
+                npm test --prefix "${path}"
+            fi
+            ;;
+        *)
+            echo "Unsupported source release path: ${path}" >&2
+            exit 1
+            ;;
+    esac

@@ -1,0 +1,24 @@
+---
+- name: Render the policies
+  ansible.builtin.command:
+    argv: [kustomize, build, "{{ render_dir | default(playbook_dir) }}"]
+  changed_when: false
+  register: rendered
+
+- name: Check the policy names
+  ansible.builtin.assert:
+    that:
+      - policies | map(attribute="metadata.name") | sort == expected_policies.keys() | sort
+  vars:
+    policies: "{{ rendered.stdout | from_yaml_all | list }}"
+
+- name: Check each policy
+  ansible.builtin.assert:
+    that:
+      - item.kind == "NetworkPolicy"
+      - item.apiVersion == "networking.k8s.io/v1"
+      - item.metadata.namespace == expected_namespace | default("egress-test")
+      - item.spec == expected_policies[item.metadata.name]
+  loop: "{{ rendered.stdout | from_yaml_all | list }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"

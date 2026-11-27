@@ -6,6 +6,7 @@
     - role: marinatedconcrete.config.minikube_test
       vars:
         minikube_test__enable_local_path_storage: true
+        minikube_test__enable_user_namespaces: true
         minikube_test__test_dir: kustomization/tests/factorio
   tasks:
     - name: Wait for statefulset

@@ -6,7 +6,7 @@ kind: DaemonSet
 metadata:
   labels:
     app.kubernetes.io/name: kube-vip-ds
-    app.kubernetes.io/version: v1.2.3
+    app.kubernetes.io/version: v1.3.2
   name: kube-vip-ds
 spec:
   selector:
@@ -16,7 +16,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: kube-vip-ds
-        app.kubernetes.io/version: v1.2.3
+        app.kubernetes.io/version: v1.3.2
     spec:
       affinity:
         nodeAffinity:
@@ -44,6 +44,8 @@ spec:
               value: first
             - name: port
               value: "6443"
+            - name: prometheus_server
+              value: :2112
             - name: vip_arp
               value: "true"
             - name: vip_leaderelection

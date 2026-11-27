@@ -1,19 +1,19 @@
 # See https://kairos.io/docs/reference/kairos-factory/ for more information.
 
-FROM quay.io/kairos/kairos-init:v0.17.3@sha256:7f35a5025559ac2f1f5f52e89e52a91f67b783ef03ff1c1ac06a690a482e805d AS kairos-init
+FROM quay.io/kairos/kairos-init:v4.7.0@sha256:ddce7e8b176be66d40c21ab58200c62c84d42907cec2f5bbf53a774ddd702421 AS kairos-init
 
 # Make build scripts available without copies in the final image.
 FROM scratch AS ctx
 COPY build_files /
 
 FROM fedora:45
-LABEL org.opencontainers.image.title="A custom Fedora-based Kairos image."
+LABEL org.opencontainers.image.description="A custom Fedora-based Kairos image."
 LABEL org.opencontainers.image.title="kairos-fedora"
 ARG MODEL=generic
 ARG TRUSTED_BOOT=false
 ARG KUBERNETES_DISTRO=k3s
 # renovate: datasource=github-releases depName=k3s-io/k3s
-ARG KUBERNETES_VERSION=v1.36.2+k3s1
+ARG KUBERNETES_VERSION=v1.37.2+k3s1
 ARG VERSION
 
 COPY --from=kairos-init /kairos-init /kairos-init

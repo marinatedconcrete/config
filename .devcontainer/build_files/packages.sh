@@ -4,6 +4,7 @@ set -eoux pipefail
 
 PACKAGES=(
     "edk2-ovmf"
+    "libatomic"
     "libssh-devel"
     "openssh-clients"
     "openssl"
@@ -21,6 +22,7 @@ dnf install \
     -y \
     "${PACKAGES[@]}"
 
+/ctx/packages/actionlint.sh
 /ctx/packages/docker.sh
 /ctx/packages/github-cli.sh
 /ctx/packages/helm.sh

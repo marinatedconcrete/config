@@ -1,0 +1,17 @@
+---
+- connection: local
+  gather_facts: false
+  hosts: localhost
+  name: Check the egress-deny-all component
+  tasks:
+    - ansible.builtin.include_tasks: ../egress-assertions.yml
+      name: Check the component
+    - ansible.builtin.include_tasks: ../egress-example.yml
+      name: Check the combined example
+  vars:
+    expected_policies:
+      deny-all-egress-networkpolicy:
+        egress: []
+        podSelector: {}
+        policyTypes:
+          - Egress

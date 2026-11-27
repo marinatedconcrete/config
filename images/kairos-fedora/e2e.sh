@@ -44,9 +44,10 @@ E2E_WEBUI_PORT="${E2E_WEBUI_PORT:-18080}"
 E2E_SSH_PORT="${E2E_SSH_PORT:-10022}"
 KAIROS_E2E_VERSION="${KAIROS_E2E_VERSION:-0.0.0-e2e}"
 # renovate: datasource=docker depName=quay.io/kairos/auroraboot
-AURORABOOT_IMAGE="${AURORABOOT_IMAGE:-quay.io/kairos/auroraboot:v0.20.1}"
+AURORABOOT_IMAGE="${AURORABOOT_IMAGE:-quay.io/kairos/auroraboot:v4.7.0@sha256:cba8ccbc0914e439945b1d370e609c4ce70d5f1c1533d34506581243f3824899}"
 
 logs_dir="${E2E_WORKDIR}/logs"
+guest_hostname="kairos-fedora-e2e"
 disk_path="${E2E_WORKDIR}/kairos-fedora.qcow2"
 ssh_key="${E2E_WORKDIR}/id_ed25519"
 cloud_config="${E2E_WORKDIR}/install-cloud-config.yaml"
@@ -142,7 +143,7 @@ generate_cloud_config() {
     public_key="$(<"${ssh_key}.pub")"
     cat >"$cloud_config" <<EOF
 #cloud-config
-hostname: kairos-fedora-e2e
+hostname: ${guest_hostname}
 users:
   - name: kairos
     groups:
@@ -256,7 +257,7 @@ wait_for_webui() {
         fi
 
         if curl --fail --silent --show-error --max-time 5 "$url" >"${logs_dir}/webui-index.html"; then
-            grep -q 'install-form' "${logs_dir}/webui-index.html" || die "WebUI responded but install form was not found"
+            grep -q 'wizard.js' "${logs_dir}/webui-index.html" || die "WebUI responded but the installer wizard was not found"
             return
         fi
         sleep 5
@@ -296,6 +297,7 @@ ssh_cmd() {
         -p "$E2E_SSH_PORT" \
         -o BatchMode=yes \
         -o ConnectTimeout=5 \
+        -o IdentitiesOnly=yes \
         -o LogLevel=ERROR \
         -o ServerAliveCountMax=1 \
         -o ServerAliveInterval=5 \
@@ -389,6 +391,31 @@ on_exit() {
     exit "$status"
 }
 
+wait_for_hostname() {
+    local current=""
+    local deadline
+    local timeout_seconds
+
+    timeout_seconds="$(duration_to_seconds "$E2E_BOOT_TIMEOUT")"
+    deadline=$((SECONDS + timeout_seconds))
+
+    log "Waiting for hostname ${guest_hostname}"
+    while ((SECONDS < deadline)); do
+        if [[ -n "$qemu_pid" ]] && ! kill -0 "$qemu_pid" >/dev/null 2>&1; then
+            wait "$qemu_pid" || true
+            die "QEMU validation VM exited while waiting for the hostname"
+        fi
+
+        if current="$(ssh_cmd hostname 2>"${logs_dir}/ssh-hostname-wait-last.log")" &&
+            [[ "$current" == "$guest_hostname" ]]; then
+            return
+        fi
+        sleep 5
+    done
+
+    die "Expected hostname '${guest_hostname}' within ${E2E_BOOT_TIMEOUT}. Last result: '${current:-<empty>}'"
+}
+
 run_guest_checks() {
     log "Checking Fedora identity"
     ssh_cmd 'grep -E "^(ID|ID_LIKE)=" /etc/os-release | grep -q fedora'
@@ -464,6 +491,7 @@ main() {
     start_qemu validate "" "$ovmf_code" "$ovmf_vars"
     wait_for_ssh
     reboot_and_wait_for_ssh
+    wait_for_hostname
     run_guest_checks
 
     phase="complete"

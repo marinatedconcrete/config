@@ -11,6 +11,8 @@ CORE_PACKAGES=(
 
 # Install standard tools in the base image.
 COMMON_PACKAGES=(
+    # Install the runtime library for Node.js 25 and later.
+    "libatomic"
     # Install DNS diagnostic tools.
     "bind-utils"
     "iproute"
@@ -23,6 +25,8 @@ COMMON_PACKAGES=(
     # Install version control tools.
     "diffutils"
     "git"
+    # Install the line coverage tool for shell scripts.
+    "kcov"
     # Install the text editor.
     "vim"
 )

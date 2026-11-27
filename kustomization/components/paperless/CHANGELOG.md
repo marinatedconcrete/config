@@ -1,5 +1,110 @@
 # Changelog
 
+## [2.2.2](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.2.1...kustomize-paperless@v2.2.2) (2026-11-27)
+
+
+### Bug Fixes
+
+* **paperless:** prevent HTTP probes from creating sessions ([#1161](https://github.com/marinatedconcrete/config/issues/1161)) ([5904ef0](https://github.com/marinatedconcrete/config/commit/5904ef0481034e90e524268e97d79c3493914050))
+
+
+### Other Changes
+
+* **prettier:** format nested files with Prettier ([#1108](https://github.com/marinatedconcrete/config/issues/1108)) ([c6b6286](https://github.com/marinatedconcrete/config/commit/c6b6286db17cf2ab50a72158933351b8859fc4d9)), closes [#1086](https://github.com/marinatedconcrete/config/issues/1086)
+
+## [2.2.1](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.2.0...kustomize-paperless@v2.2.1) (2026-11-22)
+
+
+### Bug Fixes
+
+* **paperless:** use a writable Python bytecode cache ([#1070](https://github.com/marinatedconcrete/config/issues/1070)) ([bc5008e](https://github.com/marinatedconcrete/config/commit/bc5008ede9be4c65e7f6dd16b29261512c8766ca))
+
+## [2.2.0](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.1.2...kustomize-paperless@v2.2.0) (2026-11-22)
+
+
+### Features
+
+* **paperless:** accept the namespace-qualified Service hostname ([#1066](https://github.com/marinatedconcrete/config/issues/1066)) ([69286d7](https://github.com/marinatedconcrete/config/commit/69286d7edaf083cd0fa938d42b88bf342f0ac4e1))
+
+## [2.1.2](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.1.1...kustomize-paperless@v2.1.2) (2026-11-21)
+
+
+### Bug Fixes
+
+* **paperless:** use localhost for HTTP probe host validation ([#1064](https://github.com/marinatedconcrete/config/issues/1064)) ([50dbdfd](https://github.com/marinatedconcrete/config/commit/50dbdfdba19a722831399cb4f3cae9a95e1d261c))
+
+## [2.1.1](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.1.0...kustomize-paperless@v2.1.1) (2026-11-19)
+
+
+### Other Changes
+
+* **package:** update ghcr.io/paperless-ngx/paperless-ngx docker tag to v3.5.1 ([#1055](https://github.com/marinatedconcrete/config/issues/1055)) ([fbb5672](https://github.com/marinatedconcrete/config/commit/fbb56725be8f137c58c27d835fed469c04c2618e))
+
+## [2.1.0](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.0.0...kustomize-paperless@v2.1.0) (2026-11-17)
+
+
+### Features
+
+* **package:** update ghcr.io/paperless-ngx/paperless-ngx docker tag to v3.5.0 ([#1049](https://github.com/marinatedconcrete/config/issues/1049)) ([1c9e2c0](https://github.com/marinatedconcrete/config/commit/1c9e2c06278189cc3046eda0aa3b7716c0dd68f2))
+
+## [2.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.2.9...kustomize-paperless@v2.0.0) (2026-11-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **paperless:** Each node must support user namespaces, and each volume must support idmapped mounts.  Move patches for the samba Deployment to the samba container of the paperless StatefulSet, and use a strategic merge patch that names the container.  Change patches for the paperless-scans PVC to paperless-consume.  Add printer_samba_password to paperless-secrets if it is missing.  If a NetworkPolicy selects the paperless pod for ingress, allow the port named smb.  A NetworkPolicy matches the port of the pod, so a rule for TCP port 445 does not match.  The README shows the upgrade steps.
+
+### Features
+
+* **paperless:** run samba in the paperless pod in a user namespace ([#1035](https://github.com/marinatedconcrete/config/issues/1035)) ([50fff92](https://github.com/marinatedconcrete/config/commit/50fff92393395c69cb96d9bc16b9e0a132f4df94))
+
+## [1.2.9](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.2.8...kustomize-paperless@v1.2.9) (2026-11-06)
+
+
+### Other Changes
+
+* **package:** update ghcr.io/paperless-ngx/paperless-ngx docker tag to v3.4.2 ([#979](https://github.com/marinatedconcrete/config/issues/979)) ([cb9cd2e](https://github.com/marinatedconcrete/config/commit/cb9cd2ecf34dd70018a6db4d8575d86c60582b09))
+
+## [1.2.8](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.2.7...kustomize-paperless@v1.2.8) (2026-11-01)
+
+
+### Other Changes
+
+* **package:** update ghcr.io/paperless-ngx/paperless-ngx docker tag to v3.4.1 ([#966](https://github.com/marinatedconcrete/config/issues/966)) ([217b36c](https://github.com/marinatedconcrete/config/commit/217b36c9723ecdf2a1472cc081808d82e3167f47))
+
+## [1.2.7](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.2.6...kustomize-paperless@v1.2.7) (2026-10-23)
+
+
+### Other Changes
+
+* **package:** update ghcr.io/paperless-ngx/paperless-ngx docker tag to v3.3.4 ([#944](https://github.com/marinatedconcrete/config/issues/944)) ([faa547e](https://github.com/marinatedconcrete/config/commit/faa547e39d5d7668ae545c23e68d414b302bf1a5))
+
+## [1.2.6](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.2.5...kustomize-paperless@v1.2.6) (2026-10-21)
+
+
+### Other Changes
+
+* **package:** update ghcr.io/paperless-ngx/paperless-ngx docker tag to v3.3.3 ([#934](https://github.com/marinatedconcrete/config/issues/934)) ([0352fae](https://github.com/marinatedconcrete/config/commit/0352faebdf85815abb0dbfd892e23cab3a70c922))
+
+## [1.2.5](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.2.4...kustomize-paperless@v1.2.5) (2026-10-17)
+
+
+### Other Changes
+
+* **package:** update ghcr.io/paperless-ngx/paperless-ngx docker tag to v3.3.2 ([#919](https://github.com/marinatedconcrete/config/issues/919)) ([20005a5](https://github.com/marinatedconcrete/config/commit/20005a5518b73e9b1166c7fd9a9f7658e04f1b01))
+
+## [1.2.4](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.2.3...kustomize-paperless@v1.2.4) (2026-10-16)
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
+
+### Other Changes
+
+* **package:** update ghcr.io/servercontainers/samba:smbd-only-latest docker digest to 31b90ea ([#862](https://github.com/marinatedconcrete/config/issues/862)) ([e67013f](https://github.com/marinatedconcrete/config/commit/e67013fe7ffb9d9da2c3eb49bf4c1dd8704dc5ac))
+
 ## [1.2.3](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v1.2.2...kustomize-paperless@v1.2.3) (2026-09-06)
 
 

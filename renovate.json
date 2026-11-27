@@ -2,9 +2,10 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     ":semanticCommitScope(package)",
-    "github>marinatedconcrete/config//renovate/marinatedconcrete#renovate-config-2.6.0",
-    "github>marinatedconcrete/config//renovate/devcontainer#renovate-config-2.6.0",
-    "github>marinatedconcrete/config//renovate/recommended#renovate-config-2.6.0"
+    "github>marinatedconcrete/config//renovate/marinatedconcrete#renovate-config-2.9.0",
+    "github>marinatedconcrete/config//renovate/devcontainer#renovate-config-2.9.0",
+    "github>marinatedconcrete/config//renovate/recommended#renovate-config-2.9.0",
+    "helpers:pinGitHubActionDigestsToSemver"
   ],
   "timezone": "America/Los_Angeles",
   "configMigration": true,
@@ -12,19 +13,14 @@
   "rollbackPrs": true,
   "packageRules": [
     {
-      "description": "Do not pin Fedora image digests because old digests disappear",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": [
-        "fedora",
-        "fedora-minimal",
-        "quay.io/fedora/**"
-      ],
-      "pinDigests": false
+      "description": "Keep pnpm compatible with the current Renovate lockfile parser",
+      "matchPackageNames": ["pnpm"],
+      "allowedVersions": "<11"
     },
     {
-      "description": "Do not pin the repo-owned devcontainer base image",
+      "description": "Do not pin Fedora image digests because old digests disappear",
       "matchDatasources": ["docker"],
-      "matchPackageNames": ["ghcr.io/marinatedconcrete/devcontainer-base"],
+      "matchPackageNames": ["fedora", "fedora-minimal", "quay.io/fedora/**"],
       "pinDigests": false
     },
     {
@@ -34,7 +30,7 @@
     },
     {
       "description": "Automerge all js infra, and gh-cli changes",
-      "matchPackageNames": ["prettier", "@yarnpkg/cli", "cli/cli", "node"],
+      "matchPackageNames": ["prettier", "pnpm", "cli/cli", "node"],
       "automerge": true,
       "automergeSchedule": ["every day"]
     },
@@ -44,6 +40,20 @@
       "minimumReleaseAge": "3 days",
       "automerge": true,
       "automergeType": "branch"
+    },
+    {
+      "description": "Do not auto-merge third-party actions, because the image workflows give them write tokens. This rule overrides the patch rule above.",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["!actions/*"],
+      "automerge": false
+    },
+    {
+      "description": "Auto-merge GitHub's own actions",
+      "automerge": true,
+      "automergeType": "branch",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["actions/*"],
+      "matchUpdateTypes": ["digest", "minor", "patch"]
     },
     {
       "description": "Auto-merge all Factorio updates",
@@ -61,7 +71,8 @@
       "groupName": "kube-vip",
       "matchFileNames": [
         "justfile",
-        "kustomization/components/kube-vip/kustomization.yml"
+        "kustomization/components/kube-vip/kustomization.yml",
+        "kustomization/components/kube-vip-wireguard/kustomization.yml"
       ],
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "matchPackageNames": ["ghcr.io/kube-vip/kube-vip"],
@@ -102,7 +113,9 @@
       "automerge": true,
       "automergeType": "branch",
       "groupName": "samba",
-      "matchFileNames": ["kustomization/components/paperless/kustomization.yml"],
+      "matchFileNames": [
+        "kustomization/components/paperless/kustomization.yml"
+      ],
       "matchPackageNames": ["ghcr.io/servercontainers/samba"],
       "matchUpdateTypes": ["digest"],
       "schedule": ["on the first day of the month"]
@@ -136,12 +149,8 @@
     },
     {
       "description": "Minor k3s updates every two weeks",
-      "commitMessagePrefix": "feat(package): ",
       "matchUpdateTypes": ["minor"],
-      "matchDepNames": [
-        "k3s-io/k3s",
-        "kubernetes/kubernetes"
-      ],
+      "matchDepNames": ["k3s-io/k3s", "kubernetes/kubernetes"],
       "minimumReleaseAge": "1 week",
       "schedule": ["* * 7,21 * *"]
     },
@@ -149,10 +158,7 @@
       "description": "Auto-merge k3s patch updates every two weeks",
       "automerge": true,
       "automergeType": "branch",
-      "matchDepNames": [
-        "k3s-io/k3s",
-        "kubernetes/kubernetes"
-      ],
+      "matchDepNames": ["k3s-io/k3s", "kubernetes/kubernetes"],
       "matchUpdateTypes": ["patch"],
       "minimumReleaseAge": "1 week",
       "schedule": ["* * 14,28 * *"]
@@ -168,9 +174,50 @@
       ],
       "minimumReleaseAgeBehaviour": "timestamp-optional",
       "automerge": false
+    },
+    {
+      "description": "Use a breaking commit type for major updates",
+      "semanticCommitType": "feat(package)!",
+      "semanticCommitScope": null,
+      "matchUpdateTypes": ["major"]
+    },
+    {
+      "description": "Use a feature commit type for minor updates",
+      "semanticCommitType": "feat",
+      "matchUpdateTypes": ["minor"]
+    },
+    {
+      "description": "Auto-merge devcontainer-base releases after all pull request checks pass. GitHub native auto-merge waits only for the required checks.",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/marinatedconcrete/devcontainer-base"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": false,
+      "minimumReleaseAge": null
+    },
+    {
+      "description": "Use a chore commit type for devcontainer-base updates. A CalVer update type does not show the size of a change. A chore commit makes a patch release of github-runner-ci.",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/marinatedconcrete/devcontainer-base"],
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "package"
+    },
+    {
+      "description": "Use the test commit type for updates to test files, so that release-please does not make a release",
+      "matchFileNames": ["**/e2e.sh", "**/tests/**", "**/*.test.*"],
+      "semanticCommitType": "test",
+      "semanticCommitScope": "package"
     }
   ],
   "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update the tool images that the shell scripts run",
+      "managerFilePatterns": ["/^actions/.*\\.sh$/", "/^images/.*\\.sh$/"],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\n[A-Z_]+_IMAGE=\"\\$\\{[A-Z_]+:-[^:\"@]+:(?<currentValue>[^@:\"}]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?\\}\""
+      ]
+    },
     {
       "customType": "regex",
       "managerFilePatterns": [
@@ -203,6 +250,16 @@
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.+?)\\s+depName=(?<depName>.+?)\\n\\s+?[A-Z_]+_VERSION=(?<currentValue>[^@\\n]+)\\n\\s+?[A-Z_]+_DIGEST=(?<currentDigest>sha256:[a-f0-9]{64})\\n"
       ]
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^kustomization/components/pod-security/enforce-(baseline|restricted)/namespace-labels\\.yml$/"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:(?:\\s*datasource=(?<datasource>(\\w|-)+))(?:\\s*depName=(?<depName>(\\w|-|\\/|\\.)+))(?:\\s*extractVersion=(?<extractVersion>.+?))\\n\\s+pod-security\\.kubernetes\\.io/enforce-version:\\s+(?<currentValue>v\\d+\\.\\d+)"
+      ],
+      "versioningTemplate": "semver-coerced"
     }
   ]
 }

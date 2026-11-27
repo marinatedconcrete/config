@@ -5,7 +5,7 @@ set -eoux pipefail
 # Install just in the base image for use in devcontainers.
 
 # renovate: datasource=github-releases depName=casey/just
-JUST_VERSION=1.58.0
+JUST_VERSION=1.59.0
   curl \
     -s \
     -L \

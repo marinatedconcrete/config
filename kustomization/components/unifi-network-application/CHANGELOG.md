@@ -1,5 +1,63 @@
 # Changelog
 
+## [2.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v2.0.0...kustomize-unifi-network-application@v2.0.1) (2026-11-19)
+
+
+### Other Changes
+
+* **package:** update lscr.io/linuxserver/unifi-network-application:10.6.109 docker digest to 053a608 ([#1053](https://github.com/marinatedconcrete/config/issues/1053)) ([e76cf46](https://github.com/marinatedconcrete/config/commit/e76cf465f71fb84f9203f2a429d5dd6575721d7d))
+* **package:** update mongo docker tag to v8.0.38 ([a9bc5c6](https://github.com/marinatedconcrete/config/commit/a9bc5c6a63b94b3cebc5cacd564d2bd2786fbaee))
+
+## [2.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.2.4...kustomize-unifi-network-application@v2.0.0) (2026-11-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **unifi-network-application:** the pod runs in a user namespace.  Each node must support user namespaces, or the pod does not start.  The volumes of the pod must support idmapped mounts.  A consumer that sets
+
+### Features
+
+* **unifi-network-application:** run in a user namespace with fewer capabilities ([#1033](https://github.com/marinatedconcrete/config/issues/1033)) ([bd34725](https://github.com/marinatedconcrete/config/commit/bd3472583c88ec60d9a69262b31e94c3cb62047b))
+
+
+### Other Changes
+
+* **package:** update lscr.io/linuxserver/unifi-network-application:10.6.109 docker digest to f782b39 ([#1032](https://github.com/marinatedconcrete/config/issues/1032)) ([1b50b82](https://github.com/marinatedconcrete/config/commit/1b50b82a35380480d15bdbfc8268ebbfcc4136f5))
+
+## [1.2.4](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.2.3...kustomize-unifi-network-application@v1.2.4) (2026-11-06)
+
+
+### Other Changes
+
+* **package:** update unifi ([#978](https://github.com/marinatedconcrete/config/issues/978)) ([ed74be3](https://github.com/marinatedconcrete/config/commit/ed74be375bfa0eb075ac273e3fc7cfd01c1285b4))
+
+## [1.2.3](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.2.2...kustomize-unifi-network-application@v1.2.3) (2026-10-24)
+
+
+### Other Changes
+
+* **package:** update lscr.io/linuxserver/unifi-network-application docker tag to v10.6.109 ([#951](https://github.com/marinatedconcrete/config/issues/951)) ([61c8de4](https://github.com/marinatedconcrete/config/commit/61c8de459e46ccf0dcf2faacd5175ee167d67e3e))
+
+## [1.2.2](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.2.1...kustomize-unifi-network-application@v1.2.2) (2026-10-21)
+
+
+### Other Changes
+
+* **package:** update mongo docker tag to v8.0.34 ([#935](https://github.com/marinatedconcrete/config/issues/935)) ([c4ee035](https://github.com/marinatedconcrete/config/commit/c4ee035a230002d7ade8dbd1b05b8d4042dea6a8))
+
+## [1.2.1](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.2.0...kustomize-unifi-network-application@v1.2.1) (2026-10-17)
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
+
+### Other Changes
+
+* **package:** update lscr.io/linuxserver/unifi-network-application docker tag to v10.6.106 ([#913](https://github.com/marinatedconcrete/config/issues/913)) ([7d89a6b](https://github.com/marinatedconcrete/config/commit/7d89a6b24ed36c272390417f35a43f2c6900d772))
+* **package:** update unifi ([#906](https://github.com/marinatedconcrete/config/issues/906)) ([c73403c](https://github.com/marinatedconcrete/config/commit/c73403cd4242918617c53cdf1e0e09be37cc0985))
+
 ## [1.2.0](https://github.com/marinatedconcrete/config/compare/kustomize-unifi-network-application@v1.1.31...kustomize-unifi-network-application@v1.2.0) (2026-06-20)
 
 

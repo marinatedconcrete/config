@@ -8,6 +8,7 @@ on:
     paths:
       - justfile
       - kustomization/components/kube-vip/kustomization.yml
+      - kustomization/components/kube-vip-wireguard/kustomization.yml
 
 concurrency:
   group: codegen-kube-vip-${{ github.ref }}
@@ -20,7 +21,7 @@ jobs:
       contents: write
       packages: read
     steps:
-      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+      - uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         id: app-token
         with:
           app-id: ${{ vars.FORMWORK_REMOVER_APP_ID }}
@@ -42,7 +43,7 @@ jobs:
         run: |
           git config user.name "formwork-remover[bot]"
           git config user.email "${{ vars.FORMWORK_REMOVER_APP_ID }}+formwork-remover[bot]@users.noreply.github.com"
-          git add kustomization/components/kube-vip/daemonset/ kustomization/components/kube-vip/rbac.yml
+          git add kustomization/components/kube-vip/daemonset/ kustomization/components/kube-vip/rbac.yml kustomization/components/kube-vip-wireguard/daemonset/
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0

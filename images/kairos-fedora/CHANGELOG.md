@@ -1,5 +1,91 @@
 # Changelog
 
+## [1.1.1](https://github.com/marinatedconcrete/config/compare/kairos-fedora-1.1.0...kairos-fedora-1.1.1) (2026-11-17)
+
+
+### Other Changes
+
+* **package:** update quay.io/kairos/kairos-init docker tag to v4.5.2 ([#1048](https://github.com/marinatedconcrete/config/issues/1048)) ([0e4e8aa](https://github.com/marinatedconcrete/config/commit/0e4e8aaeb74b854a2553e096c80344e98c448c41))
+
+## [1.1.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-1.0.1...kairos-fedora-1.1.0) (2026-11-14)
+
+
+### Features
+
+* **package:** update quay.io/kairos/kairos-init docker tag to v4.5.0 ([#1034](https://github.com/marinatedconcrete/config/issues/1034)) ([a481e48](https://github.com/marinatedconcrete/config/commit/a481e48bcbed775ee36b326fb651ac52c194e581))
+
+
+### Documentation Updates
+
+* **kairos-fedora:** describe the cloud datasource probe ([#1044](https://github.com/marinatedconcrete/config/issues/1044)) ([642056f](https://github.com/marinatedconcrete/config/commit/642056f464dbf7f799f431c09837b475247c8312))
+
+## [1.0.1](https://github.com/marinatedconcrete/config/compare/kairos-fedora-1.0.0...kairos-fedora-1.0.1) (2026-11-07)
+
+
+### Bug Fixes
+
+* **kairos-fedora:** read the Kairos Agent version from kairos-agent 4 ([f55b89f](https://github.com/marinatedconcrete/config/commit/f55b89f057de8e34e9c27da961003af528c1bc4a))
+* **kairos-fedora:** unload the GRUB tpm module for an old grub.cfg ([#1000](https://github.com/marinatedconcrete/config/issues/1000)) ([5256abb](https://github.com/marinatedconcrete/config/commit/5256abb6bdff289f887eca4e973c7515a5045ac3))
+
+## [1.0.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.11.0...kairos-fedora-1.0.0) (2026-11-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* **package:** Kairos v4.4.0 stops the boot when a persistent state mount fails. It does not persist `/usr/libexec`. It enables CIS Level 1 hardening by default and mounts `/tmp` `noexec`. It changes the `sshd` values in `/etc/ssh/sshd_config.d/05-kairos-hardening.conf`. `PermitRootLogin` changes from `no` to `prohibit-password`. To override a value, add a drop-in that sorts before `05-`.
+* **deps:** upgrade to fedora 45
+
+### Features
+
+* add reusable image release notes action ([#893](https://github.com/marinatedconcrete/config/issues/893)) ([47de9f2](https://github.com/marinatedconcrete/config/commit/47de9f213b055950c4174189279c9ccb102fbc70))
+* **deps:** upgrade to fedora 45 ([242d244](https://github.com/marinatedconcrete/config/commit/242d244ff132dc689c960b78c7530de8d1fb106a))
+* **package:** update kairos-init to v4.4.0 ([#927](https://github.com/marinatedconcrete/config/issues/927)) ([58814a3](https://github.com/marinatedconcrete/config/commit/58814a381e9584aaf7769d67237a2d59409404d3))
+
+
+### Other Changes
+
+* **package:** update dependency k3s-io/k3s to v1.37.2+k3s1 ([#994](https://github.com/marinatedconcrete/config/issues/994)) ([7f0ea4f](https://github.com/marinatedconcrete/config/commit/7f0ea4fe85612f387f82cce8bee13fc527c457f7))
+* **package:** update quay.io/kairos/auroraboot docker tag to v0.29.0 ([#965](https://github.com/marinatedconcrete/config/issues/965)) ([026c238](https://github.com/marinatedconcrete/config/commit/026c2385ea7ac14ef8823c2dfc1b8dd0705843e6))
+
+## [0.11.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.10.1...kairos-fedora-0.11.0) (2026-10-25)
+
+
+### Features
+
+* **package:** Update dependency k3s-io/k3s to v1.37.1+k3s1 ([#939](https://github.com/marinatedconcrete/config/issues/939)) ([7eb733e](https://github.com/marinatedconcrete/config/commit/7eb733e283d6d2eccb8209de659338245485932f))
+
+## [0.10.1](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.10.0...kairos-fedora-0.10.1) (2026-10-20)
+
+
+### Other Changes
+
+* **package:** update AuroraBoot to v0.28.0 ([#920](https://github.com/marinatedconcrete/config/issues/920)) ([8823678](https://github.com/marinatedconcrete/config/commit/8823678e7f2ef9d709ba9dacd42f8757ad4cb3e4))
+
+## [0.10.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.9.0...kairos-fedora-0.10.0) (2026-10-08)
+
+
+### Features
+
+* include the hostname command ([9dd85eb](https://github.com/marinatedconcrete/config/commit/9dd85eb319fe725b5c56a173f9feca49a8844de7))
+
+
+### Bug Fixes
+
+* **package:** revert kairos-fedora to Fedora 44 ([33809b8](https://github.com/marinatedconcrete/config/commit/33809b8ccfda50d94957c8db33eb7ef534d9bb10))
+* **renovate:** track the pinned tool images in shell scripts ([09f7b4d](https://github.com/marinatedconcrete/config/commit/09f7b4d05dc22ecf7cd2a96206ec4a5abbf54e41))
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
+
+### Other Changes
+
+* **package:** update dependency k3s-io/k3s to v1.36.4+k3s1 ([37741ba](https://github.com/marinatedconcrete/config/commit/37741bab415bb4357144ed262ca39031a0489129))
+* **package:** update fedora docker tag to v45 ([#695](https://github.com/marinatedconcrete/config/issues/695)) ([dfcc54d](https://github.com/marinatedconcrete/config/commit/dfcc54dfe8a1aa5fec2aa12882577f47b8f76515))
+* **package:** update quay.io/kairos/kairos-init docker tag to v0.17.3 ([#855](https://github.com/marinatedconcrete/config/issues/855)) ([3f627bd](https://github.com/marinatedconcrete/config/commit/3f627bd85e582f87607c575fa3424f37d7039046))
+
 ## [0.9.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-0.8.1...kairos-fedora-0.9.0) (2026-07-16)
 
 

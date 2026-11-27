@@ -1,0 +1,112 @@
+---
+name: Run checks
+on:
+  push:
+
+jobs:
+  build:
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Docker
+        uses: docker/setup-docker-action@3f1ab1ab0e29231562e4db4ca600c1a49653bac6 # v5.7.0
+        with:
+          daemon-config: |
+            {
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build devcontainer image
+        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
+        with:
+          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
+          cacheTo: ghcr.io/marinatedconcrete/config-devcontainer
+          env: |
+            CI=1
+          imageName: ghcr.io/marinatedconcrete/config-devcontainer
+          push: filter
+          refFilterForPush: refs/heads/main
+  check-format:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check formatting
+        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
+        with:
+          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
+          env: |
+            CI=1
+          imageName: ghcr.io/marinatedconcrete/config-devcontainer
+          push: never
+          runCmd: just check-format
+  kustomization-test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The runner can load an AppArmor profile for Mosquitto. The profile
+      # then applies in the privileged test containers and blocks the
+      # program. Only the Mosquitto test needs this step.
+      - name: Remove Host AppArmor Profiles
+        if: matrix.kustomization-test == 'mosquitto'
+        run: |
+          if [[ -f /etc/apparmor.d/mosquitto ]]; then
+            sudo apparmor_parser --remove /etc/apparmor.d/mosquitto
+          fi
+      - name: Validate configs
+        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
+        with:
+          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
+          env: |
+            CI=1
+          imageName: ghcr.io/marinatedconcrete/config-devcontainer
+          push: never
+          runCmd: just kustomization-test ${{ matrix.kustomization-test }}
+    strategy:
+      matrix:
+        kustomization-test:
+          - egress-coredns
+          - egress-deny-all
+          - egress-kubernetes-api
+          - egress-public-internet
+          - factorio
+          - kube-vip
+          - kube-vip-wireguard
+          - mosquitto
+          - paperless
+          - pod-security-audit-warn-baseline
+          - pod-security-audit-warn-restricted
+          - pod-security-enforce-baseline
+          - pod-security-enforce-restricted
+          - pod-security-enforce-privileged
+          - priorityclass
+          - unifi-network-application
+  lint:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Validate configs
+        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
+        with:
+          cacheFrom: ghcr.io/marinatedconcrete/config-devcontainer
+          env: |
+            CI=1
+          imageName: ghcr.io/marinatedconcrete/config-devcontainer
+          push: never
+          runCmd: just lint

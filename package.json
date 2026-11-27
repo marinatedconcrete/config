@@ -1,16 +1,11 @@
 {
   "devDependencies": {
-    "prettier": "3.9.6",
-    "renovate": "43.204.1"
+    "prettier": "3.10.1",
+    "renovate": "44.198.0"
   },
-  "packageManager": "yarn@4.18.0",
+  "packageManager": "pnpm@10.34.9",
   "scripts": {
-    "format": "prettier --log-level warn --no-error-on-unmatched-pattern --write '**/*.yml' '**/*.json' '**/*.md'",
-    "check-format": "prettier --no-error-on-unmatched-pattern --check '**/*.yml' '**/*.json' '**/*.md'"
-  },
-  "dependenciesMeta": {
-    "prettier@3.9.6": {
-      "unplugged": true
-    }
+    "format": "prettier --log-level warn --no-error-on-unmatched-pattern --write '**/*.md' '**/*.yml' '**/*.yaml' '**/*.json' '**/*.mjs'",
+    "check-format": "prettier --no-error-on-unmatched-pattern --check '**/*.md' '**/*.yml' '**/*.yaml' '**/*.json' '**/*.mjs'"
   }
 }

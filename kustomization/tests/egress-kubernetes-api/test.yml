@@ -1,0 +1,17 @@
+---
+- connection: local
+  gather_facts: false
+  hosts: localhost
+  name: Check the egress-kubernetes-api component
+  tasks:
+    - ansible.builtin.include_tasks: ../egress-assertions.yml
+      name: Check the component
+  vars:
+    expected_policies:
+      allow-egress-kubernetes-api-networkpolicy:
+        egress: []
+        podSelector:
+          matchLabels:
+            networking.marinatedconcrete.com/api-server-client: "true"
+        policyTypes:
+          - Egress

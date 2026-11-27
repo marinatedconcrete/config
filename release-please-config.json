@@ -1,6 +1,11 @@
 {
   "changelog-sections": [
     {
+      "hidden": true,
+      "type": "style",
+      "section": "Formatting"
+    },
+    {
       "hidden": false,
       "type": "feat",
       "section": "Features"
@@ -29,6 +34,12 @@
   "include-component-in-tag": true,
   "include-v-in-tag": true,
   "packages": {
+    "actions/image-release-notes": {
+      "include-v-in-tag": false,
+      "package-name": "image-release-notes",
+      "release-type": "simple",
+      "tag-separator": "-"
+    },
     "ansible": {
       "extra-files": [
         {
@@ -66,32 +77,33 @@
       "release-type": "simple",
       "tag-separator": "-"
     },
+    "kustomization/components/egress-coredns": {
+      "package-name": "kustomize-egress-coredns",
+      "release-type": "simple"
+    },
+    "kustomization/components/egress-deny-all": {
+      "package-name": "kustomize-egress-deny-all",
+      "release-type": "simple"
+    },
+    "kustomization/components/egress-kubernetes-api": {
+      "package-name": "kustomize-egress-kubernetes-api",
+      "release-type": "simple"
+    },
+    "kustomization/components/egress-public-internet": {
+      "package-name": "kustomize-egress-public-internet",
+      "release-type": "simple"
+    },
     "kustomization/components/factorio": {
       "package-name": "kustomize-factorio",
       "release-type": "simple"
     },
-    "kustomization/components/k3s-egress-deny-all": {
-      "package-name": "kustomize-k3s-egress-deny-all",
-      "release-type": "simple"
-    },
-    "kustomization/components/k3s-egress-dns": {
-      "package-name": "kustomize-k3s-egress-dns",
-      "release-type": "simple"
-    },
-    "kustomization/components/k3s-egress-kubernetes-api": {
-      "package-name": "kustomize-k3s-egress-kubernetes-api",
-      "release-type": "simple"
-    },
-    "kustomization/components/k3s-egress-pods-and-services": {
-      "package-name": "kustomize-k3s-egress-pods-and-services",
-      "release-type": "simple"
-    },
-    "kustomization/components/k3s-egress-public-internet": {
-      "package-name": "kustomize-k3s-egress-public-internet",
-      "release-type": "simple"
-    },
     "kustomization/components/kube-vip": {
       "package-name": "kustomize-kube-vip",
+      "release-type": "simple"
+    },
+    "kustomization/components/kube-vip-wireguard": {
+      "initial-version": "1.0.0",
+      "package-name": "kustomize-kube-vip-wireguard",
       "release-type": "simple"
     },
     "kustomization/components/mosquitto": {
@@ -115,6 +127,11 @@
       "package-name": "renovate-config",
       "release-type": "simple",
       "tag-separator": "-"
+    },
+    "kustomization/components/pod-security": {
+      "package-name": "kustomize-pod-security",
+      "release-type": "simple",
+      "initial-version": "1.0.0"
     }
   },
   "separate-pull-requests": true,

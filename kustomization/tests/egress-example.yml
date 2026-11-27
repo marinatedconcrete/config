@@ -1,0 +1,77 @@
+---
+- ansible.builtin.include_tasks: egress-assertions.yml
+  name: Verify the combined policies
+  vars:
+    expected_namespace: egress-example
+    expected_policies:
+      allow-egress-coredns-networkpolicy:
+        egress:
+          - ports:
+              - port: 53
+                protocol: TCP
+              - port: 53
+                protocol: UDP
+            to:
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: kube-system
+                podSelector:
+                  matchLabels:
+                    k8s-app: kube-dns
+              - ipBlock:
+                  cidr: 192.0.2.53/32
+        podSelector:
+          matchLabels:
+            networking.marinatedconcrete.com/dns-client: "true"
+        policyTypes:
+          - Egress
+      allow-egress-kubernetes-api-networkpolicy:
+        egress:
+          - ports:
+              - port: 6443
+                protocol: TCP
+            to:
+              - ipBlock:
+                  cidr: 192.0.2.10/32
+        podSelector:
+          matchLabels:
+            networking.marinatedconcrete.com/api-server-client: "true"
+        policyTypes:
+          - Egress
+      allow-egress-public-internet-networkpolicy:
+        egress:
+          - ports:
+              - port: 80
+                protocol: TCP
+              - port: 443
+                protocol: TCP
+            to:
+              - ipBlock:
+                  cidr: 0.0.0.0/0
+                  except:
+                    - 0.0.0.0/8
+                    - 10.0.0.0/8
+                    - 100.64.0.0/10
+                    - 127.0.0.0/8
+                    - 169.254.0.0/16
+                    - 172.16.0.0/12
+                    - 192.0.0.0/24
+                    - 192.0.2.0/24
+                    - 192.88.99.0/24
+                    - 192.168.0.0/16
+                    - 198.18.0.0/15
+                    - 198.51.100.0/24
+                    - 203.0.113.0/24
+                    - 224.0.0.0/4
+                    - 240.0.0.0/4
+        podSelector:
+          matchLabels:
+            networking.marinatedconcrete.com/internet-client: "true"
+        policyTypes:
+          - Egress
+      deny-all-egress-networkpolicy:
+        egress: []
+        podSelector: {}
+        policyTypes:
+          - Egress
+    render_dir: "{{ playbook_dir }}/../../examples/egress"

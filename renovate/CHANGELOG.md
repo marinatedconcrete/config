@@ -1,5 +1,33 @@
 # Changelog
 
+## [2.9.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.8.0...renovate-config-2.9.0) (2026-11-08)
+
+
+### Features
+
+* **kube-vip-wireguard:** add a component that serves Services over WireGuard ([#1010](https://github.com/marinatedconcrete/config/issues/1010)) ([de1dc7d](https://github.com/marinatedconcrete/config/commit/de1dc7d867855cc889044e1d001ecfa4e3f4029b))
+
+## [2.8.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.7.0...renovate-config-2.8.0) (2026-11-08)
+
+
+### Features
+
+* release devcontainer-base with CalVer versions ([#1004](https://github.com/marinatedconcrete/config/issues/1004)) ([ec99ec3](https://github.com/marinatedconcrete/config/commit/ec99ec3b0fd71252d374dbf86f211626eeb899b5))
+
+## [2.7.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.6.1...renovate-config-2.7.0) (2026-11-06)
+
+
+### Features
+
+* add reusable image release notes action ([#893](https://github.com/marinatedconcrete/config/issues/893)) ([47de9f2](https://github.com/marinatedconcrete/config/commit/47de9f213b055950c4174189279c9ccb102fbc70))
+
+## [2.6.1](https://github.com/marinatedconcrete/config/compare/renovate-config-2.6.0...renovate-config-2.6.1) (2026-09-26)
+
+
+### Documentation Updates
+
+* require ASD-STE100 for documentation and comments ([#872](https://github.com/marinatedconcrete/config/issues/872)) ([afaf6fd](https://github.com/marinatedconcrete/config/commit/afaf6fd9c5a619b1a899fb089a7719b3db4791f8))
+
 ## [2.6.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.5.0...renovate-config-2.6.0) (2026-08-29)
 
 

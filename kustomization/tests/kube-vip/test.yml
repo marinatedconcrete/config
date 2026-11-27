@@ -12,12 +12,40 @@
         api_version: apps/v1
         context: "{{ kubernetes_core_k8s__context }}"
         kind: DaemonSet
-        name: kube-vip-ds
+        name: "{{ item }}"
         namespace: "{{ test_namespace }}"
         state: present
         wait: true
         wait_timeout: 300 # 5 minutes.
       changed_when: false
+      loop: "{{ daemonsets }}"
+    # The minikube node is a control plane node, so it runs both DaemonSets.
+    # Both use the host network, so each metrics server must have its own port.
+    - name: Wait for kube-vip to start
+      kubernetes.core.k8s_log:
+        context: "{{ kubernetes_core_k8s__context }}"
+        label_selectors:
+          - "app.kubernetes.io/name={{ item }}"
+        namespace: "{{ test_namespace }}"
+      changed_when: false
+      delay: 5
+      loop: "{{ daemonsets }}"
+      register: kube_vip_logs
+      retries: 24
+      until: kube_vip_logs.log | default('') is search('starting Kube-vip Manager')
+    - name: Check that each metrics server has a port
+      ansible.builtin.assert:
+        fail_msg: "{{ item.item }} did not start a metrics server on its port: {{ item.log_lines | select('search', 'prometheus HTTP server') }}"
+        quiet: true
+        that:
+          - item.log is search('prometheus HTTP server started')
+          - item.log is not search('prometheus HTTP server err')
+      loop: "{{ kube_vip_logs.results }}"
+      loop_control:
+        label: "{{ item.item }}"
   vars:
+    daemonsets:
+      - kube-vip-ds
+      - kube-vip-svc-ds
     kubernetes_core_k8s__context: kube-vip
     test_namespace: "{{ (lookup('file', 'kustomization.yml') | from_yaml).namespace }}"

@@ -7,15 +7,28 @@ on: # yamllint disable-line rule:truthy
       - main
     paths:
       - .github/workflows/image-github-runner-ci.yml
+      - actions/image-release-notes/**
       - images/github-runner-ci/**
-    tags:
-      - github-runner-ci-*
   pull_request:
     branches:
       - main
     paths:
       - .github/workflows/image-github-runner-ci.yml
+      - actions/image-release-notes/**
       - images/github-runner-ci/**
+  workflow_call:
+    inputs:
+      sha:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+    outputs:
+      digest:
+        value: ${{ jobs.build-github-runner-ci.outputs.digest }}
+      release-notes-artifact:
+        value: ${{ jobs.build-github-runner-ci.outputs.release-notes-artifact }}
 
 jobs:
   build-github-runner-ci:
@@ -26,21 +39,24 @@ jobs:
       packages: write
     outputs:
       digest: ${{ steps.build.outputs.digest }}
+      release-notes-artifact: ${{ steps.release_notes.outputs.artifact-name }}
       run_job_container_test: ${{ steps.image_export.outputs.push }}
       tag: ${{ steps.version_tag.outputs.tag }}
 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.sha || github.sha }}
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Compute Version Tag
         env:
-          BRANCH: ${{ github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('pr-{0}.{1}.{2}.{3}', github.event.number, github.run_id, github.run_number, github.run_attempt) }}
+          BRANCH: ${{ inputs.sha && format('candidate-{0}-{1}-{2}', inputs.sha, github.run_id, github.run_attempt) || github.ref_type == 'tag' && github.ref_name || github.event_name != 'pull_request' && format('{0}.{1}.{2}', github.run_id, github.run_number, github.run_attempt) || format('pr-{0}.{1}.{2}.{3}', github.event.number, github.run_id, github.run_number, github.run_attempt) }}
         id: version_tag
         run: echo "tag=$BRANCH" | sed -e 's/github-runner-ci-//' >> "$GITHUB_OUTPUT"
       - name: Select Image Export Mode
@@ -64,17 +80,21 @@ jobs:
           images: ghcr.io/${{ github.repository_owner }}/github-runner-ci
       - name: Build Image
         id: build
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: images/github-runner-ci
           file: images/github-runner-ci/Containerfile
-          labels: ${{ steps.metadata.outputs.labels }}
+          labels: |
+            ${{ steps.metadata.outputs.labels }}
+            org.opencontainers.image.revision=${{ inputs.sha || github.sha }}
+            org.opencontainers.image.version=${{ inputs.version || steps.metadata.outputs.version }}
           load: ${{ steps.image_export.outputs.load }}
           push: ${{ steps.image_export.outputs.push }}
           tags: ghcr.io/${{ github.repository_owner }}/github-runner-ci:${{ steps.version_tag.outputs.tag }}
       - name: Smoke Test Image
         run: |
           docker run --rm ghcr.io/${{ github.repository_owner }}/github-runner-ci:${{ steps.version_tag.outputs.tag }} bash -lc '
+            set -e
             test "$(id -u):$(id -g)" = "1001:1001"
             test "$HOME" = "/home/runner"
             test -w "$HOME"
@@ -89,6 +109,18 @@ jobs:
             shellcheck --version
             yq --version
           '
+      - name: Generate Image Release Notes
+        id: release_notes
+        uses: ./actions/image-release-notes
+        with:
+          artifact-name: github-runner-ci-release-notes${{ inputs.version && format('-{0}', inputs.version) || '' }}
+          component: github-runner-ci
+          components-script: images/github-runner-ci/release-notes-components.sh
+          containerfile: images/github-runner-ci/Containerfile
+          highlight-packages: git jq ripgrep ShellCheck yq
+          image: ghcr.io/${{ github.repository_owner }}/github-runner-ci:${{ steps.version_tag.outputs.tag }}
+          tag: ${{ inputs.version && format('github-runner-ci-{0}', inputs.version) || '' }}
+          version: ${{ inputs.version }}
 
   test-github-actions-job-container:
     name: Test GitHub Actions Job Container
@@ -107,6 +139,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.sha || github.sha }}
       - name: Verify Actions Job Container
         shell: bash
         run: |

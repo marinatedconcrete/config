@@ -1,9 +1,6 @@
 {
   "name": "config",
   "build": {
-    "args": {
-      "DEVCONTAINER_BASE_TAG": "${localEnv:DEVCONTAINER_BASE_TAG:latest}"
-    },
     "cacheFrom": "ghcr.io/marinatedconcrete/config-devcontainer",
     "context": "..",
     "dockerfile": "Containerfile"
@@ -12,8 +9,6 @@
     "vscode": {
       "extensions": [
         "esbenp.prettier-vscode",
-        // Let VS Code find the Prettier package for formatting.
-        "arcanis.vscode-zipfs",
         "github.vscode-github-actions",
         "ms-kubernetes-tools.vscode-kubernetes-tools",
         "nefrob.vscode-just-syntax",
@@ -22,15 +17,15 @@
       "files.readonlyInclude": {
         "kustomization/components/kube-vip/daemonset/services.yml": true,
         "kustomization/components/kube-vip/daemonset/vip.yml": true,
-        "kustomization/components/kube-vip/rbac.yml": true
+        "kustomization/components/kube-vip/rbac.yml": true,
+        "kustomization/components/kube-vip-wireguard/daemonset/wireguard.yml": true
       },
       "settings": {
         "prettier.useEditorConfig": false,
         "search.exclude": {
-          "**/.yarn": true,
-          "**/.pnp.*": true
+          "**/node_modules": true
         },
-        "prettier.prettierPath": ".yarn/sdks/prettier/index.js"
+        "prettier.prettierPath": "node_modules/prettier/index.cjs"
       }
     }
   },
@@ -43,10 +38,10 @@
       // Disable unused node-gyp dependencies to save space.
       "nodeGypDependencies": "false",
       // renovate: datasource=github-releases depName=nvm-sh/nvm
-      "nvmVersion": "0.40.7",
+      "nvmVersion": "0.41.0",
       "pnpmVersion": "none",
       // renovate: datasource=node-version depName=node
-      "version": "24.20.0"
+      "version": "26.13.1"
     }
   },
   "mounts": [

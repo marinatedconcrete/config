@@ -123,6 +123,16 @@ spec:
               memory: 1Gi
           securityContext:
             allowPrivilegeEscalation: false
+            # The image starts as root.  It changes file owners and then runs the
+            # application as an unprivileged user.
+            capabilities:
+              add:
+                - CHOWN
+                - DAC_OVERRIDE
+                - SETGID
+                - SETUID
+              drop:
+                - ALL
             seccompProfile:
               type: RuntimeDefault
           volumeMounts:
@@ -150,6 +160,9 @@ spec:
               memory: 100Mi
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
             seccompProfile:
               type: RuntimeDefault
           volumeMounts:
@@ -157,6 +170,7 @@ spec:
               name: init-mongodb
             - mountPath: /scripts
               name: mongodb-scripts
+      hostUsers: false
       priorityClassName: critical-application
       volumes:
         - emptyDir:

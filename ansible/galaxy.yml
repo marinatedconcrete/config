@@ -1,7 +1,7 @@
 namespace: marinatedconcrete
 name: config
 description: A collection of various useful things for us.
-version: 1.4.7
+version: 2.0.0
 readme: README.md
 authors:
   - robarnold
@@ -13,7 +13,11 @@ tags:
 dependencies:
   kubernetes.core: '>=2.0.0'
 repository: https://github.com/marinatedconcrete/config
-documentation: lol
+documentation: https://github.com/marinatedconcrete/config/blob/main/ansible/README.md
 homepage: https://github.com/marinatedconcrete/config
 issues: https://github.com/marinatedconcrete/config/issues
-build_ignore: []
+build_ignore:
+  # Keep local tool state and development files out of the archive.
+  - .ansible
+  - .config
+  - requirements.txt

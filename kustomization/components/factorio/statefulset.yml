@@ -40,6 +40,9 @@ spec:
               memory: 400Mi
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
             seccompProfile:
               type: RuntimeDefault
           volumeMounts:
@@ -51,6 +54,7 @@ spec:
               name: factorio-saves
             - mountPath: /opt/fsm-data
               name: factorio-server-manager-data
+      hostUsers: false
       priorityClassName: application
       securityContext:
         fsGroup: 65534
