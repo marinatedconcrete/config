@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.8](https://github.com/marinatedconcrete/config/compare/vscode-ssh-server-0.1.7...vscode-ssh-server-0.1.8) (2026-11-28)
+
+
+### Other Changes
+
+* **prettier:** format nested files with Prettier ([#1108](https://github.com/marinatedconcrete/config/issues/1108)) ([c6b6286](https://github.com/marinatedconcrete/config/commit/c6b6286db17cf2ab50a72158933351b8859fc4d9)), closes [#1086](https://github.com/marinatedconcrete/config/issues/1086)
+
 ## [0.1.7](https://github.com/marinatedconcrete/config/compare/vscode-ssh-server-0.1.6...vscode-ssh-server-0.1.7) (2026-11-01)
 
 
