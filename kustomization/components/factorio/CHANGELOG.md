@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/marinatedconcrete/config/compare/kustomize-factorio@v1.0.0...kustomize-factorio@v1.0.1) (2026-11-28)
+
+
+### Documentation Updates
+
+* link the kustomize-&lt;name&gt;.yml release asset in the component READMEs ([#1190](https://github.com/marinatedconcrete/config/issues/1190)) ([bd58444](https://github.com/marinatedconcrete/config/commit/bd5844482558293e135097a8ae33cb479008cb02))
+
 ## [1.0.0](https://github.com/marinatedconcrete/config/compare/kustomize-factorio@v0.1.5...kustomize-factorio@v1.0.0) (2026-11-10)
 
 
