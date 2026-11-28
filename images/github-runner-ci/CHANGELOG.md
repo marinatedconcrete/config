@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.2](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.3.1...github-runner-ci-1.3.2) (2026-11-28)
+
+
+### Bug Fixes
+
+* verify downloads in image and devcontainer build scripts ([#1201](https://github.com/marinatedconcrete/config/issues/1201)) ([51df996](https://github.com/marinatedconcrete/config/commit/51df99608e7b8f6a5c963d2b64adcfc39a027370))
+
+
+### Other Changes
+
+* **package:** update ghcr.io/marinatedconcrete/devcontainer-base docker tag to v2026.11.3 ([#1167](https://github.com/marinatedconcrete/config/issues/1167)) ([3f403f8](https://github.com/marinatedconcrete/config/commit/3f403f830c7b67e08b3de307a602c005a9f601e2))
+* **package:** update ghcr.io/marinatedconcrete/devcontainer-base docker tag to v2026.11.4 ([#1174](https://github.com/marinatedconcrete/config/issues/1174)) ([edcf193](https://github.com/marinatedconcrete/config/commit/edcf1936b34055c415dcd07a88a5e0f7a20154e5))
+* **package:** update ghcr.io/marinatedconcrete/devcontainer-base docker tag to v2026.11.5 ([#1175](https://github.com/marinatedconcrete/config/issues/1175)) ([861179c](https://github.com/marinatedconcrete/config/commit/861179ce1764da3613e08dee49e87f1e1b956c40))
+
 ## [1.3.1](https://github.com/marinatedconcrete/config/compare/github-runner-ci-1.3.0...github-runner-ci-1.3.1) (2026-11-20)
 
 
