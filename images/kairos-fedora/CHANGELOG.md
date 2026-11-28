@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/marinatedconcrete/config/compare/kairos-fedora-1.1.1...kairos-fedora-1.2.0) (2026-11-28)
+
+
+### Features
+
+* **package:** update quay.io/kairos/kairos-init docker tag to v4.7.0 ([#1059](https://github.com/marinatedconcrete/config/issues/1059)) ([a530c94](https://github.com/marinatedconcrete/config/commit/a530c94062bf6f783a279682cbf604a78a07adaa))
+
+
+### Bug Fixes
+
+* **kairos-fedora:** correct the workflow path filter and image labels ([#1119](https://github.com/marinatedconcrete/config/issues/1119)) ([38bd300](https://github.com/marinatedconcrete/config/commit/38bd300e063291fbf51fe2e05f97bfacd7e8d0bd))
+
 ## [1.1.1](https://github.com/marinatedconcrete/config/compare/kairos-fedora-1.1.0...kairos-fedora-1.1.1) (2026-11-17)
 
 
