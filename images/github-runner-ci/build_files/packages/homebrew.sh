@@ -4,7 +4,11 @@ set -euo pipefail
 
 RUNNER_USER="${RUNNER_USER:-runner}"
 HOMEBREW_PREFIX="${HOMEBREW_PREFIX:-/home/linuxbrew/.linuxbrew}"
-HOMEBREW_INSTALL_URL="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
+# Pin the installer to one commit of Homebrew/install and check its hash.
+# To update, read the new install.sh at the new commit, then change both values.
+HOMEBREW_INSTALL_COMMIT="e09ddecb4d4f4a3e776c00c62e010276133d1eed"
+HOMEBREW_INSTALL_SHA256="34090c61925f5d5c4caca7f1f7089efac33056b1603b4d62b4671d8d22f28fb3"
+HOMEBREW_INSTALL_URL="https://raw.githubusercontent.com/Homebrew/install/${HOMEBREW_INSTALL_COMMIT}/install.sh"
 
 if [[ "$(id -u)" -eq 0 ]]; then
     exec runuser -u "${RUNNER_USER}" -- env \
@@ -30,6 +34,7 @@ curl \
     --silent \
     "${HOMEBREW_INSTALL_URL}" \
     --output "${installer}"
+echo "${HOMEBREW_INSTALL_SHA256}  ${installer}" | sha256sum --check
 chmod 0755 "${installer}"
 
 CI=1 NONINTERACTIVE=1 /bin/bash "${installer}"
