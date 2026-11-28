@@ -20,6 +20,7 @@ COMMON_PACKAGES=(
     # Install basic system utilities.
     "coreutils"
     "jq"
+    "ripgrep"
     "sudo"
     "watch"
     # Install version control tools.
