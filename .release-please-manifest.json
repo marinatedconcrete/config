@@ -7,7 +7,7 @@
   "kustomization/components/factorio": "1.0.0",
   "kustomization/components/kube-vip": "5.1.1",
   "kustomization/components/kube-vip-wireguard": "1.0.1",
-  "kustomization/components/mosquitto": "2.0.7",
+  "kustomization/components/mosquitto": "2.0.8",
   "kustomization/components/paperless": "2.2.2",
   "kustomization/components/priorityclass": "1.0.4",
   "kustomization/components/unifi-network-application": "2.0.1",
