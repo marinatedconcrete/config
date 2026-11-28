@@ -403,6 +403,51 @@ const publishImage = (api, assets, promote = async () => {}) =>
     promote,
   });
 
+test("a new image release without a tested digest stops all writes", async (t) => {
+  const { state, api } = server();
+  const promote = t.mock.fn();
+  await assert.rejects(publishRelease({ api, candidate: image, promote }), {
+    message: "Missing tested image digest",
+  });
+  assert(state.operations.every((operation) => operation.startsWith("GET ")));
+  assert.equal(promote.mock.callCount(), 0);
+});
+
+for (const { name, receipt, message } of [
+  {
+    name: "a receipt for a different candidate",
+    receipt: {
+      ...image,
+      sha: "b".repeat(40),
+      imageDigest: `sha256:${"1".repeat(64)}`,
+    },
+    message: "Existing release identifies a different candidate",
+  },
+  {
+    name: "an image receipt without a tested digest",
+    receipt: image,
+    message: "Existing receipt has no tested image digest",
+  },
+]) {
+  test(`${name} stops all writes`, async (t) => {
+    const { state, api } = server();
+    const record = Buffer.from(
+      JSON.stringify({ ...receipt, assets: [] }),
+    ).toString("base64");
+    state.tag = image.sha;
+    state.release = {
+      id: 1,
+      tag_name: image.tag,
+      draft: true,
+      body: `<!-- config-release: ${record} -->`,
+    };
+    const promote = t.mock.fn();
+    await assert.rejects(publishImage(api, [], promote), { message });
+    assert(state.operations.every((operation) => operation.startsWith("GET ")));
+    assert.equal(promote.mock.callCount(), 0);
+  });
+}
+
 test("image recovery after a failed promotion keeps the validated SBOM", async () => {
   const { state, api } = server();
   await assert.rejects(
