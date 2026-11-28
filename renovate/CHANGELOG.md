@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.10.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.9.0...renovate-config-2.10.0) (2026-11-28)
+
+
+### Features
+
+* **renovate:** pin GitHub Actions to full versions ([#1148](https://github.com/marinatedconcrete/config/issues/1148)) ([3f5bb1e](https://github.com/marinatedconcrete/config/commit/3f5bb1e5259f34a54d9dd610757c94d45e1dbc43))
+
+
+### Bug Fixes
+
+* **renovate:** require review for third-party actions and group pod-security releases ([#1124](https://github.com/marinatedconcrete/config/issues/1124)) ([0763525](https://github.com/marinatedconcrete/config/commit/076352595318a9b0178b74610cc43f0e7a7b84ea))
+
 ## [2.9.0](https://github.com/marinatedconcrete/config/compare/renovate-config-2.8.0...renovate-config-2.9.0) (2026-11-08)
 
 
