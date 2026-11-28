@@ -2,6 +2,55 @@
 
 [Kairos Factory](https://kairos.io/docs/reference/kairos-factory/) builds this custom image.
 
+## Use the Published Image
+
+Select a version from the [Kairos Fedora releases](https://github.com/marinatedconcrete/config/releases?q=kairos-fedora).
+Use the version number from the release tag as the OCI image tag.
+For example, release `kairos-fedora-1.1.1` supplies `ghcr.io/marinatedconcrete/kairos-fedora:1.1.1`.
+
+### Migrate an Existing Kairos Node
+
+Use this procedure on an existing Kairos node in standard boot mode.
+For trusted boot, use the [Kairos trusted boot upgrade procedure](https://kairos.io/docs/upgrade/trustedboot/).
+
+1. Back up the node configuration and persistent data.
+2. For a Kubernetes node, drain the node before the upgrade.
+3. On the node, run the upgrade with the selected image tag:
+
+   ```sh
+   sudo kairos-agent upgrade --source oci:ghcr.io/marinatedconcrete/kairos-fedora:1.1.1
+   ```
+
+4. Restart the node after the command completes successfully.
+5. Log in to the node. Check the image version in `/etc/kairos-release`.
+6. For a Kubernetes node, check that the node is `Ready`. Then uncordon the node.
+
+If the upgrade fails to boot, select the passive system from the boot menu.
+See [Kairos manual upgrades](https://kairos.io/docs/upgrade/manual/) for the recovery system upgrade procedure.
+
+### Install on a New Node
+
+On a machine with Docker, download the selected image and use AuroraBoot to make an installer ISO:
+
+```sh
+IMAGE=ghcr.io/marinatedconcrete/kairos-fedora:1.1.1
+docker pull "$IMAGE"
+mkdir -p build/kairos-install
+docker run --rm \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v "$PWD/build/kairos-install:/tmp/auroraboot" \
+    quay.io/kairos/auroraboot:v0.30.0@sha256:5c12af1ecbb54193420abe0643f459a9812a2f90c88bba86a889dbcdf53e6fdf \
+    build-iso --output /tmp/auroraboot "oci:$IMAGE"
+```
+
+Boot the target node from the ISO in `build/kairos-install`.
+Open the Kairos WebUI on port 8080.
+Supply your Kairos configuration.
+Check the target disk before you start the installation.
+Installation can erase the data on that disk.
+After installation, remove the installation media.
+Start the node from the installed disk.
+
 ## Cloud Datasources
 
 At startup, Kairos tries to get userdata from cloud datasources.
