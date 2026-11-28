@@ -82,6 +82,7 @@ jobs:
           - factorio
           - kube-vip
           - kube-vip-wireguard
+          - authelia
           - mosquitto
           - paperless
           - pod-security-audit-warn-baseline

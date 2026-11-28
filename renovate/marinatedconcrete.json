@@ -123,6 +123,12 @@
       "matchPackageNames": ["marinatedconcrete/config"]
     },
     {
+      "groupName": "marinatedconcrete Authelia Kustomize Component",
+      "groupSlug": "marinatedconcrete-kustomize-authelia",
+      "matchCurrentValue": "kustomize-authelia@**",
+      "matchPackageNames": ["marinatedconcrete/config"]
+    },
+    {
       "groupName": "marinatedconcrete Mosquitto Kustomize Component",
       "groupSlug": "marinatedconcrete-kustomize-mosquitto",
       "matchCurrentValue": "kustomize-mosquitto@**",
