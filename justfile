@@ -376,6 +376,7 @@ shell-coverage: (coverage-gate "--kcov-dir" "/tmp/shell-coverage-report")
 release-scripts-test:
     bash .github/scripts/publish-draft-release.test.sh
     bash .github/scripts/release-latest.test.sh
+    bash .github/scripts/download-integrity.test.sh
 
 # Run all tests..
 [group('test')]
