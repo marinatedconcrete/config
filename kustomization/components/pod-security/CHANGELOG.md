@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/marinatedconcrete/config/compare/kustomize-pod-security@v1.1.0...kustomize-pod-security@v1.1.1) (2026-11-28)
+
+
+### Documentation Updates
+
+* fix stale pod-security, priorityclass, and release READMEs ([#1121](https://github.com/marinatedconcrete/config/issues/1121)) ([e7a2f17](https://github.com/marinatedconcrete/config/commit/e7a2f174b7b5b5d3692e670e521d56f41bc18e25))
+
 ## [1.1.0](https://github.com/marinatedconcrete/config/compare/kustomize-pod-security@v1.0.0...kustomize-pod-security@v1.1.0) (2026-10-27)
 
 
