@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.1.2](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v5.1.1...kustomize-kube-vip@v5.1.2) (2026-11-28)
+
+
+### Documentation Updates
+
+* link the kustomize-&lt;name&gt;.yml release asset in the component READMEs ([#1190](https://github.com/marinatedconcrete/config/issues/1190)) ([bd58444](https://github.com/marinatedconcrete/config/commit/bd5844482558293e135097a8ae33cb479008cb02))
+
+
+### Other Changes
+
+* **prettier:** format nested files with Prettier ([#1108](https://github.com/marinatedconcrete/config/issues/1108)) ([c6b6286](https://github.com/marinatedconcrete/config/commit/c6b6286db17cf2ab50a72158933351b8859fc4d9)), closes [#1086](https://github.com/marinatedconcrete/config/issues/1086)
+
 ## [5.1.1](https://github.com/marinatedconcrete/config/compare/kustomize-kube-vip@v5.1.0...kustomize-kube-vip@v5.1.1) (2026-11-22)
 
 
