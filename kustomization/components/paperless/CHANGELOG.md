@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.3](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.2.2...kustomize-paperless@v2.2.3) (2026-11-28)
+
+
+### Documentation Updates
+
+* link the kustomize-&lt;name&gt;.yml release asset in the component READMEs ([#1190](https://github.com/marinatedconcrete/config/issues/1190)) ([bd58444](https://github.com/marinatedconcrete/config/commit/bd5844482558293e135097a8ae33cb479008cb02))
+
 ## [2.2.2](https://github.com/marinatedconcrete/config/compare/kustomize-paperless@v2.2.1...kustomize-paperless@v2.2.2) (2026-11-27)
 
 
