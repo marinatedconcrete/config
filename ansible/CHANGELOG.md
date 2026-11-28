@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.0.1](https://github.com/marinatedconcrete/config/compare/ansible-collection@v2.0.0...ansible-collection@v2.0.1) (2026-11-28)
+
+
+### Bug Fixes
+
+* **ansible:** correct collection metadata, packaging, and minikube nodes ([#1122](https://github.com/marinatedconcrete/config/issues/1122)) ([73f346b](https://github.com/marinatedconcrete/config/commit/73f346b07c17821269601dde9cf6755d12e5bb20))
+* **ansible:** stop and delete the profile that minikube_test starts ([#1137](https://github.com/marinatedconcrete/config/issues/1137)) ([902fd4d](https://github.com/marinatedconcrete/config/commit/902fd4df6e2f8eae15bf36faed99c2ca625abf04))
+
+
+### Other Changes
+
+* **prettier:** format nested files with Prettier ([#1108](https://github.com/marinatedconcrete/config/issues/1108)) ([c6b6286](https://github.com/marinatedconcrete/config/commit/c6b6286db17cf2ab50a72158933351b8859fc4d9)), closes [#1086](https://github.com/marinatedconcrete/config/issues/1086)
+
 ## [2.0.0](https://github.com/marinatedconcrete/config/compare/ansible-collection@v1.6.1...ansible-collection@v2.0.0) (2026-11-22)
 
 
