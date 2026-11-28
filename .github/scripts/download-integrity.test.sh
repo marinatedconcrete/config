@@ -39,9 +39,15 @@ file="${FAKE_FIXTURES}/$(basename "${url}")"
 if [[ -n "${output}" ]]; then cp "${file}" "${output}"; else cat "${file}"; fi
 STUB
 for name in install mv dnf; do
-  printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >> "${FAKE_LOG}/%s"\n' "${name}" > "${work}/bin/${name}"
+  cat > "${work}/bin/${name}" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "${FAKE_LOG}/$(basename "$0")"
+STUB
 done
-printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >> "${FAKE_LOG}/brew"\n' > "${work}/prefix/bin/brew"
+cat > "${work}/prefix/bin/brew" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "${FAKE_LOG}/brew"
+STUB
 chmod +x "${work}"/bin/* "${work}/prefix/bin/brew"
 
 version_of() {
@@ -171,7 +177,7 @@ check_tool helm "${ROOT}/.devcontainer/build_files/packages/helm.sh"
 check_tool actionlint "${ROOT}/.devcontainer/build_files/packages/actionlint.sh"
 check_tool kubectl "${ROOT}/.devcontainer/build_files/packages/kubectl.sh"
 check_tool minikube "${ROOT}/.devcontainer/build_files/packages/minikube.sh"
-INSTALL_LOG=mv
+INSTALL_LOG="mv"
 check_tool just "${ROOT}/images/devcontainer-base/build_files/packages/just.sh"
 INSTALL_LOG=dnf
 check_tool github_cli "${ROOT}/.devcontainer/build_files/packages/github-cli.sh"
